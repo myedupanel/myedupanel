@@ -8,7 +8,7 @@ import { MdArrowBack, MdPictureAsPdf } from 'react-icons/md'; // Naya icon
 const StudentSidebar = () => {
   const router = useRouter();
 
-  const openModal = (modalName) => {
+  const openModal = (modalName: string) => {
     router.push(`/admin/students?modal=${modalName}`);
   };
 
