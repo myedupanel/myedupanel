@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './StudentsPage.module.scss';
-import StudentSidebar from './components/StudentSidebar'; // Naya sidebar import karein
+import StudentSidebar from './components/StudentSidebar';
 import StudentsTable from '@/components/admin/StudentsTable/StudentsTable';
 import Modal from '@/components/common/Modal/Modal';
 import AddStudentForm from '@/components/admin/AddStudentForm/AddStudentForm';
@@ -68,6 +68,12 @@ const StudentsPage = () => {
     const handleEditClick = (student: Student) => {
         setEditingStudent(student);
         setIsAddModalOpen(true);
+    };
+
+    // FIX: Changed the parameter from (studentId: string) to (student: Student)
+    // to match what the StudentsTable component provides.
+    const handleGenerateBonafide = (student: Student) => {
+        router.push(`/admin/students/generate-bonafide?studentId=${student._id}`);
     };
 
     const closeAddModalAndReset = () => {
@@ -182,6 +188,7 @@ const StudentsPage = () => {
                             students={filteredAndSortedStudents}
                             onDelete={handleDeleteStudent}
                             onEdit={handleEditClick}
+                            onGenerateBonafide={handleGenerateBonafide}
                         />
                     </main>
                 </div>
