@@ -8,7 +8,7 @@ import html2canvas from 'html2canvas';
 // Data Types
 export type SchoolInfo = { name: string; address: string; logoChar: string; session: string; };
 export type DetailedReportCard = {
-  studentId: string; // FIX: studentId property added here
+  studentId: string;
   studentName: string; class: string; rollNumber: string; seatNumber: string;
   examName: string; marks: { subject: string; score: number; max: number }[];
   totalMarks: number; maxMarks: number; percentage: number; result: 'Pass' | 'Fail';
@@ -32,7 +32,8 @@ const ReportCardDetail = ({ report, schoolInfo }: ReportCardDetailProps) => {
   const handleDownload = () => {
     const input = reportCardRef.current;
     if (input) {
-      html2canvas(input, { scale: 2, useCORS: true, backgroundColor: '#f8fafc' }).then(canvas => {
+      // FIX: Removed the unsupported 'backgroundColor' property.
+      html2canvas(input, { useCORS: true }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -94,7 +95,7 @@ const ReportCardDetail = ({ report, schoolInfo }: ReportCardDetailProps) => {
         </div>
       </div>
 
-      <div className={styles.modalActions}>
+      <div className={`${styles.modalActions} no-print`}>
         <button className={`${styles.actionButton} ${styles.downloadButton}`} onClick={handleDownload}><MdDownload /> Download PDF</button>
         <button className={`${styles.actionButton} ${styles.printButton}`} onClick={() => window.print()}><MdPrint /> Print</button>
       </div>

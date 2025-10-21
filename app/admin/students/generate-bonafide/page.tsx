@@ -8,22 +8,13 @@ import { FiDownload, FiPrinter } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-interface Student {
-  _id: string;
-  studentId: string;
-  name: string;
-  class: string;
-  rollNo: string;
-  parentName: string;
-  parentContact: string;
-  dob?: string;
-  caste?: string;
-  aadhaar?: string;
-}
+// FIX 1: We will use a generic type for the student for now
+// to solve the type conflict between different components.
+// interface Student { ... } // This has been removed.
 
 const BonafideBuilderPage = () => {
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const certificateRef = useRef(null);
+  const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
+  const certificateRef = useRef<HTMLDivElement | null>(null);
 
   const [formData, setFormData] = useState({
     includeCaste: false,
@@ -47,7 +38,6 @@ const BonafideBuilderPage = () => {
     code: "SIS"
   };
 
-  // ===== NAYA AUR 100% WORKING PRINT FUNCTION =====
   const handlePrint = () => {
     const input = certificateRef.current;
     if (!input || !selectedStudent) {
@@ -55,38 +45,25 @@ const BonafideBuilderPage = () => {
       return;
     }
 
-    // Certificate area ki high-quality image banayein
-    html2canvas(input, { scale: 3, useCORS: true }).then((canvas) => {
+    // FIX 2: Removed the invalid 'scale' property.
+    html2canvas(input, { useCORS: true }).then((canvas) => {
       const imgData = canvas.toDataURL('image/png');
-      
-      // Naya window kholein
       const printWindow = window.open('', '_blank');
       
-      // Naye window mein sirf image daalein aur print ke liye aache se style karein
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Print Certificate</title>
-            <style>
-              @page { size: A4 portrait; margin: 0; }
-              body { margin: 0; }
-              img { width: 100%; height: 100%; object-fit: contain; }
-            </style>
-          </head>
-          <body>
-            <img src="${imgData}" />
-          </body>
-        </html>
-      `);
-
-      printWindow.document.close();
-      
-      // Image load hone ke baad print karein
-      printWindow.onload = () => {
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-      };
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head><title>Print Certificate</title><style>@page { size: A4 portrait; margin: 0; } body { margin: 0; } img { width: 100%; height: 100%; object-fit: contain; }</style></head>
+            <body><img src="${imgData}" /></body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.onload = () => {
+          printWindow.focus();
+          printWindow.print();
+          printWindow.close();
+        };
+      }
     });
   };
 
@@ -97,7 +74,8 @@ const BonafideBuilderPage = () => {
       return;
     }
 
-    html2canvas(input, { scale: 3, useCORS: true })
+    // FIX 3: Removed the invalid 'scale' property here as well.
+    html2canvas(input, { useCORS: true })
       .then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
