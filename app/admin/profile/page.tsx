@@ -112,7 +112,7 @@ const AdminProfilePage = () => {
           {imagePreview ? (
             <Image src={imagePreview} alt="Profile" width={100} height={100} className={styles.profileImage} />
           ) : (
-            <DefaultAvatar name={formData.adminName} />
+            <DefaultAvatar />
           )}
           <div className={styles.imageUploadWrapper}>
             <label htmlFor="imageUpload">Change Photo</label>
