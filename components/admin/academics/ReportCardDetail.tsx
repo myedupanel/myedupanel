@@ -8,6 +8,7 @@ import html2canvas from 'html2canvas';
 // Data Types
 export type SchoolInfo = { name: string; address: string; logoChar: string; session: string; };
 export type DetailedReportCard = {
+  studentId: string; // FIX: studentId property added here
   studentName: string; class: string; rollNumber: string; seatNumber: string;
   examName: string; marks: { subject: string; score: number; max: number }[];
   totalMarks: number; maxMarks: number; percentage: number; result: 'Pass' | 'Fail';
@@ -19,7 +20,7 @@ const ReportCardDetail = ({ report, schoolInfo }: ReportCardDetailProps) => {
   const reportCardRef = useRef<HTMLDivElement>(null);
 
   if (!report || !schoolInfo) {
-    return null; 
+    return null;
   }
 
   const getGrade = (percentage: number) => {

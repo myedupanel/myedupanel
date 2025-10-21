@@ -5,61 +5,44 @@ import { MdAssessment, MdPrint, MdRemoveRedEye } from 'react-icons/md';
 import Modal from '@/components/common/Modal/Modal';
 import ReportCardDetail, { DetailedReportCard, SchoolInfo } from '@/components/admin/academics/ReportCardDetail';
 
-// --- PROFESSIONAL REAL-TIME DATABASE STRUCTURE ---
+// --- DATABASE MOCK ---
 const schoolDetails: SchoolInfo = {
   name: "SchoolPro Academy",
   address: "123 Education Lane, Knowledge City",
   logoChar: 'S',
   session: "2025-2026",
 };
-
 const allStudents = [
   { id: 'S001', name: 'Aarav Sharma', class: 'Grade 10', rollNumber: '10-A-01', seatNumber: 'SC10-052' },
   { id: 'S002', name: 'Priya Patel', class: 'Grade 10', rollNumber: '10-A-02', seatNumber: 'SC10-053' },
   { id: 'S003', name: 'Rohan Mehta', class: 'Grade 9', rollNumber: '09-B-01', seatNumber: 'SC09-015' },
   { id: 'S004', name: 'Sneha Gupta', class: 'Grade 9', rollNumber: '09-B-02', seatNumber: 'SC09-016' },
 ];
-
 const examStructureDatabase = {
-  'Daily Tests': {
-    '2025-10-01 Test': { 'Science': 10 },
-    '2025-10-02 Test': { 'Maths': 10 },
-  },
-  'Weekly Tests': {
-    'October Week 1': { 'Mathematics': 25, 'Science': 25 },
-    'October Week 2': { 'English': 25, 'History': 25 },
-    'November Week 1': { 'Mathematics': 25, 'Physics': 25 },
-  },
-  'Monthly Tests': {
-    'January Test': {}, 'February Test': {}, 'March Test': {}, 'April Test': {}, 'May Test': {}, 'June Test': {}, 'July Test': {}, 'August Test': {},
-    'September Test': { 'Mathematics': 50, 'Science': 50 },
-    'October Test': {}, 'November Test': {}, 'December Test': {},
-  },
   'Term Exams': {
     'Mid-Term Exam': { 'Mathematics': 100, 'Science': 100, 'English': 100 },
     'Final Exam': { 'Mathematics': 100, 'Science': 100, 'English': 100 },
   },
+  'Monthly Tests': {
+    'September Test': { 'Mathematics': 50, 'Science': 50 },
+  },
 };
-
 const marksDatabase = {
   'Aarav Sharma': {
     'Final Exam': { 'Mathematics': 95, 'Science': 98, 'English': 88 },
     'Mid-Term Exam': { 'Mathematics': 85, 'Science': 90, 'English': 82 },
-    'September Test': { 'Mathematics': 45, 'Science': 48 },
-    '2025-10-01 Test': { 'Science': 9 },
   },
   'Priya Patel': {
     'Final Exam': { 'Mathematics': 82, 'Science': 88, 'English': 90 },
-    'Mid-Term Exam': { 'Mathematics': 80, 'Science': 85, 'English': 88 },
   },
 };
-// --- END OF DATABASE ---
+// --- END OF DATABASE MOCK ---
 
 type ReportData = DetailedReportCard;
 
 const ResultsPage = () => {
-  const [selectedExamType, setSelectedExamType] = useState(Object.keys(examStructureDatabase)[3]);
-  const [selectedExam, setSelectedExam] = useState(Object.keys(examStructureDatabase['Term Exams' as keyof typeof examStructureDatabase])[1]);
+  const [selectedExamType, setSelectedExamType] = useState(Object.keys(examStructureDatabase)[0]);
+  const [selectedExam, setSelectedExam] = useState(Object.keys(examStructureDatabase['Term Exams'])[0]);
   const [reportData, setReportData] = useState<ReportData[] | null>(null);
   const [selectedClass, setSelectedClass] = useState('Grade 10');
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -67,30 +50,38 @@ const ResultsPage = () => {
 
   useEffect(() => {
     const examsInType = Object.keys(examStructureDatabase[selectedExamType as keyof typeof examStructureDatabase] || {});
-    setSelectedExam(examsInType[0] || '');
-  }, [selectedExamType]);
+    if (examsInType.length > 0 && !examsInType.includes(selectedExam)) {
+      setSelectedExam(examsInType[0]);
+    }
+  }, [selectedExamType, selectedExam]);
 
   const handleGenerate = () => {
-    if (!selectedExam) {
-      alert("Please select a specific exam.");
+    const studentsInClass = allStudents.filter(s => s.class === selectedClass);
+    
+    // FIX: Added type assertions to safely access nested properties
+    const examsForType = examStructureDatabase[selectedExamType as keyof typeof examStructureDatabase];
+    const examMaxMarks = examsForType[selectedExam as keyof typeof examsForType];
+
+    if (!examMaxMarks || Object.keys(examMaxMarks).length === 0) {
+      setReportData([]);
       return;
     }
-    const studentsInClass = allStudents.filter(s => s.class === selectedClass);
-    const examMaxMarks = examStructureDatabase[selectedExamType as keyof typeof examStructureDatabase][selectedExam as keyof typeof examStructureDatabase[keyof typeof examStructureDatabase]];
-    if(!examMaxMarks) {
-        setReportData([]);
-        return;
-    }
-    const totalMaxMarks = Object.values(examMaxMarks).reduce((acc, marks) => acc + (marks || 0), 0);
+    
+    const totalMaxMarks = Object.values(examMaxMarks).reduce<number>((acc, marks) => acc + Number(marks || 0), 0);
 
     const generatedReports: ReportData[] = studentsInClass.map(student => {
-      const studentMarksData = marksDatabase[student.name as keyof typeof marksDatabase]?.[selectedExam as keyof typeof examStructureDatabase[keyof typeof examStructureDatabase]];
-      const totalMarks = studentMarksData ? Object.values(studentMarksData).reduce((acc, marks) => acc + (marks || 0), 0) : 0;
+      // FIX: Added type assertions here as well for safety
+      const studentExams = marksDatabase[student.name as keyof typeof marksDatabase];
+      const studentMarksData = studentExams ? studentExams[selectedExam as keyof typeof studentExams] : undefined;
+      
+      const totalMarks = studentMarksData ? Object.values(studentMarksData).reduce<number>((acc, marks) => acc + Number(marks || 0), 0) : 0;
+      
       const percentage = totalMaxMarks > 0 ? Math.round((totalMarks / totalMaxMarks) * 100) : 0;
+      
       const marksArray = studentMarksData ? Object.keys(studentMarksData).map(subject => ({
         subject,
-        score: studentMarksData[subject as keyof typeof studentMarksData] || 0,
-        max: examMaxMarks[subject as keyof typeof examMaxMarks] || 0
+        score: (studentMarksData as any)[subject] || 0,
+        max: (examMaxMarks as any)[subject] || 0,
       })) : [];
 
       return {
@@ -105,8 +96,8 @@ const ResultsPage = () => {
         percentage,
         result: percentage >= 40 ? 'Pass' : 'Fail',
         marks: marksArray,
-        attendance: 92, // Sample Data
-        remarks: "Excellent progress and consistent effort shown throughout the term. Keep up the hard work.", // Sample Data
+        attendance: 92,
+        remarks: "Excellent progress.",
       };
     });
     setReportData(generatedReports);
@@ -116,7 +107,7 @@ const ResultsPage = () => {
     setSelectedReport(report);
     setIsReportModalOpen(true);
   };
-
+  
   const examOptions = Object.keys(examStructureDatabase[selectedExamType as keyof typeof examStructureDatabase] || {});
 
   return (
@@ -141,10 +132,8 @@ const ResultsPage = () => {
           </div>
           <div className={styles.formGroup}>
             <label htmlFor="exam-select">Select Specific Exam</label>
-            <select id="exam-select" value={selectedExam} onChange={(e) => setSelectedExam(e.target.value)} disabled={examOptions.length === 0}>
-              {examOptions.length > 0 ? (
-                examOptions.map(exam => <option key={exam} value={exam}>{exam}</option>)
-              ) : ( <option>No exams in this type</option> )}
+            <select id="exam-select" value={selectedExam} onChange={(e) => setSelectedExam(e.target.value)} disabled={!examOptions.length}>
+              {examOptions.map(exam => <option key={exam} value={exam}>{exam}</option>)}
             </select>
           </div>
           <button className={styles.generateButton} onClick={handleGenerate}>
@@ -153,32 +142,32 @@ const ResultsPage = () => {
         </div>
         <div className={styles.resultsContainer}>
           {reportData ? (
-            <table className={styles.resultsTable}>
-              <thead>
-                <tr><th>Student Name</th><th>Total Marks</th><th>Percentage</th><th>Result</th><th>Actions</th></tr>
-              </thead>
-              <tbody>
-                {reportData.map(report => (
-                  <tr key={report.studentId}>
-                    <td>{report.studentName}</td>
-                    <td>{`${report.totalMarks} / ${report.maxMarks}`}</td>
-                    <td>{report.percentage}%</td>
-                    <td><span className={`${styles.resultBadge} ${report.result === 'Pass' ? styles.pass : styles.fail}`}>{report.result}</span></td>
-                    <td><button className={styles.viewButton} onClick={() => handleViewReport(report)}><MdRemoveRedEye /> View Report</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+             <table className={styles.resultsTable}>
+               <thead>
+                 <tr><th>Student Name</th><th>Total Marks</th><th>Percentage</th><th>Result</th><th>Actions</th></tr>
+               </thead>
+               <tbody>
+                 {reportData.map(report => (
+                   <tr key={report.studentId}>
+                     <td>{report.studentName}</td>
+                     <td>{`${report.totalMarks} / ${report.maxMarks}`}</td>
+                     <td>{report.percentage}%</td>
+                     <td><span className={`${styles.resultBadge} ${report.result === 'Pass' ? styles.pass : styles.fail}`}>{report.result}</span></td>
+                     <td><button className={styles.viewButton} onClick={() => handleViewReport(report)}><MdRemoveRedEye /> View Report</button></td>
+                   </tr>
+                 ))}
+               </tbody>
+             </table>
           ) : (
-            <div className={styles.emptyState}>
-              <MdPrint size={60} />
-              <h2>Generate Report Cards</h2>
-              <p>Select a class and an exam from the options above and click 'Generate Reports' to see the results.</p>
-            </div>
+             <div className={styles.emptyState}>
+               <MdPrint size={60} />
+               <h2>Generate Report Cards</h2>
+               <p>Select a class and an exam from the options above and click 'Generate Reports' to see the results.</p>
+             </div>
           )}
         </div>
       </div>
-      <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="">
+      <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Student Report Card">
         {selectedReport && <ReportCardDetail report={selectedReport} schoolInfo={schoolDetails} />}
       </Modal>
     </>
