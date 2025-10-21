@@ -3,10 +3,31 @@ import React, { useState, useEffect } from 'react';
 import api from '@/backend/utils/api';
 import styles from './FeeDashboard.module.scss';
 import StatCard from '@/components/admin/StatCard/StatCard';
-import FeeTabs from '@/components/admin/FeeTabs/FeeTabs'; // <-- FeeTabs component ko import kiya
+import FeeTabs from '@/components/admin/FeeTabs/FeeTabs';
 import { MdSchedule, MdCreditCard, MdAccountBalanceWallet, MdSchool, MdChevronRight } from 'react-icons/md';
 
-const formatCurrency = (amount) => {
+// --- TYPE DEFINITIONS ---
+interface DashboardData {
+    lateCollection: { amount: number; studentCount: number };
+    onlinePayment: { transactionCount: number; totalStudents: number };
+    depositCollection: { amount: number; studentCount: number };
+    schoolCollection: { collected: number; goal: number };
+}
+
+interface Template {
+    _id: string;
+    name: string;
+}
+
+interface TemplateDetails {
+    name: string;
+    studentCount: number;
+    paidStudentCount: number;
+    totalAmount: number;
+    collectedAmount: number;
+}
+
+const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
         style: 'currency',
         currency: 'INR',
@@ -15,10 +36,10 @@ const formatCurrency = (amount) => {
 };
 
 const FeeDashboardPage = () => {
-    const [dashboardData, setDashboardData] = useState(null);
-    const [templates, setTemplates] = useState([]);
-    const [selectedTemplate, setSelectedTemplate] = useState(null);
-    const [templateDetails, setTemplateDetails] = useState(null);
+    const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+    const [templates, setTemplates] = useState<Template[]>([]);
+    const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+    const [templateDetails, setTemplateDetails] = useState<TemplateDetails | null>(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -28,8 +49,8 @@ const FeeDashboardPage = () => {
             try {
                 setLoading(true);
                 const [dashboardRes, templatesRes] = await Promise.all([
-                    api.get('/fees/dashboard-overview'),
-                    api.get('/fees/templates')
+                    api.get<DashboardData>('/fees/dashboard-overview'),
+                    api.get<Template[]>('/fees/templates')
                 ]);
                 
                 setDashboardData(dashboardRes.data);
@@ -55,7 +76,7 @@ const FeeDashboardPage = () => {
             setDetailsLoading(true);
             setTemplateDetails(null);
             try {
-                const res = await api.get(`/fees/templates/${selectedTemplate._id}`);
+                const res = await api.get<TemplateDetails>(`/fees/templates/${selectedTemplate._id}`);
                 setTemplateDetails(res.data);
             } catch (error) {
                 console.error("Error fetching template details:", error);
@@ -79,46 +100,40 @@ const FeeDashboardPage = () => {
         return (templateDetails.collectedAmount / templateDetails.totalAmount) * 100;
     };
 
-    // ===== SIRF EK RETURN STATEMENT HAI =====
     return (
         <div className={styles.dashboardContainer}>
             <h1 className={styles.pageTitle}>Dashboard Overview</h1>
             
-            {/* Phase 1: Overview Cards */}
             {dashboardData && (
                 <div className={styles.statsGrid}>
+                    {/* FIX: Removed the invalid 'subtitle' prop from all StatCards. */}
                     <StatCard
                         icon={<MdSchedule />}
                         title="Late Collection"
                         value={formatCurrency(dashboardData.lateCollection.amount)}
-                        subtitle={`${dashboardData.lateCollection.studentCount} Students`}
-                        theme="late"
+                        theme="orange"
                     />
                     <StatCard
                         icon={<MdCreditCard />}
                         title="Online Payment"
                         value={`${dashboardData.onlinePayment.transactionCount} Txns`}
-                        subtitle={`out of ${dashboardData.onlinePayment.totalStudents} Students`}
-                        theme="online"
+                        theme="purple"
                     />
                     <StatCard
                         icon={<MdAccountBalanceWallet />}
                         title="Deposit Collection"
                         value={formatCurrency(dashboardData.depositCollection.amount)}
-                        subtitle={`${dashboardData.depositCollection.studentCount} Students`}
-                        theme="deposit"
+                        theme="blue"
                     />
                     <StatCard
                         icon={<MdSchool />}
                         title="School Collection"
                         value={formatCurrency(dashboardData.schoolCollection.collected)}
-                        subtitle={`Goal: ${formatCurrency(dashboardData.schoolCollection.goal)}`}
-                        theme="school"
+                        theme="green"
                     />
                 </div>
             )}
 
-            {/* Phase 2: Fee Structure Section */}
             <div className={styles.mainContentGrid}>
                 <div className={styles.feeStructureCard}>
                     <div className={styles.cardHeader}>
@@ -177,8 +192,7 @@ const FeeDashboardPage = () => {
                     )}
                 </div>
             </div>
-
-            {/* Phase 3: Payment Quick View Section */}
+            
             <FeeTabs />
 
         </div>
