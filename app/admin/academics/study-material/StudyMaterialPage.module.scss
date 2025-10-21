@@ -1,0 +1,138 @@
+.pageContainer {
+  padding: 1.5rem;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  h1 { font-size: 1.75rem; color: #1e293b; }
+}
+
+.uploadButton {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem;
+  background-color: #22c55e; color: #ffffff; border: none; border-radius: 8px;
+  font-weight: 600; cursor: pointer; transition: background-color 0.2s ease;
+  &:hover { background-color: #16a34a; }
+}
+
+/* New Tab Styles */
+.categoryTabs {
+  display: flex;
+  gap: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 2rem;
+}
+
+.tabButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background-color: transparent;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #0ea5e9;
+    background-color: #f0f9ff;
+  }
+
+  &.active {
+    color: #0ea5e9;
+    font-weight: 600;
+    border-bottom-color: #0ea5e9;
+  }
+}
+
+.materialGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.materialCard {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  border: 1px solid #f1f5f9;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-top: 4px solid transparent; /* NAYI LINE: Border ke liye jagah */
+
+  /* NAYA STYLE: File type ke hisaab se border color */
+  &.pdfCard { border-top-color: #ef4444; }
+  &.wordCard { border-top-color: #3b82f6; }
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07);
+  }
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.icon {
+  font-size: 2.5rem;
+  &.pdf { color: #ef4444; }
+  &.word { color: #3b82f6; }
+}
+
+.cardActions { display: flex; gap: 0.5rem; }
+
+.actionButton {
+  background: none; border: none; cursor: pointer; color: #94a3b8;
+  font-size: 1.2rem; padding: 0.25rem; transition: color 0.2s ease;
+  &:hover { color: #334155; }
+}
+
+.cardTitle {
+  font-size: 1.1rem; font-weight: 600; color: #1e293b;
+  margin: 0 0 0.5rem;
+}
+
+.cardMeta {
+  display: flex; gap: 0.5rem; font-size: 0.85rem; color: #64748b;
+  margin-bottom: 1rem;
+  span {
+    background-color: #f8fafc; padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+  }
+}
+
+.cardDate { font-size: 0.8rem; color: #94a3b8; margin: 0; }
+
+/* NAYA STYLE: Empty State ke liye */
+.emptyState {
+  grid-column: 1 / -1; /* Yeh poori grid ki width lega */
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px dashed #e2e8f0;
+
+  h3 {
+    font-size: 1.25rem;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: #64748b;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+

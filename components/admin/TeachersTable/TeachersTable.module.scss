@@ -1,0 +1,52 @@
+.tableContainer {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th, td {
+        padding: 16px;
+        text-align: left;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    th {
+        background-color: #fafafa;
+        font-weight: 600;
+        color: #555;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.actionBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+
+    &.edit {
+        color: #3B82F6; // Blue
+        &:hover { background-color: rgba(59, 130, 246, 0.1); }
+    }
+
+    &.delete {
+        color: #EF4444; // Red
+        &:hover { background-color: rgba(239, 68, 68, 0.1); }
+    }
+}

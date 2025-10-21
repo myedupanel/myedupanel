@@ -1,0 +1,11 @@
+.layout {
+  display: flex;
+  height: 100%;
+}
+
+.content {
+  flex-grow: 1;
+  overflow-y: auto;
+  background-color: #f8fafc; /* Naya halka gray background */
+  padding: 1.5rem; /* Padding yahan add kar di hai */
+}

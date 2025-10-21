@@ -1,0 +1,68 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  max-height: 650px;
+}
+.formBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex-grow: 1;
+  background-color: #f8fafc;
+}
+.formGroup {
+  margin-bottom: 1.5rem;
+  label { font-weight: 500; margin-bottom: 0.5rem; display: block; }
+  input { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; }
+}
+.questionBox {
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+.questionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  h4 { margin: 0; }
+}
+.deleteButton {
+  background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer;
+}
+.questionBox textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  min-height: 60px;
+  margin-bottom: 1rem;
+}
+.optionsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.optionInput {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  input[type="radio"] { flex-shrink: 0; }
+  input[type="text"] { width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px; }
+}
+.addButton {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem;
+  background-color: #f1f5f9; color: #0ea5e9; border: 1px solid #e2e8f0; border-radius: 8px;
+  font-weight: 600; cursor: pointer;
+}
+.formFooter {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background-color: #fff;
+}
+.submitButton {
+  width: 100%; padding: 0.85rem; background-color: #0ea5e9; color: #fff;
+  border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer;
+}

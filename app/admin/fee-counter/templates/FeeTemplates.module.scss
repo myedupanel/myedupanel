@@ -1,0 +1,59 @@
+.pageContainer {
+    padding: 2rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #343a40;
+}
+
+.addButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background-color: #0d6efd;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.contentArea {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+}
+.templateList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.templateItem {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  font-weight: 500;
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.errorText {
+  color: #dc3545;
+  background-color: #f8d7da;
+  padding: 0.75rem;
+  border-radius: 6px;
+  text-align: center;
+}

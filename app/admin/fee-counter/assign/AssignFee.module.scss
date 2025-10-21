@@ -1,0 +1,124 @@
+.pageContainer {
+    padding: 2rem;
+}
+
+.header {
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #343a40;
+}
+
+.formContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.section {
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.sectionNumber {
+    background-color: #0d6efd;
+    color: #fff;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #343a40;
+}
+
+.sectionContent {
+    padding: 1.5rem;
+}
+
+.searchBar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 0 1rem;
+    
+    svg { color: #6c757d; }
+
+    input {
+        width: 100%;
+        border: none;
+        outline: none;
+        padding: 0.8rem 0.5rem;
+        background: transparent;
+        font-size: 1rem;
+    }
+}
+
+.selectInput {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.assignButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #198754;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: #157347;
+    }
+}
+.selectedStudent {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: #e7f5ff;
+  border: 1px solid #b6e0fe;
+  color: #0c5460;
+  border-radius: 8px;
+}
+.errorMessage {
+  margin-top: 1rem;
+  color: #842029;
+  background-color: #f8d7da;
+  border: 1px solid #f5c2c7;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+}

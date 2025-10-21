@@ -1,0 +1,80 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem; /* Achha vertical spacing */
+    width: 100%; /* Poori available width le */
+}
+
+.tableWrapper {
+    overflow-x: auto; /* Agar content zyada ho to scrollbar */
+    border: 1px solid #e9ecef; /* Halka border table ke around */
+    border-radius: 8px; /* Smooth corners */
+    background-color: #fff; /* White background */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Halka shadow */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.table th, .table td {
+    padding: 1rem 1.25rem; /* Zyada padding for better spacing */
+    text-align: left;
+    border-bottom: 1px solid #dee2e6; /* Thoda darker border */
+    white-space: nowrap; /* Text ko ek line mein rakhega */
+    vertical-align: middle;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em; /* Thoda space letters ke beech */
+}
+
+/* Table body rows par hover effect */
+.table tbody tr:hover {
+    background-color: #f1f3f5; /* Hover par halka grey background */
+}
+
+/* --- Status Badge ke liye naye Styles --- */
+.status {
+    padding: 0.35rem 0.75rem; /* Badge ki padding badhayi */
+    border-radius: 20px;
+    font-size: 0.75rem; /* Font size chota kiya */
+    font-weight: 700; /* Bold font */
+    color: #fff;
+    display: inline-flex; /* Text ko center karne ke liye */
+    align-items: center;
+    justify-content: center;
+    min-width: 70px; /* Minimum width for consistency */
+}
+
+.paid { background-color: #198754; } /* Green */
+.pending { background-color: #ffc107; color: #343a40; } /* Yellowish, text dark */
+.late { background-color: #dc3545; } /* Red for Late */
+.failed { background-color: #6c757d; } /* Grey for Failed */
+/* Agar koi aur status ho to yahan add karein */
+
+/* Message styles for loading/error/no data */
+.message, .messageError, .noData {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+    font-size: 1rem;
+}
+
+.messageError { 
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.noData {
+    padding: 1.5rem;
+    font-style: italic;
+    color: #888;
+}

@@ -1,0 +1,44 @@
+.dashboardContainer {
+  padding: 2rem; /* Thoda gap add karega, jisse Header neeche aa jaayega */
+}
+
+/* 1. Student Admission Chart Container */
+.chartContainer {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+/* 2. Stats Grid (Ab 3 columns ka hai) */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columns */
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* 3. Recent Payments Container */
+.paymentsContainer {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive styles for smaller screens */
+@media (max-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboardContainer {
+    padding: 1rem;
+  }
+  .statsGrid {
+    grid-template-columns: 1fr; /* 1 column */
+  }
+}

@@ -1,0 +1,144 @@
+.container {
+    padding: 0; // Padding ab Accordion component ke andar hai
+}
+
+.panelContent {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2.5rem;
+}
+
+.formArea {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    select, input[type="date"] {
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 1rem;
+        background-color: #fff;
+    }
+}
+
+.dateGroup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.fileUploadLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    padding: 0.7rem 1.2rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background-color: #fff;
+    
+    input[type="file"] {
+        display: none;
+    }
+}
+
+.submitButton {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #0d6efd;
+    color: #fff;
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: #0b5ed7;
+    }
+
+    &:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+    }
+}
+
+.helpArea {
+    background-color: #f8f9fa;
+    border-left: 1px solid #e9ecef;
+    padding: 1.5rem;
+    font-size: 0.9rem;
+    height: fit-content; // Taaki help section form ke saath align ho
+
+    h4 { 
+        margin-top: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #343a40;
+    }
+    hr {
+        border: none;
+        border-top: 1px solid #dee2e6;
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    ol { 
+        padding-left: 1.5rem;
+        color: #495057;
+        line-height: 1.6;
+    }
+    li { margin-bottom: 0.75rem; }
+    a { 
+        font-weight: 600; 
+        cursor: pointer;
+        color: #0d6efd;
+        text-decoration: none;
+        &:hover { text-decoration: underline; }
+    }
+}
+
+/* ===== OPTION 2 KE LIYE NAYE STYLES ===== */
+
+.checkboxGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    
+    label {
+        font-weight: 500;
+        color: #495057;
+        cursor: pointer;
+    }
+    input[type="checkbox"] {
+        width: 1.1rem;
+        height: 1.1rem;
+        cursor: pointer;
+    }
+}
+
+.columnList {
+    list-style: none;
+    padding-left: 1.5rem;
+    font-size: 0.85rem;
+    color: #495057;
+
+    li {
+        margin-bottom: 0.5rem;
+    }
+}

@@ -1,0 +1,47 @@
+.container {
+  width: 100%;
+  height: 100%;
+  h3 { margin-top: 0; color: #334155; }
+}
+
+.listsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.listSection h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.topHeader { color: #22c55e; }
+.bottomHeader { color: #ef4444; }
+
+.performersList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9rem;
+    color: #475569;
+  }
+}
+
+.topScore, .bottomScore {
+  font-weight: 600;
+}
+
+.topScore { color: #16a34a; }
+.bottomScore { color: #dc2626; }

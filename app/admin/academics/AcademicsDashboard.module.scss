@@ -1,0 +1,63 @@
+/* Header Styles */
+.header {
+  margin-bottom: 2rem;
+  h1 {
+    font-size: 2rem;
+    color: #1e293b;
+    margin: 0;
+  }
+  p {
+    font-size: 1rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+  }
+}
+
+/* The Main Grid Container */
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  
+  /* UPDATED: Humne 'side' ko 'side1' aur 'side2' mein tod diya hai */
+  grid-template-areas:
+    "stat1 stat2 stat3"
+    "chart chart side1"
+    "chart chart side2";
+}
+
+/* Common styles for all grid items */
+%grid-item-base {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07);
+  }
+}
+
+/* Assigning grid areas */
+.mainChart {
+  @extend %grid-item-base;
+  grid-area: chart;
+  min-height: 400px; /* Thodi height badha di hai */
+}
+
+.upcomingExams {
+  @extend %grid-item-base;
+  grid-area: side1; /* Pehle yeh 'side' tha */
+}
+
+/* NEW: Naya area assignments ke liye */
+.recentAssignments {
+  @extend %grid-item-base;
+  grid-area: side2;
+}
+
+/* Page wrapper for overall spacing if needed */
+.pageWrapper {
+  padding: 1rem; /* Adjust padding as needed */
+}

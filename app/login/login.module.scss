@@ -1,0 +1,285 @@
+.pageWrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  font-family: inherit;
+  background-color: var(--page-bg);
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Left Side: Form --- */
+.formContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.formCard {
+  width: 100%;
+  max-width: 420px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+  
+  h1 {
+    font-weight: 700;
+    font-size: 2.2rem;
+    display: flex; 
+    justify-content: center; 
+    gap: 0.5rem; 
+  }
+
+  .schoolText { color: var(--fb-blue); }
+  .proText { color: var(--light-black); }
+}
+
+.welcomeText {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text-medium);
+  margin-bottom: 8px;
+}
+
+.formContent {
+  width: 100%;
+  
+  h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 30px;
+    text-align: left;
+  }
+}
+
+.inputGroup {
+  margin-bottom: 25px;
+
+  label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-medium);
+    margin-bottom: 8px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    }
+  }
+}
+
+.passwordWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  
+  input { padding-right: 45px; }
+
+  .eyeIcon {
+    position: absolute;
+    right: 15px;
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 1.2rem;
+  }
+}
+
+.forgotPasswordRow {
+  margin-top: 10px;
+  text-align: right;
+}
+
+.forgotLink {
+  font-size: 0.85rem;
+  color: var(--primary-blue);
+  text-decoration: none;
+  font-weight: 500;
+  &:hover { text-decoration: underline; }
+}
+
+.submitBtn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 15px;
+  background-color: var(--primary-blue);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: var(--primary-blue-hover);
+  }
+}
+
+/* --- Right Side: Slideshow --- */
+.slideshowContainer {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background-color: #333;
+
+  @media (max-width: 900px) {
+    display: none;
+  }
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+.slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: scale(1.1);
+  transition: opacity 1.5s ease-in-out, transform 8s ease-out; 
+  z-index: 1;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.slideshowContent {
+  position: absolute;
+  bottom: 50px;
+  left: 50px;
+  right: 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  z-index: 3;
+}
+
+.tagline {
+  font-size: 2rem;
+  font-weight: 600;
+  max-width: 400px;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.navArrows {
+  display: flex;
+  gap: 10px;
+  span {
+    width: 45px;
+    height: 45px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+    transition: background-color 0.2s;
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+/* --- Styles for Action & Home Links --- */
+.actionLinkContainer {
+  margin-top: 25px;
+}
+
+.actionLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: var(--sky-blue);
+  color: var(--text-dark);
+  font-weight: 500;
+  border: 1px solid #e0e7ff;
+  transition: all 0.2s ease;
+
+  span {
+    margin-right: 8px;
+  }
+  strong {
+    color: var(--primary-blue);
+  }
+  &:hover {
+    background-color: #e0eaff;
+    border-color: var(--primary-blue);
+  }
+}
+
+.homeLinkContainer {
+  margin-top: 25px;
+  text-align: center;
+}
+
+.homeLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text-light);
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--primary-blue);
+  }
+}
+
+/* --- ADDED ERROR MESSAGE STYLES --- */
+.errorMessage {
+  text-align: center;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}

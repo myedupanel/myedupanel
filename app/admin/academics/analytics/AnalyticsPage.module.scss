@@ -1,0 +1,128 @@
+.pageContainer {
+  padding: 1.5rem;
+  width: 100%;
+}
+// ... (purane header, titleSection styles waise hi rakhein)
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem; /* Margin kam kiya */
+}
+
+/* Naye Toggle Buttons ke liye Styles */
+.viewToggle {
+  display: flex;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  padding: 0.25rem;
+
+  button {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    font-weight: 500;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &.active {
+      background-color: #ffffff;
+      color: #0ea5e9;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+  }
+}
+
+.filterSection {
+  display: flex;
+  justify-content: flex-end; /* Filters ko right mein rakhein */
+  margin-bottom: 2rem;
+  
+  select {
+    min-width: 220px;
+    padding: 0.6rem 1rem;
+    border: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+}
+// ... (baaki ke grid, card, aur chart styles waise hi rakhein)
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.titleSection {
+  h1 { font-size: 1.75rem; color: #1e293b; margin: 0; }
+  p { font-size: 1rem; color: #64748b; margin-top: 0.25rem; }
+}
+
+.filterSection {
+  display: flex;
+  gap: 1rem;
+  
+  select {
+    min-width: 180px;
+    padding: 0.6rem 1rem;
+    border: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+}
+
+.analyticsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  
+  /* Grid layout define karein */
+  grid-template-areas:
+    "stat1 stat2 stat3"
+    "trend trend mastery";
+}
+
+%grid-item-base {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.statCard {
+  @extend %grid-item-base;
+  text-align: center;
+  
+  h4 { font-size: 2rem; color: #1e293b; margin: 0.5rem 0; }
+  p { color: #64748b; margin: 0; font-size: 0.9rem; }
+  .icon {
+    font-size: 2rem;
+    padding: 0.75rem;
+    border-radius: 50%;
+    color: #fff;
+    display: inline-block;
+
+    &.blue { background-color: #3b82f6; }
+    &.green { background-color: #22c55e; }
+    &.orange { background-color: #f97316; }
+  }
+}
+
+.chartContainer {
+  @extend %grid-item-base;
+  min-height: 350px;
+  
+  h3 { margin-top: 0; color: #334155; }
+}
+
+/* Grid areas ko assign karein */
+.statCard:nth-child(1) { grid-area: stat1; }
+.statCard:nth-child(2) { grid-area: stat2; }
+.statCard:nth-child(3) { grid-area: stat3; }
+.chartContainer:nth-child(4) { grid-area: trend; }
+.chartContainer:nth-child(5) { grid-area: mastery; }

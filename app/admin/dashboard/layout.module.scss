@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+}
+
+.content {
+  flex-grow: 1;
+  margin-left: 250px; /* <-- YEH LINE ADD KAREIN */
+  background-color: #f4f7fa;
+  min-height: 100vh;
+}
+.container {
+  display: flex;
+  height: 100vh; /* Yeh poori screen ki height le lega */
+  width: 100vw;  /* Yeh poori screen ki width le lega */
+  overflow: hidden; /* Extra scrollbars ko rokne ke liye */
+}
+
+.content {
+  flex-grow: 1; /* Yeh content area ko bachi hui saari jagah de dega */
+  overflow-y: auto; /* Agar content lamba ho toh woh scroll ho paayega */
+  height: 100vh; /* Content area bhi poori height lega */
+}

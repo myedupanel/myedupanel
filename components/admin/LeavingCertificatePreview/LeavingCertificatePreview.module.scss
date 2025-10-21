@@ -1,0 +1,79 @@
+.certificateWrapper {
+  font-family: 'Times New Roman', Times, serif;
+  color: #000;
+  padding: 1in;
+  background: white;
+  border: 1px solid #ccc;
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-family: sans-serif;
+  color: #95a5a6;
+  text-align: center;
+  font-style: italic;
+}
+
+.letterhead {
+  text-align: center;
+  margin-bottom: 0.5in;
+  h1 {
+    font-size: 16pt;
+    font-weight: bold;
+    margin: 0;
+  }
+  p {
+    font-size: 10pt;
+    margin: 0;
+  }
+}
+
+.title {
+  text-align: center;
+  font-weight: bold;
+  font-size: 14pt;
+  text-decoration: underline;
+  margin-bottom: 0.3in;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  font-size: 11pt;
+  line-height: 1.5;
+  margin-bottom: 0.3in;
+}
+
+.detailItem {
+  display: grid;
+  grid-template-columns: 200px 1fr; /* Label aur value ke liye columns */
+  
+  .label {
+    font-weight: 500;
+  }
+}
+
+.remarks {
+  margin-bottom: 0.5in;
+  font-size: 11pt;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 1in;
+  font-size: 11pt;
+}
+
+.signature {
+  text-align: center;
+  p {
+    margin: 0;
+    padding-top: 5px;
+  }
+}

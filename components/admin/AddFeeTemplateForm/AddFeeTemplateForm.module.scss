@@ -1,0 +1,110 @@
+.formContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 500px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    input {
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #e9ecef;
+}
+
+.itemsLabel {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: -0.5rem;
+}
+
+.itemRow {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+
+    input {
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+}
+
+.addButton, .removeButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ced4da;
+    background-color: #f8f9fa;
+    color: #495057;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.removeButton {
+    background-color: transparent;
+    border: none;
+    color: #dc3545;
+    padding: 0.5rem;
+}
+
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.saveButton, .cancelButton {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.saveButton {
+    background-color: #198754;
+    color: #fff;
+}
+
+.cancelButton {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+}
+.totalAmount {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.2rem;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+
+  span {
+    color: #6c757d;
+  }
+  strong {
+    color: #212529;
+  }
+}

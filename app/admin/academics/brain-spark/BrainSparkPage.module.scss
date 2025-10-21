@@ -1,0 +1,114 @@
+/* Final Professional Layout with Gaps */
+.pageContainer {
+  padding: 2rem; /* Overall page padding badhaya */
+  width: 100%;
+  background-color: #f8fafc; /* Page ko halka background color diya */
+}
+
+.header {
+  margin-bottom: 2rem;
+  h1 { 
+    font-size: 2rem; /* Title thoda bada kiya */
+    color: #1e293b;
+  }
+}
+
+.tabContainer {
+  display: flex;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 2.5rem; /* Tabs ke neeche gap badhaya */
+}
+
+.tabButton {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1.25rem; border: none;
+  border-bottom: 3px solid transparent;
+  background-color: transparent;
+  font-size: 1rem; font-weight: 500; color: #64748b;
+  cursor: pointer; transition: all 0.2s ease;
+  &:hover { color: #0ea5e9; background-color: #f0f9ff; }
+  &.active { color: #0ea5e9; font-weight: 600; border-bottom-color: #0ea5e9; }
+}
+
+.tabContent {
+  /* Ab har section ke liye ek card jaisa look */
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.todayView, .libraryView {
+  h2 { 
+    margin-top: 0; 
+    color: #334155;
+    font-size: 1.5rem; /* Section titles ko thoda bada kiya */
+    margin-bottom: 1.5rem;
+  }
+}
+
+.activeQuizCard {
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  color: #fff;
+  padding: 2rem; /* Card ke andar padding badhaya */
+  border-radius: 12px;
+  h3 { margin: 0 0 0.5rem; }
+  p { opacity: 0.9; margin: 0 0 1.5rem; }
+  .activeQuizFooter {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.9rem;
+    button {
+      background-color: #fff; color: #7c3aed; border: none; padding: 0.6rem 1.2rem;
+      border-radius: 6px; font-weight: 600; cursor: pointer;
+    }
+  }
+}
+
+.libraryHeader {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 1rem;
+  h2 { margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+}
+
+.addButton {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem;
+  background-color: #0ea5e9; color: #ffffff; border: none; border-radius: 8px;
+  font-weight: 600; cursor: pointer;
+}
+
+.quizList {
+  display: flex; flex-direction: column; gap: 1rem;
+}
+
+.quizItem {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 0 0 2px #dbeafe;
+    border-color: #bfdbfe;
+  }
+}
+
+.quizInfo {
+  .quizTitle { font-size: 1.1rem; font-weight: 600; margin: 0; }
+  .quizMeta { font-size: 0.85rem; color: #64748b; margin: 0.25rem 0 0; }
+}
+
+.quizActions {
+  display: flex; gap: 0.75rem;
+  button {
+    background: #f8fafc; border: 1px solid #e2e8f0; cursor: pointer;
+    color: #475569; display: flex; align-items: center; gap: 0.25rem;
+    font-size: 0.85rem; font-weight: 500; padding: 0.5rem 0.75rem;
+    border-radius: 6px; transition: all 0.2s ease;
+    &:hover { background-color: #f1f5f9; color: #1e293b; }
+  }
+}

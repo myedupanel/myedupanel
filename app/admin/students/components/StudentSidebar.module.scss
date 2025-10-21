@@ -1,0 +1,85 @@
+.sidebarContainer {
+  width: 250px;
+  flex-shrink: 0;
+  background-color: #1e293b; /* Admin sidebar jaisa dark color */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: white;
+}
+
+.titleSection {
+  padding: 20px 25px 0 25px;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+  h3 {
+    color: white;
+    font-weight: 600;
+    margin: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 15px;
+  }
+}
+
+.menuSection {
+  flex-grow: 1; /* Yeh important hai, isse footer neeche chala jaata hai */
+  overflow-y: auto; /* Agar items zyada honge to scrollbar aayega */
+  
+  ul {
+    list-style: none;
+    padding: 0 15px;
+    margin: 0;
+  }
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 10px;
+  color: #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  margin-bottom: 5px;
+  font-weight: 500;
+
+  &:hover {
+    background-color: #334155;
+    color: white;
+  }
+
+  svg {
+    font-size: 20px;
+  }
+}
+
+/* === Naye Styles === */
+.footerSection {
+  flex-shrink: 0;
+  padding: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: auto; /* Yeh button ko hamesha neeche rakhega */
+}
+
+.dashboardButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #334155;
+  color: #cbd5e1;
+  border: none;
+  padding: 12px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background-color: #4f46e5;
+    color: white;
+  }
+}

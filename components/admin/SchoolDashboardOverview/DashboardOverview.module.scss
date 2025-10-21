@@ -1,0 +1,186 @@
+/* Main container for the whole page */
+.schoolPageContainer {
+    display: flex;
+    background-color: #f8f9fa; // Lighter, more professional background
+    min-height: 100vh;
+}
+
+/* === FIX for Sidebar Overlap === */
+/* This pushes the main content to the right, so it doesn't hide behind the sidebar.
+   Adjust '260px' if your sidebar's width is different. */
+.mainContent {
+    flex-grow: 1;
+    padding: 1.5rem 2rem;
+    overflow-y: auto;
+    margin-left: 260px; 
+}
+
+/* General styles for the dashboard area */
+.overviewContainer {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.mainTitle {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 2rem;
+}
+
+/* Premium Stat Cards (if you decide to add them back) */
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.statCard {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    border: 1px solid #e9ecef;
+    border-top: 4px solid; // Color is applied inline
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.07);
+    }
+}
+.iconWrapper {
+    padding: 1rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    svg { font-size: 1.75rem; }
+}
+.statInfo {
+    .statTitle { font-size: 0.9rem; color: #6c757d; margin: 0 0 0.25rem 0; font-weight: 500; }
+    .statValue { font-size: 1.75rem; font-weight: 700; color: #212529; margin: 0; }
+}
+
+/* Premium Main Grid for all summary boxes */
+.mainGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); // A flexible 3-column layout
+    gap: 1.5rem;
+}
+
+.summaryBox {
+    background-color: #fff;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    grid-column: span 1; // By default, each box takes 1 column
+}
+
+.chartBox {
+    grid-column: span 3; // The chart box takes all 3 columns
+    height: 380px;
+    padding: 1rem;
+}
+.chartContainer {
+    width: 100%;
+    height: 100%;
+}
+
+.boxHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e9ecef;
+    h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #343a40;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+}
+.viewAllLink {
+    font-size: 0.8rem;
+    color: #495057;
+    text-decoration: none;
+    font-weight: 500;
+    &:hover { color: #007bff; }
+}
+
+.boxContent {
+    padding: 1.25rem;
+    flex-grow: 1;
+    p { margin: 0.25rem 0; }
+}
+
+.recentList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+    li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.85rem 1.25rem;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #f1f3f5;
+        &:last-child { border-bottom: none; }
+    }
+}
+.subject {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.boxFooter {
+    padding: 0.75rem 1.25rem;
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+.addButton {
+    width: 100%;
+    padding: 0.6rem;
+    background-color: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    &:hover { background-color: #007bff; color: #fff; border-color: #007bff; }
+}
+
+.smallText { 
+    font-size: 0.9rem; 
+    color: #6c757d; 
+    text-align: center;
+    strong { color: #212529; }
+}
+
+/* Loading and Error Messages */
+.message, .loading, .error {
+    font-size: 1.2rem;
+    color: #6c757d;
+    text-align: center;
+    padding: 4rem;
+    font-weight: 500;
+    grid-column: 1 / -1; /* Make it span full width if inside a grid */
+}
+
+.error {
+    color: #dc3545;
+}

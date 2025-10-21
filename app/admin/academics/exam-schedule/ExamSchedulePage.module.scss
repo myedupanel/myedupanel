@@ -1,0 +1,100 @@
+.pageContainer {
+  padding: 1rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 1.75rem;
+    color: #1e293b;
+  }
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background-color: #0ea5e9;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #0284c7;
+  }
+}
+
+.tableContainer {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.examTable {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  thead {
+    background-color: #f8fafc;
+    th {
+      font-size: 0.8rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  tbody {
+    tr:last-child {
+      td {
+        border-bottom: none;
+      }
+    }
+    td {
+      color: #334155;
+    }
+  }
+}
+
+.actionsCell {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.editButton, .deleteButton {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.editButton {
+  background-color: #f97316; /* Orange */
+}
+
+.deleteButton {
+  background-color: #ef4444; /* Red */
+}

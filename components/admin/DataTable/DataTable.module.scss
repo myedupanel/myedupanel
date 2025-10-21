@@ -1,0 +1,35 @@
+// Poori file ko isse replace kar dein
+.tableCard {
+    background-color: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.tableHeader {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  // ... baaki table ki styling waise hi rahegi ...
+}
+
+.pagination {
+  // ... pagination ki styling waise hi rahegi ...
+}
+
+.noData {
+    text-align: center;
+    padding: 2rem;
+    color: #94a3b8;
+    font-style: italic;
+}

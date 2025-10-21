@@ -1,0 +1,25 @@
+.container {
+    width: 100%;
+}
+.tableWrapper {
+    overflow-x: auto;
+}
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.table th, .table td {
+    padding: 0.9rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #f1f3f5;
+}
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+.message, .messageError, .noData {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+.messageError { color: #dc3545; }

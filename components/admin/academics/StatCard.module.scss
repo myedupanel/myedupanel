@@ -1,0 +1,51 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px_6px -1px rgba(0, 0, 0, 0.05);
+  border-left: 5px solid; /* Theme color ke liye border */
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  border-radius: 50%;
+  color: #ffffff;
+}
+
+.textWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.title {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+/* Color Themes */
+.blue {
+  border-color: #3b82f6;
+  .iconWrapper { background-color: #3b82f6; }
+}
+
+.orange {
+  border-color: #f97316;
+  .iconWrapper { background-color: #f97316; }
+}
+
+.green {
+  border-color: #22c55e;
+  .iconWrapper { background-color: #22c55e; }
+}
