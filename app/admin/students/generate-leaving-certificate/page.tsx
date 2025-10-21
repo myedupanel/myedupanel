@@ -7,9 +7,20 @@ import { FiDownload, FiPrinter } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+// FIX 1: Defined an interface for the Student object.
+interface Student {
+  name: string;
+  dob?: string;
+  joiningDate?: string;
+  greNo?: string;
+  // Add any other properties your StudentSearch component might return
+}
+
 const LeavingCertificatePage = () => {
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const certificateRef = useRef(null);
+  // FIX 2: Used the new Student type for the state.
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  // FIX 3: Added the correct type for the ref.
+  const certificateRef = useRef<HTMLDivElement | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: '', middleName: '', lastName: '', gender: 'Male',
@@ -40,35 +51,42 @@ const LeavingCertificatePage = () => {
     }
   }, [selectedStudent]);
 
-  const handleInputChange = (e) => {
+  // FIX 4: Added the correct type for the event parameter.
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // ===== PRINT FUNCTION =====
   const handlePrint = () => {
     const input = certificateRef.current;
     if (!input || !selectedStudent) return alert("Please select a student first.");
 
-    html2canvas(input, { scale: 2, useCORS: true }).then((canvas) => {
+    // FIX 5: Removed the unsupported 'scale' option.
+    html2canvas(input, { useCORS: true }).then((canvas) => {
       const imgData = canvas.toDataURL('image/png');
       const printWindow = window.open('', '_blank');
-      printWindow.document.write(`<html><head><title>Print LC</title><style>@page{size:A4 portrait;margin:0;}body{margin:0;}img{width:100%;}</style></head><body><img src="${imgData}" /></body></html>`);
-      printWindow.document.close();
-      printWindow.onload = () => {
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-      };
+      
+      // FIX 6: Added a check to ensure printWindow is not null.
+      if (printWindow) {
+        printWindow.document.write(`<html><head><title>Print LC</title><style>@page{size:A4 portrait;margin:0;}body{margin:0;}img{width:100%;}</style></head><body><img src="${imgData}" /></body></html>`);
+        printWindow.document.close();
+        printWindow.onload = () => {
+          printWindow.focus();
+          printWindow.print();
+          printWindow.close();
+        };
+      } else {
+        alert("Pop-up blocked. Please allow pop-ups for this site.");
+      }
     });
   };
 
-  // ===== PDF DOWNLOAD FUNCTION =====
   const handleDownloadPDF = () => {
     const input = certificateRef.current;
     if (!input || !selectedStudent) return alert("Please select a student first.");
 
-    html2canvas(input, { scale: 2, useCORS: true }).then((canvas) => {
+    // FIX 7: Removed the unsupported 'scale' option.
+    html2canvas(input, { useCORS: true }).then((canvas) => {
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -96,7 +114,6 @@ const LeavingCertificatePage = () => {
       
       <div className={styles.builderLayout}>
         <div className={styles.formColumn}>
-          {/* ... (Form ka poora code waisa hi rahega) ... */}
           <div className={styles.formSection}>
             <h2>1. Select Student</h2>
             <StudentSearch onStudentSelect={setSelectedStudent} />
