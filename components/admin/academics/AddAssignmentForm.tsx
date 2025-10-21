@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // <-- FIX 1: useEffect ko import kiya
 import styles from './AddAssignmentForm.module.scss';
 
 // Form data ka type
@@ -15,17 +15,24 @@ export type AssignmentFormData = {
 // Component ke props ka type
 interface AddAssignmentFormProps {
   onSave: (data: AssignmentFormData) => void;
+  onClose: () => void; // <-- FIX 2: Modal band karne ke liye prop
+  initialData: AssignmentFormData | null; // <-- FIX 2: Edit data receive karne ke liye prop
 }
 
-const AddAssignmentForm = ({ onSave }: AddAssignmentFormProps) => {
-  const [formData, setFormData] = useState<AssignmentFormData>({
-    title: '',
-    studentName: '',
-    class: '',
-    subject: '',
-    dueDate: '',
-    status: 'Pending',
-  });
+// Default state define kiya taaki form reset kar sakein
+const DEFAULT_FORM_DATA: AssignmentFormData = {
+  title: '',
+  studentName: '',
+  class: '',
+  subject: '',
+  dueDate: '',
+  status: 'Pending',
+};
+
+const AddAssignmentForm = ({ onSave, onClose, initialData }: AddAssignmentFormProps) => {
+  const [formData, setFormData] = useState<AssignmentFormData>(
+    initialData || DEFAULT_FORM_DATA
+  );
 
   const getTodayString = () => {
     const today = new Date();
@@ -33,6 +40,19 @@ const AddAssignmentForm = ({ onSave }: AddAssignmentFormProps) => {
     const day = String(today.getDate()).padStart(2, '0');
     return `${today.getFullYear()}-${month}-${day}`;
   };
+  
+  // <-- FIX 1: useEffect Hook Add kiya ===
+  // Yeh 'initialData' prop ko "sunega" (listen karega).
+  // Jab bhi 'initialData' badlega (jaise user edit button pe click karega),
+  // yeh form ke state ko naye data se update kar dega.
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    } else {
+      // Agar 'initialData' null hai (yaani "Add New" pe click hua), toh form ko reset karein
+      setFormData(DEFAULT_FORM_DATA);
+    }
+  }, [initialData]); // Yeh effect tabhi chalega jab 'initialData' badlega
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -76,7 +96,17 @@ const AddAssignmentForm = ({ onSave }: AddAssignmentFormProps) => {
           </select>
         </div>
       </div>
-      <button type="submit" className={styles.submitButton}>Save Assignment</button>
+      
+      {/* <-- FIX 3: Buttons ko wrapper mein daala aur Cancel button add kiya */}
+      <div className={styles.buttonContainer}> 
+        <button type="submit" className={styles.submitButton}>
+          {/* Bonus: Button ka text change karein agar edit kar rahe hain */}
+          {initialData ? 'Update Assignment' : 'Save Assignment'}
+        </button>
+        <button type="button" className={styles.cancelButton} onClick={onClose}>
+          Cancel
+        </button>
+      </div>
     </form>
   );
 };

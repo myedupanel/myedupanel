@@ -138,7 +138,12 @@ const AssignmentsPage = () => {
       </div>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={assignmentToEdit ? "Edit Assignment" : "Add New Assignment"}>
-        <AddAssignmentForm onSave={handleSave} initialData={assignmentToEdit} />
+        {/* <-- YEH HAI FIX: Humne 'onClose' prop ko yahaan pass kar diya hai --> */}
+        <AddAssignmentForm 
+          onSave={handleSave} 
+          initialData={assignmentToEdit} 
+          onClose={handleCloseModal} 
+        />
       </Modal>
     </>
   );
