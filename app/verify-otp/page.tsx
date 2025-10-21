@@ -126,7 +126,9 @@ const VerifyOtpPage = () => {
               {otp.map((digit, index) => (
                 <input
                   key={index}
-                  ref={el => inputRefs.current[index] = el}
+                  // ===== YEH HAI AAPKA FIX (line 131) =====
+                  // Humne function ke around curly braces {} add kiye hain
+                  ref={el => { inputRefs.current[index] = el }}
                   type="text"
                   maxLength={1}
                   value={digit}

@@ -27,7 +27,8 @@ interface StudentData {
 // Helper function to calculate average score
 const getAverageScore = (scores: Score[]): number => {
   if (!scores || scores.length === 0) return 0;
-  return Math.round(scores.reduce((acc, cur) => acc + Number(cur.score || 0), 0) / scores.length);
+  // FIX 1: Explicitly typing all arguments
+  return Math.round(scores.reduce((acc: number, cur: Score) => acc + Number(cur.score || 0), 0) / scores.length);
 };
 
 // Mock "Database" using the defined interface
@@ -100,7 +101,8 @@ const AnalyticsPage = () => {
 
         return {
             totalStudents: studentDatabase.length,
-            overallAttendance: Math.round(studentDatabase.reduce((acc, s) => acc + Number(s.attendance || 0), 0) / studentDatabase.length),
+            // FIX 2: Explicitly typing all arguments
+            overallAttendance: Math.round(studentDatabase.reduce((acc: number, s: StudentData) => acc + Number(s.attendance || 0), 0) / studentDatabase.length),
             classPerformance,
             subjectPerformance,
         };
@@ -135,7 +137,7 @@ const AnalyticsPage = () => {
             {viewMode === 'By Class' && (
                 <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
                     {classOptions.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+                </select> 
             )}
         </div>
 
@@ -156,9 +158,11 @@ const AnalyticsPage = () => {
         {viewMode === 'By Class' && analyticsData.studentsInClass && analyticsData.studentsInClass.length > 0 && (
             <div className={styles.analyticsGrid}>
                 {/* Stat Cards */}
-                <div className={styles.statCard}><MdDonutLarge className={`${styles.icon} ${styles.blue}`} /><h4>{`${Math.round(analyticsData.studentsInClass.reduce((acc, s) => acc + Number(s.attendance || 0), 0) / analyticsData.studentsInClass.length)}%`}</h4><p>Class Attendance</p></div>
+                {/* ===== YEH HAI AAKHRI FIX (Line 161) ===== */}
+                <div className={styles.statCard}><MdDonutLarge className={`${styles.icon} ${styles.blue}`} /><h4>{`${Math.round(analyticsData.studentsInClass.reduce((acc: number, s: StudentData) => acc + Number(s.attendance || 0), 0) / analyticsData.studentsInClass.length)}%`}</h4><p>Class Attendance</p></div>
                 <div className={styles.statCard}><MdTrendingUp className={`${styles.icon} ${styles.green}`} /><h4>{analyticsData.classAverageScore}%</h4><p>Class Avg. Score</p></div>
-                <div className={styles.statCard}><MdTaskAlt className={`${styles.icon} ${styles.orange}`} /><h4>{analyticsData.studentsInClass.reduce((acc, s) => acc + Number(s.assignmentsSubmitted || 0), 0)}</h4><p>Total Assignments</p></div>
+                {/* ===== YEH HAI AAKHRI FIX (Line 163) ===== */}
+                <div className={styles.statCard}><MdTaskAlt className={`${styles.icon} ${styles.orange}`} /><h4>{analyticsData.studentsInClass.reduce((acc: number, s: StudentData) => acc + Number(s.assignmentsSubmitted || 0), 0)}</h4><p>Total Assignments</p></div>
                 {/* Components */}
                 <div className={styles.chartContainer}><ClassPerformers top={analyticsData.topPerformers || []} bottom={analyticsData.bottomPerformers || []} /></div>
                 <div className={styles.chartContainer}><ClassSubjectChart data={analyticsData.classSubjectAverages || []} /></div>
