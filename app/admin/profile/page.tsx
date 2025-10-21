@@ -22,7 +22,6 @@ const AdminProfilePage = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // We check if 'user' exists before doing anything
     if (user) {
       const savedProfile = localStorage.getItem(`adminProfile_${user._id}`);
       let imageUrl = "";
@@ -31,7 +30,6 @@ const AdminProfilePage = () => {
       }
 
       setFormData({
-        // This now correctly uses 'adminName' and 'schoolName' from the user object
         adminName: user.adminName || '',
         schoolName: user.schoolName || '',
         email: user.email || '',
@@ -62,7 +60,6 @@ const AdminProfilePage = () => {
     }
   };
   
-  // This helps in re-uploading the same file if needed
   const handleInputClick = (e: React.MouseEvent<HTMLInputElement>) => {
     (e.target as HTMLInputElement).value = '';
   };
@@ -73,16 +70,13 @@ const AdminProfilePage = () => {
     if (!user) return;
 
     try {
-      // 1. Save profile image to local storage
       localStorage.setItem(`adminProfile_${user._id}`, JSON.stringify({ profileImageUrl: formData.profileImageUrl }));
       
-      // 2. Send text data to the backend
       const response = await axios.put('http://localhost:5000/api/admin/profile', {
         adminName: formData.adminName,
         schoolName: formData.schoolName
       });
 
-      // 3. If backend sends a new token, update the user state
       if (response.data.token) {
         await login(response.data.token);
       }
@@ -112,7 +106,8 @@ const AdminProfilePage = () => {
           {imagePreview ? (
             <Image src={imagePreview} alt="Profile" width={100} height={100} className={styles.profileImage} />
           ) : (
-            <DefaultAvatar name={formData.adminName} />
+            // FIX: Removed the prop, as the component doesn't accept any.
+            <DefaultAvatar />
           )}
           <div className={styles.imageUploadWrapper}>
             <label htmlFor="imageUpload">Change Photo</label>
