@@ -28,7 +28,8 @@ interface Teacher {
 }
 
 // ✨ STEP 2: Apne backend ka URL define karein
-const SOCKET_SERVER_URL = "http://localhost:5000";
+// YEH LINE AAPKE CODE MEIN PEHLE SE THI, MAINE ISE CHHUA NAHI HAI
+const socket = io("https://myedupanel.onrender.com");
 
 const TeachersPage = () => {
   // Get the logged-in admin's data from AuthContext
@@ -50,7 +51,7 @@ const TeachersPage = () => {
     // Only fetch if we have the admin's school ID
     if (!user?._id) return; 
     try {
-      const res = await axios.get('http://localhost:5000/api/teachers', {
+      const res = await axios.get('/api/teachers', {
         params: { schoolId: user._id } // Send schoolId to the backend
       });
       setTeachers(res.data);
@@ -67,7 +68,10 @@ const TeachersPage = () => {
   // ✨ STEP 3: Real-time events ko "sunne" ke liye naya socket setup karein
   useEffect(() => {
     // 1. Backend se connect karein
-    const socket = io(SOCKET_SERVER_URL);
+    // --- YAHAN ERROR THA ---
+    // Original: const socket = io(SOCKET_SERVER_URL);
+    // Fixed:
+    const socket = io("https://myedupanel.onrender.com");
 
     // 2. 'teacher_added' event ko sunein
     socket.on('teacher_added', (newTeacher: Teacher) => {
@@ -120,10 +124,10 @@ const TeachersPage = () => {
     try {
       if (editingTeacher) {
         // If we are editing, send a PUT request
-        await axios.put(`http://localhost:5000/api/teachers/${editingTeacher._id}`, dataToSend);
+        await axios.put(`/api/teachers/${editingTeacher._id}`, dataToSend);
       } else {
         // If we are creating, send a POST request
-        await axios.post('http://localhost:5000/api/teachers', dataToSend);
+        await axios.post('/api/teachers', dataToSend);
       }
       // ✨ FIX: fetchTeachers() yahaan se hata diya. Socket update ka intezar karega.
       closeModal();   // Close the modal
@@ -142,7 +146,7 @@ const TeachersPage = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this teacher?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/teachers/${id}`);
+        await axios.delete(`/api/teachers/${id}`);
         // ✨ FIX: fetchTeachers() yahaan se hata diya. Socket update ka intezar karega.
       } catch (error) {
         console.error('Failed to delete teacher', error);
@@ -188,7 +192,7 @@ const TeachersPage = () => {
     try {
       // Hum bulk import ke baad fetchTeachers() call karenge, 
       // kyunki backend/bulk route shayad ek-ek karke event emit na kare.
-      const response = await axios.post('http://localhost:5000/api/teachers/bulk', dataWithSchoolInfo);
+      const response = await axios.post('/api/teachers/bulk', dataWithSchoolInfo);
       alert(response.data.message);
       fetchTeachers(); // Bulk operation ke baad list ko refresh karein
       setIsImportModalOpen(false);

@@ -26,8 +26,8 @@ interface Student {
     parentContact: string;
 }
 
-// ✨ STEP 2: Apne backend ka URL define karein
-const SOCKET_SERVER_URL = "http://localhost:5000"; // Yakeen karein ki yeh port aapke server.js se match karta hai
+// ✨ STEP 2: Apne backend ka URL define karein (Yeh line abhi use nahi ho rahi hai, par koi baat nahi)
+const socket = io("https://myedupanel.onrender.com");
 
 const StudentsPage = () => {
     const router = useRouter();
@@ -71,7 +71,9 @@ const StudentsPage = () => {
     // ✨ STEP 3: Real-time "smarter" events ko sunne ke liye naya 'useEffect'
     useEffect(() => {
         // 1. Backend se connect karein
-        const socket = io(SOCKET_SERVER_URL);
+        // --- YAHAN BADLAAV KIYA GAYA HAI ---
+        // Humne 'SOCKET_SERVER_URL' ko asli URL se replace kar diya hai
+        const socket = io("https://myedupanel.onrender.com");
 
         // 2. 'student_added' event ko sunein
         socket.on('student_added', (newStudent: Student) => {

@@ -51,7 +51,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+      const response = await axios.post('/api/auth/login', formData);
       const token = response.data.token;
       
       // Context ke login function ko call karein. Yeh token save karega aur state update karega.

@@ -63,7 +63,7 @@ const VerifyOtpPage = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/verify-otp', {
+      const response = await axios.post('/api/auth/verify-otp', {
         email: email, otp: enteredOtp,
       });
       if (response.data.success) {
@@ -85,7 +85,7 @@ const VerifyOtpPage = () => {
     setResendStatus('');
     
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/resend-otp', { email });
+      const response = await axios.post('/api/auth/resend-otp', { email });
       if (response.data.success) {
         setResendStatus(response.data.message);
         setCountdown(120);

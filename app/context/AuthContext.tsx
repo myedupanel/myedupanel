@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setToken(storedToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
       try {
-        const response = await axios.get('http://localhost:5000/api/auth/me');
+        const response = await axios.get('/api/auth/me');
         setUser(response.data);
       } catch (error: any) {
         console.error("Failed to fetch user from token:", error.response?.status, error.message);
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(newToken);
     axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
     try {
-      const response = await axios.get('http://localhost:5000/api/auth/me');
+      const response = await axios.get('/api/auth/me');
       setUser(response.data);
       setIsLoading(false); // Ensure loading is false after successful login fetch
       return response.data;

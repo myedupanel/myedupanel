@@ -82,7 +82,7 @@ const DashboardControlCenter = () => {
             if (!token) return;
             try {
                 setLoading(true);
-                const response = await axios.get('http://localhost:5000/api/admin/dashboard-data', {
+                const response = await axios.get('/api/admin/dashboard-data', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setData(response.data);

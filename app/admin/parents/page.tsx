@@ -33,7 +33,7 @@ const ParentsPage = () => {
 
   const fetchParents = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/parents');
+      const res = await axios.get('/api/parents');
       setParents(res.data);
       // --- DEBUGGING LINE ---
       console.log("Fetched Parents Data from API:", res.data); // <-- YEH LINE ADD KI GAYI HAI
@@ -55,10 +55,10 @@ const ParentsPage = () => {
   const handleFormSubmit = async (data: any) => {
     try {
       if (editingParent) {
-        await axios.put(`http://localhost:5000/api/parents/${editingParent._id}`, data);
+        await axios.put(`/api/parents/${editingParent._id}`, data);
         alert('Parent updated successfully!');
       } else {
-        await axios.post('http://localhost:5000/api/parents', data);
+        await axios.post('/api/parents', data);
         alert('Parent added successfully!');
       }
       fetchParents();
@@ -77,7 +77,7 @@ const ParentsPage = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this parent?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/parents/${id}`);
+        await axios.delete(`/api/parents/${id}`);
         fetchParents();
       } catch (error) {
         console.error('Failed to delete parent', error);

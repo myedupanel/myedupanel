@@ -57,7 +57,7 @@ const AddParentForm: React.FC<AddParentFormProps> = ({ onClose, onSubmit, existi
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/students');
+        const res = await axios.get('/api/students');
         setStudents(res.data);
       } catch (error) {
         console.error("Failed to fetch students for form", error);

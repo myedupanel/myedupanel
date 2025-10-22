@@ -77,7 +77,7 @@ const AdminProfilePage = () => {
       localStorage.setItem(`adminProfile_${user._id}`, JSON.stringify({ profileImageUrl: formData.profileImageUrl }));
       
       // 2. Send text data to the backend
-      const response = await axios.put('http://localhost:5000/api/admin/profile', {
+      const response = await axios.put('/api/admin/profile', {
         adminName: formData.adminName,
         schoolName: formData.schoolName
       });

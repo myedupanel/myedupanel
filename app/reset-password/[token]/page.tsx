@@ -41,7 +41,7 @@ export default function ResetPasswordPage() {
 
     try {
       // NOTE: Make sure this API route is correct for your backend setup
-      const response = await axios.put(`http://localhost:5000/api/auth/reset-password/${token}`, { password });
+      const response = await axios.put(`/api/auth/reset-password/${token}`, { password });
       setMessage("Your password has been reset successfully! Redirecting to login...");
       
       setTimeout(() => {

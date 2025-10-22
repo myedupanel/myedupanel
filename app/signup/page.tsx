@@ -55,7 +55,7 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/signup', formData);
+      const response = await axios.post('/api/auth/signup', formData);
       
       // Backend se mile success message ko set karein
       setMessage(response.data.message || "OTP sent successfully!");

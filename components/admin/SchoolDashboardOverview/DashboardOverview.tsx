@@ -66,7 +66,7 @@ const DashboardControlCenter = () => {
 
         try {
             // NOTE: Make sure this is your correct dashboard API endpoint
-            const response = await axios.get('http://localhost:5000/api/admin/dashboard-stats', {
+            const response = await axios.get('/api/admin/dashboard-stats', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setData(response.data);
@@ -90,7 +90,7 @@ const DashboardControlCenter = () => {
     // ✨ 4. YEH NAYA 'useEffect' REAL-TIME UPDATES KE LIYE HAI
     useEffect(() => {
         // Apne backend server se connect karein
-        const socket = io('http://localhost:5000');
+        const socket = io("https://myedupanel.onrender.com");
 
         // 'updateDashboard' event ko "sunein"
         // Yeh wahi event hai jo aapne backend 'students.js' se emit kiya tha

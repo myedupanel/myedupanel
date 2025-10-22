@@ -4,10 +4,10 @@ import axios from 'axios';
 const api = axios.create({
   /*
    * ===== YEH SABSE ZAROORI BADLAV HAI =====
-   * Humne baseURL ko 'http://localhost:5000/api' set kiya hai.
+   * Humne baseURL ko '/api' set kiya hai.
    * Isse Axios ko pata chal jaayega ki har request is poore address par bhejni hai.
    */
-  baseURL: 'http://localhost:5000/api', 
+  baseURL: '/api', 
   headers: {
     'Content-Type': 'application/json',
   },

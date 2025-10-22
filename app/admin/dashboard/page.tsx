@@ -127,7 +127,7 @@ const AdminDashboardPage = () => {
     fetchDashboardData();
     loadProfileData();
 
-    const socket = io("http://localhost:5000");
+    const socket = io("https://myedupanel.onrender.com");
     socket.on('connect', () => console.log('Socket.IO: Connected'));
     socket.on('updateDashboard', () => { fetchDashboardData(); });
     socket.on('connect_error', (err) => console.error('Socket.IO: Connection Error!', err.message));
