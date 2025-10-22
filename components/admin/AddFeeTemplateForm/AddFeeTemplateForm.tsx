@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from 'react'; // <-- useMemo ko import kiya
+import React, { useState, useMemo } from 'react';
 import styles from './AddFeeTemplateForm.module.scss';
 import { FiPlus, FiTrash2, FiSave } from 'react-icons/fi';
 import api from '@/backend/utils/api';
@@ -10,22 +10,31 @@ interface Item {
   amount: string;
 }
 
-const AddFeeTemplateForm = ({ onClose, onSuccess }) => {
+// FIX 1: Component ke props ke liye ek interface banaya
+interface AddFeeTemplateFormProps {
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+// FIX 2: Interface ka istemal karke props ko type kiya
+const AddFeeTemplateForm = ({ onClose, onSuccess }: AddFeeTemplateFormProps) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [items, setItems] = useState<Item[]>([{ name: '', amount: '' }]);
     const [error, setError] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
-    // ===== NAYA UPGRADE: LIVE TOTAL CALCULATION =====
-    // useMemo ka istemal kiya taaki total tabhi calculate ho jab items badlein
     const totalAmount = useMemo(() => {
         return items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
     }, [items]);
 
     const handleItemChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
         const newItems = [...items];
-        newItems[index][event.target.name as keyof Item] = event.target.value;
+        // Ensure that event.target.name is a valid key of Item
+        const key = event.target.name as keyof Item; 
+        if (key in newItems[index]) {
+            newItems[index][key] = event.target.value;
+        }
         setItems(newItems);
     };
 
@@ -46,8 +55,8 @@ const AddFeeTemplateForm = ({ onClose, onSuccess }) => {
         try {
             const res = await api.post('/fees/templates', payload);
             alert(res.data.message);
-            onSuccess();
-            onClose();
+            onSuccess(); // Call onSuccess after successful save
+            // onClose(); // Optionally call onClose if you want modal to close on success
         } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to create template.');
         } finally {
@@ -72,18 +81,17 @@ const AddFeeTemplateForm = ({ onClose, onSuccess }) => {
             {items.map((item, index) => (
                 <div key={index} className={styles.itemRow}>
                     <input type="text" name="name" placeholder="Item Name (e.g., Tuition Fee)" value={item.name} onChange={(e) => handleItemChange(index, e)} />
-                    <input type="number" name="amount" placeholder="Amount" value={item.amount} onChange={(e) => handleItemChange(index, e)} />
-                    <button onClick={() => removeItemRow(index)} className={styles.removeButton} disabled={items.length <= 1}>
+                    <input type="number" name="amount" placeholder="Amount" value={item.amount} onChange={(e) => handleItemChange(index, e)} min="0" /> 
+                    <button type="button" onClick={() => removeItemRow(index)} className={styles.removeButton} disabled={items.length <= 1}>
                         <FiTrash2 />
                     </button>
                 </div>
             ))}
             
-            <button onClick={addItemRow} className={styles.addButton}><FiPlus /> Add Another Item</button>
+            <button type="button" onClick={addItemRow} className={styles.addButton}><FiPlus /> Add Another Item</button>
             
             <hr className={styles.divider} />
 
-            {/* ===== NAYA TOTAL AMOUNT DISPLAY ===== */}
             <div className={styles.totalAmount}>
                 <span>Total Amount:</span>
                 <strong>
@@ -94,8 +102,8 @@ const AddFeeTemplateForm = ({ onClose, onSuccess }) => {
             {error && <p className={styles.errorText}>{error}</p>}
 
             <div className={styles.formActions}>
-                <button onClick={onClose} className={styles.cancelButton} disabled={isSaving}>Cancel</button>
-                <button onClick={handleSubmit} className={styles.saveButton} disabled={isSaving}>
+                <button type="button" onClick={onClose} className={styles.cancelButton} disabled={isSaving}>Cancel</button>
+                <button type="button" onClick={handleSubmit} className={styles.saveButton} disabled={isSaving}>
                     <FiSave /> {isSaving ? 'Saving...' : 'Save Template'}
                 </button>
             </div>
