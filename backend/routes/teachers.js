@@ -1,5 +1,3 @@
-// routes/teachers.js
-
 const express = require('express');
 const router = express.Router();
 const generatePassword = require('generate-password');
@@ -92,9 +90,12 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => { // 
       // return res.status(201).json({ message: 'Teacher created, but email failed.', teacher: newTeacher });
     }
 
-    // --- REAL-TIME UPDATE ---
+    // --- ✨ REAL-TIME UPDATE (UPGRADED) ---
     if (req.io) {
         req.io.emit('updateDashboard'); // Signal dashboard to refetch counts
+        
+        // ✨ Event 2: Teacher list ko update karne ke liye (naya teacher object bhej rahe hain)
+        req.io.emit('teacher_added', newTeacher);
     }
 
     res.status(201).json({ message: 'Teacher created successfully and welcome email sent.', teacher: newTeacher });
@@ -164,9 +165,12 @@ router.put('/:id', [authMiddleware, authorize('admin')], async (req, res) => {
     // Update the name in the corresponding User model as well
     await User.updateOne({ email: teacher.email }, { $set: { adminName: teacher.name } });
 
-     // --- REAL-TIME UPDATE ---
+     // --- ✨ REAL-TIME UPDATE (UPGRADED) ---
      if (req.io) {
         req.io.emit('updateDashboard'); // Might not affect counts, but good practice
+        
+        // ✨ Event 2: Teacher list ko update karne ke liye (updated teacher object bhej rahe hain)
+        req.io.emit('teacher_updated', teacher);
     }
 
 
@@ -193,15 +197,22 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
      if (teacher.schoolId.toString() !== req.user.id) {
         return res.status(401).json({ msg: 'User not authorized to delete this teacher' });
     }
+    
+    // ✨ Hum ID ko pehle save kar lete hain
+    const deletedTeacherId = req.params.id;
+    const teacherEmail = teacher.email; // Aur email bhi
 
     // Delete Teacher record first
-    await Teacher.findByIdAndDelete(req.params.id);
+    await Teacher.findByIdAndDelete(deletedTeacherId);
     // Then delete the associated User account
-    await User.findOneAndDelete({ email: teacher.email });
+    await User.findOneAndDelete({ email: teacherEmail });
 
-     // --- REAL-TIME UPDATE ---
+     // --- ✨ REAL-TIME UPDATE (UPGRADED) ---
      if (req.io) {
         req.io.emit('updateDashboard'); // Signal dashboard to refetch counts
+        
+        // ✨ Event 2: Teacher list ko update karne ke liye (delete ki hui ID bhej rahe hain)
+        req.io.emit('teacher_deleted', deletedTeacherId);
     }
 
     res.json({ message: 'Teacher and associated user account removed successfully' });

@@ -75,6 +75,15 @@ const calculateLateFees = async (req, res) => {
   try {
     const schoolId = req.user.id;
     const result = await FeeRecord.updateMany({ schoolId, status: 'Pending', dueDate: { $lt: new Date() } }, { $set: { status: 'Late', lateFine: 100 } });
+    
+    // --- ✨ REAL-TIME UPDATE ---
+    if (req.io && result.modifiedCount > 0) {
+        // Yeh event dashboard aur late fee list, dono ko update kar sakta hai
+        req.io.emit('updateDashboard');
+        // Ek general event ki records update hue hain (taaki frontend refetch kar le)
+        req.io.emit('fee_records_updated'); 
+    }
+
     res.status(200).json({ message: `${result.modifiedCount} records updated to 'Late'.` });
   } catch (error) { console.error("Error in calculateLateFees:", error); res.status(500).send("Server Error"); }
 };
@@ -158,6 +167,15 @@ const assignFeeToStudent = async (req, res) => {
     if (!template) return res.status(404).json({ message: 'Fee template not found.' });
     const newFeeRecord = new FeeRecord({ studentId, templateId, schoolId: req.user.id, amount: template.totalAmount, dueDate });
     await newFeeRecord.save();
+
+    // --- ✨ REAL-TIME UPDATE ---
+    if (req.io) {
+        // Yeh event dashboard aur student fee record list, dono ko update kar sakta hai
+        req.io.emit('updateDashboard');
+        // Naya record bhej rahe hain (taaki frontend state ko update kar sake)
+        req.io.emit('fee_record_added', newFeeRecord); 
+    }
+
     res.status(201).json({ message: 'Fee assigned successfully!', record: newFeeRecord });
   } catch (error) { console.error("Error in assignFeeToStudent:", error); res.status(500).send("Server Error"); }
 };
@@ -170,6 +188,18 @@ const createFeeTemplate = async (req, res) => {
     const totalAmount = items.reduce((sum, item) => sum + Number(item.amount || 0), 0);
     const newTemplate = new FeeTemplate({ name, description, items, totalAmount, schoolId: req.user.id });
     await newTemplate.save();
+    
+    // --- ✨ REAL-TIME UPDATE ---
+    if (req.io) {
+        // Event 1: Dashboard ko refresh karne ke liye
+        req.io.emit('updateDashboard'); 
+        
+        // Event 2: Fee Template list ko update karne ke liye (naya template bhej rahe hain)
+        req.io.emit('fee_template_added', newTemplate); 
+    } else {
+        console.warn('Socket.IO instance (req.io) not found on request object.');
+    }
+
     res.status(201).json({ message: 'Fee Template created successfully!', template: newTemplate });
   } catch (error) { console.error("Error in createFeeTemplate:", error); res.status(500).send("Server Error"); }
 };
@@ -238,6 +268,13 @@ const updateExistingRecords = async (req, res) => {
         await FeeRecord.findByIdAndUpdate(recordId, { $set: updateData });
         updatedCount++;
       }
+    }
+
+    // --- ✨ REAL-TIME UPDATE ---
+    if (req.io && updatedCount > 0) {
+        // Ek general event ki dashboard aur records update hue hain
+        req.io.emit('updateDashboard');
+        req.io.emit('fee_records_updated'); 
     }
 
     res.status(200).json({ message: `Import complete. ${updatedCount} records were updated.` });

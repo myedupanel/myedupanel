@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import styles from './DashboardOverview.module.scss';
+import styles from './SchoolPage.module.scss'; // Using the name from your example
 import Sidebar from '@/components/layout/Sidebar/Sidebar'; 
 import Link from 'next/link';
 import axios from 'axios';
@@ -11,6 +11,9 @@ import {
     MdAssessment, MdSettings, MdPersonAdd 
 } from 'react-icons/md';
 
+// ✨ 1. Socket.IO client ko import karein
+import { io } from "socket.io-client";
+
 // (schoolMenuItems array remains the same)
 const schoolMenuItems = [
     { id: 'students', title: 'Students', path: '/admin/students', icon: <MdPeople /> },
@@ -18,7 +21,7 @@ const schoolMenuItems = [
     // ... rest of the items
 ];
 
-// ✨ FIX: Define interfaces for your data shape
+// (All your interfaces remain the same)
 interface Student {
     _id: string;
     name: string;
@@ -26,7 +29,6 @@ interface Student {
         class: string;
     };
 }
-
 interface Teacher {
     _id: string;
     name: string;
@@ -34,15 +36,12 @@ interface Teacher {
         subject: string;
     };
 }
-
 interface DashboardStats {
     totalStudents: number;
     totalTeachers: number;
     totalParents: number;
     totalStaff: number;
 }
-
-// This is the main interface for your API data
 interface DashboardData {
     stats: DashboardStats;
     recentStudents: Student[];
@@ -53,32 +52,61 @@ interface DashboardData {
 const DashboardControlCenter = () => {
     const { token } = useAuth(); // Get token to authorize API call
     
-    // ✨ FIX (Applied): Update useState to expect DashboardData or null
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true); // Loading state
     const [error, setError] = useState(''); // Error state
 
+    // ✨ 2. Humne 'fetchData' function ko 'useEffect' se bahar nikaal liya hai
+    //    Taaki hum isse baar-baar call kar sakein
+    const fetchData = async () => {
+        if (!token) return; // Wait until token is available
+
+        // Sirf pehli baar page load par 'Loading...' dikhayein
+        if (!data) setLoading(true); 
+
+        try {
+            // NOTE: Make sure this is your correct dashboard API endpoint
+            const response = await axios.get('http://localhost:5000/api/admin/dashboard-stats', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setData(response.data);
+            setError('');
+        } catch (err) {
+            console.error("Failed to fetch dashboard data:", err);
+            setError('Could not load dashboard data.');
+        } finally {
+            // Loading state ko sirf pehli baar hi false karein
+            if (!data) setLoading(false);
+        }
+    };
+
+    // ✨ 3. Yeh 'useEffect' pehli baar data load karne ke liye hai
     useEffect(() => {
-        const fetchData = async () => {
-            if (!token) return; // Wait until token is available
-
-            try {
-                setLoading(true);
-                const response = await axios.get('http://localhost:5000/api/admin/dashboard-stats', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setData(response.data);
-                setError('');
-            } catch (err) {
-                console.error("Failed to fetch dashboard data:", err);
-                setError('Could not load dashboard data.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
+        if (token) {
+            fetchData();
+        }
     }, [token]); // Re-run when token becomes available
+
+    // ✨ 4. YEH NAYA 'useEffect' REAL-TIME UPDATES KE LIYE HAI
+    useEffect(() => {
+        // Apne backend server se connect karein
+        const socket = io('http://localhost:5000');
+
+        // 'updateDashboard' event ko "sunein"
+        // Yeh wahi event hai jo aapne backend 'students.js' se emit kiya tha
+        socket.on('updateDashboard', () => {
+            console.log("REAL-TIME UPDATE RECEIVED! Dashboard data refresh ho raha hai...");
+            
+            // Jaise hi event aaye, data ko dobaara fetch karein
+            fetchData();
+        });
+
+        // Clean-up function: Jab component hatega, toh connection band kar dein
+        return () => {
+            socket.disconnect();
+        };
+    }, [token, fetchData]); // Dependencies add ki hain
+
 
     if (loading) {
         return <div className={styles.loading}>Loading Dashboard...</div>;
@@ -91,19 +119,16 @@ const DashboardControlCenter = () => {
         <div className={styles.overviewContainer}>
             <h1 className={styles.mainTitle}>School Control Center</h1>
             
-            {/* The top 4 cards have been removed as requested */}
-
             <div className={styles.mainGrid}>
                 {/* Students Box (Now with real data) */}
                 <div className={styles.summaryBox}>
                     <div className={styles.boxHeader}>
-                        {/* data?.stats... is correct because 'data' can be null */}
+                        {/* YEH NUMBER AB REAL-TIME MEIN UPDATE HOGA */}
                         <h2><MdPeople/> Students ({data?.stats?.totalStudents})</h2>
                         <Link href="/admin/students" className={styles.viewAllLink}>View All</Link>
                     </div>
                     <ul className={styles.recentList}>
                         <li className={styles.listHeader}>Recent Admissions</li>
-                        {/* 'student' is now correctly typed as 'Student' */}
                         {data?.recentStudents?.map(student => (
                             <li key={student._id}><span>{student.name} ({student.details?.class})</span></li>
                         ))}
@@ -114,12 +139,12 @@ const DashboardControlCenter = () => {
                 {/* Teachers Box (Now with real data) */}
                 <div className={styles.summaryBox}>
                     <div className={styles.boxHeader}>
+                         {/* YEH NUMBER BHI AB REAL-TIME MEIN UPDATE HOGA */}
                         <h2><MdSchool/> Teachers ({data?.stats?.totalTeachers})</h2>
                         <Link href="/admin/teachers" className={styles.viewAllLink}>View All</Link>
                     </div>
                     <ul className={styles.recentList}>
                         <li className={styles.listHeader}>Recently Joined</li>
-                        {/* 'teacher' is now correctly typed as 'Teacher' */}
                          {data?.recentTeachers?.map(teacher => (
                             <li key={teacher._id}><span>{teacher.name}</span><span className={styles.subject}>{teacher.details?.subject}</span></li>
                         ))}
@@ -127,7 +152,7 @@ const DashboardControlCenter = () => {
                     <div className={styles.boxFooter}><button className={styles.addButton}><MdPersonAdd /> Add Teacher</button></div>
                 </div>
 
-                {/* Other boxes can be updated similarly once their backend data is ready */}
+                {/* Other boxes */}
                  <div className={styles.summaryBox}>
                     <div className={styles.boxHeader}><h2><MdFamilyRestroom/> Parents ({data?.stats?.totalParents})</h2></div>
                     <div className={styles.boxContent}><p>Parent data will be shown here.</p></div>

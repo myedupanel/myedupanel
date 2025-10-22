@@ -12,6 +12,9 @@ import * as XLSX from 'xlsx';
 import StudentFilters from '@/components/admin/StudentFilters/StudentFilters';
 import ImportTeachersForm from '@/components/admin/ImportTeachersForm/ImportTeachersForm';
 
+// ✨ STEP 1: Socket.IO client ko import karein
+import { io } from "socket.io-client";
+
 // Step 1: Define the data structure for a Teacher
 interface Teacher {
   _id: string;
@@ -23,6 +26,9 @@ interface Teacher {
   schoolId?: string;
   schoolName?: string;
 }
+
+// ✨ STEP 2: Apne backend ka URL define karein
+const SOCKET_SERVER_URL = "http://localhost:5000";
 
 const TeachersPage = () => {
   // Get the logged-in admin's data from AuthContext
@@ -58,6 +64,45 @@ const TeachersPage = () => {
     fetchTeachers();
   }, [user]); // The dependency array [user] means this runs again if the user logs in/out
 
+  // ✨ STEP 3: Real-time events ko "sunne" ke liye naya socket setup karein
+  useEffect(() => {
+    // 1. Backend se connect karein
+    const socket = io(SOCKET_SERVER_URL);
+
+    // 2. 'teacher_added' event ko sunein
+    socket.on('teacher_added', (newTeacher: Teacher) => {
+      console.log("SOCKET: Naya teacher add hua!", newTeacher);
+      // State update: Purani list mein naya teacher jod dein
+      setTeachers((prevTeachers) => [...prevTeachers, newTeacher]);
+    });
+
+    // 3. 'teacher_updated' event ko sunein
+    socket.on('teacher_updated', (updatedTeacher: Teacher) => {
+      console.log("SOCKET: Teacher update hua!", updatedTeacher);
+      // State update: List mein puraane teacher ko naye se badal dein
+      setTeachers((prevTeachers) =>
+        prevTeachers.map((t) =>
+          t._id === updatedTeacher._id ? updatedTeacher : t
+        )
+      );
+    });
+
+    // 4. 'teacher_deleted' event ko sunein
+    socket.on('teacher_deleted', (deletedTeacherId: string) => {
+      console.log("SOCKET: Teacher delete hua!", deletedTeacherId);
+      // State update: List se uss ID waale teacher ko hata dein
+      setTeachers((prevTeachers) =>
+        prevTeachers.filter((t) => t._id !== deletedTeacherId)
+      );
+    });
+
+    // 5. Clean-up: Jab component hatega, toh connection band kar dein
+    return () => {
+      socket.disconnect();
+    };
+  }, []); // [] ka matlab yeh effect sirf ek baar component load par chalega
+
+
   // Function to close modals and reset the editing state
   const closeModal = () => {
     setIsAddModalOpen(false);
@@ -80,7 +125,7 @@ const TeachersPage = () => {
         // If we are creating, send a POST request
         await axios.post('http://localhost:5000/api/teachers', dataToSend);
       }
-      fetchTeachers(); // Refresh the list of teachers
+      // ✨ FIX: fetchTeachers() yahaan se hata diya. Socket update ka intezar karega.
       closeModal();   // Close the modal
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to save teacher.';
@@ -98,7 +143,7 @@ const TeachersPage = () => {
     if (window.confirm('Are you sure you want to delete this teacher?')) {
       try {
         await axios.delete(`http://localhost:5000/api/teachers/${id}`);
-        fetchTeachers(); // Refresh the list after deleting
+        // ✨ FIX: fetchTeachers() yahaan se hata diya. Socket update ka intezar karega.
       } catch (error) {
         console.error('Failed to delete teacher', error);
       }
@@ -141,9 +186,11 @@ const TeachersPage = () => {
       schoolName: user?.schoolName
     }));
     try {
+      // Hum bulk import ke baad fetchTeachers() call karenge, 
+      // kyunki backend/bulk route shayad ek-ek karke event emit na kare.
       const response = await axios.post('http://localhost:5000/api/teachers/bulk', dataWithSchoolInfo);
       alert(response.data.message);
-      fetchTeachers();
+      fetchTeachers(); // Bulk operation ke baad list ko refresh karein
       setIsImportModalOpen(false);
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || "Error importing teachers.";

@@ -47,7 +47,11 @@ app.use('/api/classes', require('./routes/classes'));
 app.use('/api/dashboard', require('./routes/dashboard')); 
 app.use('/api/teachers', require('./routes/teachers')); 
 app.use('/api/parents', require('./routes/parents'));
-app.use('/api/schools', require('./routes/schools'));
+
+// ✨ FIX: Yahaan naya '/api/school' route add kiya hai (Bonafide page ke liye)
+app.use('/api/school', require('./routes/schoolRoutes')); // Handles /api/school/profile
+
+app.use('/api/schools', require('./routes/schoolRoutes')); // Yeh aapka pehle wala route hai
 app.use('/api/fees', require('./routes/fees'));
 
 // 6. Socket.IO Connection Handler

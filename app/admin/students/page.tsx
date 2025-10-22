@@ -13,6 +13,9 @@ import * as XLSX from 'xlsx';
 import ImportStudentsForm from '@/components/admin/ImportStudentsForm/ImportStudentsForm';
 import StudentFilters from '@/components/admin/StudentFilters/StudentFilters';
 
+// ✨ STEP 1: Socket.IO client ko import karein
+import { io } from "socket.io-client";
+
 interface Student {
     _id: string;
     studentId: string;
@@ -22,6 +25,9 @@ interface Student {
     parentName: string;
     parentContact: string;
 }
+
+// ✨ STEP 2: Apne backend ka URL define karein
+const SOCKET_SERVER_URL = "http://localhost:5000"; // Yakeen karein ki yeh port aapke server.js se match karta hai
 
 const StudentsPage = () => {
     const router = useRouter();
@@ -57,9 +63,50 @@ const StudentsPage = () => {
         }
     };
 
+    // Yeh aapka original 'useEffect' hai jo pehli baar data laata hai
     useEffect(() => {
         fetchStudents();
     }, []);
+
+    // ✨ STEP 3: Real-time "smarter" events ko sunne ke liye naya 'useEffect'
+    useEffect(() => {
+        // 1. Backend se connect karein
+        const socket = io(SOCKET_SERVER_URL);
+
+        // 2. 'student_added' event ko sunein
+        socket.on('student_added', (newStudent: Student) => {
+            console.log("SOCKET: Naya student add hua!", newStudent);
+            // State update: Purani list mein naya student jod dein
+            // Isse list turant update ho jaayegi
+            setStudents((prevStudents) => [...prevStudents, newStudent]);
+        });
+
+        // 3. 'student_updated' event ko sunein
+        socket.on('student_updated', (updatedStudent: Student) => {
+            console.log("SOCKET: Student update hua!", updatedStudent);
+            // State update: List mein puraane student ko naye se badal dein
+            setStudents((prevStudents) =>
+                prevStudents.map((s) =>
+                    s._id === updatedStudent._id ? updatedStudent : s
+                )
+            );
+        });
+
+        // 4. 'student_deleted' event ko sunein
+        socket.on('student_deleted', (deletedStudentId: string) => {
+            console.log("SOCKET: Student delete hua!", deletedStudentId);
+            // State update: List se uss ID waale student ko hata dein
+            setStudents((prevStudents) =>
+                prevStudents.filter((s) => s._id !== deletedStudentId)
+            );
+        });
+
+        // 5. Clean-up: Jab component hatega, toh connection band kar dein
+        return () => {
+            socket.disconnect();
+        };
+    }, []); // [] ka matlab yeh effect sirf ek baar component load par chalega
+
 
     const clearModalParam = () => {
         router.replace('/admin/students', { scroll: false });
@@ -70,8 +117,6 @@ const StudentsPage = () => {
         setIsAddModalOpen(true);
     };
 
-    // FIX: Changed the parameter from (studentId: string) to (student: Student)
-    // to match what the StudentsTable component provides.
     const handleGenerateBonafide = (student: Student) => {
         router.push(`/admin/students/generate-bonafide?studentId=${student._id}`);
     };
@@ -95,9 +140,11 @@ const StudentsPage = () => {
     const handleUpdateStudent = async (updatedData: Partial<Student>) => {
         if (!editingStudent) return;
         try {
+            // Note: Jab yeh API call hoga, aapka backend 'student_updated' event bhejega.
+            // Aapka socket listener usse pakad lega aur state update kar dega.
             await api.put(`/students/${editingStudent._id}`, updatedData);
             closeAddModalAndReset();
-            fetchStudents();
+            // fetchStudents(); // Hum iski jagah socket par nirbhar kar sakte hain, lekin aapke code ke mutabik rakha hai
         } catch (error) {
             console.error('Failed to update student', error);
             alert('Failed to update student');
@@ -107,8 +154,9 @@ const StudentsPage = () => {
     const handleDeleteStudent = async (id: string) => {
         if (window.confirm("Are you sure you want to delete this student?")) {
             try {
+                // Note: Jab yeh API call hoga, aapka backend 'student_deleted' event bhejega.
                 await api.delete(`/students/${id}`);
-                fetchStudents();
+                // fetchStudents(); // Socket isse handle kar lega
             } catch (error) {
                 console.error('Failed to delete student', error);
             }
@@ -117,9 +165,12 @@ const StudentsPage = () => {
 
     const handleDataImport = async (importedData: any[]) => {
         try {
+            // Note: Bulk import ke liye, backend ko 'student_added' multiple baar bhejna hoga
+            // ya ek 'students_bulk_added' event bhejna hoga.
+            // Abhi ke liye, hum 'fetchStudents' par hi nirbhar rahenge.
             const response = await api.post('/students/bulk', importedData);
             alert(response.data.message);
-            fetchStudents();
+            fetchStudents(); // Bulk add ke baad poori list refresh karna sahi hai
             closeImportModal();
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || "Error importing students.";
@@ -201,7 +252,9 @@ const StudentsPage = () => {
             >
                 <AddStudentForm
                     onClose={closeAddModalAndReset}
-                    onSuccess={fetchStudents}
+                    // 'onSuccess' ab naye student ko add karne ke baad 'fetchStudents' call karega
+                    // Iske saath hi socket event bhi aayega, jo state ko update karega.
+                    onSuccess={fetchStudents} 
                     existingStudent={editingStudent}
                     onUpdate={handleUpdateStudent}
                 />

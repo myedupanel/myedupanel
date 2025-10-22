@@ -14,7 +14,6 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
         // --- FIX 1: Get schoolName from the logged-in admin's token ---
         const schoolName = req.user.schoolName;
         if (!schoolName) {
-            // If admin's school name isn't available in token, something is wrong
             return res.status(400).json({ msg: 'Admin school information is missing. Cannot add student.' });
         }
 
@@ -28,17 +27,19 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
         student = new Student({
             ...req.body, // Include all other fields from the request body
             class: studentClass, // Ensure 'class' field is correctly mapped if needed
-            // --- FIX 3: Save schoolName instead of schoolId ---
             schoolName: schoolName
         });
 
         // Save the student to the database
         await student.save();
 
-        // --- REAL-TIME UPDATE ---
-        // Emit an event to update the dashboard (if io is attached)
+        // --- ✨ REAL-TIME UPDATE (UPGRADED) ---
         if (req.io) {
-            req.io.emit('updateDashboard');
+            // Event 1: Dashboard ko refresh karne ke liye
+            req.io.emit('updateDashboard'); 
+            
+            // Event 2: Student list ko update karne ke liye (naya student object bhej rahe hain)
+            req.io.emit('student_added', student); 
         } else {
             console.warn('Socket.IO instance (req.io) not found on request object.');
         }
@@ -47,11 +48,9 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
         res.status(201).json({ message: 'Student added successfully', student });
 
     } catch (err) {
-        // Handle validation errors
         if (err.name === 'ValidationError') {
             return res.status(400).json({ msg: err.message });
         }
-        // Log other errors and send a generic server error response
         console.error("Error creating student:", err.message);
         res.status(500).send('Server Error');
     }
@@ -62,12 +61,10 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
 // @access  Private (Admin, Teacher)
 router.get('/', [authMiddleware, authorize('admin', 'teacher')], async (req, res) => {
     try {
-        // --- FIX: Filter by schoolName from the token ---
         const schoolName = req.user.schoolName;
         if (!schoolName) {
             return res.status(400).json({ msg: 'School information not found for user.' });
         }
-        // Find students matching the schoolName and sort by name
         const students = await Student.find({ schoolName: schoolName }).sort({ name: 1 });
         res.json(students);
     } catch (err) {
@@ -81,23 +78,20 @@ router.get('/', [authMiddleware, authorize('admin', 'teacher')], async (req, res
 // @access  Private (Admin, Teacher, Staff - adjust roles as needed)
 router.get('/search', authMiddleware, async (req, res) => {
     try {
-        // --- FIX: Filter by schoolName from the token ---
         const schoolName = req.user.schoolName;
-        const studentName = req.query.name || ''; // Get search query from URL
+        const studentName = req.query.name || ''; 
 
         if (!schoolName) {
              return res.status(400).json({ msg: 'School information not found.' });
         }
-        // Basic validation for search query length
         if (studentName.length < 2) {
-            return res.json([]); // Return empty if query is too short
+            return res.json([]); 
         }
 
-        // Find students matching schoolName and name (case-insensitive)
         const students = await Student.find({
             schoolName: schoolName,
-            name: { $regex: studentName, $options: 'i' } // Assuming 'name' field exists
-        }).limit(10); // Limit results for performance
+            name: { $regex: studentName, $options: 'i' } 
+        }).limit(10); 
 
         res.json(students);
     } catch (error) {
@@ -117,18 +111,15 @@ router.get('/:id', authMiddleware, async (req, res) => {
             return res.status(404).json({ msg: 'Student not found' });
         }
 
-        // --- FIX: Check if student's school matches the user's school ---
         if (student.schoolName !== req.user.schoolName) {
-            // User is trying to access a student from another school
             return res.status(403).json({ msg: 'User not authorized to view this student' });
         }
 
         res.json(student);
     } catch (error) {
         console.error("Error fetching single student:", error.message);
-        // Handle invalid MongoDB ID format
         if (error.kind === 'ObjectId') {
-            return res.status(404).json({ msg: 'Student not found with that ID format' });
+            return res.status(444).json({ msg: 'Student not found with that ID format' }); 
         }
         res.status(500).send('Server Error');
     }
@@ -145,21 +136,22 @@ router.put('/:id', [authMiddleware, authorize('admin')], async (req, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
 
-        // --- FIX: Verify ownership using schoolName ---
         if (student.schoolName !== req.user.schoolName) {
             return res.status(401).json({ msg: 'User not authorized to edit this student' });
         }
 
-        // Prevent accidental change of schoolName
         const updateData = { ...req.body };
-        delete updateData.schoolName; // Remove schoolName if present in update data
+        delete updateData.schoolName; 
 
-        // Find by ID and update with new data
         student = await Student.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true });
 
-        // Emit real-time update
+        // --- ✨ REAL-TIME UPDATE (UPGRADED) ---
         if (req.io) {
+            // Event 1: Dashboard ko refresh karne ke liye
             req.io.emit('updateDashboard');
+            
+            // Event 2: Student list ko update karne ke liye (updated student object bhej rahe hain)
+            req.io.emit('student_updated', student);
         }
 
         res.json({ message: 'Student details updated successfully', student });
@@ -180,17 +172,23 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
             return res.status(404).json({ message: 'Student not found' });
         }
 
-        // --- FIX: Verify ownership using schoolName ---
         if (student.schoolName !== req.user.schoolName) {
             return res.status(401).json({ msg: 'User not authorized to delete this student' });
         }
+        
+        // ✨ Hum ID ko pehle save kar lete hain
+        const deletedStudentId = req.params.id;
 
         // Delete the student
-        await Student.findByIdAndDelete(req.params.id);
+        await Student.findByIdAndDelete(deletedStudentId);
 
-        // Emit real-time update
+        // --- ✨ REAL-TIME UPDATE (UPGRADED) ---
         if (req.io) {
+            // Event 1: Dashboard ko refresh karne ke liye
             req.io.emit('updateDashboard');
+            
+            // Event 2: Student list ko update karne ke liye (delete ki hui ID bhej rahe hain)
+            req.io.emit('student_deleted', deletedStudentId);
         }
 
         res.json({ message: 'Student removed successfully' });
