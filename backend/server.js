@@ -24,7 +24,9 @@ app.use((req, res, next) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // Your frontend's address
+    // -- CHANGE 1: 'origin' ko flexible banaya --
+    // Ab yeh aapke live frontend (Vercel URL se) aur localhost, dono se connection lega
+    origin: [process.env.FRONTEND_URL, "http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE"]
   }
 });
@@ -70,9 +72,10 @@ mongoose.connect(mongoURI)
   .then(() => {
     console.log("MongoDB connected successfully!");
     
-    // Use server.listen, not app.listen
-    server.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+    // -- CHANGE 2: Server '0.0.0.0' par listen karega --
+    // Yeh Render ko batata hai ki public internet se requests accept karni hain
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server is running on port: ${PORT}`);
     });
 
   })
