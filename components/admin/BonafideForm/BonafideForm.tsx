@@ -2,17 +2,52 @@
 import React from 'react';
 import styles from './BonafideForm.module.scss';
 
-const BonafideForm = ({ student, formData, setFormData }) => {
+// FIX 1: Define an interface for the formData structure
+interface FormData {
+  includeCaste: boolean;
+  includeAadhaar: boolean;
+  includeUdise: boolean;
+  noSchoolHeader: boolean;
+  includeCharacter: boolean;
+  characterText: string;
+  includeSchoolRecInfo: boolean;
+  schoolRecInfoText: string;
+  includeReason: boolean;
+  reasonText: string;
+  paragraphText: string;
+  template: string;
+  principalRole: string;
+}
 
-  const handleCheckboxChange = (e) => {
+// FIX 2: Define an interface for the component's props
+interface BonafideFormProps {
+  // Using 'any' for student for now, consistent with the parent component
+  student: any | null; 
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+}
+
+// FIX 3: Apply the BonafideFormProps interface to the component
+const BonafideForm = ({ student, formData, setFormData }: BonafideFormProps) => {
+
+  // FIX 4: Add type for the event parameter 'e'
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setFormData(prev => ({ ...prev, [name]: checked }));
+    // FIX 5: Add type for the 'prev' parameter
+    setFormData((prev: FormData) => ({ ...prev, [name]: checked }));
   };
 
-  const handleInputChange = (e) => {
+  // FIX 6: Add type for the event parameter 'e'
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    // FIX 7: Add type for the 'prev' parameter
+    setFormData((prev: FormData) => ({ ...prev, [name]: value }));
   };
+
+  // Check if student exists before trying to render info
+  if (!student) {
+    return <p>Please select a student first.</p>; // Or some placeholder
+  }
 
   return (
     <form className={styles.form}>
@@ -98,7 +133,6 @@ const BonafideForm = ({ student, formData, setFormData }) => {
       {/* Paragraph Customization */}
       <div className={styles.formGroup}>
         <label htmlFor="paragraphText">Certificate Body Text</label>
-        {/* ===== BADLAV YAHAN HAI ===== */}
         <p className={styles.helpText}>Use placeholders like '__studentName__' or '__class__'</p>
         <textarea
             id="paragraphText"
