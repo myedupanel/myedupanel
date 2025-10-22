@@ -6,7 +6,8 @@ const nextConfig = {
       {
         source: '/api/:path*',
         // --- YAHAN BADLAAV KIYA GAYA HAI ---
-        destination: 'https://myedupanel.onrender.com/:path*', // Aapka naya live backend address
+        // Humne /api ko destination URL mein wapas jod diya hai
+        destination: 'https://myedupanel.onrender.com/api/:path*', 
       },
     ];
   },
