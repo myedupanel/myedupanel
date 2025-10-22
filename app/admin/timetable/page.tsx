@@ -6,13 +6,12 @@ import Modal from '@/components/common/Modal/Modal';
 import AssignPeriodForm from '@/components/admin/AssignPeriodForm/AssignPeriodForm';
 import Link from 'next/link';
 
-// NAYA BADLAV: TimeSlot type mein 'isBreak' property add ki
 interface TimeSlot {
     id: string;
     name: string;
     startTime: string;
     endTime: string;
-    isBreak: boolean; // <- Yeh zaroori hai
+    isBreak: boolean; 
 }
 
 interface PeriodData {
@@ -24,7 +23,6 @@ const classOptions = ["Nursery", "LKG", "UKG", "Grade 1", "Grade 2", "Grade 3", 
 const teacherOptions = ["Priya Sharma", "Rahul Verma", "Anjali Mehta", "Suresh Kumar", "Deepika Singh"];
 
 const TimetablePage = () => {
-    // ... (Saare states waise hi rahenge)
     const [viewBy, setViewBy] = useState<'class' | 'teacher'>('class');
     const [selectedGroup, setSelectedGroup] = useState(classOptions[0]);
     const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
@@ -34,7 +32,6 @@ const TimetablePage = () => {
     const [currentSlot, setCurrentSlot] = useState<{ day: string, slotName: string } | null>(null);
 
     useEffect(() => {
-        // ... (useEffect ka logic waise hi rahega)
         const savedTimetable = localStorage.getItem('schoolTimetableData');
         if (savedTimetable) { setTimetableData(JSON.parse(savedTimetable)); }
 
@@ -49,7 +46,6 @@ const TimetablePage = () => {
         }
     }, []);
 
-    // ... (Baaki ke functions waise hi rahenge)
     const handleOpenModal = (day: string, slotName: string) => {
         if (viewBy === 'teacher') { return; }
         setCurrentSlot({ day, slotName });
@@ -87,7 +83,6 @@ const TimetablePage = () => {
     return (
         <div className={styles.pageContainer}>
             <div className={styles.header}>
-                {/* ... (Header waise hi rahega) */}
                 <h1 className={styles.pageTitle}>Timetable Management</h1>
                 <div className={styles.controls}>
                     <div className={styles.viewToggle}>
@@ -119,7 +114,6 @@ const TimetablePage = () => {
                                         const key = `${day}-${slot.name}`;
                                         const periodData = currentDisplayData?.[key];
                                         
-                                        // NAYA LOGIC: Check karega ki slot break hai ya nahi
                                         if (slot.isBreak) {
                                             return (
                                                 <td key={slot.id} className={styles.breakCell}>
@@ -152,7 +146,6 @@ const TimetablePage = () => {
                     </table>
                 ) : (
                     <div className={styles.emptyState}>
-                        {/* ... (Empty state waise hi rahega) */}
                         <h2>No Time Slots Found</h2>
                         <p>Please go to the settings page to create time slots for the timetable.</p>
                         <Link href="/admin/settings" className={styles.settingsButton}> Go to Settings </Link>
@@ -164,7 +157,8 @@ const TimetablePage = () => {
                 <AssignPeriodForm
                     onClose={() => setIsModalOpen(false)}
                     onSave={handleSavePeriod}
-                    teacherOptions={teacherOptions}
+                    // FIX: Removed the invalid teacherOptions prop below
+                    // teacherOptions={teacherOptions} 
                 />
             </Modal>
         </div>
