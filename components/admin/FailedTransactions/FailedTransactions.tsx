@@ -11,8 +11,26 @@ const formatCurrency = (amount: number): string => {
     }).format(amount);
 };
 
-const FailedTransactions = ({ studentId }) => {
-    const [records, setRecords] = useState<any[]>([]);
+// ✨ FIX 1: Define an interface for the component's props
+interface Props {
+    studentId: string; // Assuming studentId is a string. Change if it's a number.
+}
+
+// ✨ FIX 2: Define an interface for a single record object
+// Based on how you use it in the <tbody>
+interface FailedRecord {
+    _id: string;
+    createdAt: string; // Or Date, if you parse it as a Date object
+    templateId?: { // Using '?' makes it optional, since you check for it
+        name: string;
+    };
+    amount: number;
+}
+
+// ✨ FIX 1 (Applied): Use the Props interface here
+const FailedTransactions = ({ studentId }: Props) => {
+    // ✨ FIX 2 (Applied): Use the FailedRecord interface with useState
+    const [records, setRecords] = useState<FailedRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -49,6 +67,7 @@ const FailedTransactions = ({ studentId }) => {
                     </thead>
                     <tbody>
                         {records.length > 0 ? (
+                            // 'record' is now correctly typed as FailedRecord
                             records.map(record => (
                                 <tr key={record._id}>
                                     <td>...{record._id.slice(-6).toUpperCase()}</td>

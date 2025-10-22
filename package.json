@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
     "@types/uuid": "^10.0.0",
     "axios": "^1.6.8",
     "cors": "^2.8.5",

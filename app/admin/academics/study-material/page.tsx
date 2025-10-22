@@ -120,7 +120,8 @@ const StudyMaterialPage = () => {
         </div>
       </div>
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={materialToEdit ? "Edit Material" : "Upload New Material"}>
-        <AddMaterialForm onSave={handleSaveMaterial} initialData={materialToEdit} />
+        {/* ✨ FIX: Added the missing onClose prop here */}
+        <AddMaterialForm onSave={handleSaveMaterial} initialData={materialToEdit} onClose={handleCloseModal} />
       </Modal>
     </>
   );

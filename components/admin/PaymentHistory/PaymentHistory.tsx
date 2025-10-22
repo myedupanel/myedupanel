@@ -11,13 +11,37 @@ const formatCurrency = (amount: number): string => {
     }).format(amount);
 };
 
+// ✨ FIX 1: Define an interface for the StatusBadge's props
+interface StatusProps {
+    status: string;
+}
+
+// ✨ FIX 1 (Applied): Use the StatusProps interface here
 // Status ke liye alag-alag color dikhane waala chota component
-const StatusBadge = ({ status }) => {
+const StatusBadge = ({ status }: StatusProps) => {
     return <span className={`${styles.status} ${styles[status?.toLowerCase()]}`}>{status}</span>;
 };
 
-const PaymentHistory = ({ studentId }) => {
-    const [records, setRecords] = useState<any[]>([]);
+// ✨ FIX 2: Define an interface for a single history record
+interface HistoryRecord {
+    _id: string;
+    templateId?: { // Optional, since you use 'N/A'
+        name: string;
+    };
+    status: string;
+    createdAt: string; // Or Date
+    amount: number;
+}
+
+// ✨ FIX 3: Define an interface for the PaymentHistory component's props
+interface HistoryProps {
+    studentId: string; // Assuming it's a string
+}
+
+// ✨ FIX 3 (Applied): Use the HistoryProps interface here
+const PaymentHistory = ({ studentId }: HistoryProps) => {
+    // ✨ FIX 2 (Applied): Use the HistoryRecord interface for state
+    const [records, setRecords] = useState<HistoryRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -55,6 +79,7 @@ const PaymentHistory = ({ studentId }) => {
                     </thead>
                     <tbody>
                         {records.length > 0 ? (
+                            // 'record' is now correctly typed as HistoryRecord
                             records.map(record => (
                                 <tr key={record._id}>
                                     <td>{record.templateId?.name || 'N/A'}</td>

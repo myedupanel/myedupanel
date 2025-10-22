@@ -2,7 +2,41 @@
 import React from 'react';
 import styles from './LeavingCertificatePreview.module.scss';
 
-const LeavingCertificatePreview = ({ student, formData, schoolDetails }) => {
+// ✨ FIX: Define an interface for the form data
+interface FormData {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  birthDate: string; // You could use string or Date
+  placeOfBirth: string;
+  nationality: string;
+  lastSchoolAttended: string;
+  joiningDate: string; // You could use string or Date
+  leavingDate: string; // You could use string or Date
+  joiningGrade: string;
+  progress: string;
+  conduct: string;
+  promotionStatus: string;
+  reasonForLeaving: string;
+  generalRemark: string;
+  certificateDate: string; // You could use string or Date
+}
+
+// ✨ FIX: Define an interface for school details
+interface SchoolDetails {
+  name?: string;     // The '?' makes this property optional
+  address?: string;  // The '?' makes this property optional
+}
+
+// ✨ FIX: Define an interface for the component's props
+interface Props {
+  student: any; // 'any' is fine here since you only check if it exists
+  formData: FormData;
+  schoolDetails: SchoolDetails;
+}
+
+// ✨ FIX (Applied): Use the Props interface here
+const LeavingCertificatePreview = ({ student, formData, schoolDetails }: Props) => {
   if (!student) {
     return <div className={styles.placeholder}>Select a student to see a preview</div>;
   }
@@ -10,6 +44,7 @@ const LeavingCertificatePreview = ({ student, formData, schoolDetails }) => {
   return (
     <div className={styles.certificateWrapper}>
       <header className={styles.letterhead}>
+        {/* These optional checks (?.) are great! */}
         <h1>{schoolDetails?.name || "School Name"}</h1>
         <p>{schoolDetails?.address || "School Address"}</p>
       </header>

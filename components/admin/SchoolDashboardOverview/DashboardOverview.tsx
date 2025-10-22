@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import styles from './SchoolPage.module.scss';
+import styles from './DashboardOverview.module.scss';
 import Sidebar from '@/components/layout/Sidebar/Sidebar'; 
 import Link from 'next/link';
 import axios from 'axios';
@@ -18,10 +18,43 @@ const schoolMenuItems = [
     // ... rest of the items
 ];
 
+// ✨ FIX: Define interfaces for your data shape
+interface Student {
+    _id: string;
+    name: string;
+    details?: {
+        class: string;
+    };
+}
+
+interface Teacher {
+    _id: string;
+    name: string;
+    details?: {
+        subject: string;
+    };
+}
+
+interface DashboardStats {
+    totalStudents: number;
+    totalTeachers: number;
+    totalParents: number;
+    totalStaff: number;
+}
+
+// This is the main interface for your API data
+interface DashboardData {
+    stats: DashboardStats;
+    recentStudents: Student[];
+    recentTeachers: Teacher[];
+}
+
 // Main Dashboard Component
 const DashboardControlCenter = () => {
     const { token } = useAuth(); // Get token to authorize API call
-    const [data, setData] = useState(null); // State to hold real data from API
+    
+    // ✨ FIX (Applied): Update useState to expect DashboardData or null
+    const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true); // Loading state
     const [error, setError] = useState(''); // Error state
 
@@ -64,11 +97,13 @@ const DashboardControlCenter = () => {
                 {/* Students Box (Now with real data) */}
                 <div className={styles.summaryBox}>
                     <div className={styles.boxHeader}>
+                        {/* data?.stats... is correct because 'data' can be null */}
                         <h2><MdPeople/> Students ({data?.stats?.totalStudents})</h2>
                         <Link href="/admin/students" className={styles.viewAllLink}>View All</Link>
                     </div>
                     <ul className={styles.recentList}>
                         <li className={styles.listHeader}>Recent Admissions</li>
+                        {/* 'student' is now correctly typed as 'Student' */}
                         {data?.recentStudents?.map(student => (
                             <li key={student._id}><span>{student.name} ({student.details?.class})</span></li>
                         ))}
@@ -84,6 +119,7 @@ const DashboardControlCenter = () => {
                     </div>
                     <ul className={styles.recentList}>
                         <li className={styles.listHeader}>Recently Joined</li>
+                        {/* 'teacher' is now correctly typed as 'Teacher' */}
                          {data?.recentTeachers?.map(teacher => (
                             <li key={teacher._id}><span>{teacher.name}</span><span className={styles.subject}>{teacher.details?.subject}</span></li>
                         ))}

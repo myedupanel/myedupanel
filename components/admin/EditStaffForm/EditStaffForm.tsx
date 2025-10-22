@@ -2,48 +2,75 @@
 import React, { useState, useEffect } from 'react';
 import styles from './EditStaffForm.module.scss';
 
-// Helper function: "DD Mon YYYY" ko "YYYY-MM-DD" mein badalta hai
+// Helper function
 const formatDateToInput = (dateStr?: string): string => {
   if (!dateStr) return '';
   try {
-    const date = new Date(dateStr.replace(/,/g, ''));
+    // Attempt to handle different potential date formats gracefully
+    const date = new Date(dateStr.replace(/,/g, '').replace(/(\d{2}) (\w{3}) (\d{4})/, '$2 $1 $3'));
+    if (isNaN(date.getTime())) return ''; // Return empty if date is invalid
     return date.toISOString().split('T')[0];
   } catch (e) {
+    console.error("Error parsing date:", dateStr, e);
     return '';
   }
 };
 
+// FIX 1: Define an interface for the form data state
+interface FormDataState {
+  name: string;
+  role: string; // Consider using a specific type like StaffRole if defined elsewhere
+  contact: string;
+  joiningDate: string;
+  leavingDate?: string | null; // Make leavingDate optional or allow null
+  // Add any other properties from staffData that might be included
+  [key: string]: any; // Allows for other properties from staffData
+}
+
 interface EditStaffFormProps {
   onClose: () => void;
   onSave: (staffData: any) => void;
-  staffData: any;
+  staffData: any; // Keep 'any' for flexibility if staffData structure varies
 }
 
 const EditStaffForm = ({ onClose, onSave, staffData }: EditStaffFormProps) => {
-  const [formData, setFormData] = useState({
-    ...staffData,
-    joiningDate: formatDateToInput(staffData.joiningDate),
-    leavingDate: formatDateToInput(staffData.leavingDate),
+  // FIX 2: Use the FormDataState interface for the state
+  const [formData, setFormData] = useState<FormDataState>({
+    name: staffData?.name || '',
+    role: staffData?.role || 'Teacher', // Default role
+    contact: staffData?.contact || '',
+    joiningDate: formatDateToInput(staffData?.joiningDate),
+    leavingDate: formatDateToInput(staffData?.leavingDate),
+    ...staffData // Spread remaining properties
   });
 
+  // Update form if staffData prop changes
   useEffect(() => {
-    setFormData({
-      ...staffData,
-      joiningDate: formatDateToInput(staffData.joiningDate),
-      leavingDate: formatDateToInput(staffData.leavingDate),
-    });
+    if (staffData) {
+        setFormData({
+            name: staffData.name || '',
+            role: staffData.role || 'Teacher',
+            contact: staffData.contact || '',
+            joiningDate: formatDateToInput(staffData.joiningDate),
+            leavingDate: formatDateToInput(staffData.leavingDate),
+            ...staffData
+        });
+    }
   }, [staffData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    // FIX 3: Add the FormDataState type to the 'prev' parameter
+    setFormData((prev: FormDataState) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Convert dates back to the desired display format before saving
     const dataToSave = {
       ...formData,
-      joiningDate: new Date(formData.joiningDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      // Ensure date conversion handles potentially empty strings
+      joiningDate: formData.joiningDate ? new Date(formData.joiningDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '',
       leavingDate: formData.leavingDate ? new Date(formData.leavingDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : undefined,
     };
     onSave(dataToSave);
@@ -59,7 +86,6 @@ const EditStaffForm = ({ onClose, onSave, staffData }: EditStaffFormProps) => {
         <div className={styles.formGroup}>
           <label htmlFor="role">Role</label>
           <select id="role" name="role" value={formData.role} onChange={handleInputChange}>
-            {/* --- YEH BADLAV HUA HAI --- */}
             <option value="Teacher">Teacher</option>
             <option value="Accountant">Accountant</option>
             <option value="Office Admin">Office Admin</option>
@@ -79,6 +105,7 @@ const EditStaffForm = ({ onClose, onSave, staffData }: EditStaffFormProps) => {
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="leavingDate">Leaving Date (Optional)</label>
+          {/* Use || '' to ensure value is never null/undefined for the input */}
           <input type="date" id="leavingDate" name="leavingDate" value={formData.leavingDate || ''} onChange={handleInputChange} />
         </div>
       </div>

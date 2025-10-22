@@ -5,46 +5,73 @@ import {
   getCoreRowModel,
   flexRender,
   getPaginationRowModel,
+  // FIX 1: Import necessary types from the library
+  ColumnDef,
+  HeaderGroup,
+  Header,
+  Row,
+  Cell,
 } from '@tanstack/react-table';
 import styles from './DataTable.module.scss';
 import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 
-// Nayi props add karein taaki hum search bar pass kar sakein
-const DataTable = ({ data = [], columns = [], topContent }) => {
+// FIX 2: Define a generic type for the data (TData)
+// and define the props interface
+interface DataTableProps<TData> {
+  data: TData[];
+  columns: ColumnDef<TData, any>[]; // Use ColumnDef type
+  topContent?: React.ReactNode; // Type topContent as optional ReactNode
+}
+
+// FIX 3: Apply the generic type and props interface
+const DataTable = <TData,>({ data = [], columns = [], topContent }: DataTableProps<TData>) => {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    // You might need to add other options like state, sorting, filtering later
   });
 
   return (
     <div className={styles.tableCard}>
-      <div className={styles.tableHeader}>
-        {/* Yahan par hum search, filter, etc. daal sakte hain */}
-        {topContent}
-      </div>
+      {topContent && ( // Render topContent only if it exists
+        <div className={styles.tableHeader}>
+          {topContent}
+        </div>
+      )}
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
-            {table.getHeaderGroups().map(headerGroup => (
+            {/* FIX 4: Add type for headerGroup */}
+            {table.getHeaderGroups().map((headerGroup: HeaderGroup<TData>) => (
               <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th key={header.id}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
+                {/* FIX 5: Add type for header */}
+                {headerGroup.headers.map((header: Header<TData, unknown>) => (
+                  <th key={header.id} style={{ width: header.getSize() !== 0 ? header.getSize() : undefined }}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                   </th>
                 ))}
               </tr>
             ))}
           </thead>
           <tbody>
-            {/* Logic add karein "No data" message ke liye */}
             {table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map(row => (
+              // FIX 6: Add type for row
+              table.getRowModel().rows.map((row: Row<TData>) => (
                 <tr key={row.id}>
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  {/* FIX 7: Add type for cell */}
+                  {row.getVisibleCells().map((cell: Cell<TData, unknown>) => (
+                    <td key={cell.id} style={{ width: cell.column.getSize() !== 0 ? cell.column.getSize() : undefined }}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </td>
                   ))}
                 </tr>
@@ -59,8 +86,29 @@ const DataTable = ({ data = [], columns = [], topContent }) => {
           </tbody>
         </table>
       </div>
+      {/* Basic Pagination Example */}
       <div className={styles.pagination}>
-        {/* Pagination waise hi rahega */}
+        <button
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+          className={styles.pageButton}
+        >
+          <MdChevronLeft /> Previous
+        </button>
+        <span>
+          Page{' '}
+          <strong>
+            {table.getState().pagination.pageIndex + 1} of{' '}
+            {table.getPageCount()}
+          </strong>{' '}
+        </span>
+        <button
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+          className={styles.pageButton}
+        >
+          Next <MdChevronRight />
+        </button>
       </div>
     </div>
   );

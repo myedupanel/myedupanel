@@ -12,8 +12,23 @@ const formatCurrency = (amount: number): string => {
     }).format(amount);
 };
 
-// Reusable table component
-const TransactionTable = ({ title, records }) => (
+// ✨ FIX 1: Define an interface for a single transaction record
+// Based on its usage in the table
+interface TransactionRecord {
+    _id: string;
+    createdAt: string; // Or Date
+    paymentMode?: string; // Optional, as you use 'N/A'
+    amount: number;
+}
+
+// ✨ FIX 2: Define an interface for the TransactionTable's props
+interface TableProps {
+    title: string;
+    records: TransactionRecord[]; // Use the interface from Fix 1
+}
+
+// ✨ FIX 2 (Applied): Use the TableProps interface here
+const TransactionTable = ({ title, records }: TableProps) => (
     <div className={styles.tableSection}>
         <h4 className={styles.tableTitle}>{title}</h4>
         <div className={styles.tableWrapper}>
@@ -29,6 +44,7 @@ const TransactionTable = ({ title, records }) => (
                 </thead>
                 <tbody>
                     {records.length > 0 ? (
+                        // 'record' is now correctly typed as TransactionRecord
                         records.map(record => (
                             <tr key={record._id}>
                                 <td>...{record._id.slice(-6).toUpperCase()}</td>
@@ -49,8 +65,15 @@ const TransactionTable = ({ title, records }) => (
     </div>
 );
 
-const PaidTransactions = ({ studentId }) => {
-    const [data, setData] = useState<{ deposits: any[], paidRecords: any[] }>({ deposits: [], paidRecords: [] });
+// ✨ FIX 3: Define an interface for the PaidTransactions component's props
+interface PaidTransactionsProps {
+    studentId: string; // Assuming it's a string
+}
+
+// ✨ FIX 3 (Applied): Use the PaidTransactionsProps interface here
+const PaidTransactions = ({ studentId }: PaidTransactionsProps) => {
+    // ✨ FIX 4: Use the TransactionRecord interface in your state
+    const [data, setData] = useState<{ deposits: TransactionRecord[], paidRecords: TransactionRecord[] }>({ deposits: [], paidRecords: [] });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
