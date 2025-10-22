@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useRef } from 'react';
+// FIX 1: 'useEffect' ko React se import kiya
+import React, { useState, useRef, useEffect } from 'react'; 
 import styles from './BonafideBuilder.module.scss';
 import StudentSearch from '@/components/admin/StudentSearch/StudentSearch';
 import BonafideForm from '@/components/admin/BonafideForm/BonafideForm';
@@ -7,10 +8,8 @@ import CertificatePreview from '@/components/admin/CertificatePreview/Certificat
 import { FiDownload, FiPrinter } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-
-// FIX 1: We will use a generic type for the student for now
-// to solve the type conflict between different components.
-// interface Student { ... } // This has been removed.
+// FIX 2: Aapka 'api' utility import kiya (jaisa aapne doosre components mein use kiya hai)
+import api from '@/backend/utils/api'; 
 
 const BonafideBuilderPage = () => {
   const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
@@ -32,11 +31,50 @@ const BonafideBuilderPage = () => {
     principalRole: 'Principal',
   });
 
+  // FIX 3: Hard-coded object ko 'useState' se badal diya
+  const [schoolDetails, setSchoolDetails] = useState({
+    name: "Loading School...",
+    address: "Loading Address...",
+    code: "..."
+  });
+
+  // FIX 4: Page load par school details fetch karne ke liye 'useEffect' add kiya
+  useEffect(() => {
+    const fetchSchoolDetails = async () => {
+      try {
+        // Maan lijiye yeh API endpoint logged-in admin ke school ki details deta hai
+        const res = await api.get('/school/profile'); 
+        if (res.data) {
+          setSchoolDetails(res.data);
+        } else {
+          // Agar data na mile toh fallback
+          setSchoolDetails({
+            name: "My School (Default)",
+            address: "My School Address (Default)",
+            code: "000"
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch school details:", err);
+        // Error hone par fallback
+        setSchoolDetails({
+          name: "My School (Error)",
+          address: "My School Address (Error)",
+          code: "000"
+        });
+      }
+    };
+
+    fetchSchoolDetails();
+  }, []); // [] ka matlab yeh effect sirf ek baar page load par chalega
+
+  /* FIX 5: Yeh hard-coded object ab delete ho gaya hai
   const schoolDetails = {
     name: "Sunshine International School",
     address: "Pune, Maharashtra, 411041",
     code: "SIS"
   };
+  */
 
   const handlePrint = () => {
     const input = certificateRef.current;
@@ -45,7 +83,6 @@ const BonafideBuilderPage = () => {
       return;
     }
 
-    // FIX 2: Removed the invalid 'scale' property.
     html2canvas(input, { useCORS: true }).then((canvas) => {
       const imgData = canvas.toDataURL('image/png');
       const printWindow = window.open('', '_blank');
@@ -74,7 +111,6 @@ const BonafideBuilderPage = () => {
       return;
     }
 
-    // FIX 3: Removed the invalid 'scale' property here as well.
     html2canvas(input, { useCORS: true })
       .then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
@@ -140,6 +176,7 @@ const BonafideBuilderPage = () => {
             <CertificatePreview 
               student={selectedStudent} 
               formData={formData} 
+              // Yeh 'schoolDetails' ab hard-coded nahi hai, yeh state se aa raha hai
               schoolDetails={schoolDetails} 
             />
           </div>

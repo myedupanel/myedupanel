@@ -7,7 +7,7 @@ export default function SimpleHeader() {
       <nav className="nav-centered"> {/* <-- Updated class name */}
         <a href="/" className="navbar-brand">
           <Logo />
-          <span>School Pro</span>
+          <span>My EduPanel</span>
         </a>
       </nav>
     </header>

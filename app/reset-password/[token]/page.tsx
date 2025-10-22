@@ -61,7 +61,7 @@ export default function ResetPasswordPage() {
         {/* Step 1: Header ko naye design ke anusaar badla gaya */}
         <header className={styles.header}>
           <h2>
-            Welcome To <span>School Pro</span>
+            Welcome To <span>My EduPanel</span>
           </h2>
           <h1>Set a New Password</h1>
           <p>Your new password must be secure and different from previous passwords.</p>

@@ -132,7 +132,7 @@ export default function Home() {
             unoptimized={true}
           />
         </div>
-        <p className="hero-subtitle">✨ Welcome to School Pro</p>
+        <p className="hero-subtitle">✨ Welcome to My EduPanel</p>
         <h1>Your Complete School<br />Management Solution</h1>
         <p className="hero-description">From admissions to academics, simplify every aspect of school administration with our comprehensive and user-friendly platform.</p>
         <div className="hero-buttons">
@@ -144,13 +144,13 @@ export default function Home() {
       <section className="trusted-by">
         <div className="container">
           <div className="trusted-by-header">
-            <h3>Trusted by 99+ Leading Educational Institutions</h3>
-            <p>Join Thousands of schools already transforming their management systems</p>
+            <h3>Trusted by 9+ Leading Educational Institutions</h3>
+            <p>Join Hundreds of schools already transforming their management systems</p>
           </div>
         </div>
         <div className="marquee-container">
           <div className="marquee-track">
-            <span>School 1</span><span>School 2</span><span>School 3</span><span>School 4</span><span>School 5</span><span>School 6</span><span>School 7</span><span>School 8</span><span>School 9</span>
+            <span>Kem English Medium School</span><span>School 2</span><span>School 3</span><span>School 4</span><span>School 5</span><span>School 6</span><span>School 7</span><span>School 8</span><span>School 9</span>
             <span>School 10</span><span>School 11</span><span>School 12</span><span>School 13</span><span>School 14</span><span>School 15</span><span>School 16</span><span>School 17</span><span>School 18</span>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function Home() {
           </div>
           <div className="impact-cards">
             <div className="impact-card"><div className="card-icon-background"><i className="bi bi-building"></i></div><div className="card-number">9+</div><div className="card-title">Schools</div><p className="card-description">Institutions using our platform</p></div>
-            <div className="impact-card"><div className="card-icon-background"><i className="bi bi-people"></i></div><div className="card-number">10000+</div><div className="card-title">Students</div><p className="card-description">Learning through our system</p></div>
+            <div className="impact-card"><div className="card-icon-background"><i className="bi bi-people"></i></div><div className="card-number">90000+</div><div className="card-title">Students</div><p className="card-description">Learning through our system</p></div>
             <div className="impact-card"><div className="card-icon-background"><i className="bi bi-person"></i></div><div className="card-number">499+</div><div className="card-title">Parents</div><p className="card-description">Engaged with their children's education</p></div>
           </div>
         </div>

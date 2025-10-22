@@ -86,7 +86,7 @@ export default function SignupPage() {
         <div className={styles.formWrapper}>
           <header className={styles.header}>
             <h3 className={styles.welcomeText}>Welcome To</h3>
-            <h1><span className={styles.schoolText}>School</span><span className={styles.proText}>Pro</span></h1>
+            <h1><span className={styles.schoolText}>My</span><span className={styles.proText}>EduPanel</span></h1>
           </header>
 
           <main className={styles.formContent}>

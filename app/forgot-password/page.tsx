@@ -33,7 +33,7 @@ export default function ForgotPasswordPage() {
       <div className={styles.formContainer}>
         <header className={styles.header}>
           <h2>
-            Welcome To <span>School Pro</span>
+            Welcome To <span>My EduPanel</span>
           </h2>
           <h1>Forgot Your Password?</h1>
           <p>Enter your email and we'll send you a reset link.</p>

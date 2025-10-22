@@ -46,7 +46,7 @@ function Navbar({ showLogin, showSignup, showFeatures, activeSection }: NavbarPr
       <nav>
         <a href="/" className="navbar-brand">
           <Logo />
-          <span>School Pro</span>
+          <span>My EduPanel</span>
         </a>
         
         <div className="nav-desktop">

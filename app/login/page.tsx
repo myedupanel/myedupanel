@@ -97,8 +97,8 @@ export default function LoginPage() {
           <header className={styles.header}>
             <p className={styles.welcomeText}>Welcome Back To</p>
             <h1>
-              <span className={styles.schoolText}>School</span>
-              <span className={styles.proText}>Pro</span>
+              <span className={styles.schoolText}>My</span>
+              <span className={styles.proText}>EduPanel</span>
             </h1>
           </header>
 

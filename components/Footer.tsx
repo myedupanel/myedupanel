@@ -7,9 +7,9 @@ function Footer() {
         <div className="footer-container">
           <div className="footer-column">
             <h4>Get In Touch</h4>
-            <p>support@SchoolPro.com</p>
+            <p>myedupanel@gmail.com</p>
             <p>+91 7776041548</p>
-            <p>devgaon Road, Paranda, Dharashiv, Maharashtra.</p>
+            <p>pune</p>
           </div>
           <div className="footer-column">
             <h4>Quick Links</h4>
@@ -28,7 +28,7 @@ function Footer() {
         </div>
       </div>
       <div className="footer-bottom">
-        <p>Copyright @ 2025 All Right Reserved by SchoolPro.</p>
+        <p>Copyright @ 2025 All Right Reserved by My EduPanel.</p>
         <div className="social-icons"></div>
       </div>
     </footer>
