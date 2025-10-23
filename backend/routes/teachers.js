@@ -15,28 +15,29 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
   try {
     const { teacherId, name, subject, contactNumber, email } = req.body;
 
-    // --- BADLAAV 1: Token se 'schoolId' aur 'schoolName' lein ---
+    // --- BADLAAV 1: Token se 'schoolId' lein ---
     const schoolIdFromToken = req.user.schoolId;
-    const schoolNameFromToken = req.user.schoolName; // Email bhejte waqt 'User' banane ke liye
+    // We might still need schoolName for the User model if it requires it, let's check User model... nope, User model requires schoolId. Perfect.
 
     // Basic Validation
     if (!teacherId || !name || !subject || !contactNumber || !email) {
       return res.status(400).json({ message: 'Please provide all required teacher details.' });
     }
-     if (!schoolIdFromToken || !schoolNameFromToken) {
-         return res.status(400).json({ message: 'Admin user details incomplete (missing school info).' });
+     // --- BADLAAV 1 (continued): Check for schoolId from token ---
+     if (!schoolIdFromToken) {
+         return res.status(400).json({ message: 'Admin user details incomplete (missing school ID).' });
      }
 
-    // --- BADLAAV 2: Duplicate teacher check ke liye 'schoolId' ka istemaal karein ---
+    // --- BADLAAV 2: Duplicate teacher check using 'schoolId' ---
     const existingTeacher = await Teacher.findOne({
-        schoolId: schoolIdFromToken, // 'schoolName' ke bajaaye 'schoolId' se check karein
+        schoolId: schoolIdFromToken, // Use schoolId for the check
         $or: [{ email }, { teacherId }]
      });
     if (existingTeacher) {
       return res.status(400).json({ message: 'A teacher with this email or ID already exists in this school.' });
     }
 
-    // Check if a user with this email already exists
+    // Check if a user with this email already exists (User email is globally unique)
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'A user account with this email already exists.' });
@@ -45,28 +46,28 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
     // Generate password
     const password = generatePassword.generate({ length: 12, numbers: true });
 
-    // --- BADLAAV 3: Naye 'User' model ke hisaab se User account banayein ---
+    // --- BADLAAV 3: Create User account using 'name' and 'schoolId' ---
     const newUser = new User({
-      name: name, // 'adminName' ke bajaaye 'name'
-      schoolId: schoolIdFromToken, // 'schoolName' ke bajaaye 'schoolId'
+      name: name, // Use 'name' field
+      schoolId: schoolIdFromToken, // Use 'schoolId' field
       email,
-      password,
-      role: 'teacher',
+      password, // Pre-save hook will hash
+      role: 'teacher', // Set role
     });
     await newUser.save();
 
-    // --- BADLAAV 4: Naye 'Teacher' model ke hisaab se Teacher record banayein ---
+    // --- BADLAAV 4: Create Teacher record using 'schoolId' ---
     const newTeacher = new Teacher({
       teacherId,
       name,
-      subject: subject,
+      subject: subject, // Keep subject as string based on model
       contactNumber,
       email,
-      schoolId: schoolIdFromToken // 'schoolName' ke bajaaye 'schoolId'
+      schoolId: schoolIdFromToken // Use 'schoolId' field
     });
     await newTeacher.save();
 
-    // Send welcome email (ismein koi badlaav nahi)
+    // Send welcome email (no changes needed here)
     try {
       const message = `
         <h1>Welcome to SchoolPro, ${name}!</h1>
@@ -81,12 +82,15 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
       await sendEmail({ to: email, subject: 'Your SchoolPro Teacher Account Details', html: message });
     } catch (emailError) {
       console.error("Could not send welcome email to teacher:", emailError);
+      // Optional: Log this error more formally
     }
 
-    // --- BADLAAV 5: Real-time update ke liye 'req.io' ka istemaal karein ---
+    // --- BADLAAV 5: Use req.io for real-time updates ---
     if (req.io) {
-        io.emit('updateDashboard');
-        io.emit('teacher_added', newTeacher);
+        req.io.emit('updateDashboard'); // Use req.io
+        req.io.emit('teacher_added', newTeacher);
+    } else {
+       console.warn('Socket.IO instance not found on request object.'); // More specific warning
     }
 
     res.status(201).json({ message: 'Teacher created successfully and welcome email sent.', teacher: newTeacher });
@@ -98,8 +102,13 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
        return res.status(400).json({ message: messages.join(' ') });
     }
     if (err.code === 11000) {
-        // --- BADLAAV 6: Error message ko naye index ke hisaab se update kiya ---
-        return res.status(400).json({ message: 'A teacher with this ID or Email already exists (Database conflict).' });
+        // --- BADLAAV 6: Update E11000 message for new index ---
+        // The unique index is now on { teacherId: 1, schoolId: 1 } OR { email: 1 } in User model
+        if (err.keyPattern && err.keyPattern.email) {
+             return res.status(400).json({ message: 'A user account with this email already exists.' });
+        } else {
+             return res.status(400).json({ message: 'A teacher with this ID already exists in this school (Database conflict).' });
+        }
     }
     res.status(500).send('Server Error creating teacher');
   }
@@ -110,13 +119,13 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
 // @access  Private (Admin or Teacher)
 router.get('/', [authMiddleware], async (req, res) => {
     try {
-        // --- BADLAAV 7: Token se 'schoolId' lein ---
+        // --- BADLAAV 7: Get 'schoolId' from token ---
         const schoolIdFromToken = req.user.schoolId;
 
         if (!schoolIdFromToken) {
             return res.status(400).json({ message: "School ID (from Admin token) is required." });
         }
-        // --- BADLAAV 8: 'schoolId' ka istemaal karke teachers ko find karein ---
+        // --- BADLAAV 8: Query using 'schoolId' ---
         const teachers = await Teacher.find({ schoolId: schoolIdFromToken }).sort({ name: 1 });
         res.json(teachers);
     } catch (err) {
@@ -137,27 +146,30 @@ router.put('/:id', [authMiddleware, authorize('admin')], async (req, res) => {
         return res.status(404).json({ message: 'Teacher not found' });
     }
 
-    // --- BADLAAV 9: 'schoolId' se authorization check karein ---
+    // --- BADLAAV 9: Authorize using 'schoolId' ---
     if (teacher.schoolId.toString() !== req.user.schoolId) {
         return res.status(401).json({ msg: 'User not authorized to edit this teacher' });
     }
 
     const updateData = { ...req.body };
-    // --- BADLAAV 10: 'schoolId' ko update hone se rokein ---
+    // --- BADLAAV 10: Prevent updating 'schoolId', email, teacherId ---
     delete updateData.schoolId;
     delete updateData.email;
     delete updateData.teacherId;
 
     teacher = await Teacher.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true });
 
-    // --- BADLAAV 11: 'User' model ko 'name' field se update karein ---
-    await User.updateOne({ email: teacher.email }, { $set: { name: teacher.name } }); // 'adminName' ke bajaaye 'name'
+    // --- BADLAAV 11: Update User model using 'name' field ---
+    // Make sure the User model uses 'name' and not 'adminName'
+    await User.updateOne({ email: teacher.email }, { $set: { name: teacher.name } });
 
-     // --- BADLAAV 12: Real-time update ke liye 'req.io' ka istemaal karein ---
+     // --- BADLAAV 12: Use req.io for real-time updates ---
      if (req.io) {
-        io.emit('updateDashboard');
-        io.emit('teacher_updated', teacher);
-    }
+        req.io.emit('updateDashboard');
+        req.io.emit('teacher_updated', teacher);
+     } else {
+        console.warn('Socket.IO instance not found on request object.');
+     }
 
     res.json({ message: 'Teacher updated successfully', teacher });
 
@@ -178,7 +190,7 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
       return res.status(404).json({ message: 'Teacher not found' });
     }
 
-    // --- BADLAAV 13: 'schoolId' se authorization check karein ---
+    // --- BADLAAV 13: Authorize using 'schoolId' ---
      if (teacher.schoolId.toString() !== req.user.schoolId) {
         return res.status(401).json({ msg: 'User not authorized to delete this teacher' });
     }
@@ -191,11 +203,13 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
     // Then delete the associated User account
     await User.findOneAndDelete({ email: teacherEmail });
 
-     // --- BADLAAV 14: Real-time update ke liye 'req.io' ka istemaal karein ---
+     // --- BADLAAV 14: Use req.io for real-time updates ---
      if (req.io) {
-        io.emit('updateDashboard');
-        io.emit('teacher_deleted', deletedTeacherId);
-    }
+        req.io.emit('updateDashboard');
+        req.io.emit('teacher_deleted', deletedTeacherId);
+     } else {
+        console.warn('Socket.IO instance not found on request object.');
+     }
 
     res.json({ message: 'Teacher and associated user account removed successfully' });
 

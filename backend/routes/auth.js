@@ -6,88 +6,86 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
-const School = require('../models/School'); // --- BADLAAV 1: School model ko import kiya ---
+const School = require('../models/School'); // --- School model imported ---
 const sendEmail = require('../utils/sendEmail');
 const { authMiddleware } = require('../middleware/authMiddleware');
 
 // ===== UPDATED SIGNUP ROUTE =====
 router.post('/signup', async (req, res) => {
-  // --- BADLAAV 2: 'adminName' ko 'name' se badla ---
+  // --- 'adminName' ko 'name' se badla ---
   const { schoolName, name, email, password } = req.body;
-  // TODO: Aapko frontend form se location data (city, state, country) bhi lena hoga
+  // TODO: Add location data from frontend
 
   try {
-    // Step 1: Check karein ki email pehle se registered hai ya nahi
+    // Step 1: Check for existing verified user
     let user = await User.findOne({ email });
 
     if (user && user.isVerified) {
       return res.status(400).json({ message: 'A user with this email is already registered.' });
     }
 
-    // Step 2: Check karein ki school name pehle se registered hai ya nahi
+    // Step 2: Check for existing school
     let school = await School.findOne({ name: schoolName });
 
     let schoolIdToUse;
 
     if (school) {
-      // Agar school pehle se hai
-      // Check karein ki yeh naya user hai ya purana unverified user
+      // School exists
       if (user && user.isVerified === false && user.schoolId.toString() === school._id.toString()) {
-        // Yeh wahi unverified user hai jo dobara try kar raha hai.
+        // Same unverified user trying again
         schoolIdToUse = school._id;
       } else {
-        // Yeh naya user hai jo purana (existing) school name use kar raha hai. BLOCK.
+        // New user trying an existing school name. BLOCK.
         return res.status(400).json({ message: 'This school name is already registered.' });
       }
     } else {
-      // School naya hai.
-      // Check karein ki user (unverified) pehle se hai ya nahi
+      // New school
       if (user && user.schoolId) {
-        // User pehle se hai, shayad school name badal raha hai. Unka purana school delete karo.
+        // Unverified user changing school name? Delete old placeholder school.
         await School.findByIdAndDelete(user.schoolId);
       }
       
-      // Naya school banao
+      // Create new school
       const newSchool = new School({
         name: schoolName,
-        // TODO: Frontend se asli location data lein, abhi ke liye placeholder
+        // Placeholder location
         location: {
           city: 'Not Set',
           state: 'Not Set',
           country: 'Not Set'
         }
       });
-      await newSchool.save(); // Agar yeh fail hua (duplicate name), toh catch block chalega
+      await newSchool.save(); // This will fail if name is duplicate (unique index)
       schoolIdToUse = newSchool._id;
     }
 
-    // Step 3: Naye schoolId ke saath User ko banao ya update karo
+    // Step 3: Create or Update User with schoolId
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 2 * 60 * 1000); // OTP expires in 2 minutes
+    const otpExpires = new Date(Date.now() + 2 * 60 * 1000);
 
     if (user) {
-      // User pehle se hai (unverified), use update karo
-      user.password = password; // pre-save hook hash kar dega
-      user.name = name; // <-- 'adminName' se 'name' kiya
-      user.schoolId = schoolIdToUse; // <-- 'schoolName' se 'schoolId' kiya
+      // Update existing unverified user
+      user.password = password;
+      user.name = name; // <-- Use 'name' field
+      user.schoolId = schoolIdToUse; // <-- Use 'schoolId' field
       user.otp = otp;
       user.otpExpires = otpExpires;
       await user.save();
     } else {
-      // Naya user banao
+      // Create new user
       user = new User({
-        schoolId: schoolIdToUse, // <-- 'schoolName' se 'schoolId' kiya
-        name: name, // <-- 'adminName' se 'name' kiya
+        schoolId: schoolIdToUse, // <-- Use 'schoolId' field
+        name: name, // <-- Use 'name' field
         email,
-        password, // pre-save hook hash kar dega
+        password,
         otp,
         otpExpires,
-        role: 'admin' // Role set karna zaroori hai
+        role: 'admin' // Set role
       });
       await user.save();
     }
 
-    // Step 4: OTP email bhejein (ismein koi badlaav nahi)
+    // Step 4: Send OTP email
     try {
       const message = `<h1>Email Verification</h1><p>Your One-Time Password (OTP) for SchoolPro is: <h2>${otp}</h2></p><p>This OTP is valid for 2 minutes.</p>`;
       await sendEmail({ to: user.email, subject: 'SchoolPro - Verify Your Email', html: message });
@@ -96,7 +94,7 @@ router.post('/signup', async (req, res) => {
       return res.status(500).send('Error sending verification email. Please try again or contact support.');
     }
 
-    // Step 5: Success response bhejein
+    // Step 5: Success response
     res.status(201).json({
       success: true,
       message: 'OTP sent to your email. Please verify to continue.'
@@ -104,7 +102,7 @@ router.post('/signup', async (req, res) => {
 
   } catch (error) {
     console.error('Signup Error:', error.message);
-    // Duplicate key errors ko handle karein
+    // Handle duplicate key errors
     if (error.code === 11000) {
       if (error.keyPattern.name) {
         return res.status(400).json({ message: 'This school name is already registered.' });
@@ -139,7 +137,7 @@ router.post('/verify-otp', async (req, res) => {
 
     // Send welcome email
     try {
-      // --- BADLAAV 3: 'user.adminName' ko 'user.name' kiya ---
+      // --- Use 'user.name' ---
       const message = `
         <h1>Welcome to SchoolPro, ${user.name}!</h1> 
         <p>Your account has been successfully verified.</p>
@@ -181,7 +179,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // --- BADLAAV 4: Token mein 'schoolName' daalne ke liye School model se fetch karein ---
+    // --- Fetch school name for the token ---
     const school = await School.findById(user.schoolId);
 
     // Create JWT Payload
@@ -189,9 +187,9 @@ router.post('/login', async (req, res) => {
       user: {
         id: user.id,
         role: user.role,
-        name: user.name, // 'adminName' se 'name' kiya
-        schoolId: user.schoolId, // 'schoolId' bhi bhej rahe hain
-        schoolName: school ? school.name : 'School Not Found' // 'schoolName' ko fetch karke bheja
+        name: user.name, // Use 'name'
+        schoolId: user.schoolId, // Send schoolId
+        schoolName: school ? school.name : 'School Not Found' // Send schoolName
       }
     };
 
@@ -213,16 +211,14 @@ router.post('/login', async (req, res) => {
 });
 
 
-// ===== ME ROUTE (No changes needed here) =====
+// ===== ME ROUTE (No changes) =====
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    // req.user.id token se aa raha hai
-    // Hum 'User' model se data fetch kar rahe hain, jo ab 'name' aur 'schoolId' use karta hai
     const user = await User.findById(req.user.id).select('-password');
     if (!user) {
-        return res.status(444).json({ message: 'User not found.' });
+        return res.status(404).json({ message: 'User not found.' });
     }
-    res.json(user); // Naya user object (name, schoolId ke saath) bhejega
+    res.json(user); // Will send new user object structure
   } catch (error) {
     console.error('Me Route Error:', error.message);
     res.status(500).send('Server Error fetching user profile.');
@@ -230,7 +226,7 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 
-// ===== FORGOT PASSWORD ROUTE (No changes needed here) =====
+// ===== FORGOT PASSWORD ROUTE (No changes) =====
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
@@ -254,7 +250,7 @@ router.post('/forgot-password', async (req, res) => {
 
     await sendEmail({ to: user.email, subject: 'Password Reset Request', html: message });
 
-    res.status(200).json({ success: true, message: 'If you use that email exists, a password reset link has been sent.' });
+    res.status(200).json({ success: true, message: 'If a user with that email exists, a password reset link has been sent.' });
 
   } catch (err) {
     const user = await User.findOne({ email: req.body.email });
@@ -269,7 +265,7 @@ router.post('/forgot-password', async (req, res) => {
 });
 
 
-// ===== RESET PASSWORD ROUTE (No changes needed here) =====
+// ===== RESET PASSWORD ROUTE (No changes) =====
 router.put('/reset-password/:token', async (req, res) => {
   try {
     const resetPasswordToken = crypto
@@ -305,7 +301,7 @@ router.put('/reset-password/:token', async (req, res) => {
 });
 
 
-// ===== RESEND OTP ROUTE (No changes needed here) =====
+// ===== RESEND OTP ROUTE (No changes) =====
 router.post('/resend-otp', async (req, res) => {
     const { email } = req.body;
 
@@ -342,4 +338,4 @@ router.post('/resend-otp', async (req, res) => {
     }
 });
 
-module.exports = router; // Export the router
+module.exports = router;
