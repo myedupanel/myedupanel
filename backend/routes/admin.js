@@ -3,6 +3,8 @@ const router = express.Router();
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+// --- Hum FeeRecord model ko import kar rahe hain ---
+const FeeRecord = require('../models/FeeRecord'); 
 const sendEmail = require('../utils/sendEmail');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { adminMiddleware } = require('../middleware/adminMiddleware');
@@ -10,6 +12,7 @@ const { adminMiddleware } = require('../middleware/adminMiddleware');
 // @route   POST /api/admin/create-user
 // @desc    Admin creates a new user (teacher, student, parent)
 // @access  Private (Admin only)
+// --- Is route mein koi badlaav nahi hai ---
 router.post(
   '/create-user',
   [authMiddleware, adminMiddleware],
@@ -32,8 +35,8 @@ router.post(
       const temporaryPassword = crypto.randomBytes(8).toString('hex');
 
       const newUserDetails = {
-        adminName: name, // Assuming User model uses adminName field
-        schoolName: req.user.schoolName, // Assign admin's school
+        adminName: name,
+        schoolName: req.user.schoolName,
         email,
         role,
         password: temporaryPassword,
@@ -44,12 +47,9 @@ router.post(
       user = new User(newUserDetails);
       await user.save();
 
-      // ===== YAHAN BADLAAV KIYA GAYA HAI (REAL-TIME UPDATE) =====
       try {
-        // Apne main server.js se 'socketio' instance ko get karein
         const io = req.app.get('socketio');
         if (io) {
-          // Sabhi connected clients ko dashboard update karne ke liye bolein
           io.emit('updateDashboard');
           console.log('Socket.IO: Dashboard update event bheja gaya.');
         } else {
@@ -58,7 +58,6 @@ router.post(
       } catch (socketError) {
         console.error("Socket emit error:", socketError);
       }
-      // ===== END BADLAAV =====
 
       try {
         const subject = 'Your SchoolPro Account has been created!';
@@ -92,54 +91,94 @@ router.post(
 // @desc    Get aggregated data for the admin dashboard
 // @access  Private (Admin only)
 // 
-// ===== YEH ROUTE BILKUL SAHI HAI - KOI BADLAAV NAHI =====
+// ===== YAHAN SABHI DYNAMIC QUERIES HAIN =====
 //
 router.get(
   '/dashboard-data',
   [authMiddleware, adminMiddleware],
   async (req, res) => {
     try {
-      // --- UPDATE: Fetch total counts along with recent users ---
       const [
         studentCount,
         teacherCount,
         parentCount,
-        staffCount, // Assuming you have a 'staff' role
+        staffCount,
         recentStudents,
         recentTeachers,
         recentParents,
-        recentStaff
+        recentStaff,
+        recentPaidFeeRecords, 
+        admissionsDataRaw 
       ] = await Promise.all([
-        User.countDocuments({ role: 'student', schoolName: req.user.schoolName }), // Filter by school
-        User.countDocuments({ role: 'teacher', schoolName: req.user.schoolName }), // Filter by school
-        User.countDocuments({ role: 'parent', schoolName: req.user.schoolName }),  // Filter by school
-        User.countDocuments({ role: 'staff', schoolName: req.user.schoolName }),   // Filter by school
-        User.find({ role: 'student', schoolName: req.user.schoolName }).sort({ createdAt: -1 }).limit(5).select('adminName details.class createdAt'), // Increased limit? Added date? Filter by school
-        User.find({ role: 'teacher', schoolName: req.user.schoolName }).sort({ createdAt: -1 }).limit(5).select('adminName details.subject createdAt'),// Increased limit? Added date? Filter by school
-        User.find({ role: 'parent', schoolName: req.user.schoolName }).sort({ createdAt: -1 }).limit(5).select('adminName createdAt'),   // Increased limit? Added date? Filter by school
-        User.find({ role: 'staff', schoolName: req.user.schoolName }).sort({ createdAt: -1 }).limit(5).select('adminName details.role createdAt'),     // Increased limit? Added date? Filter by school
+        // Counts
+        User.countDocuments({ role: 'student', schoolName: req.user.schoolName }),
+        User.countDocuments({ role: 'teacher', schoolName: req.user.schoolName }),
+        User.countDocuments({ role: 'parent', schoolName: req.user.schoolName }),
+        User.countDocuments({ role: 'staff', schoolName: req.user.schoolName }),
+        // Recent Users
+        User.find({ role: 'student', schoolName: req.user.schoolName }).sort({ createdAt: -1 }).limit(5).select('adminName details.class createdAt'),
+        User.find({ role: 'teacher', schoolName: req.user.schoolName }).sort({ createdAt: -1 }).limit(5).select('adminName details.subject createdAt'),
+        User.find({ role: 'parent', schoolName: req.user.schoolName }).sort({ createdAt: -1 }).limit(5).select('adminName createdAt'),
+        User.find({ role: 'staff', schoolName: req.user.schoolName }).sort({ createdAt: -1 }).limit(5).select('adminName details.role createdAt'),
+        
+        // --- Recent Payments ki Asli Query ---
+        FeeRecord.find({ 
+          // schoolId: req.user.schoolName, // Hum maan rahe hain schoolId aapke 'User' model se aayega
+          status: 'Paid' 
+        })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate('studentId', 'adminName') // 'studentId' field ko User model se 'adminName' laakar bharo
+        .select('amount createdAt studentId'),
+
+        // --- Student Admission Chart ki Asli Query (Aggregation) ---
+        User.aggregate([
+          { $match: { role: 'student', schoolName: req.user.schoolName } },
+          { $group: {
+              _id: { month: { $month: "$createdAt" } },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { "_id.month": 1 } }
+        ])
       ]);
 
-      // --- Keep your static data for now, replace later if needed ---
-      // TODO: Replace with dynamic data fetched from database (e.g., actual student counts per class/month)
-      const admissionsData = [ { month: 'Apr', admissions: 25 }, { month: 'May', admissions: 42 }, { month: 'Jun', admissions: 55 }, { month: 'Jul', admissions: 30 }, { month: 'Aug', admissions: 18 }, { month: 'Sep', admissions: 12 } ];
-      // TODO: Replace with dynamic data fetched from a Fees collection
-      const recentFees = [ { _id: 'F01', student: 'Aryan Gupta', amount: '₹5,000'}, { _id: 'F02', student: 'Priya Singh', amount: '₹4,500'} ];
+      // --- Chart ke Data ko Format Karna ---
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const admissionsMap = new Map(monthNames.map((name, index) => [index + 1, { name, admissions: 0 }]));
+      
+      admissionsDataRaw.forEach(item => {
+        admissionsMap.set(item._id.month, {
+          name: monthNames[item._id.month - 1],
+          admissions: item.count
+        });
+      });
+      const admissionsData = Array.from(admissionsMap.values());
+      
+      // --- BADLAAV 5: Recent Payments Data ko Frontend ke liye Format Karna ---
+      // ===== YEH HAI AAPKA JAVASCRIPT FIX (BINA 'as any') =====
+      const recentFees = recentPaidFeeRecords.map(record => ({
+        _id: record._id,
+        // Hum check kar rahe hain ki studentId aur uspe adminName maujood hai ya nahi
+        student: record.studentId && record.studentId.adminName ? record.studentId.adminName : 'Unknown Student',
+        amount: `₹${record.amount.toLocaleString('en-IN')}`, // Amount ko format kiya
+        date: record.createdAt.toLocaleDateString('en-IN') // Date ko format kiya
+      }));
+      // --- END BADLAAV 5 ---
 
-      // --- UPDATE: Add the fetched counts to the response ---
+
+      // --- Final Data Object ---
       const dashboardData = {
         totalStudents: studentCount,
         totalTeachers: teacherCount,
         totalParents: parentCount,
         totalStaff: staffCount,
-        admissionsData, // Keep static chart data for now
+        admissionsData, // Ab yeh DYNAMIC hai
         recentStudents,
         recentTeachers,
         recentParents,
         recentStaff,
-        recentFees // Keep static fee data for now
-        // TODO: Add totalClasses if you have a Class model later
-        // TODO: Add monthlyRevenue if you have a Fees model later
+        recentFees      // Ab yeh DYNAMIC hai
       };
 
       res.json(dashboardData);
@@ -155,6 +194,7 @@ router.get(
 // @route   PUT /api/admin/profile
 // @desc    Update admin's profile (name and school name)
 // @access  Private
+// --- Is route mein koi badlaav nahi hai ---
 router.put('/profile', authMiddleware, async (req, res) => {
   const { adminName, schoolName } = req.body;
   const userId = req.user.id;
@@ -166,16 +206,12 @@ router.put('/profile', authMiddleware, async (req, res) => {
     }
 
     if (schoolName !== user.schoolName) {
-      // Check if school name is already taken by ANOTHER admin
-      if (schoolName) { // Ensure schoolName is provided
+      if (schoolName) {
            const existingAdminSchool = await User.findOne({ schoolName, role: 'admin', _id: { $ne: userId } });
            if (existingAdminSchool) {
                return res.status(400).json({ message: 'This school name is already registered by another admin.' });
            }
        }
-
-
-      // Check 90-day rule
       if (user.schoolNameLastUpdated) {
         const lastUpdate = new Date(user.schoolNameLastUpdated);
         const ninetyDaysAgo = new Date();
@@ -188,7 +224,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
           });
         }
       }
-      user.schoolNameLastUpdated = new Date(); // Update timestamp only if name changes
+      user.schoolNameLastUpdated = new Date();
     }
 
 
@@ -197,13 +233,12 @@ router.put('/profile', authMiddleware, async (req, res) => {
 
     await user.save();
 
-    // Create and send a new token with updated user info
     const payload = {
       user: {
         id: user.id,
         role: user.role,
-        adminName: user.adminName, // Send updated name
-        schoolName: user.schoolName, // Send updated school name
+        adminName: user.adminName,
+        schoolName: user.schoolName,
       },
     };
 
@@ -213,16 +248,11 @@ router.put('/profile', authMiddleware, async (req, res) => {
       { expiresIn: '5h' },
       (err, token) => {
         if (err) throw err;
-        // Send back the new token so the frontend can stay up-to-date
         res.json({ message: 'Profile updated successfully!', token });
       }
     );
 
   } catch (error) {
-    // This duplicate key error should now only happen for email, handled elsewhere
-    // if (error.code === 11000) {
-    //   return res.status(400).json({ message: 'That school name is already taken.' });
-    // }
     console.error("Profile Update Error:", error);
     res.status(500).send('Server Error updating profile');
   }

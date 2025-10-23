@@ -9,7 +9,6 @@ const FeeRecordSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    // 'enum' ka matlab hai ki status sirf in values mein se hi ho sakta hai
     enum: ['Paid', 'Pending', 'Late', 'Failed'],
     default: 'Pending'
   },
@@ -29,7 +28,8 @@ const FeeRecordSchema = new mongoose.Schema({
   // Yeh record kis student ka hai
   studentId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Student', // Yeh Mongoose ko batata hai ki yeh ID 'Student' model se judi hai
+    // ===== YEH HAI ZAROORI BADLAAV =====
+    ref: 'User', // Yeh Mongoose ko batata hai ki yeh ID 'User' model se judi hai
     required: true
   },
   // Yeh record kis school ka hai
@@ -51,7 +51,7 @@ const FeeRecordSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-discount: {
+  discount: {
     type: Number,
     default: 0
   },
@@ -62,15 +62,9 @@ discount: {
   chequeNumber: { type: String, trim: true },
   chequeDate: { type: Date }, // Cheque par likhi hui date
   bankName: { type: String, trim: true },
-  // ... baaki ke fields jaise studentId, schoolId, etc. ...
-  dueDate: {
-    type: Date,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
+  
+  // --- Duplicate fields yahaan se hata diye gaye hain ---
+
 });
 
 module.exports = mongoose.model('FeeRecord', FeeRecordSchema);
