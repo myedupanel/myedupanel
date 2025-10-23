@@ -189,3 +189,29 @@
 .time {
   font-weight: 600;
 }
+// Yeh code copy karke Header.module.scss mein sabse neeche add karein
+
+// Yeh container profile photo aur default avatar, dono ko hold karega
+.avatarContainer {
+  margin-right: 12px; // Naam aur avatar ke beech thodi jagah
+}
+
+// Yeh hai aapka naya default "Initials" avatar
+.defaultAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%; // Isse circle banega
+  background-color: #7c3aed; // Ek accha purple color
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600; // Bold text
+  font-size: 0.9rem; // Initials ka size
+  line-height: 1;
+}
+
+// Yeh puraani profileImage class ko bhi round kar dega
+.profileImage {
+  border-radius: 50%; // Asli photo ko bhi circle mein dikhayega
+}

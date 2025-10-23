@@ -13,10 +13,19 @@ const formatDate = (date: Date) => {
   return date.toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 };
 
-// --- BADLAV 1: Interface ko 'adminName' use karne ke liye update kiya ---
+// --- NAYA HELPER FUNCTION: Naam se Initials nikaalne ke liye ---
+const getInitials = (name: string) => {
+  if (!name) return '?'; // Agar naam na ho
+  const names = name.split(' ');
+  const firstInitial = names[0]?.[0] || '';
+  const lastInitial = names.length > 1 ? names[names.length - 1]?.[0] : '';
+  return `${firstInitial}${lastInitial}`.toUpperCase();
+};
+// --- End Helper Function ---
+
 interface HeaderProps {
   admin: {
-    adminName: string; // 'name' ki jagah 'adminName'
+    adminName: string; 
     email: string;
     profileImageUrl: string;
   };
@@ -38,15 +47,28 @@ const Header = ({ admin }: HeaderProps) => {
       <div className={styles.titleBar}>
         <h1 className={styles.pageTitle}>Dashboard</h1>
         <div className={styles.profileSection}>
-          <Image 
-            src={admin.profileImageUrl || '/default-avatar.png'}
-            alt="Admin Profile Photo" 
-            width={40} 
-            height={40} 
-            className={styles.profileImage}
-          />
+
+          {/* --- BADLAV YAHAN HAI: Avatar Logic --- */}
+          <div className={styles.avatarContainer}>
+            {admin.profileImageUrl ? (
+              // Agar profile photo hai, toh use dikhao
+              <Image 
+                src={admin.profileImageUrl}
+                alt="Admin Profile Photo" 
+                width={40} 
+                height={40} 
+                className={styles.profileImage}
+              />
+            ) : (
+              // Agar photo nahi hai, toh initials waala default avatar dikhao
+              <div className={styles.defaultAvatar}>
+                <span>{getInitials(admin.adminName)}</span>
+              </div>
+            )}
+          </div>
+          {/* --- End Avatar Logic --- */}
+
           <div className={styles.profileInfo}>
-            {/* --- BADLAV 2: 'admin.name' ki jagah 'admin.adminName' ka istemal kiya --- */}
             <span className={styles.profileName}>{admin.adminName}</span>
           </div>
           <Link href="/admin/profile" className={styles.editButton}>
