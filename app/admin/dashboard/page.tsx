@@ -106,17 +106,24 @@ const AdminDashboardPage = () => {
 
   const loadProfileData = useCallback(() => {
     if (user) {
+      // ===== YAHI HAI AAPKA FIX =====
+      // Humne user.email ki jagah user.adminName kar diya
       let profileData: AdminProfile = { 
         ...user, 
-        adminName: user.email, 
+        adminName: user.adminName, // <--- FIX YAHAN HAI
         profileImageUrl: '' 
       };
       
       const savedProfile = localStorage.getItem(`adminProfile_${user._id}`);
       if (savedProfile) {
         const savedData = JSON.parse(savedProfile);
+        // Neeche ki lines profile image ko localStorage se load karti hain
         if (savedData.profileImageUrl && savedData.profileImageUrl.startsWith('data:image')) {
           profileData.profileImageUrl = savedData.profileImageUrl;
+        }
+        // Agar local storage mein naam hai, toh usey prathmikta dein
+        if (savedData.adminName) {
+            profileData.adminName = savedData.adminName;
         }
       }
       setAdminProfile(profileData);
@@ -132,7 +139,8 @@ const AdminDashboardPage = () => {
     socket.on('updateDashboard', () => { fetchDashboardData(); });
     socket.on('connect_error', (err) => console.error('Socket.IO: Connection Error!', err.message));
     
-    window.addEventListener('focus', loadProfileData);
+    // Yeh listener profile pic/name ko turant update karne ke liye hai
+    window.addEventListener('focus', loadProfileData); 
 
     return () => {
       window.removeEventListener('focus', loadProfileData);
@@ -146,7 +154,9 @@ const AdminDashboardPage = () => {
 
   return (
     <div className={styles.dashboardContainer}>
+      {/* Header component ab updated adminProfile data use karega */}
       <Header admin={adminProfile} />
+      
       <div className={styles.statsGrid}>
         {dashboardData.stats.map((stat) => (
           <StatCard
