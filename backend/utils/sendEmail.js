@@ -7,8 +7,11 @@ const sendEmail = async (options) => {
 
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: true, 
+    port: process.env.SMTP_PORT, // Yeh Render se '587' uthayega
+    
+    // --- YAHAN BADLAAV KIYA GAYA HAI ---
+    secure: false, // Port 587 ke liye 'false' hona zaroori hai
+    
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
