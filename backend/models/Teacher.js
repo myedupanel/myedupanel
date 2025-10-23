@@ -3,12 +3,13 @@
 const mongoose = require('mongoose');
 
 const TeacherSchema = new mongoose.Schema({
-  // --- FIELD UPDATED ---
-  schoolName: { // Changed from schoolId
-    type: String, // Changed type to String
-    required: [true, "School name is required for teacher"], // Added required message
-    trim: true
+  // --- BADLAAV 1: 'schoolName' ko 'schoolId' se replace kiya ---
+  schoolId: {
+    type: mongoose.Schema.Types.ObjectId, // Yeh ek database ID hai
+    ref: 'School', // Yeh 'School' model se link hai
+    required: [true, "School ID is required for teacher"],
   },
+
   teacherId: {
     type: String,
     required: [true, "Teacher ID is required"]
@@ -31,7 +32,7 @@ const TeacherSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, "Email is required"],
-    unique: true, // Email should be unique across all users/teachers
+    unique: true, // Email hamesha unique rahega (sahi hai)
     lowercase: true,
     trim: true,
     // Basic email format validation
@@ -43,9 +44,8 @@ const TeacherSchema = new mongoose.Schema({
   },
 });
 
-// --- INDEX UPDATED ---
-// This index ensures that within the same school (schoolName),
-// each teacherId must be unique.
-TeacherSchema.index({ teacherId: 1, schoolName: 1 }, { unique: true });
+// --- BADLAAV 2: Index ko 'schoolId' use karne ke liye update kiya ---
+// Iska matlab hai ki teacherId ek schoolId ke andar unique hona chahiye.
+TeacherSchema.index({ teacherId: 1, schoolId: 1 }, { unique: true });
 
 module.exports = mongoose.model('Teacher', TeacherSchema);

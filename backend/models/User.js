@@ -5,17 +5,20 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto'); // Import crypto library
 
 const UserSchema = new mongoose.Schema({
-  schoolName: {
+  // --- BADLAAV 1: 'schoolName' ko 'schoolId' se replace kiya ---
+  schoolId: {
+    type: mongoose.Schema.Types.ObjectId, // Yeh ek database ID hai
+    ref: 'School', // Yeh 'School' model se link hai
+    required: [true, 'School ID is required for all users'],
+  },
+
+  // --- BADLAAV 2: 'adminName' ka naam badal kar 'name' kar diya ---
+  name: { // Pehle 'adminName' tha
     type: String,
-    required: [true, 'School name is required'],
-    // unique: true, // <-- YEH LINE HATA DI GAYI HAI (BILKUL SAHI!)
+    required: [true, 'User name is required'],
     trim: true
   },
-  adminName: {
-    type: String,
-    required: [true, 'Admin name is required'],
-    trim: true
-  },
+
   email: {
     type: String,
     required: [true, 'Email is required'],
@@ -29,17 +32,19 @@ const UserSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ['admin', 'teacher', 'student', 'parent'],
-    default: 'admin'
+    required: [true, 'User role is required'], // Ise 'default' se 'required' kar diya
   },
   isVerified: {
     type: Boolean,
     default: false
   },
+
+  // --- Baaki ke fields ---
   resetPasswordToken: String,
   resetPasswordExpire: Date,
   otp: String,
   otpExpires: Date,
-  schoolNameLastUpdated: Date,
+  // --- BADLAAV 3: 'schoolNameLastUpdated' ko hata diya ---
   createdAt: {
     type: Date,
     default: Date.now

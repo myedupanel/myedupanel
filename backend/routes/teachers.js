@@ -1,3 +1,5 @@
+// routes/teachers.js
+
 const express = require('express');
 const router = express.Router();
 const generatePassword = require('generate-password');
@@ -13,20 +15,21 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
   try {
     const { teacherId, name, subject, contactNumber, email } = req.body;
 
-    // --- FIX 1: Get schoolName from token ---
-    const schoolNameFromAdmin = req.user.schoolName;
+    // --- BADLAAV 1: Token se 'schoolId' aur 'schoolName' lein ---
+    const schoolIdFromToken = req.user.schoolId;
+    const schoolNameFromToken = req.user.schoolName; // Email bhejte waqt 'User' banane ke liye
 
     // Basic Validation
     if (!teacherId || !name || !subject || !contactNumber || !email) {
       return res.status(400).json({ message: 'Please provide all required teacher details.' });
     }
-     if (!schoolNameFromAdmin) {
+     if (!schoolIdFromToken || !schoolNameFromToken) {
          return res.status(400).json({ message: 'Admin user details incomplete (missing school info).' });
      }
 
-    // --- FIX 2: Check for duplicate teacher using schoolName ---
+    // --- BADLAAV 2: Duplicate teacher check ke liye 'schoolId' ka istemaal karein ---
     const existingTeacher = await Teacher.findOne({
-        schoolName: schoolNameFromAdmin, // Check within the admin's school using schoolName
+        schoolId: schoolIdFromToken, // 'schoolName' ke bajaaye 'schoolId' se check karein
         $or: [{ email }, { teacherId }]
      });
     if (existingTeacher) {
@@ -39,34 +42,31 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
       return res.status(400).json({ message: 'A user account with this email already exists.' });
     }
 
-    // --- FIX 3: REMOVED subject splitting. Save as string. ---
-    // const subjectArray = subject.split(',').map(s => s.trim()); // REMOVED
-
     // Generate password
     const password = generatePassword.generate({ length: 12, numbers: true });
 
-    // Create the User account for the teacher
+    // --- BADLAAV 3: Naye 'User' model ke hisaab se User account banayein ---
     const newUser = new User({
-      adminName: name,
-      schoolName: schoolNameFromAdmin,
+      name: name, // 'adminName' ke bajaaye 'name'
+      schoolId: schoolIdFromToken, // 'schoolName' ke bajaaye 'schoolId'
       email,
       password,
       role: 'teacher',
     });
     await newUser.save();
 
-    // Create the Teacher record
+    // --- BADLAAV 4: Naye 'Teacher' model ke hisaab se Teacher record banayein ---
     const newTeacher = new Teacher({
       teacherId,
       name,
-      subject: subject, // --- FIX 3 (continued): Save subject as string ---
+      subject: subject,
       contactNumber,
       email,
-      schoolName: schoolNameFromAdmin // --- FIX 1 (continued): Save schoolName ---
+      schoolId: schoolIdFromToken // 'schoolName' ke bajaaye 'schoolId'
     });
     await newTeacher.save();
 
-    // Send welcome email
+    // Send welcome email (ismein koi badlaav nahi)
     try {
       const message = `
         <h1>Welcome to SchoolPro, ${name}!</h1>
@@ -83,9 +83,8 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
       console.error("Could not send welcome email to teacher:", emailError);
     }
 
-    // Real-time update
-    if (req.app.get('socketio')) {
-        const io = req.app.get('socketio');
+    // --- BADLAAV 5: Real-time update ke liye 'req.io' ka istemaal karein ---
+    if (req.io) {
         io.emit('updateDashboard');
         io.emit('teacher_added', newTeacher);
     }
@@ -99,8 +98,8 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
        return res.status(400).json({ message: messages.join(' ') });
     }
     if (err.code === 11000) {
-        // Error from index { teacherId: 1, schoolName: 1 }
-        return res.status(400).json({ message: 'A teacher with this ID already exists in this school (Database conflict).' });
+        // --- BADLAAV 6: Error message ko naye index ke hisaab se update kiya ---
+        return res.status(400).json({ message: 'A teacher with this ID or Email already exists (Database conflict).' });
     }
     res.status(500).send('Server Error creating teacher');
   }
@@ -111,14 +110,14 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
 // @access  Private (Admin or Teacher)
 router.get('/', [authMiddleware], async (req, res) => {
     try {
-        // --- FIX 4: Use schoolName from token ---
-        const schoolNameFromAdmin = req.user.schoolName;
+        // --- BADLAAV 7: Token se 'schoolId' lein ---
+        const schoolIdFromToken = req.user.schoolId;
 
-        if (!schoolNameFromAdmin) {
-            return res.status(400).json({ message: "School Name (from Admin token) is required." });
+        if (!schoolIdFromToken) {
+            return res.status(400).json({ message: "School ID (from Admin token) is required." });
         }
-        // --- FIX 4 (continued): Query using schoolName ---
-        const teachers = await Teacher.find({ schoolName: schoolNameFromAdmin }).sort({ name: 1 });
+        // --- BADLAAV 8: 'schoolId' ka istemaal karke teachers ko find karein ---
+        const teachers = await Teacher.find({ schoolId: schoolIdFromToken }).sort({ name: 1 });
         res.json(teachers);
     } catch (err) {
         console.error("Error fetching teachers:", err.message);
@@ -138,29 +137,24 @@ router.put('/:id', [authMiddleware, authorize('admin')], async (req, res) => {
         return res.status(404).json({ message: 'Teacher not found' });
     }
 
-    // --- FIX 5: Check using schoolName ---
-    if (teacher.schoolName !== req.user.schoolName) {
+    // --- BADLAAV 9: 'schoolId' se authorization check karein ---
+    if (teacher.schoolId.toString() !== req.user.schoolId) {
         return res.status(401).json({ msg: 'User not authorized to edit this teacher' });
     }
 
     const updateData = { ...req.body };
-    delete updateData.schoolName; // Don't allow changing schoolName
+    // --- BADLAAV 10: 'schoolId' ko update hone se rokein ---
+    delete updateData.schoolId;
     delete updateData.email;
-    delete updateData.teacherId; // Don't allow changing teacherId
-
-    // --- FIX 6: REMOVED subject splitting ---
-    // if (updateData.subject && typeof updateData.subject === 'string') {
-    //     updateData.subject = updateData.subject.split(',').map(s => s.trim());
-    // }
+    delete updateData.teacherId;
 
     teacher = await Teacher.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true });
 
-    // Update the name in the corresponding User model as well
-    await User.updateOne({ email: teacher.email }, { $set: { adminName: teacher.name } });
+    // --- BADLAAV 11: 'User' model ko 'name' field se update karein ---
+    await User.updateOne({ email: teacher.email }, { $set: { name: teacher.name } }); // 'adminName' ke bajaaye 'name'
 
-     // Real-time update
-     if (req.app.get('socketio')) {
-        const io = req.app.get('socketio');
+     // --- BADLAAV 12: Real-time update ke liye 'req.io' ka istemaal karein ---
+     if (req.io) {
         io.emit('updateDashboard');
         io.emit('teacher_updated', teacher);
     }
@@ -184,8 +178,8 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
       return res.status(404).json({ message: 'Teacher not found' });
     }
 
-    // --- FIX 7: Check using schoolName ---
-     if (teacher.schoolName !== req.user.schoolName) {
+    // --- BADLAAV 13: 'schoolId' se authorization check karein ---
+     if (teacher.schoolId.toString() !== req.user.schoolId) {
         return res.status(401).json({ msg: 'User not authorized to delete this teacher' });
     }
 
@@ -197,9 +191,8 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
     // Then delete the associated User account
     await User.findOneAndDelete({ email: teacherEmail });
 
-     // Real-time update
-     if (req.app.get('socketio')) {
-        const io = req.app.get('socketio');
+     // --- BADLAAV 14: Real-time update ke liye 'req.io' ka istemaal karein ---
+     if (req.io) {
         io.emit('updateDashboard');
         io.emit('teacher_deleted', deletedTeacherId);
     }

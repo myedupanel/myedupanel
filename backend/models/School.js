@@ -1,34 +1,28 @@
+// models/School.js
+
 const mongoose = require('mongoose');
 
 const schoolSchema = new mongoose.Schema({
     // Basic Info
     name: {
         type: String,
-        required: true, // Yeh field zaroori hai
-        trim: true      // Aage peeche ke extra spaces hata dega
-    },
-    adminName: {
-        type: String,
-        required: true
-    },
-    adminEmail: {
-        type: String,
-        required: true,
-        unique: true    // Har school ka admin email alag hona chahiye
+        required: [true, "School name is required"],
+        unique: true, // <-- YAHI HAI HAMAARA MAIN FIX!
+        trim: true
     },
     
-    // Location Info (Problem #2 ko solve karne ke liye)
+    // Location Info (Yeh aapka idea tha, bahut achha hai)
     location: {
         city: { type: String, required: true },
         state: { type: String, required: true },
         country: { type: String, required: true }
     },
 
-    // Platform Info
+    // Platform Info (Yeh bhi perfect hai)
     plan: {
         type: String,
-        enum: ['Starter', 'Premium', 'Trial'], // Inke alawa koi aur value nahi ho sakti
-        default: 'Trial'                     // Naya school banne par default value
+        enum: ['Starter', 'Premium', 'Trial'],
+        default: 'Trial'
     },
     status: {
         type: String,
@@ -36,8 +30,11 @@ const schoolSchema = new mongoose.Schema({
         default: 'Active'
     }
 }, { 
-    timestamps: true // 'createdAt' aur 'updatedAt' fields apne aap ban jayengi
+    timestamps: true // 'createdAt' aur 'updatedAt' fields
 });
+
+// Yeh index location se search karne mein future mein madad karega
+schoolSchema.index({ "location.city": 1, "location.state": 1 });
 
 const School = mongoose.model('School', schoolSchema);
 

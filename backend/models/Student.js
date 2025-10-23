@@ -3,12 +3,13 @@
 const mongoose = require('mongoose');
 
 const StudentSchema = new mongoose.Schema({
-  // --- FIELD UPDATED ---
-  schoolName: { // Changed from schoolId
-    type: String, // Changed type to String
-    required: [true, "School name is required for student"], // Added required message
-    trim: true
+  // --- BADLAAV 1: 'schoolName' ko 'schoolId' se replace kiya ---
+  schoolId: {
+    type: mongoose.Schema.Types.ObjectId, // Yeh ek database ID hai
+    ref: 'School', // Yeh 'School' model se link hai
+    required: [true, "School ID is required for student"],
   },
+  
   studentId: {
     type: String,
     required: [true, "Student ID is required"]
@@ -35,18 +36,15 @@ const StudentSchema = new mongoose.Schema({
   parentContact: {
     type: String,
     required: [true, "Parent contact is required"]
-    // Maybe add validation for phone number format later
   },
   createdAt: {
     type: Date,
     default: Date.now
   },
-  // You might want to add other fields like address, DOB, etc. later
 });
 
-// --- INDEX UPDATED ---
-// This index ensures that within the same school (schoolName),
-// each studentId must be unique.
-StudentSchema.index({ studentId: 1, schoolName: 1 }, { unique: true });
+// --- BADLAAV 2: Index ko 'schoolId' use karne ke liye update kiya ---
+// Iska matlab hai ki studentId ek schoolId ke andar unique hona chahiye.
+StudentSchema.index({ studentId: 1, schoolId: 1 }, { unique: true });
 
 module.exports = mongoose.model('Student', StudentSchema);
