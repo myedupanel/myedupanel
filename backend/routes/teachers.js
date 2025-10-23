@@ -4,8 +4,6 @@ const generatePassword = require('generate-password');
 const Teacher = require('../models/Teacher'); // Ensure path is correct
 const User = require('../models/User');       // Ensure path is correct
 const sendEmail = require('../utils/sendEmail'); // Ensure path is correct
-// Assuming teacherController is mainly for bulk, keep it if needed
-// const teacherController = require('../controllers/teacherController');
 const { authMiddleware, authorize } = require('../middleware/authMiddleware'); // Added authorize
 
 // @route   POST /api/teachers
@@ -15,23 +13,21 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => { // 
   try {
     // Get required fields from body
     const { teacherId, name, subject, contactNumber, email } = req.body;
-    // --- FIX 1: Get schoolId and schoolName from logged-in user ---
-    const schoolIdFromAdmin = req.user.id; // Admin's User ID acting as School ID
+    
+    // --- FIX 1: Sirf schoolName ko token se lein ---
     const schoolNameFromAdmin = req.user.schoolName; // Admin's School Name
 
     // Basic Validation
     if (!teacherId || !name || !subject || !contactNumber || !email) {
       return res.status(400).json({ message: 'Please provide all required teacher details.' });
     }
-     if (!schoolIdFromAdmin || !schoolNameFromAdmin) {
+     if (!schoolNameFromAdmin) { // Sirf schoolName check karein
          return res.status(400).json({ message: 'Admin user details incomplete (missing school info).' });
      }
 
-
-    // Check for duplicate teacher (using email OR teacherId within the SAME school)
-    // Assuming Teacher model uses schoolId (which is admin's user ID)
+    // --- FIX 2: Check for duplicate teacher using schoolName ---
     const existingTeacher = await Teacher.findOne({
-        schoolId: schoolIdFromAdmin, // Check within the admin's school
+        schoolId: schoolNameFromAdmin, // Check within the admin's school
         $or: [{ email }, { teacherId }]
      });
     if (existingTeacher) {
@@ -41,10 +37,11 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => { // 
     // Check if a user with this email already exists ANYWHERE in the system
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      // If user exists, maybe prevent creation or handle differently?
-      // For now, prevent creating a duplicate user account.
       return res.status(400).json({ message: 'A user account with this email already exists.' });
     }
+    
+    // --- FIX 3: Subject string ko array mein convert karein ---
+    const subjectArray = subject.split(',').map(s => s.trim());
 
     // Generate password
     const password = generatePassword.generate({ length: 12, numbers: true });
@@ -57,21 +54,20 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => { // 
       password, // Pre-save hook will hash this
       role: 'teacher',
     });
-    await newUser.save(); // This should work now (no unique schoolName issue)
+    await newUser.save(); 
 
     // Create the Teacher record
-    // Assuming Teacher model uses schoolId (admin's user ID)
     const newTeacher = new Teacher({
       teacherId,
       name,
-      subject,
+      subject: subjectArray, // --- FIX 3 (continued): Yahaan array save karein
       contactNumber,
       email,
-      schoolId: schoolIdFromAdmin // --- FIX 2: Use admin's ID ---
+      schoolId: schoolNameFromAdmin // --- FIX 1 (continued): Yahaan schoolName save karein
     });
     await newTeacher.save();
 
-    // Send welcome email (optional, can be skipped if causing issues)
+    // Send welcome email
     try {
       const message = `
         <h1>Welcome to SchoolPro, ${name}!</h1>
@@ -86,29 +82,23 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => { // 
       await sendEmail({ to: email, subject: 'Your SchoolPro Teacher Account Details', html: message });
     } catch (emailError) {
       console.error("Could not send welcome email to teacher:", emailError);
-      // Don't block the response if email fails, maybe return a partial success message
-      // return res.status(201).json({ message: 'Teacher created, but email failed.', teacher: newTeacher });
     }
 
-    // --- ✨ REAL-TIME UPDATE (UPGRADED) ---
-    if (req.io) {
-        req.io.emit('updateDashboard'); // Signal dashboard to refetch counts
-        
-        // ✨ Event 2: Teacher list ko update karne ke liye (naya teacher object bhej rahe hain)
-        req.io.emit('teacher_added', newTeacher);
+    // --- ✨ REAL-TIME UPDATE ---
+    if (req.app.get('socketio')) { // req.io ki jagah req.app.get('socketio') behtar hai
+        const io = req.app.get('socketio');
+        io.emit('updateDashboard'); // Dashboard counts ko refetch karne ke liye
+        io.emit('teacher_added', newTeacher); // Teacher list ko update karne ke liye
     }
 
     res.status(201).json({ message: 'Teacher created successfully and welcome email sent.', teacher: newTeacher });
 
   } catch (err) {
     console.error("Error creating teacher:", err);
-    // Handle validation errors specifically
     if (err.name === 'ValidationError') {
-      // Extract specific validation messages if possible
        const messages = Object.values(err.errors).map(val => val.message);
        return res.status(400).json({ message: messages.join(' ') });
     }
-    // Handle potential duplicate key errors from Teacher model index (teacherId + schoolId)
     if (err.code === 11000) {
         return res.status(400).json({ message: 'Duplicate key error, likely teacherId within the school.' });
     }
@@ -116,21 +106,21 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => { // 
   }
 });
 
-// --- UPDATE OTHER ROUTES to use schoolId consistently ---
+// --- UPDATE OTHER ROUTES to use schoolName consistently ---
 
 // @route   GET /api/teachers
 // @desc    Get all teachers for the admin's school
-// @access  Private (Admin or Teacher) - Adjust authorization as needed
-router.get('/', [authMiddleware], async (req, res) => { // Removed authorize for now, admin check is implicit via schoolId
+// @access  Private (Admin or Teacher)
+router.get('/', [authMiddleware], async (req, res) => {
     try {
-        const schoolId = req.user.id; // Get admin's ID (acting as schoolId)
-        // const schoolId = req.query.schoolId; // Alternative if frontend sends it
+        // --- FIX 4: schoolId ki jagah schoolName token se lein ---
+        const schoolNameFromAdmin = req.user.schoolName; 
 
-        if (!schoolId) {
-            return res.status(400).json({ message: "School ID (Admin ID) is required." });
+        if (!schoolNameFromAdmin) {
+            return res.status(400).json({ message: "School Name (from Admin token) is required." });
         }
-        // Assuming Teacher model uses schoolId
-        const teachers = await Teacher.find({ schoolId: schoolId }).sort({ name: 1 }); // Filter by admin's ID
+        // Assuming Teacher model uses schoolId to store schoolName
+        const teachers = await Teacher.find({ schoolId: schoolNameFromAdmin }).sort({ name: 1 });
         res.json(teachers);
     } catch (err) {
         console.error("Error fetching teachers:", err.message);
@@ -150,29 +140,31 @@ router.put('/:id', [authMiddleware, authorize('admin')], async (req, res) => {
         return res.status(404).json({ message: 'Teacher not found' });
     }
 
-    // Ensure the teacher belongs to the admin's school
-    if (teacher.schoolId.toString() !== req.user.id) {
+    // --- FIX 5: Admin ID ki jagah Admin SchoolName se check karein ---
+    if (teacher.schoolId !== req.user.schoolName) {
         return res.status(401).json({ msg: 'User not authorized to edit this teacher' });
     }
 
-    // Prevent changing schoolId or potentially email via update
     const updateData = { ...req.body };
     delete updateData.schoolId;
-    delete updateData.email; // Usually email shouldn't be changed here
+    delete updateData.email; 
+
+    // --- FIX 6: Agar subject update ho raha hai, toh usey bhi array banayein ---
+    if (updateData.subject && typeof updateData.subject === 'string') {
+        updateData.subject = updateData.subject.split(',').map(s => s.trim());
+    }
 
     teacher = await Teacher.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true });
 
     // Update the name in the corresponding User model as well
     await User.updateOne({ email: teacher.email }, { $set: { adminName: teacher.name } });
 
-     // --- ✨ REAL-TIME UPDATE (UPGRADED) ---
-     if (req.io) {
-        req.io.emit('updateDashboard'); // Might not affect counts, but good practice
-        
-        // ✨ Event 2: Teacher list ko update karne ke liye (updated teacher object bhej rahe hain)
-        req.io.emit('teacher_updated', teacher);
+     // --- ✨ REAL-TIME UPDATE ---
+     if (req.app.get('socketio')) {
+        const io = req.app.get('socketio');
+        io.emit('updateDashboard');
+        io.emit('teacher_updated', teacher);
     }
-
 
     res.json({ message: 'Teacher updated successfully', teacher });
 
@@ -193,26 +185,24 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
       return res.status(404).json({ message: 'Teacher not found' });
     }
 
-    // Ensure the teacher belongs to the admin's school
-     if (teacher.schoolId.toString() !== req.user.id) {
+    // --- FIX 7: Admin ID ki jagah Admin SchoolName se check karein ---
+     if (teacher.schoolId !== req.user.schoolName) {
         return res.status(401).json({ msg: 'User not authorized to delete this teacher' });
     }
     
-    // ✨ Hum ID ko pehle save kar lete hain
     const deletedTeacherId = req.params.id;
-    const teacherEmail = teacher.email; // Aur email bhi
+    const teacherEmail = teacher.email; 
 
     // Delete Teacher record first
     await Teacher.findByIdAndDelete(deletedTeacherId);
     // Then delete the associated User account
     await User.findOneAndDelete({ email: teacherEmail });
 
-     // --- ✨ REAL-TIME UPDATE (UPGRADED) ---
-     if (req.io) {
-        req.io.emit('updateDashboard'); // Signal dashboard to refetch counts
-        
-        // ✨ Event 2: Teacher list ko update karne ke liye (delete ki hui ID bhej rahe hain)
-        req.io.emit('teacher_deleted', deletedTeacherId);
+     // --- ✨ REAL-TIME UPDATE ---
+     if (req.app.get('socketio')) {
+        const io = req.app.get('socketio');
+        io.emit('updateDashboard'); 
+        io.emit('teacher_deleted', deletedTeacherId);
     }
 
     res.json({ message: 'Teacher and associated user account removed successfully' });
@@ -223,8 +213,5 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
   }
 });
 
-// Bulk import route - Assuming teacherController handles this
-// Make sure teacherController also uses req.user.id for schoolId
-// router.post('/bulk', [authMiddleware, authorize('admin')], teacherController.addTeachersInBulk);
 
 module.exports = router;
