@@ -8,53 +8,50 @@ const { authMiddleware, authorize } = require('../middleware/authMiddleware');
 // @access  Private (Admin only)
 router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
     try {
-        // Extract student details from request body
         const { studentId, name, class: studentClass, rollNo, parentName, parentContact } = req.body;
 
-        // --- FIX 1: Get schoolName from the logged-in admin's token ---
-        const schoolNameFromToken = req.user.schoolName; // Hum ise 'schoolNameFromToken' ka naam denge
+        // Get schoolName from the logged-in admin's token
+        const schoolNameFromToken = req.user.schoolName;
         if (!schoolNameFromToken) {
             return res.status(400).json({ msg: 'Admin school information is missing. Cannot add student.' });
         }
 
-        // --- FIX 2: Check for duplicates using studentId AND schoolId (database key) ---
-        let student = await Student.findOne({ studentId, schoolId: schoolNameFromToken });
+        // --- FIX 1: Check for duplicates using studentId AND schoolName ---
+        let student = await Student.findOne({ studentId, schoolName: schoolNameFromToken });
         if (student) {
             return res.status(400).json({ msg: 'A student with this ID already exists in your school.' });
         }
 
         // Create a new student instance
         student = new Student({
-            ...req.body, // Include all other fields from the request body
-            class: studentClass, 
-            schoolId: schoolNameFromToken // --- FIX 3: 'schoolName' ki jagah 'schoolId' mein save karein
+            ...req.body,
+            class: studentClass,
+            // --- FIX 2: Save using the correct field name 'schoolName' ---
+            schoolName: schoolNameFromToken
         });
 
-        // Save the student to the database
         await student.save();
 
-        // --- ✨ REAL-TIME UPDATE (Yeh pehle se sahi tha) ---
-        if (req.app.get('socketio')) { // req.io ki jagah req.app.get('socketio') behtar hai
+        // Real-time update logic
+        if (req.app.get('socketio')) {
             const io = req.app.get('socketio');
-            // Event 1: Dashboard ko refresh karne ke liye
-            io.emit('updateDashboard'); 
-            
-            // Event 2: Student list ko update karne ke liye
-            io.emit('student_added', student); 
+            io.emit('updateDashboard');
+            io.emit('student_added', student);
         } else {
             console.warn('Socket.IO instance not found on request object.');
         }
 
-        // Send success response
         res.status(201).json({ message: 'Student added successfully', student });
 
     } catch (err) {
-        // --- ERROR FIX: Duplicate key error ko aache se handle karein ---
         if (err.code === 11000) {
-            return res.status(400).json({ msg: 'A student with this ID already exists in your school (Database conflict).' });
+            // Error because of the unique index { studentId: 1, schoolName: 1 }
+            return res.status(400).json({ msg: 'A student with this ID already exists in this school (Database conflict).' });
         }
         if (err.name === 'ValidationError') {
-            return res.status(400).json({ msg: err.message });
+            // Catch specific validation errors like missing fields
+            const messages = Object.values(err.errors).map(val => val.message);
+            return res.status(400).json({ msg: messages.join(' ') });
         }
         console.error("Error creating student:", err.message);
         res.status(500).send('Server Error');
@@ -70,8 +67,8 @@ router.get('/', [authMiddleware, authorize('admin', 'teacher')], async (req, res
         if (!schoolNameFromToken) {
             return res.status(400).json({ msg: 'School information not found for user.' });
         }
-        // --- FIX 4: 'schoolName' ki jagah 'schoolId' se find karein ---
-        const students = await Student.find({ schoolId: schoolNameFromToken }).sort({ name: 1 });
+        // --- FIX 3: Query using 'schoolName' ---
+        const students = await Student.find({ schoolName: schoolNameFromToken }).sort({ name: 1 });
         res.json(students);
     } catch (err) {
         console.error("Error fetching students:", err.message);
@@ -81,24 +78,24 @@ router.get('/', [authMiddleware, authorize('admin', 'teacher')], async (req, res
 
 // @route   GET /api/students/search
 // @desc    Search students by name within the admin's school
-// @access  Private (Admin, Teacher, Staff - adjust roles as needed)
+// @access  Private (Admin, Teacher, Staff)
 router.get('/search', authMiddleware, async (req, res) => {
     try {
         const schoolNameFromToken = req.user.schoolName;
-        const studentName = req.query.name || ''; 
+        const studentName = req.query.name || '';
 
         if (!schoolNameFromToken) {
              return res.status(400).json({ msg: 'School information not found.' });
         }
         if (studentName.length < 2) {
-            return res.json([]); 
+            return res.json([]);
         }
 
-        // --- FIX 5: 'schoolName' ki jagah 'schoolId' se find karein ---
+        // --- FIX 4: Query using 'schoolName' ---
         const students = await Student.find({
-            schoolId: schoolNameFromToken,
-            name: { $regex: studentName, $options: 'i' } 
-        }).limit(10); 
+            schoolName: schoolNameFromToken,
+            name: { $regex: studentName, $options: 'i' }
+        }).limit(10);
 
         res.json(students);
     } catch (error) {
@@ -109,7 +106,7 @@ router.get('/search', authMiddleware, async (req, res) => {
 
 // @route   GET /api/students/:id
 // @desc    Get a single student by their MongoDB ID
-// @access  Private (Admin, Teacher, Staff - adjust roles as needed)
+// @access  Private (Admin, Teacher, Staff)
 router.get('/:id', authMiddleware, async (req, res) => {
     try {
         const student = await Student.findById(req.params.id);
@@ -118,8 +115,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
             return res.status(404).json({ msg: 'Student not found' });
         }
 
-        // --- FIX 6: 'student.schoolName' ki jagah 'student.schoolId' check karein ---
-        if (student.schoolId !== req.user.schoolName) {
+        // --- FIX 5: Check using 'schoolName' ---
+        if (student.schoolName !== req.user.schoolName) {
             return res.status(403).json({ msg: 'User not authorized to view this student' });
         }
 
@@ -127,7 +124,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
     } catch (error) {
         console.error("Error fetching single student:", error.message);
         if (error.kind === 'ObjectId') {
-            return res.status(404).json({ msg: 'Student not found with that ID format' }); // 404 use karna behtar hai
+            return res.status(404).json({ msg: 'Student not found with that ID format' });
         }
         res.status(500).send('Server Error');
     }
@@ -144,21 +141,22 @@ router.put('/:id', [authMiddleware, authorize('admin')], async (req, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
 
-        // --- FIX 7: 'student.schoolName' ki jagah 'student.schoolId' check karein ---
-        if (student.schoolId !== req.user.schoolName) {
+        // --- FIX 6: Check using 'schoolName' ---
+        if (student.schoolName !== req.user.schoolName) {
             return res.status(401).json({ msg: 'User not authorized to edit this student' });
         }
 
         const updateData = { ...req.body };
-        delete updateData.schoolId; // schoolId ko update data se hata dein
-        delete updateData.schoolName; // schoolName ko bhi (agar galti se aa gaya ho)
+        // Don't allow changing schoolName or studentId via update
+        delete updateData.schoolName;
+        delete updateData.studentId;
 
         student = await Student.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true });
 
-        // --- ✨ REAL-TIME UPDATE ---
+        // Real-time update
         if (req.app.get('socketio')) {
             const io = req.app.get('socketio');
-            io.emit('updateDashboard');
+            io.emit('updateDashboard'); // Dashboard counts might change if student is added/removed elsewhere
             io.emit('student_updated', student);
         }
 
@@ -180,16 +178,16 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
             return res.status(404).json({ message: 'Student not found' });
         }
 
-        // --- FIX 8: 'student.schoolName' ki jagah 'student.schoolId' check karein ---
-        if (student.schoolId !== req.user.schoolName) {
+        // --- FIX 7: Check using 'schoolName' ---
+        if (student.schoolName !== req.user.schoolName) {
             return res.status(401).json({ msg: 'User not authorized to delete this student' });
         }
-        
+
         const deletedStudentId = req.params.id;
 
         await Student.findByIdAndDelete(deletedStudentId);
 
-        // --- ✨ REAL-TIME UPDATE ---
+        // Real-time update
         if (req.app.get('socketio')) {
             const io = req.app.get('socketio');
             io.emit('updateDashboard');
@@ -203,4 +201,4 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
     }
 });
 
-module.exports = router; // Export the router
+module.exports = router;
