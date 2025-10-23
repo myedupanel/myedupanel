@@ -8,7 +8,7 @@ const UserSchema = new mongoose.Schema({
   schoolName: {
     type: String,
     required: [true, 'School name is required'],
-    // unique: true, // <-- YEH LINE HATA DI GAYI HAI
+    // unique: true, // <-- YEH LINE HATA DI GAYI HAI (BILKUL SAHI!)
     trim: true
   },
   adminName: {
