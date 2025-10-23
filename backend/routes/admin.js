@@ -44,6 +44,22 @@ router.post(
       user = new User(newUserDetails);
       await user.save();
 
+      // ===== YAHAN BADLAAV KIYA GAYA HAI (REAL-TIME UPDATE) =====
+      try {
+        // Apne main server.js se 'socketio' instance ko get karein
+        const io = req.app.get('socketio');
+        if (io) {
+          // Sabhi connected clients ko dashboard update karne ke liye bolein
+          io.emit('updateDashboard');
+          console.log('Socket.IO: Dashboard update event bheja gaya.');
+        } else {
+          console.log('Socket.IO: Instance nahi mila.');
+        }
+      } catch (socketError) {
+        console.error("Socket emit error:", socketError);
+      }
+      // ===== END BADLAAV =====
+
       try {
         const subject = 'Your SchoolPro Account has been created!';
         const message = `
@@ -75,6 +91,9 @@ router.post(
 // @route   GET /api/admin/dashboard-data
 // @desc    Get aggregated data for the admin dashboard
 // @access  Private (Admin only)
+// 
+// ===== YEH ROUTE BILKUL SAHI HAI - KOI BADLAAV NAHI =====
+//
 router.get(
   '/dashboard-data',
   [authMiddleware, adminMiddleware],

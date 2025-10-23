@@ -6,11 +6,14 @@ interface StatCardProps {
   icon: React.ReactNode;
   value: string;
   title: string;
-  theme: 'blue' | 'green' | 'orange' | 'purple';
+  // --- BADLAAV YAHAN HAI ---
+  // Humne naye colours 'teal' aur 'sky' ko list mein add kar diya
+  theme: 'blue' | 'green' | 'orange' | 'purple' | 'teal' | 'sky';
 }
 
 const StatCard: React.FC<StatCardProps> = ({ icon, value, title, theme }) => {
   return (
+    // Yeh line ab naye themes (styles[theme]) ko handle kar legi
     <div className={`${styles.card} ${styles[theme]}`}>
       <div className={styles.iconWrapper}>
         {icon}

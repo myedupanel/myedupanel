@@ -11,7 +11,6 @@ import styles from './AdminDashboard.module.scss';
 import { useAuth } from '../../context/AuthContext';
 
 // --- TYPE DEFINITIONS ---
-// FIX 1: ChartData ke liye ek naya type banaya jismein 'color' zaroori hai.
 interface ChartData {
   name: string;
   admissions: number;
@@ -25,14 +24,16 @@ interface AdminProfile {
   profileImageUrl: string;
 }
 
+// ===== BADLAAV 2: Naye Professional Colours =====
 const cardDetails = {
-  "Total Students": { icon: <MdPeople />, theme: "purple" },
-  "Total Teachers": { icon: <MdSchool />, theme: "orange" },
+  "Total Students": { icon: <MdPeople />, theme: "blue" },
+  "Total Teachers": { icon: <MdSchool />, theme: "teal" },
   "Monthly Revenue": { icon: <MdAttachMoney />, theme: "green" },
   "Total Parents": { icon: <MdFamilyRestroom />, theme: "purple" },
   "Total Staff": { icon: <MdBadge />, theme: "orange" },
-  "Total Classes": { icon: <MdClass />, theme: "green" }
+  "Total Classes": { icon: <MdClass />, theme: "sky" }
 } as const;
+// ===== END BADLAAV 2 =====
 
 interface BackendDashboardData {
   admissionsData: { month: string; admissions: number }[];
@@ -45,11 +46,11 @@ interface BackendDashboardData {
   totalTeachers?: number;
   totalParents?: number;
   totalClasses?: number;
+  totalStaff?: number; // Backend yeh bhej raha hai, humein iska type add karna chahiye
 }
 
 interface FormattedDashboardData {
   stats: { title: string; value: string }[];
-  // FIX 2: Yahan naye ChartData type ka istemal kiya.
   admissionData: ChartData[]; 
   recentPayments: any[];
 }
@@ -65,7 +66,6 @@ const AdminDashboardPage = () => {
       const data = response.data;
 
       const chartDataFromApi = data.admissionsData || [];
-      // FIX 3: Variable ko bhi naye ChartData type se initialize kiya.
       let coloredChartData: ChartData[] = [];
 
       if (chartDataFromApi.length > 0) {
@@ -82,14 +82,17 @@ const AdminDashboardPage = () => {
         });
       }
 
+      // ===== BADLAAV 1: "0" Bug Fix Yahaan Hai =====
       const formattedStats = [
         { title: "Total Students", value: (data.totalStudents || 0).toString() },
         { title: "Total Teachers", value: (data.totalTeachers || 0).toString() },
-        { title: "Monthly Revenue", value: "₹0" },
+        { title: "Monthly Revenue", value: "₹0" }, // Yeh abhi static hai
         { title: "Total Parents", value: (data.totalParents || 0).toString() },
-        { title: "Total Staff", value: (data.recentStaff?.length || 0).toString() },
+        // Humne data.recentStaff.length ko data.totalStaff se badal diya
+        { title: "Total Staff", value: (data.totalStaff || 0).toString() }, 
         { title: "Total Classes", value: (data.totalClasses || 0).toString() }
       ];
+      // ===== END BADLAAV 1 =====
 
       const formattedData: FormattedDashboardData = {
         stats: formattedStats,
@@ -106,22 +109,18 @@ const AdminDashboardPage = () => {
 
   const loadProfileData = useCallback(() => {
     if (user) {
-      // ===== YAHI HAI AAPKA FIX =====
-      // Humne user.email ki jagah user.adminName kar diya
       let profileData: AdminProfile = { 
         ...user, 
-        adminName: user.adminName, // <--- FIX YAHAN HAI
+        adminName: user.adminName, 
         profileImageUrl: '' 
       };
       
       const savedProfile = localStorage.getItem(`adminProfile_${user._id}`);
       if (savedProfile) {
         const savedData = JSON.parse(savedProfile);
-        // Neeche ki lines profile image ko localStorage se load karti hain
         if (savedData.profileImageUrl && savedData.profileImageUrl.startsWith('data:image')) {
           profileData.profileImageUrl = savedData.profileImageUrl;
         }
-        // Agar local storage mein naam hai, toh usey prathmikta dein
         if (savedData.adminName) {
             profileData.adminName = savedData.adminName;
         }
@@ -136,10 +135,15 @@ const AdminDashboardPage = () => {
 
     const socket = io("https://myedupanel.onrender.com");
     socket.on('connect', () => console.log('Socket.IO: Connected'));
-    socket.on('updateDashboard', () => { fetchDashboardData(); });
+    
+    // Yahi magic hai real-time updates ka
+    socket.on('updateDashboard', () => { 
+      console.log('Socket.IO: Update event mila! Data refresh ho raha hai...');
+      fetchDashboardData(); 
+    });
+
     socket.on('connect_error', (err) => console.error('Socket.IO: Connection Error!', err.message));
     
-    // Yeh listener profile pic/name ko turant update karne ke liye hai
     window.addEventListener('focus', loadProfileData); 
 
     return () => {
@@ -154,7 +158,6 @@ const AdminDashboardPage = () => {
 
   return (
     <div className={styles.dashboardContainer}>
-      {/* Header component ab updated adminProfile data use karega */}
       <Header admin={adminProfile} />
       
       <div className={styles.statsGrid}>
@@ -163,6 +166,7 @@ const AdminDashboardPage = () => {
             key={stat.title}
             title={stat.title}
             value={stat.value}
+            // Icon aur naye colours ab yahaan se aa rahe hain
             icon={cardDetails[stat.title as keyof typeof cardDetails]?.icon}
             theme={cardDetails[stat.title as keyof typeof cardDetails]?.theme}
           />
