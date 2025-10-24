@@ -33,7 +33,7 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
     <aside className="sidebar-container">
       <div className="logo-section">
         <Link href="/admin/dashboard">
-          <h2>SchoolPro</h2>
+          <h2>My EduPanel</h2>
         </Link>
       </div>
       
