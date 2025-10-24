@@ -8,16 +8,14 @@ const { Server } = require("socket.io");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- ✨ NEW: Import all Mongoose Models Here ---
-// Import models to ensure they are registered with Mongoose before routes use them
+// --- Import all Mongoose Models Here ---
 require('./models/School');
 require('./models/User');
 require('./models/Student');
 require('./models/Teacher');
-require('./models/Parent'); // Make sure this file exists
-require('./models/FeeRecord'); // Make sure this file exists
-// Add any other models you have (e.g., Class)
-// require('./models/Class');
+require('./models/Parent');
+require('./models/FeeRecord');
+// require('./models/Class'); // Add other models if they exist
 // --- End Model Imports ---
 
 // Standard Middlewares
@@ -51,15 +49,19 @@ app.get('/', (req, res) => {
 });
 // --- Ensure correct file names here ---
 app.use('/api/auth', require('./routes/auth'));
-app.use('/api/admin', require('./routes/admin')); // Assuming file is admin.js
-app.use('/api/students', require('./routes/students')); // Assuming file is student.js
+app.use('/api/admin', require('./routes/admin')); // Correct according to screenshot
+// --- FIX: Use plural 'students.js' ---
+app.use('/api/students', require('./routes/students'));
+// --- END FIX ---
 // app.use('/api/classes', require('./routes/classes')); // Uncomment if you have this route
 // app.use('/api/dashboard', require('./routes/dashboard')); // Uncomment if you have this route
-app.use('/api/teachers', require('./routes/teacher')); // Assuming file is teacher.js
-app.use('/api/parents', require('./routes/parents')); // Assuming file is parents.js
+// --- FIX: Use plural 'teachers.js' ---
+app.use('/api/teachers', require('./routes/teachers'));
+// --- END FIX ---
+app.use('/api/parents', require('./routes/parents')); // Correct according to screenshot
 app.use('/api/school', require('./routes/schoolRoutes')); // Handles /api/school/profile
-app.use('/api/schools', require('./routes/schoolRoutes')); // Assuming file is schoolRoutes.js
-app.use('/api/fees', require('./routes/fees')); // Assuming file is fees.js
+app.use('/api/schools', require('./routes/schoolRoutes')); // Correct according to screenshot
+app.use('/api/fees', require('./routes/fees')); // Correct according to screenshot
 // --- End Route Definitions ---
 
 // Socket.IO Connection Handler
