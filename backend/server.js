@@ -52,7 +52,7 @@ app.get('/', (req, res) => {
 // --- Ensure correct file names here ---
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin')); // Assuming file is admin.js
-app.use('/api/students', require('./routes/student')); // Assuming file is student.js
+app.use('/api/students', require('./routes/students')); // Assuming file is student.js
 // app.use('/api/classes', require('./routes/classes')); // Uncomment if you have this route
 // app.use('/api/dashboard', require('./routes/dashboard')); // Uncomment if you have this route
 app.use('/api/teachers', require('./routes/teacher')); // Assuming file is teacher.js
