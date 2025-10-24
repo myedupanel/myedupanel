@@ -62,6 +62,7 @@ app.use('/api/parents', require('./routes/parents')); // Correct according to sc
 app.use('/api/school', require('./routes/schoolRoutes')); // Handles /api/school/profile
 app.use('/api/schools', require('./routes/schoolRoutes')); // Correct according to screenshot
 app.use('/api/fees', require('./routes/fees')); // Correct according to screenshot
+app.use('/api/staff', require('./routes/staff'));
 // --- End Route Definitions ---
 
 // Socket.IO Connection Handler
