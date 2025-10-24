@@ -74,7 +74,7 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
             studentId, name, class: studentClass, rollNo, parentName, parentContact,
             email: providedEmail || undefined, // Store trimmed email or undefined here too
             schoolId: schoolIdFromToken,
-            userId: newUser._id // Optional: Link to the User document's ID
+            userId: newUser._id // Link to the User document's ID
         });
         await newStudent.save(); // Save the Student document
         console.log(`[POST /students] Student document saved with ID: ${newStudent._id}`);
@@ -206,9 +206,9 @@ router.put('/:id', [authMiddleware, authorize('admin')], async (req, res) => {
 });
 
 // @route   DELETE /api/students/:id
-// @desc    Delete a student (AND their User account if email exists)
+// @desc    Delete a student (AND their User account if email or userId exists)
 // @access  Private (Admin only)
-// --- THIS ROUTE INCLUDES USER DELETION ---
+// --- THIS ROUTE INCLUDES USER DELETION BY EMAIL OR USERID ---
 router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => {
     try {
         let student = await Student.findById(req.params.id);
@@ -217,29 +217,34 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
 
         const deletedStudentId = req.params.id;
         const studentEmail = student.email; // Get email stored in Student doc
+        const linkedUserId = student.userId; // Get linked userId from Student doc
 
-        // --- Delete the User account first (if email exists) ---
+        // --- Try deleting User by Email first ---
+        let userDeleted = false;
         if (studentEmail) {
             const deletedUser = await User.findOneAndDelete({ email: studentEmail, role: 'student' });
             if(deletedUser) {
-                console.log(`[DELETE /students] Deleted user account for email: ${studentEmail}`);
+                console.log(`[DELETE /students] Deleted user account by email: ${studentEmail}`);
+                userDeleted = true;
             } else {
                  console.log(`[DELETE /students] User account not found for email: ${studentEmail} (role: student), maybe already deleted.`);
             }
-        } else {
-            // --- NEW: Try deleting User based on studentId if linked ---
-            // This assumes you added 'userId' to Student model and saved newUser._id there
-            if (student.userId) {
-                const deletedUserById = await User.findOneAndDelete({ _id: student.userId, role: 'student' });
-                if(deletedUserById) {
-                     console.log(`[DELETE /students] Deleted user account by linked ID: ${student.userId}`);
-                } else {
-                     console.log(`[DELETE /students] User account not found for linked ID: ${student.userId}`);
-                }
+        }
+
+        // --- If not deleted by email, try deleting by linked userId ---
+        if (!userDeleted && linkedUserId) {
+            const deletedUserById = await User.findOneAndDelete({ _id: linkedUserId, role: 'student' });
+            if(deletedUserById) {
+                 console.log(`[DELETE /students] Deleted user account by linked ID: ${linkedUserId}`);
+                 userDeleted = true; // Mark as deleted even if found by ID
             } else {
-                 console.log(`[DELETE /students] No email or linked userId associated with student ${deletedStudentId}, cannot delete User account.`);
+                 console.log(`[DELETE /students] User account not found for linked ID: ${linkedUserId}.`);
             }
-             // --- END NEW ---
+        }
+
+        // Log if no User could be deleted
+        if (!userDeleted && !studentEmail && !linkedUserId) {
+             console.log(`[DELETE /students] No email or linked userId associated with student ${deletedStudentId}, cannot delete User account.`);
         }
 
         // --- Then delete the Student document ---
@@ -248,8 +253,11 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
 
         // --- Socket emit ---
         if (req.io) {
-            req.io.emit('updateDashboard');
+             console.log("[DELETE /students] Emitting socket events..."); // Added log
+            req.io.emit('updateDashboard'); // Trigger dashboard refresh
             req.io.emit('student_deleted', deletedStudentId);
+        } else {
+             console.warn('[DELETE /students] Socket.IO instance (req.io) not found on request object.'); // Added Warning
         }
 
         res.json({ message: 'Student removed successfully' });
