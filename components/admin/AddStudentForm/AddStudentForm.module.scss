@@ -27,7 +27,16 @@
       box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
     }
   }
-}
+
+  // --- NEW STYLE for the <small> tag ---
+  small {
+    font-size: 0.85em; // Slightly smaller text
+    color: #6c757d;   // Muted grey color
+    margin-top: -4px; // Adjust spacing if needed
+  }
+  // --- END NEW STYLE ---
+
+} // End of .inputGroup
 
 .actions {
   display: flex;
@@ -52,6 +61,11 @@
   &:hover {
     background-color: #2980b9;
   }
+  // Optional: Style for disabled state
+  &:disabled {
+      background-color: #a9cce3;
+      cursor: not-allowed;
+  }
 }
 
 .cancelBtn {
@@ -60,4 +74,19 @@
   &:hover {
     background-color: #e0e0e0;
   }
+   // Optional: Style for disabled state
+   &:disabled {
+      background-color: #e0e0e0;
+      cursor: not-allowed;
+      opacity: 0.7;
+   }
+}
+
+// --- Optional: Add styles for error message ---
+.error {
+    color: #dc3545; // Red color for errors
+    font-size: 0.9em;
+    margin-top: 5px;
+    margin-bottom: 0; // Adjust spacing
+    text-align: right; // Align with buttons if needed
 }
