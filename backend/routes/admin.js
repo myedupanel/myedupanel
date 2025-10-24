@@ -1,4 +1,4 @@
-// routes/adminRoutes.js (or admin.js based on your server.js)
+// routes/admin.js (or adminRoutes.js)
 const mongoose = require('mongoose'); // Needed for ObjectId
 const Student = require('../models/Student'); // Assuming path is correct
 const Teacher = require('../models/Teacher'); // Assuming path is correct
@@ -72,16 +72,21 @@ router.post(
 // @route   GET /api/admin/dashboard-data
 // @desc    Get aggregated data for the admin dashboard
 // @access  Private (Admin only)
-// --- Code updated to use schoolId ---
+// --- Code updated to use schoolId AND aggregate correctly ---
 router.get(
   '/dashboard-data',
-  [authMiddleware, adminMiddleware],
+  [authMiddleware, adminMiddleware], // Ensure adminMiddleware checks role
   async (req, res) => {
+    console.log("[GET /dashboard-data] Request received."); // Added log
     try {
       const schoolIdFromAdmin = req.user.schoolId;
-      if (!schoolIdFromAdmin) return res.status(400).json({ msg: 'Admin school information missing.' });
+      if (!schoolIdFromAdmin) {
+        console.log("[GET /dashboard-data] Error: Missing schoolId in token."); // Added log
+        return res.status(400).json({ msg: 'Admin school information missing.' });
+      }
+      console.log(`[GET /dashboard-data] Fetching data for schoolId: ${schoolIdFromAdmin}`); // Added log
 
-      // Use Mongoose ObjectId for matching in aggregation if schoolIdFromAdmin is a string
+      // Convert schoolId to ObjectId for aggregation matching
       let schoolObjectId;
        try {
            schoolObjectId = mongoose.Types.ObjectId.isValid(schoolIdFromAdmin) ? new mongoose.Types.ObjectId(schoolIdFromAdmin) : null;
@@ -95,30 +100,132 @@ router.get(
        }
 
 
-      const [ studentCount, teacherCount, parentCount, staffCount, recentStudents, recentTeachers, recentParents, recentStaff, recentPaidFeeRecords, admissionsDataRaw ] = await Promise.all([
-        User.countDocuments({ role: 'student', schoolId: schoolIdFromAdmin }), User.countDocuments({ role: 'teacher', schoolId: schoolIdFromAdmin }),
-        User.countDocuments({ role: 'parent', schoolId: schoolIdFromAdmin }), User.countDocuments({ role: 'staff', schoolId: schoolIdFromAdmin }),
+      const [
+        studentCount,
+        teacherCount,
+        parentCount,
+        staffCount,
+        recentStudents,
+        recentTeachers,
+        recentParents, // Assuming Parent model exists
+        recentStaff,   // Assuming staff are Users
+        recentPaidFeeRecords,
+        // --- Aggregation for Admissions by Month (from User collection) ---
+        admissionsDataRaw,
+        // --- Aggregation for Students by Class (from Student collection) ---
+        classCountsRaw
+      ] = await Promise.all([
+        // Counts using User model and schoolId
+        User.countDocuments({ role: 'student', schoolId: schoolIdFromAdmin }),
+        User.countDocuments({ role: 'teacher', schoolId: schoolIdFromAdmin }),
+        User.countDocuments({ role: 'parent', schoolId: schoolIdFromAdmin }),
+        User.countDocuments({ role: 'staff', schoolId: schoolIdFromAdmin }),
+
+        // Recent lists (fetching specific models)
         Student.find({ schoolId: schoolIdFromAdmin }).sort({ createdAt: -1 }).limit(5).select('name class createdAt'),
         Teacher.find({ schoolId: schoolIdFromAdmin }).sort({ createdAt: -1 }).limit(5).select('name subject createdAt'),
         Parent.find({ schoolId: schoolIdFromAdmin }).sort({ createdAt: -1 }).limit(5).select('name createdAt'), // Assumes Parent model exists and has schoolId
         User.find({ role: 'staff', schoolId: schoolIdFromAdmin }).sort({ createdAt: -1 }).limit(5).select('name createdAt'), // Assumes staff are Users with schoolId
+
+        // Fee Records
         FeeRecord.find({ schoolId: schoolIdFromAdmin, status: 'Paid' }).sort({ createdAt: -1 }).limit(5)
           .populate({ path: 'studentId', select: 'name' }) // Populate student name
           .select('amount createdAt studentId'),
-        User.aggregate([ // Aggregate student *Users* by schoolId
-          { $match: { role: 'student', schoolId: schoolObjectId } }, // Use converted ObjectId
-          { $group: { _id: { month: { $month: "$createdAt" } }, count: { $sum: 1 } } },
-          { $project: { _id: 0, month: "$_id.month", admissions: "$count" } }, { $sort: { "month": 1 } }
+
+        // --- UPDATED: Admission Chart (Aggregate student USERS by creation month) ---
+        User.aggregate([
+          { $match: { role: 'student', schoolId: schoolObjectId } }, // Match student Users in this school
+          {
+             $project: { // Project the month from createdAt
+                 month: { $month: "$createdAt" }
+             }
+          },
+          {
+             $group: { // Group by month and count
+                 _id: "$month", // Group by the extracted month number
+                 admissions: { $sum: 1 } // Count documents in each group
+             }
+          },
+          {
+             $project: { // Reshape the output
+                 _id: 0, // Exclude the default _id
+                 month: "$_id", // Rename _id to month
+                 admissions: 1 // Include the count
+             }
+          },
+          { $sort: { "month": 1 } } // Sort by month number (1-12)
+        ]),
+
+        // --- NEW: Class Counts (Aggregate STUDENTS by class) ---
+        Student.aggregate([
+            { $match: { schoolId: schoolObjectId } }, // Match Students in this school
+            {
+                $group: { // Group by class name
+                    _id: "$class", // The field storing class name in Student model
+                    count: { $sum: 1 } // Count students per class
+                }
+            },
+            {
+                $project: { // Reshape the output
+                    _id: 0, // Exclude the default _id
+                    name: "$_id", // Rename _id to name (class name)
+                    count: 1 // Include the count
+                }
+            },
+            { $sort: { "name": 1 } } // Sort alphabetically by class name
         ])
-      ]);
+      ]).catch(err => {
+          // Catch errors from Promise.all early
+          console.error("[GET /dashboard-data] Error during Promise.all:", err);
+          throw err; // Re-throw to be caught by the outer try-catch
+      });
+      console.log("[GET /dashboard-data] Raw Admissions Data:", admissionsDataRaw); // Added log
+      console.log("[GET /dashboard-data] Raw Class Counts:", classCountsRaw);       // Added log
+
+      // --- Format Admissions Data (By Month) ---
       const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       const admissionsMap = new Map(monthNames.map((name, index) => [index + 1, { name, admissions: 0 }]));
-      admissionsDataRaw.forEach(item => { if (item.month >= 1 && item.month <= 12) { admissionsMap.set(item.month, { name: monthNames[item.month - 1], admissions: item.admissions }); } });
-      const admissionsData = Array.from(admissionsMap.values());
+      admissionsDataRaw.forEach(item => {
+        if (item.month >= 1 && item.month <= 12) {
+             admissionsMap.set(item.month, { name: monthNames[item.month - 1], admissions: item.admissions });
+        }
+      });
+      const admissionsData = Array.from(admissionsMap.values()); // Show all 12 months for consistency
+      console.log("[GET /dashboard-data] Formatted Admissions (Month):", admissionsData); // Added log
+
+
+      // --- Format Class Counts Data ---
+      // Directly use the result from aggregation as it's already { name: className, count: number }
+      const classCounts = classCountsRaw;
+      console.log("[GET /dashboard-data] Formatted Class Counts:", classCounts); // Added log
+
+
+      // --- Format Recent Payments (No change here) ---
       const recentFees = recentPaidFeeRecords.map(record => ({ _id: record._id.toString(), student: record.studentId?.name || 'Unknown Student', amount: `₹${record.amount.toLocaleString('en-IN')}`, date: record.createdAt ? record.createdAt.toISOString() : 'No Date' }));
-      const dashboardData = { totalStudents: studentCount, totalTeachers: teacherCount, totalParents: parentCount, totalStaff: staffCount, admissionsData, recentStudents, recentTeachers, recentParents, recentStaff, recentFees };
+
+      // --- Final Data Object ---
+      const dashboardData = {
+        totalStudents: studentCount,
+        totalTeachers: teacherCount,
+        totalParents: parentCount,
+        totalStaff: staffCount,
+        admissionsData,           // DYNAMIC Monthly Admissions
+        classCounts,              // DYNAMIC Class Counts
+        recentStudents,
+        recentTeachers,
+        recentParents,  // Add if fetched
+        recentStaff,    // Add if fetched
+        recentFees
+        // TODO: Add totalClasses (maybe classCounts.length?)
+        // TODO: Add monthlyRevenue (requires FeeRecord aggregation by month)
+      };
+      console.log("[GET /dashboard-data] Sending final dashboard data."); // Added log
       res.json(dashboardData);
-    } catch (err) { console.error("Dashboard Data Error:", err.message, err.stack); res.status(500).send('Server Error fetching dashboard data'); }
+
+    } catch (err) {
+      console.error("[GET /dashboard-data] CATCH BLOCK ERROR:", err.message, err.stack);
+      res.status(500).send('Server Error fetching dashboard data');
+    }
   }
 );
 
@@ -194,7 +301,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
     const requestedAdminNameTrimmed = adminName.trim();
     if (requestedAdminNameTrimmed && requestedAdminNameTrimmed !== user.name.trim()) {
         console.log(`[PUT /profile] User name change requested from '${user.name}' to '${requestedAdminNameTrimmed}'`);
-        user.name = requestedAdminNameTrimmed; // Update user object IN MEMORY
+        user.name = requestedAdminNameTrimmed; // Update user's 'name' field
         userNeedsSave = true; // Mark user doc to be saved
         console.log(`[PUT /profile] User name marked for update.`);
     } else { console.log(`[PUT /profile] User name not changed or not provided.`); }

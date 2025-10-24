@@ -1,30 +1,68 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
-import api from '@/backend/utils/api';
+import api from '@/backend/utils/api'; // Ensure correct path
 import { io } from "socket.io-client";
 import Header from '@/components/admin/Header/Header';
 import StatCard from '@/components/admin/StatCard/StatCard';
 import StudentAdmissionChart from '@/components/admin/StudentAdmissionChart/StudentAdmissionChart';
+// --- NEW: Import the new chart component ---
+import StudentClassChart from '@/components/admin/academics/StudentClassChart'; // Ensure path is correct
 import RecentPayments from '@/components/admin/RecentPayments/RecentPayments';
 import { MdPeople, MdSchool, MdAttachMoney, MdFamilyRestroom, MdBadge, MdClass } from 'react-icons/md';
 import styles from './AdminDashboard.module.scss';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, User } from '../../context/AuthContext'; // Import User type
 
 // --- TYPE DEFINITIONS ---
-interface ChartData {
-  name: string;
+
+// For Monthly Admissions Chart
+interface MonthlyAdmissionData {
+  name: string; // Month Name (e.g., "Jan")
   admissions: number;
-  color: string;
+  color: string; // Dynamic color
 }
 
-// Interface for the data expected by the Header component
-interface AdminProfile {
-  _id: string;
-  adminName: string; // Header component expects adminName
-  email: string;
-  profileImageUrl: string;
+// --- NEW: For Class Counts Chart ---
+interface ClassCountData {
+    name: string; // Class Name (e.g., "Grade-1")
+    count: number;
+    color: string; // Dynamic color
 }
 
+// Matches the structure sent FROM the backend
+interface BackendDashboardData {
+  admissionsData: { name: string; admissions: number }[]; // Backend sends name/admissions
+  classCounts: { name: string; count: number }[];       // Backend sends name/count
+  recentStudents: any[];
+  recentTeachers: any[];
+  recentParents: any[];
+  recentStaff: any[];
+  recentFees: { _id: string; student: string; amount: string; date: string }[]; // More specific type
+  totalStudents?: number;
+  totalTeachers?: number;
+  totalParents?: number;
+  totalClasses?: number; // Maybe use classCounts.length?
+  totalStaff?: number;
+}
+
+// For storing formatted data in the component's state
+interface FormattedDashboardData {
+  stats: { title: string; value: string }[];
+  monthlyAdmissions: MonthlyAdmissionData[]; // Use updated name
+  classCounts: ClassCountData[];          // Use updated name
+  recentPayments: { _id: string; student: string; amount: string; date: string }[];
+}
+
+// --- NEW: Define color palettes ---
+const classColors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#D97706']; // Example palette
+const admissionColors = {
+    high: '#22c55e', // Green
+    medium: '#8b5cf6', // Purple
+    low: '#ef4444' // Red
+};
+// --- END NEW ---
+
+
+// Card details (Use your existing cardDetails or update colors as needed)
 const cardDetails = {
   "Total Students": { icon: <MdPeople />, theme: "blue" },
   "Total Teachers": { icon: <MdSchool />, theme: "teal" },
@@ -34,158 +72,170 @@ const cardDetails = {
   "Total Classes": { icon: <MdClass />, theme: "sky" }
 } as const;
 
-interface BackendDashboardData {
-  admissionsData: { month: string; admissions: number }[];
-  recentStudents: any[];
-  recentTeachers: any[];
-  recentParents: any[];
-  recentStaff: any[];
-  recentFees: any[];
-  totalStudents?: number;
-  totalTeachers?: number;
-  totalParents?: number;
-  totalClasses?: number;
-  totalStaff?: number;
-}
 
-interface FormattedDashboardData {
-  stats: { title: string; value: string }[];
-  admissionData: ChartData[];
-  recentPayments: any[];
-}
+// --- Helper Function to get Color based on Value ---
+const getAdmissionColor = (value: number, min: number, max: number): string => {
+    if (value <= 0) return '#9ca3af'; // Grey for zero or negative (if possible)
+    if (max === min && value > 0) return admissionColors.medium; // If only one value > 0, use medium
+    if (value === max) return admissionColors.high;
+    if (value === min) return admissionColors.low;
+    // Simple logic for values in between (adjust as needed)
+    const mid = (max + min) / 2;
+    return value >= mid ? admissionColors.medium : admissionColors.low; // Lean towards medium/low for intermediate
+};
+// --- END HELPER ---
+
 
 const AdminDashboardPage = () => {
-  const { user } = useAuth(); // 'user' now likely has 'name', not 'adminName'
+  // --- UPDATED: Destructure token from useAuth ---
+  const { user, token } = useAuth() as { user: User | null; token: string | null; login: (token: string) => Promise<any> };
   const [dashboardData, setDashboardData] = useState<FormattedDashboardData | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
 
+  // --- UPDATED fetchDashboardData ---
   const fetchDashboardData = useCallback(async () => {
+    // Ensure we have a token before fetching
+    if (!token) {
+        console.log("fetchDashboardData: No token found, skipping fetch.");
+        return; // Exit if no token
+    }
+    console.log("fetchDashboardData: Fetching data...");
     try {
-      const response = await api.get<BackendDashboardData>('/admin/dashboard-data');
+      // Use the api instance (ensure it's configured correctly)
+      const response = await api.get<BackendDashboardData>('/admin/dashboard-data'); // No need to pass token if api instance handles it
       const data = response.data;
+      console.log("fetchDashboardData: Data received from backend:", data);
 
-      const chartDataFromApi = data.admissionsData || [];
-      let coloredChartData: ChartData[] = [];
+      // --- Process Monthly Admissions with Dynamic Colors ---
+      const monthlyDataFromApi = data.admissionsData || [];
+      let coloredMonthlyData: MonthlyAdmissionData[] = [];
+      if (monthlyDataFromApi.length > 0) {
+          const admissionValues = monthlyDataFromApi.map(d => d.admissions).filter(v => v > 0); // Consider only > 0 for min/max
+          const maxVal = admissionValues.length > 0 ? Math.max(...admissionValues) : 0;
+          const minVal = admissionValues.length > 0 ? Math.min(...admissionValues) : 0;
+          console.log(`Monthly Admissions Min: ${minVal}, Max: ${maxVal}`);
 
-      if (chartDataFromApi.length > 0) {
-        const values = chartDataFromApi.map(d => d.admissions);
-        const maxVal = Math.max(...values);
-        const minVal = Math.min(...values);
-
-        coloredChartData = chartDataFromApi.map(item => {
-            let color: string;
-            if (item.admissions === maxVal) color = "#22c55e";
-            else if (item.admissions === minVal) color = "#ef4444";
-            else color = "#8b5cf6";
-            return { name: item.month, admissions: item.admissions, color };
-        });
+          coloredMonthlyData = monthlyDataFromApi.map(item => ({
+              name: item.name,
+              admissions: item.admissions,
+              color: getAdmissionColor(item.admissions, minVal, maxVal) // Use helper function
+          }));
+      } else {
+           console.log("fetchDashboardData: No monthly admissions data found.");
       }
+      console.log("fetchDashboardData: Processed Monthly Admissions:", coloredMonthlyData);
 
+
+      // --- Process Class Counts with Dynamic Colors ---
+      const classDataFromApi = data.classCounts || [];
+      let coloredClassData: ClassCountData[] = [];
+      if (classDataFromApi.length > 0) {
+          coloredClassData = classDataFromApi.map((item, index) => ({
+              name: item.name,
+              count: item.count,
+              color: classColors[index % classColors.length] // Cycle through palette
+          }));
+      } else {
+            console.log("fetchDashboardData: No class count data found.");
+      }
+      console.log("fetchDashboardData: Processed Class Counts:", coloredClassData);
+
+
+      // Format Stats
       const formattedStats = [
         { title: "Total Students", value: (data.totalStudents || 0).toString() },
         { title: "Total Teachers", value: (data.totalTeachers || 0).toString() },
-        { title: "Monthly Revenue", value: "₹0" }, // Static for now
+        { title: "Monthly Revenue", value: "₹0" }, // Static
         { title: "Total Parents", value: (data.totalParents || 0).toString() },
         { title: "Total Staff", value: (data.totalStaff || 0).toString() },
-        { title: "Total Classes", value: (data.totalClasses || 0).toString() } // Assuming backend sends this
+        // Use length of class data for total classes
+        { title: "Total Classes", value: (classDataFromApi.length || 0).toString() }
       ];
 
+      // Set the final formatted data to state
       const formattedData: FormattedDashboardData = {
         stats: formattedStats,
-        admissionData: coloredChartData,
-        recentPayments: data.recentFees || []
+        monthlyAdmissions: coloredMonthlyData, // Pass colored data
+        classCounts: coloredClassData,       // Pass colored data
+        recentPayments: data.recentFees || [] // Use recentFees directly
       };
 
       setDashboardData(formattedData);
+      console.log("fetchDashboardData: Dashboard state updated.");
+
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
-      // Provide default structure on error to prevent crashes
-      setDashboardData({
-         stats: [
-            { title: "Total Students", value: "0" }, { title: "Total Teachers", value: "0" },
-            { title: "Monthly Revenue", value: "₹0" }, { title: "Total Parents", value: "0" },
-            { title: "Total Staff", value: "0" }, { title: "Total Classes", value: "0" }
-         ],
-         admissionData: [],
-         recentPayments: []
-      });
+      // Set empty state on error to prevent crashes
+      setDashboardData({ stats: [], monthlyAdmissions: [], classCounts: [], recentPayments: [] });
     }
-  }, []);
+  }, [token]); // Add token as a dependency
 
+  // loadProfileData (Use the correct version from previous steps)
   const loadProfileData = useCallback(() => {
     if (user) {
-      // --- FIX IS HERE: Use user.name instead of user.adminName ---
-      // We map user.name (from AuthContext) to adminName (expected by Header prop)
       let profileData: AdminProfile = {
-        _id: user._id,           // Make sure _id is included
-        email: user.email,       // Make sure email is included
-        adminName: user.name,    // Map user.name to adminName
-        profileImageUrl: ''      // Initialize profileImageUrl
+        _id: user._id, email: user.email,
+        adminName: user.name, // Map user.name to adminName
+        profileImageUrl: ''
       };
-      // --- End of FIX ---
-
-      // Load profile image and potentially updated name from localStorage
       const savedProfile = localStorage.getItem(`adminProfile_${user._id}`);
       if (savedProfile) {
         try {
             const savedData = JSON.parse(savedProfile);
-            // Prioritize localStorage name if available (from profile edit page)
-            if (savedData.adminName) {
-                profileData.adminName = savedData.adminName;
-            }
-            // Load saved image if it looks valid
+            if (savedData.adminName) profileData.adminName = savedData.adminName;
             if (savedData.profileImageUrl && savedData.profileImageUrl.startsWith('data:image')) {
               profileData.profileImageUrl = savedData.profileImageUrl;
             }
-        } catch (e) {
-            console.error("Failed to parse saved profile data:", e);
-            // Optionally clear corrupted localStorage data
-            // localStorage.removeItem(`adminProfile_${user._id}`);
-        }
+        } catch (e) { console.error("Failed to parse saved profile data:", e); }
       }
       setAdminProfile(profileData);
-    } else {
-        // Handle case where user is not logged in or data is not yet available
-        setAdminProfile(null);
-    }
-  }, [user]); // Dependency on user object
+    } else { setAdminProfile(null); }
+  }, [user]);
 
   useEffect(() => {
-    fetchDashboardData();
-    loadProfileData(); // Load profile data on initial mount and when user changes
+    // Fetch data immediately if token exists, AuthContext effect might be slightly delayed
+    if (token) {
+        fetchDashboardData();
+    }
+    loadProfileData(); // Load profile data
 
-    const socket = io("https://myedupanel.onrender.com"); // Ensure correct backend URL
-    socket.on('connect', () => console.log('Socket.IO: Connected'));
+    // --- Socket.IO setup ---
+    // Use an environment variable for the socket URL for flexibility
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "https://myedupanel.onrender.com"; // Store URL in variable
+    const socket = io(socketUrl);
+
+    // --- FIX IS HERE: Removed .io.uri ---
+    socket.on('connect', () => {
+        console.log('Socket.IO: Connected!');
+        console.log('Socket.IO: Connected to URL:', socketUrl); // Log the variable instead
+    });
+    // --- END FIX ---
 
     socket.on('updateDashboard', () => {
-      console.log('Socket.IO: Update event received! Refreshing data...');
-      fetchDashboardData();
+      console.log('Socket.IO: Update event received! Refreshing dashboard data...');
+      fetchDashboardData(); // Refetch data on update event
     });
+    socket.on('connect_error', (err) => console.error('Socket.IO: Connection Error!', err.message, err.cause));
+    window.addEventListener('focus', loadProfileData); // Refresh profile on focus
 
-    socket.on('connect_error', (err) => console.error('Socket.IO: Connection Error!', err.message));
-
-    // Refresh profile data when window gains focus (e.g., after editing profile in another tab)
-    window.addEventListener('focus', loadProfileData);
-
-    // Cleanup function: remove listener and disconnect socket when component unmounts
-    return () => {
+    return () => { // Cleanup
       window.removeEventListener('focus', loadProfileData);
       socket.disconnect();
       console.log('Socket.IO: Disconnected');
     };
-  }, [fetchDashboardData, loadProfileData]); // Dependencies for useEffect
+    // fetchDashboardData is stable due to useCallback, loadProfileData depends on user, token added
+  }, [fetchDashboardData, loadProfileData, token]);
 
   // Loading state
   if (!adminProfile || !dashboardData) {
     return <div className={styles.loading}>Loading Dashboard...</div>;
   }
 
-  // Render the dashboard
+  // --- UPDATED JSX TO INCLUDE NEW CHART ---
   return (
     <div className={styles.dashboardContainer}>
-      {/* Pass the correctly formatted adminProfile to Header */}
+      {/* Ensure AdminProfile type matches what Header expects */}
       <Header admin={adminProfile} />
-
       <div className={styles.statsGrid}>
         {dashboardData.stats.map((stat) => (
           <StatCard
@@ -197,14 +247,34 @@ const AdminDashboardPage = () => {
           />
         ))}
       </div>
-      <div className={styles.chartContainer}>
-        <StudentAdmissionChart data={dashboardData.admissionData} />
+      {/* --- Charts Side-by-Side --- */}
+      {/* Add a wrapper div with appropriate styling (e.g., grid or flex) */}
+      <div className={styles.chartsRow}>
+          {/* Container for the first chart */}
+          <div className={styles.chartContainer}>
+            {/* Existing chart now receives updated monthly data */}
+            <StudentAdmissionChart data={dashboardData.monthlyAdmissions} />
+          </div>
+          {/* --- NEW: Container and Render the Class Count Chart --- */}
+          <div className={styles.chartContainer}>
+            <StudentClassChart data={dashboardData.classCounts} />
+          </div>
+          {/* --- END NEW --- */}
       </div>
       <div className={styles.paymentsContainer}>
         <RecentPayments payments={dashboardData.recentPayments} />
       </div>
     </div>
   );
+  // --- END UPDATED JSX ---
 };
 
 export default AdminDashboardPage;
+
+// Define AdminProfile inline if not imported from elsewhere
+interface AdminProfile {
+  _id: string;
+  adminName: string;
+  email: string;
+  profileImageUrl: string;
+}
