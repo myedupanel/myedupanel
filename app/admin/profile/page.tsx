@@ -3,21 +3,20 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import styles from './ProfilePage.module.scss';
-// --- FIX 1: Import User type from AuthContext ---
+// --- Import User type from AuthContext ---
 import { useAuth, User } from '../../context/AuthContext';
 import DefaultAvatar from '../../../components/common/DefaultAvatar';
 import axios from 'axios';
 
-// --- FIX 2: Remove the separate UserWithUpdateDate interface ---
-// (Assuming 'User' type in AuthContext now includes 'schoolNameLastUpdated?')
+// --- Remove the separate UserWithUpdateDate interface ---
 
 const AdminProfilePage = () => {
   const router = useRouter();
-  // --- FIX 3: Cast user directly to the imported User type ---
+  // --- Cast user directly to the imported User type ---
   const { user, login } = useAuth() as { user: User | null; login: (token: string) => Promise<any> };
 
   const [formData, setFormData] = useState({
-    name: '', // Changed from adminName
+    name: '', // Use 'name' to match state and form input
     schoolName: '',
     email: '',
     profileImageUrl: ""
@@ -31,7 +30,6 @@ const AdminProfilePage = () => {
 
   // Calculate 90-day rule
   useMemo(() => {
-    // Access schoolNameLastUpdated directly from the User type
     if (user?.schoolNameLastUpdated) {
       const lastUpdate = new Date(user.schoolNameLastUpdated);
       const ninetyDaysAgo = new Date();
@@ -39,8 +37,9 @@ const AdminProfilePage = () => {
 
       if (lastUpdate > ninetyDaysAgo) {
         const diffTime = Math.abs(new Date().getTime() - lastUpdate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        const remaining = 90 - diffDays;
+        // Calculate days passed since last update
+        const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const remaining = 90 - daysPassed;
         setDaysRemaining(remaining > 0 ? remaining : 0);
         setCanUpdateSchoolName(false);
       } else {
@@ -51,14 +50,12 @@ const AdminProfilePage = () => {
         setCanUpdateSchoolName(true);
         setDaysRemaining(null);
     }
-    // Dependency uses optional chaining which is fine
   }, [user?.schoolNameLastUpdated]);
 
 
   useEffect(() => {
-    // Now user object will correctly have name, schoolName, email, _id properties
     if (user) {
-      const savedProfile = localStorage.getItem(`adminProfile_${user._id}`); // Use user._id
+      const savedProfile = localStorage.getItem(`adminProfile_${user._id}`);
       let imageUrl = "";
       let savedName = "";
 
@@ -66,15 +63,14 @@ const AdminProfilePage = () => {
         try {
           const parsedData = JSON.parse(savedProfile);
           imageUrl = parsedData.profileImageUrl || "";
-          // Keep using adminName key from localStorage for consistency if needed
-          savedName = parsedData.adminName || "";
+          savedName = parsedData.adminName || ""; // Still check localStorage for adminName key
         } catch (e) { console.error("Failed to parse saved profile data:", e); }
       }
 
       setFormData({
-        name: savedName || user.name || '', // Use user.name
-        schoolName: user.schoolName || '', // Use user.schoolName
-        email: user.email || '', // Use user.email
+        name: savedName || user.name || '', // Prioritize localStorage, then context 'name'
+        schoolName: user.schoolName || '', // Use 'schoolName' from context/token
+        email: user.email || '', // Use 'email' from context/token
         profileImageUrl: imageUrl
       });
 
@@ -106,31 +102,35 @@ const AdminProfilePage = () => {
     (e.target as HTMLInputElement).value = '';
   };
 
+  // --- UPDATED handleFormSubmit ---
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!user) return;
 
     try {
-      // Save profile image and name to local storage
-      localStorage.setItem(`adminProfile_${user._id}`, JSON.stringify({ // Use user._id
+      // 1. Save profile image and name to local storage
+      localStorage.setItem(`adminProfile_${user._id}`, JSON.stringify({
         profileImageUrl: formData.profileImageUrl,
-        adminName: formData.name // Save form's name field
+        adminName: formData.name // Save form's name field as adminName
       }));
 
-      // Send data to backend (backend expects adminName key)
+      // 2. Send data to backend (backend expects adminName key)
       const response = await axios.put('/api/admin/profile', {
         adminName: formData.name, // Send form's name as adminName
         schoolName: formData.schoolName
       });
 
-      // Update user state if new token received
+      // --- FIX: Wait for login update BEFORE showing alert & navigating ---
+      // 3. Update user state if new token received
       if (response.data.token) {
-        await login(response.data.token);
+        await login(response.data.token); // Wait for context update
       }
+      // --- End FIX ---
 
+      // 4. Show success and navigate AFTER context is updated
       alert('Profile saved successfully!');
-      router.push('/admin/dashboard');
+      router.push('/admin/dashboard'); // Navigate now
 
     } catch (err: any) {
       const message = err.response?.data?.message || 'Failed to update profile. Please try again.';
@@ -138,6 +138,8 @@ const AdminProfilePage = () => {
       console.error("Profile update error:", err.response?.data);
     }
   };
+  // --- End UPDATED handleFormSubmit ---
+
 
   const handleCancel = () => {
     router.push('/admin/dashboard');
