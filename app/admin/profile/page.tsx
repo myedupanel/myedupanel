@@ -1,14 +1,14 @@
 "use client";
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react'; // useMemo ko import karna zaroori hai agar use kar rahe hain
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import styles from './ProfilePage.module.scss';
 // --- Import User type from AuthContext ---
-import { useAuth, User } from '../../context/AuthContext';
+import { useAuth, User } from '../../context/AuthContext'; // User type ko import karein
 import DefaultAvatar from '../../../components/common/DefaultAvatar';
 import axios from 'axios';
 
-// --- REMOVED the separate UserWithUpdateDate interface ---
+// --- Remove the separate UserWithUpdateDate interface ---
 
 const AdminProfilePage = () => {
   const router = useRouter();
@@ -16,7 +16,8 @@ const AdminProfilePage = () => {
   const { user, login } = useAuth() as { user: User | null; login: (token: string) => Promise<any> };
 
   const [formData, setFormData] = useState({
-    name: '', // Use 'name' to match state and form input
+    // Form state abhi bhi adminName use kar sakta hai, kyunki form inputs aur backend API ise expect karte hain
+    adminName: '',
     schoolName: '',
     email: '',
     profileImageUrl: ""
@@ -25,23 +26,19 @@ const AdminProfilePage = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState('');
 
-  // --- State for 90-day logic ---
+  // --- State aur logic 90-day rule ke liye (Yeh pehle se add ho chuka hai) ---
   const [canUpdateSchoolName, setCanUpdateSchoolName] = useState(true);
   const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
 
-  // --- Calculate 90-day rule ---
   useMemo(() => {
-    // Access schoolNameLastUpdated directly from the User type
     if (user?.schoolNameLastUpdated) {
       const lastUpdate = new Date(user.schoolNameLastUpdated);
       const ninetyDaysAgo = new Date();
       ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-
       if (lastUpdate > ninetyDaysAgo) {
         const diffTime = Math.abs(new Date().getTime() - lastUpdate.getTime());
-        // Calculate days passed since last update
         const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        const remaining = Math.max(0, 90 - daysPassed); // Ensure remaining days isn't negative
+        const remaining = Math.max(0, 90 - daysPassed);
         setDaysRemaining(remaining);
         setCanUpdateSchoolName(false);
       } else {
@@ -49,45 +46,45 @@ const AdminProfilePage = () => {
         setDaysRemaining(null);
       }
     } else {
-        // If no date is set, they can update
-        setCanUpdateSchoolName(true);
-        setDaysRemaining(null);
+      setCanUpdateSchoolName(true);
+      setDaysRemaining(null);
     }
-  }, [user?.schoolNameLastUpdated]); // Recalculate if the date changes
+  }, [user?.schoolNameLastUpdated]);
 
 
   useEffect(() => {
-    // Populate form when user data is available
+    // Populate form data jab user object available ho
     if (user) {
-      const savedProfile = localStorage.getItem(`adminProfile_${user._id}`); // Use user._id
+      const savedProfile = localStorage.getItem(`adminProfile_${user._id}`);
       let imageUrl = "";
-      let savedName = ""; // Use 'savedName' for clarity
+      let savedName = "";
 
       if (savedProfile) {
         try {
           const parsedData = JSON.parse(savedProfile);
           imageUrl = parsedData.profileImageUrl || "";
-          // Check for name in localStorage (might be more up-to-date if just edited)
-          savedName = parsedData.adminName || ""; // Still check localStorage key
+          savedName = parsedData.adminName || ""; // localStorage se adminName check karein
         } catch (e) { console.error("Failed to parse saved profile data:", e); }
       }
 
-      // Set form data: Prioritize savedName, then user.name, then empty string
+      // --- FIX IS HERE: Use user.name from context ---
       setFormData({
-        name: savedName || user.name || '',
-        schoolName: user.schoolName || '', // Use schoolName from Auth context
-        email: user.email || '',
+        adminName: savedName || user.name || '', // savedName ya phir user.name use karein
+        schoolName: user.schoolName || '', // user.schoolName context se
+        email: user.email || '',           // user.email context se
         profileImageUrl: imageUrl
       });
+      // --- End FIX ---
 
       if (imageUrl) {
         setImagePreview(imageUrl);
       }
     }
-  }, [user]); // Rerun when user object from AuthContext updates
+  }, [user]); // Yeh effect tab chalega jab user object change hoga
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    // Form state ko update karein (yeh adminName key use karta hai)
     setFormData(prevData => ({ ...prevData, [name]: value }));
   };
 
@@ -108,39 +105,34 @@ const AdminProfilePage = () => {
     (e.target as HTMLInputElement).value = '';
   };
 
-  // --- Updated handleFormSubmit with navigation fix ---
+  // --- handleFormSubmit mein navigation fix pehle se hai ---
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!user) return;
 
-    // Log data being sent
     console.log("Submitting Profile Data:", {
-      adminName: formData.name, // Sending form 'name' as 'adminName' key
+      adminName: formData.adminName, // Backend ko adminName bhej rahe hain
       schoolName: formData.schoolName
     });
 
     try {
-      // 1. Save profile image and name to local storage
       localStorage.setItem(`adminProfile_${user._id}`, JSON.stringify({
         profileImageUrl: formData.profileImageUrl,
-        adminName: formData.name // Save form's name field as adminName
+        adminName: formData.adminName // localStorage mein bhi adminName save karein
       }));
 
-      // 2. Send data to backend (backend expects adminName key)
       const response = await axios.put('/api/admin/profile', {
-        adminName: formData.name, // Send form's name as adminName
+        adminName: formData.adminName, // Backend ko adminName bhej rahe hain
         schoolName: formData.schoolName
       });
 
-      // 3. Update user state if new token received (WAIT for this)
       if (response.data.token) {
-        await login(response.data.token); // Wait for context update
+        await login(response.data.token); // Wait karein context update ke liye
       }
 
-      // 4. Show success and navigate AFTER context is updated
       alert('Profile saved successfully!');
-      router.push('/admin/dashboard'); // Navigate now
+      router.push('/admin/dashboard'); // Baad mein navigate karein
 
     } catch (err: any) {
       const message = err.response?.data?.message || 'Failed to update profile. Please try again.';
@@ -148,17 +140,16 @@ const AdminProfilePage = () => {
       console.error("Profile update error:", err.response?.data);
     }
   };
-  // --- End Updated handleFormSubmit ---
-
 
   const handleCancel = () => {
     router.push('/admin/dashboard');
   };
 
   if (!user) {
-    return <div>Loading profile...</div>; // Loading state
+    return <div>Loading profile...</div>;
   }
 
+  // Form inputs abhi bhi 'adminName' use kar sakte hain kyunki state wahi use kar raha hai
   return (
     <div className={styles.profileContainer}>
       <h1 className={styles.title}>Edit Profile</h1>
@@ -167,10 +158,9 @@ const AdminProfilePage = () => {
           {imagePreview ? (
             <Image src={imagePreview} alt="Profile" width={100} height={100} className={styles.profileImage} />
           ) : (
-            <DefaultAvatar name={formData.name} size={100} /> // Pass name for initials
+            <DefaultAvatar name={formData.adminName} size={100} /> // Pass form state ka naam
           )}
           <div className={styles.imageUploadWrapper}>
-            {/* Make sure styles.uploadButton exists or style the label directly */}
             <label htmlFor="imageUpload" className={styles.uploadButton}>Change Photo</label>
             <input type="file" id="imageUpload" accept="image/*" onChange={handleImageChange} onClick={handleInputClick} style={{ display: 'none' }}/>
           </div>
@@ -179,10 +169,9 @@ const AdminProfilePage = () => {
         <form className={styles.profileForm} onSubmit={handleFormSubmit}>
           {error && <p className={styles.errorMessage}>{error}</p>}
 
-          {/* Use 'name' for id, name, and value */}
           <div className={styles.formGroup}>
-            <label htmlFor="name">Full Name</label>
-            <input type="text" id="name" name="name" value={formData.name} onChange={handleInputChange} required />
+            <label htmlFor="adminName">Full Name</label> {/* Label/id 'adminName' hi rahega */}
+            <input type="text" id="adminName" name="adminName" value={formData.adminName} onChange={handleInputChange} required /> {/* name/value 'adminName' hi rahega */}
           </div>
 
           <div className={styles.formGroup}>
@@ -194,11 +183,9 @@ const AdminProfilePage = () => {
               value={formData.schoolName}
               onChange={handleInputChange}
               required
-              disabled={!canUpdateSchoolName} // Disable based on 90-day rule
-              // Add a specific class for disabled state if needed for styling
+              disabled={!canUpdateSchoolName}
               className={!canUpdateSchoolName ? styles.disabledInput : ''}
             />
-            {/* Show 90-day message */}
             {!canUpdateSchoolName && daysRemaining !== null && (
               <p className={styles.infoMessage}>
                 You can change your school name again in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}.
