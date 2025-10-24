@@ -1,5 +1,8 @@
 // routes/adminRoutes.js
-
+const mongoose = require('mongoose'); // Needed for ObjectId
+const Student = require('../models/Student'); // Assuming path is correct
+const Teacher = require('../models/Teacher'); // Assuming path is correct
+const Parent = require('../models/Parent');
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
