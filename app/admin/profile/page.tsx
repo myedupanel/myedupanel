@@ -9,10 +9,10 @@ import axios from 'axios';
 
 const AdminProfilePage = () => {
   const router = useRouter();
-  const { user, login } = useAuth();
+  const { user, login } = useAuth(); // 'user' now has 'name', not 'adminName'
 
   const [formData, setFormData] = useState({
-    adminName: '',
+    adminName: '', // This state field name is fine, it's what the form uses
     schoolName: '',
     email: '',
     profileImageUrl: ""
@@ -22,27 +22,36 @@ const AdminProfilePage = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // We check if 'user' exists before doing anything
     if (user) {
       const savedProfile = localStorage.getItem(`adminProfile_${user._id}`);
       let imageUrl = "";
+      let savedName = ""; // Variable to hold name from localStorage
+
       if (savedProfile) {
-        imageUrl = JSON.parse(savedProfile).profileImageUrl || "";
+        try {
+          const parsedData = JSON.parse(savedProfile);
+          imageUrl = parsedData.profileImageUrl || "";
+          savedName = parsedData.adminName || ""; // Get saved name if exists
+        } catch (e) {
+            console.error("Failed to parse saved profile data:", e);
+        }
       }
 
+      // --- FIX IS HERE: Use user.name ---
       setFormData({
-        // This now correctly uses 'adminName' and 'schoolName' from the user object
-        adminName: user.adminName || '',
-        schoolName: user.schoolName || '',
+        // Use savedName if available, otherwise use name from AuthContext
+        adminName: savedName || user.name || '',
+        schoolName: user.schoolName || '', // schoolName comes directly from token via AuthContext
         email: user.email || '',
         profileImageUrl: imageUrl
       });
+      // --- End of FIX ---
 
       if (imageUrl) {
         setImagePreview(imageUrl);
       }
     }
-  }, [user]);
+  }, [user]); // Rerun when user object updates
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -61,8 +70,7 @@ const AdminProfilePage = () => {
       reader.readAsDataURL(file);
     }
   };
-  
-  // This helps in re-uploading the same file if needed
+
   const handleInputClick = (e: React.MouseEvent<HTMLInputElement>) => {
     (e.target as HTMLInputElement).value = '';
   };
@@ -73,18 +81,21 @@ const AdminProfilePage = () => {
     if (!user) return;
 
     try {
-      // 1. Save profile image to local storage
-      localStorage.setItem(`adminProfile_${user._id}`, JSON.stringify({ profileImageUrl: formData.profileImageUrl }));
-      
-      // 2. Send text data to the backend
+      // 1. Save profile (including name for consistency) to local storage
+      localStorage.setItem(`adminProfile_${user._id}`, JSON.stringify({
+          profileImageUrl: formData.profileImageUrl,
+          adminName: formData.adminName // Save the current form name too
+      }));
+
+      // 2. Send text data (using adminName key as backend expects) to the backend
       const response = await axios.put('/api/admin/profile', {
-        adminName: formData.adminName,
+        adminName: formData.adminName, // Send current form name
         schoolName: formData.schoolName
       });
 
-      // 3. If backend sends a new token, update the user state
+      // 3. If backend sends a new token, update the user state in AuthContext
       if (response.data.token) {
-        await login(response.data.token);
+        await login(response.data.token); // login updates the user object in AuthContext
       }
 
       alert('Profile saved successfully!');
@@ -100,10 +111,12 @@ const AdminProfilePage = () => {
     router.push('/admin/dashboard');
   };
 
+  // Show loading until user data is available
   if (!user) {
     return <div>Loading profile...</div>;
   }
 
+  // Render the form
   return (
     <div className={styles.profileContainer}>
       <h1 className={styles.title}>Edit Profile</h1>
@@ -112,22 +125,23 @@ const AdminProfilePage = () => {
           {imagePreview ? (
             <Image src={imagePreview} alt="Profile" width={100} height={100} className={styles.profileImage} />
           ) : (
-            <DefaultAvatar />
+            // Pass the current name from formData for initials
+            <DefaultAvatar name={formData.adminName} size={100} />
           )}
           <div className={styles.imageUploadWrapper}>
-            <label htmlFor="imageUpload">Change Photo</label>
-            <input type="file" id="imageUpload" accept="image/*" onChange={handleImageChange} onClick={handleInputClick} />
+            <label htmlFor="imageUpload" className={styles.uploadButton}>Change Photo</label>
+            <input type="file" id="imageUpload" accept="image/*" onChange={handleImageChange} onClick={handleInputClick} style={{ display: 'none' }}/>
           </div>
         </div>
 
         <form className={styles.profileForm} onSubmit={handleFormSubmit}>
           {error && <p className={styles.errorMessage}>{error}</p>}
-          
+
           <div className={styles.formGroup}>
             <label htmlFor="adminName">Full Name</label>
             <input type="text" id="adminName" name="adminName" value={formData.adminName} onChange={handleInputChange} required />
           </div>
-          
+
           <div className={styles.formGroup}>
             <label htmlFor="schoolName">School Name</label>
             <input type="text" id="schoolName" name="schoolName" value={formData.schoolName} onChange={handleInputChange} required />
