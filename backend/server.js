@@ -2,15 +2,25 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-
-// 1. Imports for Socket.IO
 const http = require('http');
 const { Server } = require("socket.io");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// 2. Standard Middlewares
+// --- ✨ NEW: Import all Mongoose Models Here ---
+// Import models to ensure they are registered with Mongoose before routes use them
+require('./models/School');
+require('./models/User');
+require('./models/Student');
+require('./models/Teacher');
+require('./models/Parent'); // Make sure this file exists
+require('./models/FeeRecord'); // Make sure this file exists
+// Add any other models you have (e.g., Class)
+// require('./models/Class');
+// --- End Model Imports ---
+
+// Standard Middlewares
 app.use(cors());
 app.use(express.json());
 
@@ -20,64 +30,55 @@ app.use((req, res, next) => {
   next();
 });
 
-// 3. Create HTTP server and attach Socket.IO
+// Create HTTP server and attach Socket.IO
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    // -- CHANGE 1: 'origin' ko flexible banaya --
-    // Ab yeh aapke live frontend (Vercel URL se) aur localhost, dono se connection lega
     origin: [process.env.FRONTEND_URL, "http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE"]
   }
 });
 
-// 4. Custom Middleware to attach 'io' to every request
-//    THIS MUST BE PLACED BEFORE THE API ROUTES
+// Custom Middleware to attach 'io' to every request
 app.use((req, res, next) => {
     req.io = io;
     next();
 });
 
-// 5. Register ALL API Routes Here
+// Register ALL API Routes Here (AFTER models are imported)
 app.get('/', (req, res) => {
   res.send('SchoolPro Backend is running!');
 });
+// --- Ensure correct file names here ---
 app.use('/api/auth', require('./routes/auth'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/students', require('./routes/students'));
-app.use('/api/classes', require('./routes/classes'));
-app.use('/api/dashboard', require('./routes/dashboard')); 
-app.use('/api/teachers', require('./routes/teachers')); 
-app.use('/api/parents', require('./routes/parents'));
-
-// ✨ FIX: Yahaan naya '/api/school' route add kiya hai (Bonafide page ke liye)
+app.use('/api/admin', require('./routes/admin')); // Assuming file is admin.js
+app.use('/api/students', require('./routes/student')); // Assuming file is student.js
+// app.use('/api/classes', require('./routes/classes')); // Uncomment if you have this route
+// app.use('/api/dashboard', require('./routes/dashboard')); // Uncomment if you have this route
+app.use('/api/teachers', require('./routes/teacher')); // Assuming file is teacher.js
+app.use('/api/parents', require('./routes/parents')); // Assuming file is parents.js
 app.use('/api/school', require('./routes/schoolRoutes')); // Handles /api/school/profile
+app.use('/api/schools', require('./routes/schoolRoutes')); // Assuming file is schoolRoutes.js
+app.use('/api/fees', require('./routes/fees')); // Assuming file is fees.js
+// --- End Route Definitions ---
 
-app.use('/api/schools', require('./routes/schoolRoutes')); // Yeh aapka pehle wala route hai
-app.use('/api/fees', require('./routes/fees'));
-
-// 6. Socket.IO Connection Handler
+// Socket.IO Connection Handler
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
-
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });
 });
 
-// 7. Database Connection and Start Server
+// Database Connection and Start Server
 const mongoURI = process.env.MONGO_URI;
 
 mongoose.connect(mongoURI)
   .then(() => {
     console.log("MongoDB connected successfully!");
-    
-    // -- CHANGE 2: Server '0.0.0.0' par listen karega --
-    // Yeh Render ko batata hai ki public internet se requests accept karni hain
-    server.listen(PORT, '0.0.0.0', () => {
+    server.listen(PORT, '0.0.0.0', () => { // Listen on all interfaces for Render
       console.log(`Server is running on port: ${PORT}`);
     });
-
   })
   .catch(err => {
     console.error("MongoDB connection error:", err);

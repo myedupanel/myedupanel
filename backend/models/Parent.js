@@ -4,25 +4,42 @@ const ParentSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    trim: true // Added trim for consistency
   },
   contactNumber: {
     type: String,
     required: true,
+    trim: true // Added trim
   },
   email: {
     type: String,
     required: true,
     unique: true,
+    lowercase: true, // Added lowercase
+    trim: true // Added trim
   },
   occupation: {
     type: String,
+    trim: true // Added trim
   },
-  // Yeh hai sabse important part: Student se link
+  // --- FIX: Changed 'ref' to match the Student model name ---
   studentId: {
-    type: mongoose.Schema.Types.ObjectId, // Yeh Mongoose ko batata hai ki yahan kisi aur document ki ID store hogi
-    ref: 'student',                       // Yeh batata hai ki ID 'students' collection se aayegi
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Student', // Changed from 'student'
     required: true,
   },
+  // --- NEW: Add schoolId to associate Parent with a School ---
+  schoolId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'School',
+      required: [true, "School ID is required for parent"],
+      index: true // Add index for faster queries by school
+  },
+  // --- END NEW ---
+
 }, { timestamps: true }); // timestamps adds createdAt and updatedAt fields automatically
 
-module.exports = mongoose.model('parent', ParentSchema);
+// Optional: Index for faster lookups within a school
+ParentSchema.index({ email: 1, schoolId: 1 }, { unique: true }); // Ensure email is unique *within* a school
+
+module.exports = mongoose.model('Parent', ParentSchema); // Register model as 'Parent'
