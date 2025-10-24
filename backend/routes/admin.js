@@ -1,24 +1,28 @@
+// routes/adminRoutes.js
+
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-// --- Hum FeeRecord model ko import kar rahe hain ---
-const FeeRecord = require('../models/FeeRecord'); 
+const User = require('../models/User'); // User model uses schoolId and name
+const School = require('../models/School'); // Import School model
+const FeeRecord = require('../models/FeeRecord'); // Assuming this path is correct
 const sendEmail = require('../utils/sendEmail');
-const { authMiddleware } = require('../middleware/authMiddleware');
-const { adminMiddleware } = require('../middleware/adminMiddleware');
+const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware'); // Assuming adminMiddleware checks role
 
 // @route   POST /api/admin/create-user
 // @desc    Admin creates a new user (teacher, student, parent)
 // @access  Private (Admin only)
-// --- Is route mein koi badlaav nahi hai ---
+// --- THIS ROUTE NEEDS UPDATING to use schoolId, name ---
 router.post(
   '/create-user',
-  [authMiddleware, adminMiddleware],
+  [authMiddleware, adminMiddleware], // Make sure adminMiddleware checks user.role === 'admin'
   async (req, res) => {
     try {
+      // --- Use 'name' from body ---
       const { name, email, role, studentClass, parentOf } = req.body;
+      // --- Get schoolId from token ---
+      const schoolIdFromAdmin = req.user.schoolId;
 
       if (!name || !email || !role) {
         return res.status(400).json({ msg: 'Please provide name, email, and role.' });
@@ -26,7 +30,12 @@ router.post(
       if (role === 'student' && !studentClass) {
         return res.status(400).json({ msg: 'Please provide class for the student.' });
       }
+      // --- Check for schoolId ---
+      if (!schoolIdFromAdmin) {
+         return res.status(400).json({ msg: 'Admin school information missing.' });
+      }
 
+      // Check if user already exists
       let user = await User.findOne({ email });
       if (user) {
         return res.status(400).json({ msg: 'User with this email already exists.' });
@@ -34,12 +43,15 @@ router.post(
 
       const temporaryPassword = crypto.randomBytes(8).toString('hex');
 
+      // --- Create User with 'name' and 'schoolId' ---
       const newUserDetails = {
-        adminName: name,
-        schoolName: req.user.schoolName,
+        name: name, // Use 'name' field
+        schoolId: schoolIdFromAdmin, // Assign admin's schoolId
         email,
         role,
-        password: temporaryPassword,
+        password: temporaryPassword, // Pre-save hook will hash
+        isVerified: true, // Mark as verified since admin is creating? Or send verification? Decide your flow.
+        // Add 'details' object if your User model uses it for class/parentOf
         ...(role === 'student' && { 'details.class': studentClass }),
         ...(role === 'parent' && { 'details.children': [parentOf] })
       };
@@ -47,18 +59,16 @@ router.post(
       user = new User(newUserDetails);
       await user.save();
 
-      try {
-        const io = req.app.get('socketio');
-        if (io) {
-          io.emit('updateDashboard');
-          console.log('Socket.IO: Dashboard update event bheja gaya.');
-        } else {
-          console.log('Socket.IO: Instance nahi mila.');
-        }
-      } catch (socketError) {
-        console.error("Socket emit error:", socketError);
+      // --- SOCKET EMIT (Needs req.io passed from server.js) ---
+      if (req.io) {
+          req.io.emit('updateDashboard'); // Signal dashboard update
+          // Optional: Emit specific event like 'user_created'
+      } else {
+          console.warn('Socket.IO instance not found on req object for create-user.');
       }
+      // --- End Socket Emit ---
 
+      // Send Welcome Email (Optional)
       try {
         const subject = 'Your SchoolPro Account has been created!';
         const message = `
@@ -73,6 +83,7 @@ router.post(
         await sendEmail({ to: user.email, subject, html: message });
       } catch (emailError) {
         console.error("Could not send creation email:", emailError);
+        // Don't fail the whole request if email fails
         return res.status(201).json({
             msg: 'User created successfully, but failed to send welcome email.'
         });
@@ -81,7 +92,11 @@ router.post(
       res.status(201).json({ msg: `User '${name}' created successfully as a ${role}.` });
 
     } catch (err) {
-      console.error(err.message);
+      console.error("Create User Error:", err.message);
+       if (err.name === 'ValidationError') {
+            const messages = Object.values(err.errors).map(val => val.message);
+            return res.status(400).json({ msg: messages.join(' ') });
+        }
       res.status(500).send('Server Error');
     }
   }
@@ -90,82 +105,106 @@ router.post(
 // @route   GET /api/admin/dashboard-data
 // @desc    Get aggregated data for the admin dashboard
 // @access  Private (Admin only)
-// 
-// ===== YAHAN SABHI DYNAMIC QUERIES HAIN =====
-//
+// --- THIS ROUTE NEEDS UPDATING to use schoolId ---
 router.get(
   '/dashboard-data',
-  [authMiddleware, adminMiddleware],
+  [authMiddleware, adminMiddleware], // Ensure adminMiddleware checks role
   async (req, res) => {
     try {
+      // --- Get schoolId from token ---
+      const schoolIdFromAdmin = req.user.schoolId;
+      if (!schoolIdFromAdmin) {
+          return res.status(400).json({ msg: 'Admin school information missing.' });
+      }
+
+      // --- Use schoolId in all queries ---
       const [
         studentCount,
         teacherCount,
         parentCount,
         staffCount,
+        // --- NOTE: User model no longer stores recent users directly, fetch related models ---
+        // Fetch recent Students using schoolId
         recentStudents,
+        // Fetch recent Teachers using schoolId
         recentTeachers,
+        // Need Parent model to fetch recent Parents using schoolId
         recentParents,
+         // Need Staff model or User with role 'staff'
         recentStaff,
-        recentPaidFeeRecords, 
-        admissionsDataRaw 
+        recentPaidFeeRecords,
+        admissionsDataRaw
       ] = await Promise.all([
-        // Counts
-        User.countDocuments({ role: 'student', schoolName: req.user.schoolName }),
-        User.countDocuments({ role: 'teacher', schoolName: req.user.schoolName }),
-        User.countDocuments({ role: 'parent', schoolName: req.user.schoolName }),
-        User.countDocuments({ role: 'staff', schoolName: req.user.schoolName }),
-        // Recent Users
-        User.find({ role: 'student', schoolName: req.user.schoolName }).sort({ createdAt: -1 }).limit(5).select('adminName details.class createdAt'),
-        User.find({ role: 'teacher', schoolName: req.user.schoolName }).sort({ createdAt: -1 }).limit(5).select('adminName details.subject createdAt'),
-        User.find({ role: 'parent', schoolName: req.user.schoolName }).sort({ createdAt: -1 }).limit(5).select('adminName createdAt'),
-        User.find({ role: 'staff', schoolName: req.user.schoolName }).sort({ createdAt: -1 }).limit(5).select('adminName details.role createdAt'),
-        
-        // --- Recent Payments ki Asli Query ---
-        FeeRecord.find({ 
-          // schoolId: req.user.schoolName, // Hum maan rahe hain schoolId aapke 'User' model se aayega
-          status: 'Paid' 
+        // Counts using User model and schoolId
+        User.countDocuments({ role: 'student', schoolId: schoolIdFromAdmin }),
+        User.countDocuments({ role: 'teacher', schoolId: schoolIdFromAdmin }),
+        User.countDocuments({ role: 'parent', schoolId: schoolIdFromAdmin }),
+        User.countDocuments({ role: 'staff', schoolId: schoolIdFromAdmin }),
+
+        // Fetch recent records from specific models using schoolId
+        // Assuming Student model has schoolId, name, class, createdAt
+        Student.find({ schoolId: schoolIdFromAdmin }).sort({ createdAt: -1 }).limit(5).select('name class createdAt'),
+        // Assuming Teacher model has schoolId, name, subject, createdAt
+        Teacher.find({ schoolId: schoolIdFromAdmin }).sort({ createdAt: -1 }).limit(5).select('name subject createdAt'),
+        // Add similar queries for Parent and Staff models if they exist
+         Parent.find({ schoolId: schoolIdFromAdmin }).sort({ createdAt: -1 }).limit(5).select('name createdAt'), // Example
+         User.find({ role: 'staff', schoolId: schoolIdFromAdmin }).sort({ createdAt: -1 }).limit(5).select('name createdAt'), // Example if staff are Users
+
+        // Fee Records (Assuming FeeRecord has schoolId and populates studentId which is a User ref)
+        FeeRecord.find({
+          schoolId: schoolIdFromAdmin, // Filter fees by schoolId
+          status: 'Paid'
         })
         .sort({ createdAt: -1 })
         .limit(5)
-        .populate('studentId', 'adminName') // 'studentId' field ko User model se 'adminName' laakar bharo
+        .populate({
+            path: 'studentId', // Assuming studentId links to Student model
+            select: 'name' // Select name from Student model
+         })
         .select('amount createdAt studentId'),
 
-        // --- Student Admission Chart ki Asli Query (Aggregation) ---
+        // Admission Chart (Aggregate Users with role 'student' and schoolId)
         User.aggregate([
-          { $match: { role: 'student', schoolName: req.user.schoolName } },
+          { $match: { role: 'student', schoolId: mongoose.Types.ObjectId(schoolIdFromAdmin) } }, // Match by schoolId
           { $group: {
               _id: { month: { $month: "$createdAt" } },
               count: { $sum: 1 }
             }
           },
-          { $sort: { "_id.month": 1 } }
+          { $project: { // Project to ensure correct output format
+              _id: 0, // Exclude the default _id
+              month: "$_id.month",
+              admissions: "$count"
+             }
+          },
+          { $sort: { "month": 1 } } // Sort by month number
         ])
       ]);
 
-      // --- Chart ke Data ko Format Karna ---
+      // --- Format Chart Data ---
       const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      // Initialize map for all months
       const admissionsMap = new Map(monthNames.map((name, index) => [index + 1, { name, admissions: 0 }]));
-      
+      // Fill map with data from aggregation
       admissionsDataRaw.forEach(item => {
-        admissionsMap.set(item._id.month, {
-          name: monthNames[item._id.month - 1],
-          admissions: item.count
-        });
+        if (item.month >= 1 && item.month <= 12) { // Ensure month is valid
+             admissionsMap.set(item.month, {
+               name: monthNames[item.month - 1],
+               admissions: item.admissions
+             });
+        }
       });
-      const admissionsData = Array.from(admissionsMap.values());
-      
-      // --- BADLAAV 5: Recent Payments Data ko Frontend ke liye Format Karna ---
-      // ===== YEH HAI AAPKA JAVASCRIPT FIX (BINA 'as any') =====
-      const recentFees = recentPaidFeeRecords.map(record => ({
-        _id: record._id,
-        // Hum check kar rahe hain ki studentId aur uspe adminName maujood hai ya nahi
-        student: record.studentId && record.studentId.adminName ? record.studentId.adminName : 'Unknown Student',
-        amount: `₹${record.amount.toLocaleString('en-IN')}`, // Amount ko format kiya
-        date: record.createdAt.toLocaleDateString('en-IN') // Date ko format kiya
-      }));
-      // --- END BADLAAV 5 ---
+      const admissionsData = Array.from(admissionsMap.values()); // Convert map values to array
 
+      // --- Format Recent Payments ---
+      const recentFees = recentPaidFeeRecords.map(record => ({
+        _id: record._id.toString(),
+        // Ensure studentId and its name property exist before accessing
+        student: record.studentId && record.studentId.name ? record.studentId.name : 'Unknown Student',
+        amount: `₹${record.amount.toLocaleString('en-IN')}`,
+        // Format date safely
+        date: record.createdAt ? record.createdAt.toISOString() : 'No Date' // Send ISO string for frontend flexibility
+      }));
 
       // --- Final Data Object ---
       const dashboardData = {
@@ -173,18 +212,20 @@ router.get(
         totalTeachers: teacherCount,
         totalParents: parentCount,
         totalStaff: staffCount,
-        admissionsData, // Ab yeh DYNAMIC hai
-        recentStudents,
-        recentTeachers,
-        recentParents,
-        recentStaff,
-        recentFees      // Ab yeh DYNAMIC hai
+        admissionsData, // Dynamic chart data
+        recentStudents, // Dynamic recent students list
+        recentTeachers, // Dynamic recent teachers list
+        recentParents,  // Dynamic recent parents list (example)
+        recentStaff,    // Dynamic recent staff list (example)
+        recentFees      // Dynamic recent fees list
+        // TODO: Add totalClasses (requires Class model query)
+        // TODO: Add monthlyRevenue (requires FeeRecord aggregation)
       };
 
       res.json(dashboardData);
 
     } catch (err) {
-      console.error("Dashboard Data Error:", err.message);
+      console.error("Dashboard Data Error:", err.message, err.stack); // Log stack trace
       res.status(500).send('Server Error fetching dashboard data');
     }
   }
@@ -192,53 +233,89 @@ router.get(
 
 
 // @route   PUT /api/admin/profile
-// @desc    Update admin's profile (name and school name)
-// @access  Private
-// --- Is route mein koi badlaav nahi hai ---
+// @desc    Update admin's profile name AND associated school name
+// @access  Private (Admin only)
+// --- THIS ROUTE IS FULLY UPDATED ---
 router.put('/profile', authMiddleware, async (req, res) => {
+  // --- Receive 'adminName' from body, but map it to user's 'name' field ---
   const { adminName, schoolName } = req.body;
-  const userId = req.user.id;
+  const userId = req.user.id; // Get user ID from token
 
   try {
+    // 1. Find the User
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+    // Only admins can use this specific route? Add role check if needed.
+    if (user.role !== 'admin') {
+         return res.status(403).json({ message: 'Only admins can update profiles via this route.' });
+    }
 
-    if (schoolName !== user.schoolName) {
-      if (schoolName) {
-           const existingAdminSchool = await User.findOne({ schoolName, role: 'admin', _id: { $ne: userId } });
-           if (existingAdminSchool) {
-               return res.status(400).json({ message: 'This school name is already registered by another admin.' });
-           }
-       }
+    // 2. Find the associated School using user.schoolId
+    const school = await School.findById(user.schoolId);
+    if (!school) {
+        // This case should ideally not happen if signup logic is correct
+        return res.status(404).json({ message: 'Associated school not found for this user.' });
+    }
+
+    let schoolNameChanged = false;
+    let newSchoolNameForToken = school.name; // Start with current name
+
+    // 3. Handle School Name Change (if requested and different)
+    if (schoolName && schoolName !== school.name) {
+      // a. Check 90-day rule on the User document
       if (user.schoolNameLastUpdated) {
         const lastUpdate = new Date(user.schoolNameLastUpdated);
         const ninetyDaysAgo = new Date();
         ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
         if (lastUpdate > ninetyDaysAgo) {
-          const daysRemaining = 90 - Math.floor((new Date() - lastUpdate) / (1000 * 60 * 60 * 24));
+          const diffTime = Math.abs(new Date().getTime() - lastUpdate.getTime());
+          // Calculate remaining days more accurately
+          const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          const daysRemaining = 90 - daysPassed;
           return res.status(400).json({
-            message: `You can only change your school name once every 90 days. Please try again in ${daysRemaining} days.`
+            message: `You can only change your school name once every 90 days. Please try again in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}.`
           });
         }
       }
+
+      // b. Check if the NEW school name is already taken by ANOTHER school
+      const existingSchoolWithNewName = await School.findOne({
+          name: schoolName,
+          _id: { $ne: user.schoolId } // Check schools other than the current user's school
+      });
+      if (existingSchoolWithNewName) {
+        return res.status(400).json({ message: 'This school name is already registered by another school.' });
+      }
+
+      // c. Update the School document's name
+      school.name = schoolName;
+      await school.save(); // Save changes to the school document
+
+      // d. Update the timestamp on the User document
       user.schoolNameLastUpdated = new Date();
+      schoolNameChanged = true;
+      newSchoolNameForToken = school.name; // Use the newly saved name for the token
     }
 
+    // 4. Handle User Name Change (if requested and different)
+    if (adminName && adminName !== user.name) {
+        user.name = adminName; // Update the 'name' field on the User model
+    }
 
-    user.adminName = adminName;
-    user.schoolName = schoolName;
-
+    // 5. Save the User document (might have updated name and/or timestamp)
     await user.save();
 
+    // 6. Generate a NEW token with potentially updated info
     const payload = {
       user: {
         id: user.id,
         role: user.role,
-        adminName: user.adminName,
-        schoolName: user.schoolName,
+        name: user.name, // Send updated name
+        schoolId: user.schoolId,
+        schoolName: newSchoolNameForToken // Send potentially updated school name
       },
     };
 
@@ -248,12 +325,21 @@ router.put('/profile', authMiddleware, async (req, res) => {
       { expiresIn: '5h' },
       (err, token) => {
         if (err) throw err;
+        // Send back the new token so frontend auth context updates
         res.json({ message: 'Profile updated successfully!', token });
       }
     );
 
   } catch (error) {
-    console.error("Profile Update Error:", error);
+     console.error("Profile Update Error:", error.message, error.stack); // Log stack trace
+     // Handle potential duplicate key error if school name update fails somehow (should be caught above)
+     if (error.code === 11000 && error.keyPattern && error.keyPattern.name) {
+         return res.status(400).json({ message: 'Failed to update school name, it might already be taken.' });
+     }
+      if (error.name === 'ValidationError') {
+         const messages = Object.values(error.errors).map(val => val.message);
+         return res.status(400).json({ message: messages.join(' ') });
+      }
     res.status(500).send('Server Error updating profile');
   }
 });
