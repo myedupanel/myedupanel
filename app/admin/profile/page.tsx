@@ -1,18 +1,23 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import styles from './ProfilePage.module.scss';
-import { useAuth } from '../../context/AuthContext';
+// --- FIX 1: Import User type from AuthContext ---
+import { useAuth, User } from '../../context/AuthContext';
 import DefaultAvatar from '../../../components/common/DefaultAvatar';
 import axios from 'axios';
 
+// --- FIX 2: Remove the separate UserWithUpdateDate interface ---
+// (Assuming 'User' type in AuthContext now includes 'schoolNameLastUpdated?')
+
 const AdminProfilePage = () => {
   const router = useRouter();
-  const { user, login } = useAuth(); // 'user' now has 'name', not 'adminName'
+  // --- FIX 3: Cast user directly to the imported User type ---
+  const { user, login } = useAuth() as { user: User | null; login: (token: string) => Promise<any> };
 
   const [formData, setFormData] = useState({
-    adminName: '', // This state field name is fine, it's what the form uses
+    name: '', // Changed from adminName
     schoolName: '',
     email: '',
     profileImageUrl: ""
@@ -21,31 +26,57 @@ const AdminProfilePage = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState('');
 
+  const [canUpdateSchoolName, setCanUpdateSchoolName] = useState(true);
+  const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
+
+  // Calculate 90-day rule
+  useMemo(() => {
+    // Access schoolNameLastUpdated directly from the User type
+    if (user?.schoolNameLastUpdated) {
+      const lastUpdate = new Date(user.schoolNameLastUpdated);
+      const ninetyDaysAgo = new Date();
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+      if (lastUpdate > ninetyDaysAgo) {
+        const diffTime = Math.abs(new Date().getTime() - lastUpdate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const remaining = 90 - diffDays;
+        setDaysRemaining(remaining > 0 ? remaining : 0);
+        setCanUpdateSchoolName(false);
+      } else {
+        setCanUpdateSchoolName(true);
+        setDaysRemaining(null);
+      }
+    } else {
+        setCanUpdateSchoolName(true);
+        setDaysRemaining(null);
+    }
+    // Dependency uses optional chaining which is fine
+  }, [user?.schoolNameLastUpdated]);
+
+
   useEffect(() => {
+    // Now user object will correctly have name, schoolName, email, _id properties
     if (user) {
-      const savedProfile = localStorage.getItem(`adminProfile_${user._id}`);
+      const savedProfile = localStorage.getItem(`adminProfile_${user._id}`); // Use user._id
       let imageUrl = "";
-      let savedName = ""; // Variable to hold name from localStorage
+      let savedName = "";
 
       if (savedProfile) {
         try {
           const parsedData = JSON.parse(savedProfile);
           imageUrl = parsedData.profileImageUrl || "";
-          savedName = parsedData.adminName || ""; // Get saved name if exists
-        } catch (e) {
-            console.error("Failed to parse saved profile data:", e);
-        }
+          // Keep using adminName key from localStorage for consistency if needed
+          savedName = parsedData.adminName || "";
+        } catch (e) { console.error("Failed to parse saved profile data:", e); }
       }
 
-      // --- FIX IS HERE: Use user.name ---
       setFormData({
-        // Use savedName if available, otherwise use name from AuthContext
-        adminName: savedName || user.name || '',
-        schoolName: user.schoolName || '', // schoolName comes directly from token via AuthContext
-        email: user.email || '',
+        name: savedName || user.name || '', // Use user.name
+        schoolName: user.schoolName || '', // Use user.schoolName
+        email: user.email || '', // Use user.email
         profileImageUrl: imageUrl
       });
-      // --- End of FIX ---
 
       if (imageUrl) {
         setImagePreview(imageUrl);
@@ -81,21 +112,21 @@ const AdminProfilePage = () => {
     if (!user) return;
 
     try {
-      // 1. Save profile (including name for consistency) to local storage
-      localStorage.setItem(`adminProfile_${user._id}`, JSON.stringify({
-          profileImageUrl: formData.profileImageUrl,
-          adminName: formData.adminName // Save the current form name too
+      // Save profile image and name to local storage
+      localStorage.setItem(`adminProfile_${user._id}`, JSON.stringify({ // Use user._id
+        profileImageUrl: formData.profileImageUrl,
+        adminName: formData.name // Save form's name field
       }));
 
-      // 2. Send text data (using adminName key as backend expects) to the backend
+      // Send data to backend (backend expects adminName key)
       const response = await axios.put('/api/admin/profile', {
-        adminName: formData.adminName, // Send current form name
+        adminName: formData.name, // Send form's name as adminName
         schoolName: formData.schoolName
       });
 
-      // 3. If backend sends a new token, update the user state in AuthContext
+      // Update user state if new token received
       if (response.data.token) {
-        await login(response.data.token); // login updates the user object in AuthContext
+        await login(response.data.token);
       }
 
       alert('Profile saved successfully!');
@@ -104,6 +135,7 @@ const AdminProfilePage = () => {
     } catch (err: any) {
       const message = err.response?.data?.message || 'Failed to update profile. Please try again.';
       setError(message);
+      console.error("Profile update error:", err.response?.data);
     }
   };
 
@@ -111,12 +143,10 @@ const AdminProfilePage = () => {
     router.push('/admin/dashboard');
   };
 
-  // Show loading until user data is available
   if (!user) {
     return <div>Loading profile...</div>;
   }
 
-  // Render the form
   return (
     <div className={styles.profileContainer}>
       <h1 className={styles.title}>Edit Profile</h1>
@@ -125,8 +155,7 @@ const AdminProfilePage = () => {
           {imagePreview ? (
             <Image src={imagePreview} alt="Profile" width={100} height={100} className={styles.profileImage} />
           ) : (
-            // Pass the current name from formData for initials
-            <DefaultAvatar name={formData.adminName} size={100} />
+            <DefaultAvatar name={formData.name} size={100} /> // Use name from formData
           )}
           <div className={styles.imageUploadWrapper}>
             <label htmlFor="imageUpload" className={styles.uploadButton}>Change Photo</label>
@@ -138,13 +167,27 @@ const AdminProfilePage = () => {
           {error && <p className={styles.errorMessage}>{error}</p>}
 
           <div className={styles.formGroup}>
-            <label htmlFor="adminName">Full Name</label>
-            <input type="text" id="adminName" name="adminName" value={formData.adminName} onChange={handleInputChange} required />
+            <label htmlFor="name">Full Name</label> {/* Use 'name' */}
+            <input type="text" id="name" name="name" value={formData.name} onChange={handleInputChange} required /> {/* Use 'name' */}
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="schoolName">School Name</label>
-            <input type="text" id="schoolName" name="schoolName" value={formData.schoolName} onChange={handleInputChange} required />
+            <input
+              type="text"
+              id="schoolName"
+              name="schoolName"
+              value={formData.schoolName}
+              onChange={handleInputChange}
+              required
+              disabled={!canUpdateSchoolName} // Disable based on 90-day rule
+              className={!canUpdateSchoolName ? styles.disabledInput : ''}
+            />
+            {!canUpdateSchoolName && daysRemaining !== null && (
+              <p className={styles.infoMessage}>
+                You can change your school name again in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}.
+              </p>
+            )}
           </div>
 
           <div className={styles.formGroup}>

@@ -5,13 +5,14 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 
-// --- FIX IS HERE: Updated User interface ---
-interface User {
+// --- FIX IS HERE: Updated and Exported User interface ---
+export interface User { // Added export
   _id: string;
-  name: string; // Changed from adminName
-  schoolName: string;
+  name: string;        // Changed from adminName
+  schoolName: string;  // This comes from the /me route now
   role: string;
   email: string;
+  schoolNameLastUpdated?: string; // Add the optional date field here
 }
 // --- End of FIX ---
 
@@ -37,66 +38,69 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (!storedToken) {
         setIsLoading(false);
-        return;
+        return; // Exit early if no token
       }
 
       setToken(storedToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
       try {
         const response = await axios.get('/api/auth/me');
-        setUser(response.data); // Fetched data should now match the updated User interface
+        // Fetched data should match the exported User interface
+        setUser(response.data);
       } catch (error: any) {
         console.error("Failed to fetch user from token:", error.response?.status, error.message);
-        if (error.response && error.response.status === 401) {
-          console.log("Token expired or invalid. Logging out.");
-          logout();
-        } else {
-          logout();
-        }
+        // Handle token errors (like 401 Unauthorized) by logging out
+        // It's safer to logout on any fetch error to prevent inconsistent state
+        logout(); // Call logout which handles cleanup and redirect
       } finally {
-         // Only set loading false if we didn't logout (which causes redirect)
-         if (localStorage.getItem('token')) {
+        // Only set loading false if we didn't logout (logout causes redirect)
+         if (localStorage.getItem('token')) { // Check if token still exists
              setIsLoading(false);
          }
       }
     };
 
     loadUserFromToken();
-  }, []); // Runs once on component mount
+    // Intentionally only running on mount, logout dependency removed
+    // to prevent potential loops if logout clears state causing re-renders.
+  }, []); // Empty dependency array: runs only once on mount
 
-  // Login function remains the same
+  // Login function
   const login = async (newToken: string): Promise<User | null> => {
     localStorage.setItem('token', newToken);
     setToken(newToken);
     axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+    setIsLoading(true); // Set loading true while fetching user after login
     try {
-      // API response should now match the updated User interface
+      // API response should match the exported User interface
       const response = await axios.get('/api/auth/me');
       setUser(response.data);
-      setIsLoading(false);
+      setIsLoading(false); // Set loading false after fetching
       return response.data;
     } catch (error) {
       console.error("Login failed: could not fetch user", error);
-      logout();
+      logout(); // Clean up on failure
+      // isLoading will be set to false by logout
       return null;
     }
   };
 
-  // Logout function remains the same
+  // Logout function
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
-    setIsLoading(false);
-    // Redirect happens here, so isLoading state might not visually matter immediately
+    setIsLoading(false); // Ensure loading is false
+    // Redirect happens here
     window.location.href = '/login';
   };
 
+  // Provide the context value
   return (
     <AuthContext.Provider value={{ isAuthenticated: !!user, user, token, login, logout, isLoading }}>
       {/* Render children only when loading is complete */}
-      {!isLoading && children}
+      {!isLoading ? children : null /* Or a loading spinner */}
     </AuthContext.Provider>
   );
 };

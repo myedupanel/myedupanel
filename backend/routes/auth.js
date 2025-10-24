@@ -163,15 +163,33 @@ router.post('/login', async (req, res) => {
 });
 
 
-// ===== ME ROUTE (No changes) =====
+// ===== ME ROUTE (UPDATED) =====
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    // req.user contains { id, role, name, schoolId, schoolName } from token
-    // Fetch fresh user data from DB using ID from token
+    // Fetch user data using the ID from the token
     const user = await User.findById(req.user.id).select('-password'); // Exclude password
-    if (!user) return res.status(404).json({ message: 'User not found.' });
-    res.json(user); // Send DB user data (which has schoolId, not schoolName)
-  } catch (error) { console.error('Me Route Error:', error.message); res.status(500).send('Server Error fetching user profile.'); }
+    if (!user) {
+        return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // --- NEW: Fetch the associated school name ---
+    const school = await School.findById(user.schoolId).select('name'); // Get only the name field
+    const schoolName = school ? school.name : 'School Not Found';
+    // --- End NEW ---
+
+    // --- NEW: Combine user data with schoolName for the response ---
+    // We need to convert the Mongoose document to a plain object to add properties
+    const userObject = user.toObject();
+    userObject.schoolName = schoolName; // Add schoolName to the object being sent
+    // schoolNameLastUpdated is already part of the User model, so it's included in userObject
+    // --- End NEW ---
+
+    res.json(userObject); // Send the combined object
+
+  } catch (error) {
+    console.error('Me Route Error:', error.message);
+    res.status(500).send('Server Error fetching user profile.');
+  }
 });
 
 
