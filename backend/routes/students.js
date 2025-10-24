@@ -12,53 +12,50 @@ const { authMiddleware, authorize } = require('../middleware/authMiddleware');
 // @route   POST /api/students
 // @desc    Add a new student AND create their User account
 // @access  Private (Admin only)
-// --- THIS ROUTE IS UPDATED ---
+// --- THIS ROUTE INCLUDES USER CREATION ---
 router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
     try {
-        // --- Get student details, including optional email ---
+        // Get student details, including optional email
         const { studentId, name, class: studentClass, rollNo, parentName, parentContact, email } = req.body;
         console.log("[POST /students] Received data:", req.body); // Log received data
 
-        // --- Gets 'schoolId' from token ---
         const schoolIdFromToken = req.user.schoolId;
         if (!schoolIdFromToken) {
             console.log("[POST /students] Error: Missing schoolId.");
             return res.status(400).json({ msg: 'Admin school information is missing. Cannot add student.' });
         }
 
-        // --- Basic Validation (excluding email for now) ---
+        // Basic Validation (excluding email for now)
         if (!studentId || !name || !studentClass || !rollNo || !parentName || !parentContact) {
             console.log("[POST /students] Error: Missing required fields.");
             return res.status(400).json({ msg: 'Please provide all required student details (Student ID, Name, Class, Roll No, Parent Name, Parent Contact).' });
         }
 
-        // --- Check duplicate Student (studentId + schoolId) ---
+        // Check duplicate Student (studentId + schoolId)
         let existingStudent = await Student.findOne({ studentId, schoolId: schoolIdFromToken });
         if (existingStudent) {
             console.log(`[POST /students] Error: Student with ID ${studentId} already exists in this school.`);
             return res.status(400).json({ msg: 'A student with this ID already exists in your school.' });
         }
 
-        // --- FIX: Check duplicate User *only if email is provided AND not empty* ---
+        // Check duplicate User *only if email is provided AND not empty*
         const providedEmail = email ? email.trim() : null; // Get trimmed email or null
         if (providedEmail) {
             console.log(`[POST /students] Email provided: '${providedEmail}'. Checking for existing user...`);
             let existingUser = await User.findOne({ email: providedEmail });
             if (existingUser) {
                 console.log(`[POST /students] Error: User with email '${providedEmail}' already exists.`);
-                // Return the specific error message
                 return res.status(400).json({ msg: 'A user account with the provided email already exists.' });
             }
             console.log(`[POST /students] Email '${providedEmail}' is unique.`);
         } else {
             console.log("[POST /students] No valid email provided. Skipping user email check.");
         }
-        // --- END FIX ---
 
-        // --- Generate Temporary Password ---
+        // Generate Temporary Password
         const password = generatePassword.generate({ length: 10, numbers: true });
 
-        // --- Create the User document ---
+        // Create the User document
         console.log(`[POST /students] Creating User document for student: ${name}`);
         const newUser = new User({
             name: name, // Student's name
@@ -71,45 +68,33 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
         await newUser.save(); // Save the User document first
         console.log(`[POST /students] User document saved with ID: ${newUser._id}`);
 
-        // --- Create the Student document ---
+        // Create the Student document
         console.log(`[POST /students] Creating Student document for student: ${name}`);
         const newStudent = new Student({
             studentId, name, class: studentClass, rollNo, parentName, parentContact,
             email: providedEmail || undefined, // Store trimmed email or undefined here too
             schoolId: schoolIdFromToken,
-            // userId: newUser._id // Optional: Link to the User document's ID
+            userId: newUser._id // Optional: Link to the User document's ID
         });
         await newStudent.save(); // Save the Student document
         console.log(`[POST /students] Student document saved with ID: ${newStudent._id}`);
 
-        // --- Optional: Send login details email ---
-        // Determine recipient email (Prioritize student's email, fallback?)
-        // Be careful using parentContact as email unless you validate it is an email
-        const recipientEmail = providedEmail; // Only send if student email is given for now
+        // Optional: Send login details email
+        const recipientEmail = providedEmail; // Only send if student email is given
         if (recipientEmail) {
              try {
                  const subject = 'Your SchoolPro Student Account Details';
-                 const message = `
-                     <h1>Welcome to SchoolPro, ${name}!</h1>
-                     <p>An account has been created for you.</p>
-                     <p>Login details:</p>
-                     <ul>
-                         <li><strong>Login Email:</strong> ${recipientEmail}</li>
-                         <li><strong>Temporary Password:</strong> ${password}</li>
-                     </ul>
-                     <p>Please change the password after the first login.</p>
-                 `;
+                 const message = `<h1>Welcome...</h1><p>Login: ${recipientEmail}</p><p>Password: ${password}</p>`;
                  await sendEmail({ to: recipientEmail, subject, html: message });
                  console.log(`[POST /students] Welcome email sent to ${recipientEmail}`);
              } catch (emailError) {
                  console.error(`[POST /students] Could not send welcome email to ${recipientEmail}:`, emailError);
-                 // Don't fail the request if email fails, just log it
              }
         } else {
              console.log(`[POST /students] No student email provided for ${name}, skipping welcome email.`);
         }
 
-        // --- Uses 'req.io' for real-time updates ---
+        // Uses 'req.io' for real-time updates
         if (req.io) {
             console.log("[POST /students] Emitting socket events...");
             req.io.emit('updateDashboard'); // Trigger dashboard refresh
@@ -121,23 +106,23 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
         res.status(201).json({ message: 'Student and user account created successfully', student: newStudent });
 
     } catch (err) {
-        // Handle potential duplicate errors from either User (email) or Student (studentId+schoolId)
         if (err.code === 11000) {
-            if (err.keyPattern?.email) { // Check if it's the unique email index from User
+            if (err.keyPattern?.email) {
                 console.error(`[POST /students] Duplicate email error:`, err);
                 return res.status(400).json({ msg: 'A user account with the provided email already exists.' });
-            } else { // Assume it's the unique studentId+schoolId index from Student
+            } else if (err.keyPattern?.studentId || err.keyPattern?.schoolId) { // Check specific keys for student index
                 console.error(`[POST /students] Duplicate student ID error:`, err);
                 return res.status(400).json({ msg: 'A student with this ID already exists in this school (Database conflict).' });
+            } else {
+                console.error(`[POST /students] Unknown duplicate key error:`, err);
+                 return res.status(400).json({ msg: 'A unique constraint error occurred.' });
             }
         }
-        // Handle validation errors (e.g., missing fields)
         if (err.name === 'ValidationError') {
             const messages = Object.values(err.errors).map(val => val.message);
             console.error(`[POST /students] Validation Error:`, messages);
             return res.status(400).json({ msg: messages.join(' ') });
         }
-        // Log other errors
         console.error("[POST /students] CATCH BLOCK Error:", err.message, err.stack);
         res.status(500).send('Server Error');
     }
@@ -146,7 +131,7 @@ router.post('/', [authMiddleware, authorize('admin')], async (req, res) => {
 // @route   GET /api/students
 // @desc    Get all students for the admin's school
 // @access  Private (Admin, Teacher)
-// --- NO CHANGES NEEDED BELOW THIS LINE ---
+// --- NO CHANGES NEEDED HERE ---
 router.get('/', [authMiddleware, authorize('admin', 'teacher')], async (req, res) => {
     try {
         const schoolIdFromToken = req.user.schoolId;
@@ -159,6 +144,7 @@ router.get('/', [authMiddleware, authorize('admin', 'teacher')], async (req, res
 // @route   GET /api/students/search
 // @desc    Search students by name within the admin's school
 // @access  Private (Admin, Teacher, Staff)
+// --- NO CHANGES NEEDED HERE ---
 router.get('/search', authMiddleware, async (req, res) => {
     try {
         const schoolIdFromToken = req.user.schoolId; const studentName = req.query.name || '';
@@ -172,6 +158,7 @@ router.get('/search', authMiddleware, async (req, res) => {
 // @route   GET /api/students/:id
 // @desc    Get a single student by their MongoDB ID
 // @access  Private (Admin, Teacher, Staff)
+// --- NO CHANGES NEEDED HERE ---
 router.get('/:id', authMiddleware, async (req, res) => {
     try {
         const student = await Student.findById(req.params.id);
@@ -184,6 +171,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 // @route   PUT /api/students/:id
 // @desc    Update a student's details
 // @access  Private (Admin only)
+// --- NO CHANGES NEEDED HERE (Optional User update logic included) ---
 router.put('/:id', [authMiddleware, authorize('admin')], async (req, res) => {
     try {
         let student = await Student.findById(req.params.id);
@@ -195,19 +183,20 @@ router.put('/:id', [authMiddleware, authorize('admin')], async (req, res) => {
 
         delete updateData.schoolId;
         delete updateData.studentId;
-        // Optionally prevent email change here if User account email should match
+        // Consider if you want to allow changing email via this route
         // delete updateData.email;
 
         student = await Student.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true });
 
-        // --- Optional: Update corresponding User name/email if student details change ---
+        // Optional: Update corresponding User name/email if student details change
         if (studentEmail && (updateData.name || updateData.email)) {
-            const userUpdate = {}; 
+            const userUpdate = {};
             if (updateData.name) userUpdate.name = updateData.name;
-            // If you allow changing email on Student form, update User email too (be careful with uniqueness)
+            // If email is allowed to change via student form, add logic here
             // if (updateData.email && updateData.email !== studentEmail) userUpdate.email = updateData.email;
              if (Object.keys(userUpdate).length > 0) {
                  await User.findOneAndUpdate({ email: studentEmail, role: 'student' }, { $set: userUpdate });
+                 console.log(`[PUT /students] Updated corresponding User for email: ${studentEmail}`);
              }
         }
 
@@ -217,9 +206,9 @@ router.put('/:id', [authMiddleware, authorize('admin')], async (req, res) => {
 });
 
 // @route   DELETE /api/students/:id
-// @desc    Delete a student (AND their User account)
+// @desc    Delete a student (AND their User account if email exists)
 // @access  Private (Admin only)
-// --- UPDATED DELETE ROUTE ---
+// --- THIS ROUTE INCLUDES USER DELETION ---
 router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => {
     try {
         let student = await Student.findById(req.params.id);
@@ -235,10 +224,22 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
             if(deletedUser) {
                 console.log(`[DELETE /students] Deleted user account for email: ${studentEmail}`);
             } else {
-                 console.log(`[DELETE /students] User account not found for email: ${studentEmail} (role: student)`);
+                 console.log(`[DELETE /students] User account not found for email: ${studentEmail} (role: student), maybe already deleted.`);
             }
         } else {
-            console.log(`[DELETE /students] No email associated with student ${deletedStudentId}, skipping User deletion.`);
+            // --- NEW: Try deleting User based on studentId if linked ---
+            // This assumes you added 'userId' to Student model and saved newUser._id there
+            if (student.userId) {
+                const deletedUserById = await User.findOneAndDelete({ _id: student.userId, role: 'student' });
+                if(deletedUserById) {
+                     console.log(`[DELETE /students] Deleted user account by linked ID: ${student.userId}`);
+                } else {
+                     console.log(`[DELETE /students] User account not found for linked ID: ${student.userId}`);
+                }
+            } else {
+                 console.log(`[DELETE /students] No email or linked userId associated with student ${deletedStudentId}, cannot delete User account.`);
+            }
+             // --- END NEW ---
         }
 
         // --- Then delete the Student document ---
@@ -257,6 +258,6 @@ router.delete('/:id', [authMiddleware, authorize('admin')], async (req, res) => 
         res.status(500).send('Server Error');
     }
 });
-// --- END UPDATED DELETE ROUTE ---
+// --- END DELETE ROUTE ---
 
 module.exports = router;
