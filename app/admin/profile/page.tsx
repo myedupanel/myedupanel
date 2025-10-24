@@ -69,7 +69,7 @@ const AdminProfilePage = () => {
   };
   const handleInputClick = (e: React.MouseEvent<HTMLInputElement>) => { (e.target as HTMLInputElement).value = ''; };
 
-  // --- UPDATED handleFormSubmit with success message, loading state, and delayed redirect ---
+  // --- UPDATED handleFormSubmit (Removed setTimeout) ---
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -100,21 +100,20 @@ const AdminProfilePage = () => {
         await login(response.data.token);
       }
 
-      // 4. Show success message on page
+      // 4. Show success message on page (briefly)
       setSuccessMessage('Profile saved successfully!');
 
-      // 5. Redirect after a delay
-      setTimeout(() => {
-        router.push('/admin/dashboard');
-      }, 2000); // 2 seconds delay
+      // 5. Redirect immediately
+      router.push('/admin/dashboard');
+      // setTimeout removed
 
     } catch (err: any) {
       const message = err.response?.data?.message || 'Failed to update profile. Please try again.';
       setError(message);
       console.error("Profile update error:", err.response?.data);
-      setIsLoading(false); // Stop loading on error
+      setIsLoading(false); // Stop loading ONLY on error
     }
-    // No need to set isLoading false here if successful, as page will redirect
+    // No need to set isLoading false here if successful, redirect happens
   };
   // --- End UPDATED handleFormSubmit ---
 
