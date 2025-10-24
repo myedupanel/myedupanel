@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
-import api from '@/backend/utils/api'; 
+import api from '@/backend/utils/api';
 import { io } from "socket.io-client";
 import Header from '@/components/admin/Header/Header';
 import StatCard from '@/components/admin/StatCard/StatCard';
@@ -17,14 +17,14 @@ interface ChartData {
   color: string;
 }
 
+// Interface for the data expected by the Header component
 interface AdminProfile {
   _id: string;
-  adminName: string;
+  adminName: string; // Header component expects adminName
   email: string;
   profileImageUrl: string;
 }
 
-// ===== BADLAAV 2: Naye Professional Colours =====
 const cardDetails = {
   "Total Students": { icon: <MdPeople />, theme: "blue" },
   "Total Teachers": { icon: <MdSchool />, theme: "teal" },
@@ -33,7 +33,6 @@ const cardDetails = {
   "Total Staff": { icon: <MdBadge />, theme: "orange" },
   "Total Classes": { icon: <MdClass />, theme: "sky" }
 } as const;
-// ===== END BADLAAV 2 =====
 
 interface BackendDashboardData {
   admissionsData: { month: string; admissions: number }[];
@@ -46,17 +45,17 @@ interface BackendDashboardData {
   totalTeachers?: number;
   totalParents?: number;
   totalClasses?: number;
-  totalStaff?: number; // Backend yeh bhej raha hai, humein iska type add karna chahiye
+  totalStaff?: number;
 }
 
 interface FormattedDashboardData {
   stats: { title: string; value: string }[];
-  admissionData: ChartData[]; 
+  admissionData: ChartData[];
   recentPayments: any[];
 }
 
 const AdminDashboardPage = () => {
-  const { user } = useAuth();
+  const { user } = useAuth(); // 'user' now likely has 'name', not 'adminName'
   const [dashboardData, setDashboardData] = useState<FormattedDashboardData | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
 
@@ -82,17 +81,14 @@ const AdminDashboardPage = () => {
         });
       }
 
-      // ===== BADLAAV 1: "0" Bug Fix Yahaan Hai =====
       const formattedStats = [
         { title: "Total Students", value: (data.totalStudents || 0).toString() },
         { title: "Total Teachers", value: (data.totalTeachers || 0).toString() },
-        { title: "Monthly Revenue", value: "₹0" }, // Yeh abhi static hai
+        { title: "Monthly Revenue", value: "₹0" }, // Static for now
         { title: "Total Parents", value: (data.totalParents || 0).toString() },
-        // Humne data.recentStaff.length ko data.totalStaff se badal diya
-        { title: "Total Staff", value: (data.totalStaff || 0).toString() }, 
-        { title: "Total Classes", value: (data.totalClasses || 0).toString() }
+        { title: "Total Staff", value: (data.totalStaff || 0).toString() },
+        { title: "Total Classes", value: (data.totalClasses || 0).toString() } // Assuming backend sends this
       ];
-      // ===== END BADLAAV 1 =====
 
       const formattedData: FormattedDashboardData = {
         stats: formattedStats,
@@ -103,70 +99,99 @@ const AdminDashboardPage = () => {
       setDashboardData(formattedData);
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
-      setDashboardData({ stats: [], admissionData: [], recentPayments: [] });
+      // Provide default structure on error to prevent crashes
+      setDashboardData({
+         stats: [
+            { title: "Total Students", value: "0" }, { title: "Total Teachers", value: "0" },
+            { title: "Monthly Revenue", value: "₹0" }, { title: "Total Parents", value: "0" },
+            { title: "Total Staff", value: "0" }, { title: "Total Classes", value: "0" }
+         ],
+         admissionData: [],
+         recentPayments: []
+      });
     }
   }, []);
 
   const loadProfileData = useCallback(() => {
     if (user) {
-      let profileData: AdminProfile = { 
-        ...user, 
-        adminName: user.adminName, 
-        profileImageUrl: '' 
+      // --- FIX IS HERE: Use user.name instead of user.adminName ---
+      // We map user.name (from AuthContext) to adminName (expected by Header prop)
+      let profileData: AdminProfile = {
+        _id: user._id,           // Make sure _id is included
+        email: user.email,       // Make sure email is included
+        adminName: user.name,    // Map user.name to adminName
+        profileImageUrl: ''      // Initialize profileImageUrl
       };
-      
+      // --- End of FIX ---
+
+      // Load profile image and potentially updated name from localStorage
       const savedProfile = localStorage.getItem(`adminProfile_${user._id}`);
       if (savedProfile) {
-        const savedData = JSON.parse(savedProfile);
-        if (savedData.profileImageUrl && savedData.profileImageUrl.startsWith('data:image')) {
-          profileData.profileImageUrl = savedData.profileImageUrl;
-        }
-        if (savedData.adminName) {
-            profileData.adminName = savedData.adminName;
+        try {
+            const savedData = JSON.parse(savedProfile);
+            // Prioritize localStorage name if available (from profile edit page)
+            if (savedData.adminName) {
+                profileData.adminName = savedData.adminName;
+            }
+            // Load saved image if it looks valid
+            if (savedData.profileImageUrl && savedData.profileImageUrl.startsWith('data:image')) {
+              profileData.profileImageUrl = savedData.profileImageUrl;
+            }
+        } catch (e) {
+            console.error("Failed to parse saved profile data:", e);
+            // Optionally clear corrupted localStorage data
+            // localStorage.removeItem(`adminProfile_${user._id}`);
         }
       }
       setAdminProfile(profileData);
+    } else {
+        // Handle case where user is not logged in or data is not yet available
+        setAdminProfile(null);
     }
-  }, [user]);
+  }, [user]); // Dependency on user object
 
   useEffect(() => {
     fetchDashboardData();
-    loadProfileData();
+    loadProfileData(); // Load profile data on initial mount and when user changes
 
-    const socket = io("https://myedupanel.onrender.com");
+    const socket = io("https://myedupanel.onrender.com"); // Ensure correct backend URL
     socket.on('connect', () => console.log('Socket.IO: Connected'));
-    
-    // Yahi magic hai real-time updates ka
-    socket.on('updateDashboard', () => { 
-      console.log('Socket.IO: Update event mila! Data refresh ho raha hai...');
-      fetchDashboardData(); 
+
+    socket.on('updateDashboard', () => {
+      console.log('Socket.IO: Update event received! Refreshing data...');
+      fetchDashboardData();
     });
 
     socket.on('connect_error', (err) => console.error('Socket.IO: Connection Error!', err.message));
-    
-    window.addEventListener('focus', loadProfileData); 
 
+    // Refresh profile data when window gains focus (e.g., after editing profile in another tab)
+    window.addEventListener('focus', loadProfileData);
+
+    // Cleanup function: remove listener and disconnect socket when component unmounts
     return () => {
       window.removeEventListener('focus', loadProfileData);
       socket.disconnect();
+      console.log('Socket.IO: Disconnected');
     };
-  }, [fetchDashboardData, loadProfileData]);
+  }, [fetchDashboardData, loadProfileData]); // Dependencies for useEffect
 
+  // Loading state
   if (!adminProfile || !dashboardData) {
     return <div className={styles.loading}>Loading Dashboard...</div>;
   }
 
+  // Render the dashboard
   return (
     <div className={styles.dashboardContainer}>
+      {/* Pass the correctly formatted adminProfile to Header */}
       <Header admin={adminProfile} />
-      
+
       <div className={styles.statsGrid}>
         {dashboardData.stats.map((stat) => (
           <StatCard
             key={stat.title}
             title={stat.title}
             value={stat.value}
-            // Icon aur naye colours ab yahaan se aa rahe hain
             icon={cardDetails[stat.title as keyof typeof cardDetails]?.icon}
             theme={cardDetails[stat.title as keyof typeof cardDetails]?.theme}
           />

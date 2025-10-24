@@ -5,14 +5,15 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 
-// Updated User interface
+// --- FIX IS HERE: Updated User interface ---
 interface User {
   _id: string;
-  adminName: string;
+  name: string; // Changed from adminName
   schoolName: string;
   role: string;
   email: string;
 }
+// --- End of FIX ---
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -30,42 +31,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true); // Start as true
 
-  // --- THIS useEffect IS UPDATED ---
   useEffect(() => {
     const loadUserFromToken = async () => {
       const storedToken = localStorage.getItem('token');
 
-      // --- FIX: Handle missing token case ---
       if (!storedToken) {
-        // If no token is found, we know the user is not logged in.
-        // Don't try to fetch user data.
-        setIsLoading(false); // Stop loading
-        // NOTE: We don't call logout() here because that forces a redirect.
-        // The redirect should be handled by protected route logic
-        // based on isAuthenticated being false.
-        return; // Exit the function early
+        setIsLoading(false);
+        return;
       }
 
-      // If token exists, proceed to verify it
       setToken(storedToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
       try {
         const response = await axios.get('/api/auth/me');
-        setUser(response.data);
+        setUser(response.data); // Fetched data should now match the updated User interface
       } catch (error: any) {
         console.error("Failed to fetch user from token:", error.response?.status, error.message);
-        // If token exists but is invalid/expired (401) or other error occurs
         if (error.response && error.response.status === 401) {
           console.log("Token expired or invalid. Logging out.");
-          logout(); // Call logout which handles cleanup and redirect
+          logout();
         } else {
-          // Handle other potential errors (like network issues) by logging out too
           logout();
         }
       } finally {
-        // Ensure loading is set to false whether the API call succeeds or fails
-        // (unless logout() was called, which redirects anyway)
-         if (localStorage.getItem('token')) { // Check if token still exists (logout removes it)
+         // Only set loading false if we didn't logout (which causes redirect)
+         if (localStorage.getItem('token')) {
              setIsLoading(false);
          }
       }
@@ -80,13 +70,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(newToken);
     axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
     try {
+      // API response should now match the updated User interface
       const response = await axios.get('/api/auth/me');
       setUser(response.data);
-      setIsLoading(false); // Ensure loading is false after successful login fetch
+      setIsLoading(false);
       return response.data;
     } catch (error) {
       console.error("Login failed: could not fetch user", error);
-      logout(); // Clean up on failure
+      logout();
       return null;
     }
   };
@@ -97,8 +88,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
-    setIsLoading(false); // Make sure loading is false after logout
-    window.location.href = '/login'; // Redirect
+    setIsLoading(false);
+    // Redirect happens here, so isLoading state might not visually matter immediately
+    window.location.href = '/login';
   };
 
   return (
