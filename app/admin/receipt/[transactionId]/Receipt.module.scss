@@ -115,18 +115,18 @@
 }
 
 @media print {
-    // Print karte waqt non-receipt cheezon ko hide kar dein
     .noPrint {
         display: none;
     }
 
-    // Use :global() for body styles within CSS Module
-    :global(body) {
-        background-color: #ffffff !important; // Force white background for printing
-        -webkit-print-color-adjust: exact;    // Ensure background colors print in Chrome/Safari
-        color-adjust: exact;                // Standard property (this might show a warning)
+    // Use :global block for global styles within CSS Module's @media rule
+    :global {
+        body {
+            background-color: #ffffff !important; // Force white background
+            -webkit-print-color-adjust: exact;    // Ensure backgrounds print (Keep this!)
+            /* color-adjust: exact; */           // Standard property (Commented out for build)
+        }
     }
-
 
     .receiptContainer {
         padding: 0;
@@ -135,15 +135,10 @@
 
     .printableArea {
         width: 100%;
-        min-height: auto; // Let content determine height when printing
+        min-height: auto;
         box-shadow: none;
         border: none;
-        padding: 0; // Adjust padding for print if needed, maybe 1cm?
+        padding: 0;
         margin: 0;
     }
-
-    // Optional: Adjust font size for print
-    // h1, h2, p, span {
-    //     font-size: 10pt;
-    // }
 }
