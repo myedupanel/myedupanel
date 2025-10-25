@@ -113,24 +113,17 @@
         background-color: #0056b3;
     }
 }
-
 @media print {
+    // Print karte waqt non-receipt cheezon ko hide kar dein
     .noPrint {
         display: none;
     }
 
-    // Use :global block for global styles within CSS Module's @media rule
-    :global {
-        body {
-            background-color: #ffffff !important; // Force white background
-            -webkit-print-color-adjust: exact;    // Ensure backgrounds print (Keep this!)
-            /* color-adjust: exact; */           // Standard property (Commented out for build)
-        }
-    }
+    /* --- :global(body) block yahan se HATA diya gaya hai --- */
 
     .receiptContainer {
         padding: 0;
-        background-color: #ffffff;
+        background-color: #ffffff; // Local container ko style karna theek hai
     }
 
     .printableArea {
@@ -138,7 +131,7 @@
         min-height: auto;
         box-shadow: none;
         border: none;
-        padding: 0;
+        padding: 0; // Print ke liye padding adjust kar sakte hain
         margin: 0;
     }
 }

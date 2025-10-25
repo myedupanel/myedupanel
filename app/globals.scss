@@ -1255,3 +1255,10 @@ body {
   --light-black: #2c2c2c;
   --sky-blue: #f0f5ff;
 }
+@media print {
+  body {
+    background-color: #ffffff !important; /* Force white background */
+    -webkit-print-color-adjust: exact;    /* For Chrome/Safari */
+    color-adjust: exact;                /* Standard property */
+  }
+}
