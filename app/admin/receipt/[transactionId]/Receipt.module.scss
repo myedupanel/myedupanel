@@ -120,14 +120,12 @@
         display: none;
     }
 
-    /* --- YAHAN BADLAAV KIYA GAYA HAI --- */
-    // :global() wrapper add kiya gaya hai
+    // Use :global() for body styles within CSS Module
     :global(body) {
         background-color: #ffffff !important; // Force white background for printing
-        -webkit-print-color-adjust: exact; // Ensure background colors print in Chrome/Safari
-        color-adjust: exact; // Standard property
+        -webkit-print-color-adjust: exact;    // Ensure background colors print in Chrome/Safari
+        color-adjust: exact;                // Standard property (this might show a warning)
     }
-    /* --- BADLAAV END --- */
 
 
     .receiptContainer {
