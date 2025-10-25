@@ -15,8 +15,9 @@ const sendEmail = require('../utils/sendEmail');
 const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware');
 
 // @route   POST /api/admin/create-user
-// @desc    Admin creates a new user (teacher, student, parent) -- STAFF CREATION REMOVED
+// @desc    Admin creates a new user (teacher, student, parent)
 // @access  Private (Admin only)
+// --- Code updated to use schoolId and name ---
 router.post(
   '/create-user',
   [authMiddleware, adminMiddleware],
@@ -25,21 +26,10 @@ router.post(
       const { name, email, role, studentClass, parentOf } = req.body;
       const schoolIdFromAdmin = req.user.schoolId;
 
-      // --- FIX: Check if the role is 'staff' and return error ---
-      if (role === 'staff') {
-          console.log("[POST /create-user] Attempted to create staff via wrong route.");
-          // Send an error telling the frontend to use the correct endpoint
-          return res.status(400).json({ msg: 'Staff creation should be done via the /api/staff endpoint.' });
-      }
-      // --- END FIX ---
-
-      // Validation for other roles (teacher, student, parent)
       if (!name || !email || !role) return res.status(400).json({ msg: 'Please provide name, email, and role.' });
       if (role === 'student' && !studentClass) return res.status(400).json({ msg: 'Please provide class for the student.' });
-      // Parent role might need parentOf validation if applicable
       if (!schoolIdFromAdmin) return res.status(400).json({ msg: 'Admin school information missing.' });
 
-      // Check for existing user (for student, teacher, parent)
       let user = await User.findOne({ email });
       if (user) return res.status(400).json({ msg: 'User with this email already exists.' });
 
@@ -53,17 +43,18 @@ router.post(
       user = new User(newUserDetails);
       await user.save();
 
-      // Socket emit logic (remains the same)
+      // Socket emit logic (ensure req.io is passed correctly)
       if (req.io) { req.io.emit('updateDashboard'); }
       else { console.warn('Socket.IO instance not found on req object for create-user.'); }
 
-      // Send Welcome Email (Optional) (remains the same)
+      // Send Welcome Email (Optional)
       try {
         const subject = 'Your SchoolPro Account has been created!';
-        const message = `<h1>Welcome...</h1><p>Email: ${email}</p><p>Temp Password: ${temporaryPassword}</p>`; // Simplified message example
+        const message = `<h1>Welcome to SchoolPro, ${name}!</h1><p>An admin has created an account for you...</p><p><strong>Email:</strong> ${email}</p><p><strong>Temporary Password:</strong> ${temporaryPassword}</p><p>Please log in and change your password...</p>`;
         await sendEmail({ to: user.email, subject, html: message });
       } catch (emailError) {
         console.error("Could not send creation email:", emailError);
+        // Proceed but inform frontend
         return res.status(201).json({ msg: 'User created successfully, but failed to send welcome email.' });
       }
       res.status(201).json({ msg: `User '${name}' created successfully as a ${role}.` });
@@ -73,9 +64,6 @@ router.post(
             const messages = Object.values(err.errors).map(val => val.message);
             return res.status(400).json({ msg: messages.join(' ') });
         }
-       if (err.code === 11000) { // Catch duplicate email error during save
-            return res.status(400).json({ msg: 'User with this email already exists (database error).' });
-       }
       res.status(500).send('Server Error');
     }
   }
@@ -85,50 +73,159 @@ router.post(
 // @desc    Get aggregated data for the admin dashboard
 // @access  Private (Admin only)
 // --- Code updated to use schoolId AND aggregate correctly ---
-// (This route remains unchanged from the previous version)
 router.get(
   '/dashboard-data',
-  [authMiddleware, adminMiddleware],
+  [authMiddleware, adminMiddleware], // Ensure adminMiddleware checks role
   async (req, res) => {
-    console.log("[GET /dashboard-data] Request received.");
+    console.log("[GET /dashboard-data] Request received."); // Added log
     try {
       const schoolIdFromAdmin = req.user.schoolId;
-      if (!schoolIdFromAdmin) { /* ... error handling ... */ return res.status(400).json({ msg: 'Admin school information missing.' });}
-      console.log(`[GET /dashboard-data] Fetching data for schoolId: ${schoolIdFromAdmin}`);
+      if (!schoolIdFromAdmin) {
+        console.log("[GET /dashboard-data] Error: Missing schoolId in token."); // Added log
+        return res.status(400).json({ msg: 'Admin school information missing.' });
+      }
+      console.log(`[GET /dashboard-data] Fetching data for schoolId: ${schoolIdFromAdmin}`); // Added log
+
+      // Convert schoolId to ObjectId for aggregation matching
       let schoolObjectId;
        try {
            schoolObjectId = mongoose.Types.ObjectId.isValid(schoolIdFromAdmin) ? new mongoose.Types.ObjectId(schoolIdFromAdmin) : null;
-           if (!schoolObjectId) { /* ... error handling ... */ return res.status(400).json({ msg: 'Invalid school ID format.' }); }
-       } catch (idError) { /* ... error handling ... */ return res.status(500).json({ msg: 'Server error processing school ID.' }); }
+           if (!schoolObjectId) {
+               console.error(`[GET /dashboard-data] Invalid school ID format received from token: ${schoolIdFromAdmin}`);
+               return res.status(400).json({ msg: 'Invalid school ID format.' });
+           }
+       } catch (idError) {
+            console.error(`[GET /dashboard-data] Error converting school ID: ${idError.message}`);
+            return res.status(500).json({ msg: 'Server error processing school ID.' });
+       }
 
 
-      const [ studentCount, teacherCount, parentCount, staffCount, recentStudents, recentTeachers, recentParents, recentStaff, recentPaidFeeRecords, admissionsDataRaw, classCountsRaw ] = await Promise.all([
-        User.countDocuments({ role: 'student', schoolId: schoolIdFromAdmin }), User.countDocuments({ role: 'teacher', schoolId: schoolIdFromAdmin }),
-        User.countDocuments({ role: 'parent', schoolId: schoolIdFromAdmin }), User.countDocuments({ role: 'staff', schoolId: schoolIdFromAdmin }), // Counts staff Users
+      const [
+        studentCount,
+        teacherCount,
+        parentCount,
+        staffCount,
+        recentStudents,
+        recentTeachers,
+        recentParents, // Assuming Parent model exists
+        recentStaff,   // Assuming staff are Users
+        recentPaidFeeRecords,
+        // --- Aggregation for Admissions by Month (from User collection) ---
+        admissionsDataRaw,
+        // --- Aggregation for Students by Class (from Student collection) ---
+        classCountsRaw
+      ] = await Promise.all([
+        // Counts using User model and schoolId
+        User.countDocuments({ role: 'student', schoolId: schoolIdFromAdmin }),
+        User.countDocuments({ role: 'teacher', schoolId: schoolIdFromAdmin }),
+        User.countDocuments({ role: 'parent', schoolId: schoolIdFromAdmin }),
+        User.countDocuments({ role: 'staff', schoolId: schoolIdFromAdmin }),
+
+        // Recent lists (fetching specific models)
         Student.find({ schoolId: schoolIdFromAdmin }).sort({ createdAt: -1 }).limit(5).select('name class createdAt'),
         Teacher.find({ schoolId: schoolIdFromAdmin }).sort({ createdAt: -1 }).limit(5).select('name subject createdAt'),
         Parent.find({ schoolId: schoolIdFromAdmin }).sort({ createdAt: -1 }).limit(5).select('name createdAt'), // Assumes Parent model exists and has schoolId
-        User.find({ role: 'staff', schoolId: schoolIdFromAdmin }).sort({ createdAt: -1 }).limit(5).select('name createdAt'), // Gets recent staff Users
-        FeeRecord.find({ schoolId: schoolIdFromAdmin, status: 'Paid' }).sort({ createdAt: -1 }).limit(5) .populate({ path: 'studentId', select: 'name' }).select('amount createdAt studentId'),
-        User.aggregate([ { $match: { role: 'student', schoolId: schoolObjectId } }, { $project: { month: { $month: "$createdAt" } } }, { $group: { _id: "$month", admissions: { $sum: 1 } } }, { $project: { _id: 0, month: "$_id", admissions: 1 } }, { $sort: { "month": 1 } } ]),
-        Student.aggregate([ { $match: { schoolId: schoolObjectId } }, { $group: { _id: "$class", count: { $sum: 1 } } }, { $project: { _id: 0, name: "$_id", count: 1 } }, { $sort: { "name": 1 } } ])
-      ]).catch(err => { console.error("[GET /dashboard-data] Error during Promise.all:", err); throw err; });
-      console.log("[GET /dashboard-data] Raw Admissions Data:", admissionsDataRaw);
-      console.log("[GET /dashboard-data] Raw Class Counts:", classCountsRaw);
+        User.find({ role: 'staff', schoolId: schoolIdFromAdmin }).sort({ createdAt: -1 }).limit(5).select('name createdAt'), // Assumes staff are Users with schoolId
 
-      // --- Formatting logic remains the same ---
-      const monthNames = ["Jan", "Feb", /*...*/ "Dec"];
-      const admissionsMap = new Map(/*...*/); admissionsDataRaw.forEach(/*...*/); const admissionsData = Array.from(admissionsMap.values());
-      console.log("[GET /dashboard-data] Formatted Admissions (Month):", admissionsData);
+        // Fee Records
+        FeeRecord.find({ schoolId: schoolIdFromAdmin, status: 'Paid' }).sort({ createdAt: -1 }).limit(5)
+          .populate({ path: 'studentId', select: 'name' }) // Populate student name
+          .select('amount createdAt studentId'),
+
+        // --- UPDATED: Admission Chart (Aggregate student USERS by creation month) ---
+        User.aggregate([
+          { $match: { role: 'student', schoolId: schoolObjectId } }, // Match student Users in this school
+          {
+             $project: { // Project the month from createdAt
+                 month: { $month: "$createdAt" }
+             }
+          },
+          {
+             $group: { // Group by month and count
+                 _id: "$month", // Group by the extracted month number
+                 admissions: { $sum: 1 } // Count documents in each group
+             }
+          },
+          {
+             $project: { // Reshape the output
+                 _id: 0, // Exclude the default _id
+                 month: "$_id", // Rename _id to month
+                 admissions: 1 // Include the count
+             }
+          },
+          { $sort: { "month": 1 } } // Sort by month number (1-12)
+        ]),
+
+        // --- NEW: Class Counts (Aggregate STUDENTS by class) ---
+        Student.aggregate([
+            { $match: { schoolId: schoolObjectId } }, // Match Students in this school
+            {
+                $group: { // Group by class name
+                    _id: "$class", // The field storing class name in Student model
+                    count: { $sum: 1 } // Count students per class
+                }
+            },
+            {
+                $project: { // Reshape the output
+                    _id: 0, // Exclude the default _id
+                    name: "$_id", // Rename _id to name (class name)
+                    count: 1 // Include the count
+                }
+            },
+            { $sort: { "name": 1 } } // Sort alphabetically by class name
+        ])
+      ]).catch(err => {
+          // Catch errors from Promise.all early
+          console.error("[GET /dashboard-data] Error during Promise.all:", err);
+          throw err; // Re-throw to be caught by the outer try-catch
+      });
+      console.log("[GET /dashboard-data] Raw Admissions Data:", admissionsDataRaw); // Added log
+      console.log("[GET /dashboard-data] Raw Class Counts:", classCountsRaw);       // Added log
+
+      // --- Format Admissions Data (By Month) ---
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const admissionsMap = new Map(monthNames.map((name, index) => [index + 1, { name, admissions: 0 }]));
+      admissionsDataRaw.forEach(item => {
+        if (item.month >= 1 && item.month <= 12) {
+             admissionsMap.set(item.month, { name: monthNames[item.month - 1], admissions: item.admissions });
+        }
+      });
+      const admissionsData = Array.from(admissionsMap.values()); // Show all 12 months for consistency
+      console.log("[GET /dashboard-data] Formatted Admissions (Month):", admissionsData); // Added log
+
+
+      // --- Format Class Counts Data ---
+      // Directly use the result from aggregation as it's already { name: className, count: number }
       const classCounts = classCountsRaw;
-      console.log("[GET /dashboard-data] Formatted Class Counts:", classCounts);
-      const recentFees = recentPaidFeeRecords.map(record => ({ _id: record._id.toString(), student: record.studentId?.name || 'Unknown Student', amount: `₹${record.amount.toLocaleString('en-IN')}`, date: record.createdAt ? record.createdAt.toISOString() : 'No Date' }));
-      // --- End Formatting ---
+      console.log("[GET /dashboard-data] Formatted Class Counts:", classCounts); // Added log
 
-      const dashboardData = { totalStudents: studentCount, totalTeachers: teacherCount, totalParents: parentCount, totalStaff: staffCount, admissionsData, classCounts, recentStudents, recentTeachers, recentParents, recentStaff, recentFees };
-      console.log("[GET /dashboard-data] Sending final dashboard data.");
+
+      // --- Format Recent Payments (No change here) ---
+      const recentFees = recentPaidFeeRecords.map(record => ({ _id: record._id.toString(), student: record.studentId?.name || 'Unknown Student', amount: `₹${record.amount.toLocaleString('en-IN')}`, date: record.createdAt ? record.createdAt.toISOString() : 'No Date' }));
+
+      // --- Final Data Object ---
+      const dashboardData = {
+        totalStudents: studentCount,
+        totalTeachers: teacherCount,
+        totalParents: parentCount,
+        totalStaff: staffCount,
+        admissionsData,           // DYNAMIC Monthly Admissions
+        classCounts,              // DYNAMIC Class Counts
+        recentStudents,
+        recentTeachers,
+        recentParents,  // Add if fetched
+        recentStaff,    // Add if fetched
+        recentFees
+        // TODO: Add totalClasses (maybe classCounts.length?)
+        // TODO: Add monthlyRevenue (requires FeeRecord aggregation by month)
+      };
+      console.log("[GET /dashboard-data] Sending final dashboard data."); // Added log
       res.json(dashboardData);
-    } catch (err) { console.error("[GET /dashboard-data] CATCH BLOCK ERROR:", err.message, err.stack); res.status(500).send('Server Error fetching dashboard data'); }
+
+    } catch (err) {
+      console.error("[GET /dashboard-data] CATCH BLOCK ERROR:", err.message, err.stack);
+      res.status(500).send('Server Error fetching dashboard data');
+    }
   }
 );
 
@@ -137,48 +234,118 @@ router.get(
 // @desc    Update admin's profile name AND associated school name
 // @access  Private (Admin only)
 // --- Code includes school update, 90-day rule, timestamp, and logging ---
-// (This route remains unchanged from the previous confirmed version)
-router.put(
-    '/profile',
-    authMiddleware,
-    async (req, res) => {
-        const { adminName, schoolName } = req.body;
-        const userId = req.user.id;
-        console.log(`[PUT /profile] START - User ID: ${userId}...`);
-        if (!adminName || !schoolName) { /* ... error handling ... */ return res.status(400).json({ message: 'Full name and school name are required.' }); }
-        try {
-            const user = await User.findById(userId);
-            if (!user) { /* ... error handling ... */ return res.status(404).json({ message: 'User not found' }); }
-            if (user.role !== 'admin') { /* ... error handling ... */ return res.status(403).json({ message: 'Only admins can update profiles...' }); }
-            const school = await School.findById(user.schoolId);
-            if (!school) { /* ... error handling ... */ return res.status(404).json({ message: 'Associated school not found...' }); }
-            console.log(`[PUT /profile] Found User: ${user.name}, School: ${school.name}`);
-            let schoolNeedsSave = false; let userNeedsSave = false; let newSchoolNameForToken = school.name;
-            const requestedSchoolNameTrimmed = schoolName.trim(); const currentSchoolNameTrimmed = school.name.trim();
-            if (requestedSchoolNameTrimmed && requestedSchoolNameTrimmed !== currentSchoolNameTrimmed) {
-                console.log(`[PUT /profile] School name change detected...`);
-                if (user.schoolNameLastUpdated) { /* ... 90-day check ... */ } else { console.log(`[PUT /profile] No previous school name update found.`); }
-                console.log(`[PUT /profile] Checking if school name '${requestedSchoolNameTrimmed}' is taken...`);
-                const existingSchoolWithNewName = await School.findOne({ name: requestedSchoolNameTrimmed, _id: { $ne: user.schoolId } });
-                if (existingSchoolWithNewName) { /* ... error handling ... */ return res.status(400).json({ message: 'This school name is already registered...' }); }
-                console.log(`[PUT /profile] School name '${requestedSchoolNameTrimmed}' is available.`);
-                school.name = requestedSchoolNameTrimmed; schoolNeedsSave = true; user.schoolNameLastUpdated = new Date(); userNeedsSave = true; newSchoolNameForToken = school.name;
-                console.log(`[PUT /profile] School and User marked for update.`);
-            } else { console.log(`[PUT /profile] School name not changed...`); }
-            const requestedAdminNameTrimmed = adminName.trim();
-            if (requestedAdminNameTrimmed && requestedAdminNameTrimmed !== user.name.trim()) {
-                console.log(`[PUT /profile] User name change requested...`); user.name = requestedAdminNameTrimmed; userNeedsSave = true; console.log(`[PUT /profile] User name marked for update.`);
-            } else { console.log(`[PUT /profile] User name not changed...`); }
-            if (schoolNeedsSave) { console.log(`[PUT /profile] Saving school...`); await school.save(); console.log(`[PUT /profile] School saved.`); } else { console.log(`[PUT /profile] Skipping school save.`); }
-            if (userNeedsSave) { console.log(`[PUT /profile] Saving user...`); await user.save(); console.log(`[PUT /profile] User saved.`); } else { console.log(`[PUT /profile] Skipping user save.`); }
-            const payload = { user: { id: user.id, role: user.role, name: user.name, schoolId: user.schoolId, schoolName: newSchoolNameForToken } };
-            console.log(`[PUT /profile] Generating token...`, payload.user);
-            jwt.sign( payload, process.env.JWT_SECRET, { expiresIn: '5h' }, (err, token) => {
-                if (err) { /* ... error handling ... */ return res.status(500).send('Server Error generating token.'); };
-                console.log(`[PUT /profile] Sending success response.`); res.json({ message: 'Profile updated successfully!', token });
-            });
-        } catch (error) { /* ... existing error handling ... */ }
-    }
-);
+router.put('/profile', authMiddleware, async (req, res) => {
+  const { adminName, schoolName } = req.body; // Receive adminName from frontend
+  const userId = req.user.id;
+  console.log(`[PUT /profile] START - User ID: ${userId} requested update. Name: '${adminName}', School: '${schoolName}'`);
 
-module.exports = router; // Make sure router is exported
+  // Validate input presence (basic check)
+  if (!adminName || !schoolName) {
+      console.log(`[PUT /profile] Error: Missing adminName or schoolName in request body.`);
+      return res.status(400).json({ message: 'Full name and school name are required.' });
+  }
+
+  try {
+    // 1. Find the User
+    const user = await User.findById(userId);
+    if (!user) { console.log(`[PUT /profile] Error: User not found for ID: ${userId}`); return res.status(404).json({ message: 'User not found' }); }
+    if (user.role !== 'admin') { console.log(`[PUT /profile] Error: User ${userId} role is '${user.role}', not 'admin'.`); return res.status(403).json({ message: 'Only admins can update profiles via this route.' }); }
+
+    // 2. Find the associated School
+    const school = await School.findById(user.schoolId);
+    if (!school) { console.log(`[PUT /profile] Error: School not found for user ${userId} with schoolId ${user.schoolId}`); return res.status(404).json({ message: 'Associated school not found for this user.' }); }
+    console.log(`[PUT /profile] Found User: ${user.name} (ID: ${user._id}), School: ${school.name} (ID: ${school._id})`);
+
+    let schoolNeedsSave = false; // Flag for school doc
+    let userNeedsSave = false;   // Flag for user doc
+    let newSchoolNameForToken = school.name; // Start with current name from DB
+
+    // 3. Handle School Name Change
+    const requestedSchoolNameTrimmed = schoolName.trim();
+    const currentSchoolNameTrimmed = school.name.trim();
+
+    if (requestedSchoolNameTrimmed && requestedSchoolNameTrimmed !== currentSchoolNameTrimmed) {
+      console.log(`[PUT /profile] School name change detected from '${currentSchoolNameTrimmed}' to '${requestedSchoolNameTrimmed}'`);
+      // a. Check 90-day rule
+      if (user.schoolNameLastUpdated) {
+        const lastUpdate = new Date(user.schoolNameLastUpdated);
+        const ninetyDaysAgo = new Date(); ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+        console.log(`[PUT /profile] Checking 90-day rule. Last update: ${lastUpdate}, 90 days ago: ${ninetyDaysAgo}`);
+        if (lastUpdate > ninetyDaysAgo) {
+          const diffTime = Math.abs(new Date().getTime() - lastUpdate.getTime()); const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24)); const daysRemaining = Math.max(0, 90 - daysPassed);
+          console.log(`[PUT /profile] 90-day rule failed. Days remaining: ${daysRemaining}`);
+          return res.status(400).json({ message: `You can only change your school name once every 90 days. Please try again in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}.` });
+        } else {
+             console.log(`[PUT /profile] 90-day rule passed.`);
+        }
+      } else { console.log(`[PUT /profile] No previous school name update found.`); }
+
+      // b. Check if NEW name is taken
+      console.log(`[PUT /profile] Checking if school name '${requestedSchoolNameTrimmed}' is already taken...`);
+      const existingSchoolWithNewName = await School.findOne({ name: requestedSchoolNameTrimmed, _id: { $ne: user.schoolId } });
+      if (existingSchoolWithNewName) { console.log(`[PUT /profile] Error: School name '${requestedSchoolNameTrimmed}' is already taken by school ID ${existingSchoolWithNewName._id}`); return res.status(400).json({ message: 'This school name is already registered by another school.' }); }
+      console.log(`[PUT /profile] School name '${requestedSchoolNameTrimmed}' is available.`);
+
+      // c. Mark School and User for saving
+      school.name = requestedSchoolNameTrimmed; // Update school object IN MEMORY
+      schoolNeedsSave = true;                   // Mark school doc to be saved
+      user.schoolNameLastUpdated = new Date();  // Update user object IN MEMORY
+      userNeedsSave = true;                     // Mark user doc to be saved
+      newSchoolNameForToken = school.name;      // Prepare the new name for the token
+      console.log(`[PUT /profile] School name marked for update to '${school.name}'. User timestamp marked for update.`);
+    } else {
+        console.log(`[PUT /profile] School name not changed ('${requestedSchoolNameTrimmed}' vs '${currentSchoolNameTrimmed}') or not provided.`);
+    }
+
+    // 4. Handle User Name Change (using adminName from body)
+    const requestedAdminNameTrimmed = adminName.trim();
+    if (requestedAdminNameTrimmed && requestedAdminNameTrimmed !== user.name.trim()) {
+        console.log(`[PUT /profile] User name change requested from '${user.name}' to '${requestedAdminNameTrimmed}'`);
+        user.name = requestedAdminNameTrimmed; // Update user's 'name' field
+        userNeedsSave = true; // Mark user doc to be saved
+        console.log(`[PUT /profile] User name marked for update.`);
+    } else { console.log(`[PUT /profile] User name not changed or not provided.`); }
+
+    // 5. Save documents IF changes were marked
+    // Use Promise.all to save concurrently if desired, or save sequentially
+    if (schoolNeedsSave) {
+        console.log(`[PUT /profile] Attempting to save school document...`);
+        await school.save(); // Save changes to the school document in DB
+        console.log(`[PUT /profile] School document saved successfully.`);
+    } else {
+        console.log(`[PUT /profile] No changes needed for school document. Skipping save.`);
+    }
+
+    if (userNeedsSave) {
+        console.log(`[PUT /profile] Attempting to save user document...`);
+        await user.save(); // Save user document (name and/or timestamp) in DB
+        console.log(`[PUT /profile] User document saved successfully.`);
+    } else {
+        console.log(`[PUT /profile] No changes needed for user document. Skipping save.`);
+    }
+
+    // 6. Generate a NEW token with final, saved data
+    const payload = { user: { id: user.id, role: user.role, name: user.name, schoolId: user.schoolId, schoolName: newSchoolNameForToken } };
+    console.log(`[PUT /profile] Generating new token with payload:`, payload.user);
+
+    jwt.sign( payload, process.env.JWT_SECRET, { expiresIn: '5h' }, (err, token) => {
+        if (err) { console.error("[PUT /profile] Error signing token:", err); return res.status(500).send('Server Error generating authentication token.'); };
+        console.log(`[PUT /profile] Token generated. Sending success response.`);
+        res.json({ message: 'Profile updated successfully!', token }); // Send new token
+      }
+    );
+
+  } catch (error) {
+     console.error("[PUT /profile] CATCH BLOCK ERROR:", error.message, error.stack);
+     if (error.code === 11000 && error.keyPattern?.name) { // Use optional chaining for safety
+         return res.status(400).json({ message: 'Failed to update school name, it might already be taken (DB constraint).' });
+     }
+      if (error.name === 'ValidationError') {
+         const messages = Object.values(error.errors).map(val => val.message);
+         return res.status(400).json({ message: messages.join(' ') });
+      }
+    res.status(500).send('Server Error updating profile');
+  }
+});
+
+module.exports = router;
