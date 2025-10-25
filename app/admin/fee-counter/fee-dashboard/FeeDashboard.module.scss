@@ -177,3 +177,73 @@
     border-radius: 8px;
     transition: width 0.4s ease;
 }
+.recentActivityCard {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    
+    // NOTE: Aapko shayad .mainContentGrid ka CSS update karna pade.
+    // Example: grid-template-columns: 1fr 1fr 1fr;
+    // Aur .feeStructureCard aur .feeDetailsCard se 'grid-column' hatana pade.
+    // Abhi ke liye, yeh 2-column grid mein stack ho jayega.
+}
+
+.feedList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px; // List ko scrollable banayein agar lambi ho
+    overflow-y: auto;
+}
+
+.feedItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0.25rem;
+    border-bottom: 1px solid #f0f0f0;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards; // Animation add karein
+
+    &:first-child {
+        font-weight: 600;
+        color: #000;
+    }
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.feedName {
+    font-size: 0.95rem;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 10px;
+}
+
+.feedAmount {
+    font-size: 0.9rem;
+    color: #007bff; // Blue color
+    font-weight: 500;
+    white-space: nowrap;
+    margin-left: 1rem;
+}
+
+/* Simple fade-in animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Aapke paas placeholder style pehle se ho sakta hai, */
+/* agar nahi hai toh yeh use karein */
+.placeholder {
+    padding: 2rem;
+    text-align: center;
+    color: #777;
+    font-size: 1rem;
+}

@@ -1,88 +1,89 @@
 const express = require('express');
 const router = express.Router();
-const { authMiddleware } = require('../middleware/authMiddleware');
-const feeController = require('../controllers/feeController');
+const { authMiddleware } = require('../middleware/authMiddleware'); // Assuming authMiddleware is needed
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 
-//  GET /api/fees/dashboard-overview
-router.get('/dashboard-overview', authMiddleware, feeController.getDashboardOverview);
+// Import all functions from feeController
+const {
+  getDashboardOverview,
+  getFeeTemplates,
+  getTemplateDetails,
+  getLatePayments,
+  calculateLateFees,
+  sendLateFeeReminders,
+  getStudentFeeRecords,
+  getProcessingPayments,
+  getEditedRecords,
+  getPdcRecords,
+  assignFeeToStudent,
+  createFeeTemplate,
+  getSampleSheet,
+  updateExistingRecords,
+  exportDetailReport,
+  getPaidTransactions,
+  getFailedTransactions,
+  getPaymentHistory,
+  collectManualFee,
+  getTransactionById,
+  getClasswiseReport,
+  getStudentReportByClass,
+  createPaymentOrder,
+  verifyPaymentWebhook
+} = require('../controllers/feeController');
 
-//  GET /api/fees/templates
-router.get('/templates', authMiddleware, feeController.getFeeTemplates);
+// --- Fee Counter Routes ---
 
-//  GET /api/fees/templates/:id
-router.get('/templates/:id', authMiddleware, feeController.getTemplateDetails);
+// Dashboard
+router.get('/dashboard-overview', authMiddleware, getDashboardOverview);
 
-//  GET /api/fees/late-payments
-router.get('/late-payments', authMiddleware, feeController.getLatePayments);
+// Templates
+router.get('/templates', authMiddleware, getFeeTemplates);
+router.get('/templates/:id', authMiddleware, getTemplateDetails);
+router.post('/templates', authMiddleware, createFeeTemplate);
 
-//  POST /api/fees/calculate-late-fees
-router.post('/calculate-late-fees', authMiddleware, feeController.calculateLateFees);
+// Assign Fee
+router.post('/assign', authMiddleware, assignFeeToStudent);
 
-//  POST /api/fees/send-reminders
-router.post('/send-reminders', authMiddleware, feeController.sendLateFeeReminders);
+// Fee Collection (Manual)
+router.post('/collect-manual', authMiddleware, collectManualFee);
 
-//  GET /api/fees/student-records
-router.get('/student-records', authMiddleware, feeController.getStudentFeeRecords);
+// Student Specific Records (For Fee Collection page tabs)
+router.get('/student/:studentId/paid', authMiddleware, getPaidTransactions);
+router.get('/student/:studentId/failed', authMiddleware, getFailedTransactions);
+router.get('/student/:studentId/history', authMiddleware, getPaymentHistory);
 
-router.get(
-    '/processing-payments',
-    authMiddleware,
-    feeController.getProcessingPayments
-);
+// Late Fees
+router.get('/late-payments', authMiddleware, getLatePayments);
+router.post('/calculate-late-fees', authMiddleware, calculateLateFees);
+router.post('/send-reminders', authMiddleware, sendLateFeeReminders);
 
-router.get(
-    '/edited-records',
-    authMiddleware,
-    feeController.getEditedRecords
-);
+// General Records & Lists
+router.get('/student-records', authMiddleware, getStudentFeeRecords);
+router.get('/processing-payments', authMiddleware, getProcessingPayments);
+router.get('/edited-records', authMiddleware, getEditedRecords);
+router.get('/pdc-records', authMiddleware, getPdcRecords);
 
-router.get(
-    '/pdc-records',
-    authMiddleware,
-    feeController.getPdcRecords
-);
-
-router.post(
-    '/assign',
-    authMiddleware,
-    feeController.assignFeeToStudent
-);
-
-router.post(
-    '/templates',
-    authMiddleware,
-    feeController.createFeeTemplate
-);
-
-router.get(
-    '/import/sample-sheet',
-    authMiddleware,
-    feeController.getSampleSheet
-);
-
+// Import / Export
+router.get('/import/sample-sheet', authMiddleware, getSampleSheet);
 router.post(
     '/import/update-records',
     authMiddleware,
-    upload.single('feeRecordFile'), // 'feeRecordFile' file input ka naam hoga
-    feeController.updateExistingRecords
+    upload.single('feeRecordFile'), // Match frontend input name
+    updateExistingRecords
 );
-router.post('/export/detail', authMiddleware, feeController.exportDetailReport);
+router.post('/export/detail', authMiddleware, exportDetailReport);
 
-router.get(
-    '/student/:studentId/paid',
-    authMiddleware,
-    feeController.getPaidTransactions
-);
-router.get(
-    '/student/:studentId/failed',
-    authMiddleware,
-    feeController.getFailedTransactions
-);
-router.get(
-    '/student/:studentId/history',
-    authMiddleware,
-    feeController.getPaymentHistory
-);
+// Reports
+router.get('/reports/classwise', authMiddleware, getClasswiseReport);
+router.get('/reports/studentwise/:classId', authMiddleware, getStudentReportByClass);
+
+// Receipt
+router.get('/transaction/:id', authMiddleware, getTransactionById);
+
+// Automatic Payment (Razorpay)
+router.post('/payment/create-order', authMiddleware, createPaymentOrder);
+// Webhook endpoint - No authMiddleware needed as it's called by Razorpay
+router.post('/payment/verify-webhook', verifyPaymentWebhook);
+
 module.exports = router;

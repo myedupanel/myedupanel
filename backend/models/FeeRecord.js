@@ -1,15 +1,26 @@
-// backend/models/FeeRecord.js
-
 const mongoose = require('mongoose');
 
 const FeeRecordSchema = new mongoose.Schema({
-  amount: {
+  amount: { // Hum ise 'totalAmount' maan kar chalenge
     type: Number,
     required: [true, 'Fee amount is required']
   },
+  
+  // --- YEH HAIN NAYE FIELDS ---
+  amountPaid: {
+    type: Number,
+    default: 0
+  },
+  balanceDue: {
+    type: Number,
+    default: 0 // Hum ise controller mein calculate karke update karenge
+  },
+  // --- 
+  
   status: {
     type: String,
-    enum: ['Paid', 'Pending', 'Late', 'Failed'],
+    // 'Partial' ko yahan add kar diya hai
+    enum: ['Paid', 'Pending', 'Late', 'Failed', 'Partial'], 
     default: 'Pending'
   },
   lateFine: {
@@ -28,8 +39,7 @@ const FeeRecordSchema = new mongoose.Schema({
   // Yeh record kis student ka hai
   studentId: {
     type: mongoose.Schema.Types.ObjectId,
-    // ===== YEH HAI ZAROORI BADLAAV =====
-    ref: 'User', // Yeh Mongoose ko batata hai ki yeh ID 'User' model se judi hai
+    ref: 'User', 
     required: true
   },
   // Yeh record kis school ka hai
@@ -40,7 +50,7 @@ const FeeRecordSchema = new mongoose.Schema({
   // Yeh record kis template se bana hai
   templateId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'FeeTemplate', // Yeh 'FeeTemplate' model se juda hai
+    ref: 'FeeTemplate', 
     required: true
   },
   dueDate: {
@@ -62,9 +72,24 @@ const FeeRecordSchema = new mongoose.Schema({
   chequeNumber: { type: String, trim: true },
   chequeDate: { type: Date }, // Cheque par likhi hui date
   bankName: { type: String, trim: true },
-  
-  // --- Duplicate fields yahaan se hata diye gaye hain ---
+});
 
+// Yeh hook 'balanceDue' ko save hone se pehle automatically calculate kar lega
+FeeRecordSchema.pre('save', function(next) {
+  this.balanceDue = this.amount - this.amountPaid - this.discount + this.lateFine;
+  
+  // Status ko bhi automatically update karega
+  if (this.balanceDue <= 0) {
+    this.status = 'Paid';
+    this.balanceDue = 0; // Balance negative na jaaye
+  } else if (this.amountPaid > 0) {
+    this.status = 'Partial';
+  } else {
+    this.status = 'Pending'; 
+    // Yahan aap 'Late' status ki logic bhi daal sakte hain
+  }
+  
+  next();
 });
 
 module.exports = mongoose.model('FeeRecord', FeeRecordSchema);
