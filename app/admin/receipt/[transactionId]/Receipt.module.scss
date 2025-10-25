@@ -58,7 +58,7 @@
         font-size: 1rem;
         color: #444;
         margin-bottom: 0.5rem;
-        
+
         strong {
             font-weight: 500;
             min-width: 120px;
@@ -75,7 +75,7 @@
     margin-top: 4rem;
     text-align: center;
     color: #777;
-    
+
     .signatureBox {
         height: 100px;
         width: 200px;
@@ -88,7 +88,6 @@
 }
 
 /* --- PRINT STYLES --- */
-// Yeh styles tabhi apply honge jab aap Print (Ctrl+P) dabayenge
 
 .noPrint {
     width: 100%;
@@ -121,9 +120,15 @@
         display: none;
     }
 
-    body {
-        background-color: #ffffff; // Print mein background force karein
+    /* --- YAHAN BADLAAV KIYA GAYA HAI --- */
+    // :global() wrapper add kiya gaya hai
+    :global(body) {
+        background-color: #ffffff !important; // Force white background for printing
+        -webkit-print-color-adjust: exact; // Ensure background colors print in Chrome/Safari
+        color-adjust: exact; // Standard property
     }
+    /* --- BADLAAV END --- */
+
 
     .receiptContainer {
         padding: 0;
@@ -132,9 +137,15 @@
 
     .printableArea {
         width: 100%;
-        min-height: auto;
+        min-height: auto; // Let content determine height when printing
         box-shadow: none;
         border: none;
-        padding: 0;
+        padding: 0; // Adjust padding for print if needed, maybe 1cm?
+        margin: 0;
     }
+
+    // Optional: Adjust font size for print
+    // h1, h2, p, span {
+    //     font-size: 10pt;
+    // }
 }
