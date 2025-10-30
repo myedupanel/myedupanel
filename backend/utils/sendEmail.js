@@ -2,14 +2,17 @@
 
 const { google } = require('googleapis');
 
-// 1. Apni saari Google keys Environment se lein (Yeh pehle jaisa hi hai)
-const CLIENTid = process.env.GOOGLE_CLIENTid;
+// 1. Apni saari Google keys Environment se lein
+// --- YEH HAI AAPKA FIX (Line 7) ---
+const CLIENTid = process.env.GOOGLE_CLIENT_ID; // FIX: 'CLIENTid' ko 'CLIENT_ID' kiya
+// --- END FIX ---
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
 const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 // 2. Google ka OAuth2 client set karein (Yeh bhi pehle jaisa hai)
+// Ab 'CLIENTid' variable mein sahi value aayegi
 const oAuth2Client = new google.auth.OAuth2(CLIENTid, CLIENT_SECRET, REDIRECT_URI);
 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
