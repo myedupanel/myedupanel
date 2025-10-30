@@ -1,11 +1,13 @@
+// components/admin/StaffTable/StaffTable.tsx
+
 "use client";
 import React from 'react';
 import styles from './StaffTable.module.scss';
 import { MdEdit, MdDelete } from 'react-icons/md';
 
-// --- Interface Updated: Add staffId for display ---
+// --- Interface Updated: id ab number hai ---
 interface StaffMember {
-  id: string; // This is the MongoDB id, used for key and actions
+  id: number; // FIX: Changed to number
   staffId: string; // This is the ID entered in the form, for display
   name: string;
   role: string;
@@ -18,8 +20,8 @@ interface StaffMember {
 
 interface StaffTableProps {
   staff: StaffMember[];
-  onDelete: (staffId: string) => void; // Expects id (which is passed as 'id' prop)
-  onEdit: (staffMember: StaffMember) => void; // Expects this component's StaffMember type
+  onDelete: (staffId: number) => void; // FIX: Expects number
+  onEdit: (staffMember: StaffMember) => void; 
 }
 
 const StaffTable = ({ staff, onDelete, onEdit }: StaffTableProps) => {
@@ -28,7 +30,7 @@ const StaffTable = ({ staff, onDelete, onEdit }: StaffTableProps) => {
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>Staff ID</th> {/* Header remains same */}
+            <th>Staff ID</th> 
             <th>Name</th>
             <th>Role</th>
             <th>Contact</th>
@@ -40,22 +42,19 @@ const StaffTable = ({ staff, onDelete, onEdit }: StaffTableProps) => {
         <tbody>
           {staff.length > 0 ? (
             staff.map((member) => (
-              // --- Use member.id (which is id) for the key ---
+              // --- Key ab number ID hai ---
               <tr key={member.id}>
-                {/* --- Display member.staffId in the first column --- */}
                 <td>{member.staffId}</td>
-                {/* --- Other columns remain same --- */}
                 <td>{member.name}</td>
                 <td>{member.role}</td>
                 <td>{member.contact}</td>
                 <td>{member.joiningDate}</td>
                 <td>{member.leavingDate || 'N/A'}</td>
                 <td className={styles.actions}>
-                  {/* onEdit sends the full 'member' object */}
                   <button className={styles.iconButton} title="Edit" onClick={() => onEdit(member)}>
                     <MdEdit />
                   </button>
-                  {/* onDelete sends member.id (which is the id) */}
+                  {/* --- onDelete ab number ID bhejega --- */}
                   <button className={`${styles.iconButton} ${styles.deleteButton}`} title="Delete" onClick={() => onDelete(member.id)}>
                     <MdDelete />
                   </button>

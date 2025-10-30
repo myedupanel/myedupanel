@@ -1,11 +1,18 @@
+// components/admin/EditStaffForm/EditStaffForm.tsx
+
 "use client";
 import React, { useState, useEffect, FormEvent } from 'react';
 import styles from './EditStaffForm.module.scss';
 
 // Prop type (Matches InternalStaffMember from StaffPage)
 interface StaffDataProp {
-  id: string; id: string; staffId?: string; name: string; role: string;
-  contactNumber?: string; email: string; joiningDate: string; // Formatted
+  id: number; // FIX: Changed to number
+  staffId?: string; 
+  name: string; 
+  role: string;
+  contactNumber?: string; 
+  email: string; 
+  joiningDate: string; // Formatted
   leavingDate?: string; // Formatted
   rawJoiningDate?: string; // Original ISO/string
   rawLeavingDate?: string; // Original ISO/string
@@ -13,77 +20,79 @@ interface StaffDataProp {
 
 // Form state type
 interface FormDataState {
-  staffId: string; name: string; role: string; contactNumber: string;
-  email: string; joiningDate: string; // YYYY-MM-DD
+  staffId: string; 
+  name: string; 
+  role: string; 
+  contactNumber: string;
+  email: string; 
+  joiningDate: string; // YYYY-MM-DD
   leavingDate: string; // YYYY-MM-DD
 }
 
 // Data sent back via onSave (Matches StaffPage expectation)
 interface StaffFormData {
-    staffId?: string; name: string; role: string; contactNumber?: string; email: string;
-    joiningDate: string; // YYYY-MM-DD
-    leavingDate?: string; // YYYY-MM-DD or undefined
+  staffId?: string; 
+  name: string; 
+  role: string; 
+  contactNumber?: string; 
+  email: string;
+  joiningDate: string; // YYYY-MM-DD
+  leavingDate?: string; // YYYY-MM-DD or undefined
 }
 
-
+// FIX: Props interface ko define kiya taaki 'onClose' error chala jaaye
 interface EditStaffFormProps {
   onClose: () => void;
-  onSave: (staffData: StaffFormData) => Promise<void>; // Expects Promise
-  staffData: StaffDataProp;
+  onSave: (staffData: StaffFormData) => Promise<void>; 
+  staffData: StaffDataProp; // Ab yeh number ID expect karega
 }
 
 // Helper to convert display/raw date to YYYY-MM-DD
 const formatDateToInput = (dateStr?: string): string => {
   if (!dateStr || dateStr === 'N/A') return '';
   try {
-    // Try ISO format first (likely from rawJoiningDate)
     const isoDate = new Date(dateStr);
     if (!isNaN(isoDate.getTime())) {
-        return isoDate.toISOString().split('T')[0];
+      return isoDate.toISOString().split('T')[0];
     }
-    // Try "DD Mon YYYY" format as fallback
     const displayDate = new Date(dateStr.replace(/(\d{2}) (\w{3}) (\d{4})/, '$2 $1 $3'));
     if (!isNaN(displayDate.getTime())) {
-        return displayDate.toISOString().split('T')[0];
+      return displayDate.toISOString().split('T')[0];
     }
-    return ''; // Return empty if parsing fails
+    return ''; 
   } catch (e) {
     console.error("Error parsing date for input:", dateStr, e);
     return '';
   }
 };
 
-
+// FIX: Component ko props accept karne ke liye update kiya
 const EditStaffForm = ({ onClose, onSave, staffData }: EditStaffFormProps) => {
   const [formData, setFormData] = useState<FormDataState>({
-    staffId: staffData?.staffId || staffData?.id || '',
+    staffId: staffData?.staffId || String(staffData?.id) || '', // FIX: staffId ab string(staffData.id) se generate hoga
     name: staffData?.name || '',
     role: staffData?.role || 'Accountant',
-    contactNumber: staffData?.contactNumber || '', // Use contactNumber
+    contactNumber: staffData?.contactNumber || '', 
     email: staffData?.email || '',
-    // Use raw date first for accurate conversion, fallback to formatted date
     joiningDate: formatDateToInput(staffData?.rawJoiningDate || staffData?.joiningDate),
     leavingDate: formatDateToInput(staffData?.rawLeavingDate || staffData?.leavingDate),
   });
-   const [error, setError] = useState('');
-   // --- ADD isLoading state ---
-   const [isLoading, setIsLoading] = useState(false);
-   // --- END ---
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Update form if staffData prop changes (No change)
+  // Update form if staffData prop changes
   useEffect(() => {
-    // ... (logic remains same) ...
-        if (staffData) {
-        setFormData({
-            staffId: staffData.staffId || staffData.id || '',
-            name: staffData.name || '',
-            role: staffData.role || 'Accountant',
-            contactNumber: staffData.contactNumber || '',
-            email: staffData.email || '',
-            joiningDate: formatDateToInput(staffData?.rawJoiningDate || staffData?.joiningDate),
-            leavingDate: formatDateToInput(staffData?.rawLeavingDate || staffData?.leavingDate),
-        });
-        setError('');
+    if (staffData) {
+      setFormData({
+        staffId: staffData.staffId || String(staffData.id) || '', // FIX: Use String(staffData.id)
+        name: staffData.name || '',
+        role: staffData.role || 'Accountant',
+        contactNumber: staffData.contactNumber || '',
+        email: staffData.email || '',
+        joiningDate: formatDateToInput(staffData?.rawJoiningDate || staffData?.joiningDate),
+        leavingDate: formatDateToInput(staffData?.rawLeavingDate || staffData?.leavingDate),
+      });
+      setError('');
     }
   }, [staffData]);
 
@@ -92,40 +101,35 @@ const EditStaffForm = ({ onClose, onSave, staffData }: EditStaffFormProps) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: FormEvent) => { // Make async
+  const handleSubmit = async (e: FormEvent) => { 
     e.preventDefault();
     setError('');
 
     if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
-        setError('Please enter a valid email address.');
-        return;
+      setError('Please enter a valid email address.');
+      return;
     }
 
-    // --- Disable button ---
     setIsLoading(true);
-    // --- END ---
 
     const dataToSave: StaffFormData = {
-        staffId: formData.staffId,
-        name: formData.name,
-        role: formData.role,
-        contactNumber: formData.contactNumber,
-        email: formData.email,
-        joiningDate: formData.joiningDate, // Send YYYY-MM-DD
-        leavingDate: formData.leavingDate || undefined, // Send YYYY-MM-DD or undefined
+      staffId: formData.staffId,
+      name: formData.name,
+      role: formData.role,
+      contactNumber: formData.contactNumber,
+      email: formData.email,
+      joiningDate: formData.joiningDate, 
+      leavingDate: formData.leavingDate || undefined, 
     };
 
     try {
-        // --- Wait for onSave to complete ---
-        await onSave(dataToSave);
-        // onClose(); // Let parent handle closing
+      await onSave(dataToSave);
+      // onClose(); // Parent component (StaffPage) ab modal ko close karega
     } catch (err) {
-        console.error("Error passed back to EditStaffForm:", err);
-        // setError("Failed to update staff."); // Or show specific error?
+      console.error("Error passed back to EditStaffForm:", err);
+      setError("Failed to update staff. Please try again."); // Error dikhaya
     } finally {
-        // --- Re-enable button ---
-        setIsLoading(false);
-        // --- END ---
+      setIsLoading(false);
     }
   };
 
@@ -180,15 +184,12 @@ const EditStaffForm = ({ onClose, onSave, staffData }: EditStaffFormProps) => {
       {error && <p className={styles.errorMessage}>{error}</p>}
 
       <div className={styles.buttonGroup}>
-         {/* --- Disable buttons when loading --- */}
         <button type="button" className={styles.cancelButton} onClick={onClose} disabled={isLoading}>Cancel</button>
         <button type="submit" className={styles.saveButton} disabled={isLoading}>
             {isLoading ? "Saving..." : "Save Changes"}
         </button>
-         {/* --- END --- */}
       </div>
     </form>
   );
 };
-
 export default EditStaffForm;
