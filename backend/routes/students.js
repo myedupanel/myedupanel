@@ -56,48 +56,89 @@ router.get('/classes', [authMiddleware], async (req, res) => {
 });
 
 
-// GET /api/students/search
 router.get('/search', authMiddleware, async (req, res) => {
+
      try {
+
         const schoolId = req.user.schoolId;
+
         const studentName = req.query.name || '';
+
         
+
         if (!schoolId) return res.status(400).json({ msg: 'School information not found.' });
+
         if (studentName.length < 2) return res.json([]);
 
+
+
         const students = await prisma.students.findMany({
+
             where: {
+
                 schoolId: schoolId,
+
                 OR: [
+
                   { first_name: { contains: studentName, mode: 'insensitive' } },
+
                   { father_name: { contains: studentName, mode: 'insensitive' } },
+
                   { last_name: { contains: studentName, mode: 'insensitive' } },
+
                 ]
+
             },
+
             select: {
+
                 studentid: true,
+
                 first_name: true,
+
                 father_name: true,
+
                 last_name: true,
-                class: { select: { class_name: true } }
+
+                class: { select: { class_name: true } } // Query sahi hai
+
             },
+
             take: 10
+
         });
 
+
+
+        // --- YEH HAI AAPKA FIX ---
+
+        // Hum 's.class.class_name' ko 's.class?.class_name' se badal rahe hain
+
         const formattedStudents = students.map(s => ({
+
             id: s.studentid,
+
             name: getFullName(s),
-            // --- YEH HAI AAPKA FIX 1 ---
-            class: s.class?.class_name || 'N/A' // 's.class.class_name' ko 's.class?.class_name' kiya
+
+            class: s.class?.class_name || 'N/A' // FIX: Optional chaining ka istemaal
+
         }));
 
-        res.json(formattedStudents);
-    } catch (error) {
-        console.error("Error searching students:", error.message);
-        res.status(500).send("Server Error");
-    }
-});
+        // --- FIX ENDS HERE ---
 
+
+
+        res.json(formattedStudents);
+
+    } catch (error) {
+
+        console.error("Error searching students:", error.message);
+
+        res.status(500).send("Server Error"); // Yahi error aapko dikh raha hai
+
+    }
+
+});
 // GET /api/students/:id
 router.get('/:id', authMiddleware, async (req, res) => {
     try {
