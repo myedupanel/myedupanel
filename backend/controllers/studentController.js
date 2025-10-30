@@ -34,23 +34,22 @@ function getCanonicalKey(header) {
   return null;
 }
 
-// 4. FUNCTION 1: addStudentsInBulk (schoolId ke saath)
+// 4. FUNCTION 1: addStudentsInBulk (Yeh Excel import ke liye hai, koi change nahi)
 const addStudentsInBulk = async (req, res) => {
   try {
-    // --- NAYA STEP: School ID ko request se lein ---
     const schoolId = req.user.schoolId;
     if (!schoolId) {
       return res.status(400).json({ message: 'Invalid or missing school ID in user token.' });
     }
 
     const studentsData = req.body;
+    // YEH CHECK 'ADD SINGLE STUDENT' MEIN FAIL HO RAHA THA
     if (!studentsData || !Array.isArray(studentsData)) {
-      return res.status(400).json({ message: 'No student data provided.' });
+      return res.status(400).json({ message: 'No student data provided. Expected an array for bulk import.' });
     }
 
-    // 1. Rows ko process karein (Same)
+    // 1. Rows ko process karein
     const processedStudents = studentsData.map(row => {
-      // ... (andar ka code same hai) ...
       const newStudent = {};
       for (const rawHeader in row) {
         const canonicalKey = getCanonicalKey(rawHeader);
@@ -62,13 +61,12 @@ const addStudentsInBulk = async (req, res) => {
       return newStudent;
     });
     
-    // 2. Filter karein (Same)
+    // 2. Filter karein
     const validStudents = processedStudents.filter(
       s => s.first_name && s.last_name && s.class_name && s.roll_number
     );
     
     if (validStudents.length === 0) {
-      // ... (andar ka code same hai) ...
       return res.status(400).json({ message: 'No valid student data. Ensure file has first_name, last_name, class_name, roll_number.' });
     }
 
@@ -80,12 +78,10 @@ const addStudentsInBulk = async (req, res) => {
       try {
         const className = student.class_name;
         
-        // 4. --- UPDATE: Class ko schoolId ke saath Find karein ---
-        // Humne schema mein @@unique([schoolId, class_name]) set kiya tha
-        // Isliye humein Prisma ko is tarah batana hoga:
+        // 4. Class ko schoolId ke saath Find karein
         let classRecord = await prisma.classes.findUnique({
           where: { 
-            schoolId_class_name: { // Yeh Prisma ne automatically banaya hai
+            schoolId_class_name: { 
               schoolId: schoolId,
               class_name: className 
             }
@@ -97,7 +93,7 @@ const addStudentsInBulk = async (req, res) => {
           classRecord = await prisma.classes.create({
             data: { 
               class_name: className,
-              schoolId: schoolId // --- UPDATE: schoolId yahaan bhi add karein ---
+              schoolId: schoolId 
             },
           });
         }
@@ -105,11 +101,10 @@ const addStudentsInBulk = async (req, res) => {
         // 5. Student data ko Prisma ke liye taiyaar karein
         const { class_name, ...studentData } = student; 
         studentData.classid = classRecord.classid; 
-        studentData.schoolId = schoolId; // --- UPDATE: schoolId student mein add karein ---
+        studentData.schoolId = schoolId; 
 
-        // Date fields ko handle karein (Same)
+        // Date fields ko handle karein
         if (studentData.dob) {
-          // ... (andar ka code same hai) ...
            try {
             const parsedDate = new Date(studentData.dob);
             if (!isNaN(parsedDate)) {
@@ -122,7 +117,6 @@ const addStudentsInBulk = async (req, res) => {
           }
         }
         if (studentData.admission_date) {
-          // ... (andar ka code same hai) ...
            try {
              const parsedDate = new Date(studentData.admission_date);
              if (!isNaN(parsedDate)) {
@@ -135,14 +129,13 @@ const addStudentsInBulk = async (req, res) => {
            }
         }
 
-        // 6. Student ko create karein (Same)
+        // 6. Student ko create karein
         await prisma.students.create({
           data: studentData,
         });
         createdCount++;
 
       } catch (error) {
-        // ... (error handling code same hai) ...
          console.error("Error creating individual student:", error);
         if (error.code === 'P2002') { 
            errors.push(`Duplicate entry for student: ${student.first_name || 'N/A'} (Roll No: ${student.roll_number || 'N/A'})`);
@@ -152,7 +145,7 @@ const addStudentsInBulk = async (req, res) => {
       }
     }
 
-    // 7. Final response (Same)
+    // 7. Final response
     res.status(201).json({
       message: `${createdCount} of ${validStudents.length} students were added successfully.`,
       errors: errors,
@@ -169,23 +162,21 @@ const addStudentsInBulk = async (req, res) => {
 // 5. FUNCTION 2: getAllStudents (schoolId ke saath)
 const getAllStudents = async (req, res) => {
   try {
-    // --- NAYA STEP: School ID ko request se lein ---
     const schoolId = req.user.schoolId;
     if (!schoolId) {
       return res.status(400).json({ message: 'Invalid or missing school ID in user token.' });
     }
 
     const students = await prisma.students.findMany({
-      // --- UPDATE: Sirf uss school ke students ko filter karein ---
       where: {
         schoolId: schoolId
       },
       include: {
-        class: true, // Class ka naam bhi saath mein fetch karega
+        class: true, 
       },
       orderBy: [
-        { class: { class_name: 'asc' } }, // Pehle class ke naam se sort
-        { first_name: 'asc' },           // Phir student ke naam se
+        { class: { class_name: 'asc' } }, 
+        { first_name: 'asc' },           
       ],
     });
     res.json(students);
@@ -195,8 +186,95 @@ const getAllStudents = async (req, res) => {
   }
 };
 
-// 6. EXPORTS
+
+// 6. --- NAYA FUNCTION: ADD SINGLE STUDENT ---
+// Yeh function aapke "Add a New Student" form ke liye hai
+const addSingleStudent = async (req, res) => {
+  try {
+    // 1. School ID token se lein
+    const schoolId = req.user.schoolId;
+    if (!schoolId) {
+      return res.status(401).json({ message: 'User not authorized or missing school ID.' });
+    }
+
+    // 2. Data ko req.body se lein (yeh ek object hai)
+    const { 
+      first_name, 
+      last_name, 
+      class_name, 
+      roll_number, 
+      ...otherDetails // Baaki saari details (dob, address, email, etc.)
+    } = req.body;
+
+    // 3. Zaroori fields check karein
+    if (!first_name || !last_name || !class_name || !roll_number) {
+      return res.status(400).json({ message: 'Missing required fields: First Name, Last Name, Class, and Roll Number are required.' });
+    }
+    
+    // 4. Class ko find karein ya create karein (same logic)
+    let classRecord = await prisma.classes.findUnique({
+      where: { 
+        schoolId_class_name: {
+          schoolId: schoolId,
+          class_name: class_name 
+        }
+      },
+    });
+
+    if (!classRecord) {
+      classRecord = await prisma.classes.create({
+        data: { 
+          class_name: class_name,
+          schoolId: schoolId 
+        },
+      });
+    }
+
+    // 5. Student data ko Prisma ke liye taiyaar karein
+    const studentData = {
+      ...otherDetails, // dob, address, email, etc.
+      first_name,
+      last_name,
+      roll_number,
+      classid: classRecord.classid,
+      schoolId: schoolId,
+    };
+
+    // 6. Date fields ko handle karein (same logic)
+    if (studentData.dob) {
+      try {
+        const parsedDate = new Date(studentData.dob);
+        studentData.dob = !isNaN(parsedDate) ? parsedDate : null;
+      } catch (e) { studentData.dob = null; }
+    }
+    if (studentData.admission_date) {
+       try {
+         const parsedDate = new Date(studentData.admission_date);
+         studentData.admission_date = !isNaN(parsedDate) ? parsedDate : null;
+       } catch (e) { studentData.admission_date = null; }
+    }
+
+    // 7. Naya student create karein
+    const newStudent = await prisma.students.create({
+      data: studentData,
+    });
+
+    // 8. Success response bhejein
+    res.status(201).json({ message: 'Student added successfully!', student: newStudent });
+
+  } catch (error) {
+    console.error("Error creating single student:", error);
+    if (error.code === 'P2002') { // Duplicate entry error
+       return res.status(400).json({ message: `Duplicate entry: A student with Roll Number ${req.body.roll_number} may already exist in ${req.body.class_name}.` });
+    }
+    res.status(500).json({ message: 'Server error while adding student.' });
+  }
+};
+
+
+// 7. EXPORTS (Naye function ke saath)
 module.exports = {
   addStudentsInBulk,
   getAllStudents,
+  addSingleStudent, // <-- Yahaan naya function add kiya
 };
