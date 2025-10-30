@@ -12,34 +12,27 @@ const getFullName = (student) => {
   return [student?.first_name, student?.father_name, student?.last_name].filter(Boolean).join(' ');
 }
 
-// === FIX: Controller se sabhi functions import karein ===
+// Controller se functions import karein
 const { 
   addSingleStudent, 
   addStudentsInBulk, 
   getAllStudents 
-} = require('../controllers/studentController'); // Controller import karein
+} = require('../controllers/studentController'); 
 
-// @route   POST /api/students
-// @desc    Add a new SINGLE student
-// @access  Private (Admin only)
-// === FIX: Yeh route ab 'addSingleStudent' ko call karega ===
+// --- Primary Routes (Controller se) ---
+
+// POST /api/students (Add single student)
 router.post('/', [authMiddleware, authorize('Admin')], addSingleStudent);
 
-// @route   POST /api/students/bulk
-// @desc    Add students in bulk from Excel/JSON
-// @access  Private (Admin only)
-// === ADDED: Bulk import ke liye naya route ===
+// POST /api/students/bulk (Add bulk students)
 router.post('/bulk', [authMiddleware, authorize('Admin')], addStudentsInBulk);
 
-// @route   GET /api/students
-// @desc    Get students for the user's school
-// @access  Private (Admin, Teacher)
-router.get('/', [authMiddleware, authorize('Admin', 'Teacher')], getAllStudents); // Controller function use karein
+// GET /api/students (Get all students)
+router.get('/', [authMiddleware, authorize('Admin', 'Teacher')], getAllStudents); 
 
-// @route   GET /api/students/classes
-// @desc    Get unique class names for the school
-// @access  Private
-// --- YEH CODE AAPKA PURANA HAI (NO CHANGE) ---
+// --- Baaki Routes (Jo pehle se file mein the) ---
+
+// GET /api/students/classes
 router.get('/classes', [authMiddleware], async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
@@ -63,10 +56,7 @@ router.get('/classes', [authMiddleware], async (req, res) => {
 });
 
 
-// @route   GET /api/students/search
-// @desc    Search students by name within the user's school
-// @access  Private
-// --- YEH CODE AAPKA PURANA HAI (NO CHANGE) ---
+// GET /api/students/search
 router.get('/search', authMiddleware, async (req, res) => {
      try {
         const schoolId = req.user.schoolId;
@@ -97,7 +87,8 @@ router.get('/search', authMiddleware, async (req, res) => {
         const formattedStudents = students.map(s => ({
             id: s.studentid,
             name: getFullName(s),
-            class: s.class.class_name
+            // --- YEH HAI AAPKA FIX 1 ---
+            class: s.class?.class_name || 'N/A' // 's.class.class_name' ko 's.class?.class_name' kiya
         }));
 
         res.json(formattedStudents);
@@ -107,10 +98,7 @@ router.get('/search', authMiddleware, async (req, res) => {
     }
 });
 
-// @route   GET /api/students/:id
-// @desc    Get a single student by their Prisma ID
-// @access  Private
-// --- YEH CODE AAPKA PURANA HAI (NO CHANGE) ---
+// GET /api/students/:id
 router.get('/:id', authMiddleware, async (req, res) => {
     try {
         const studentIdInt = parseInt(req.params.id);
@@ -121,7 +109,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
         const student = await prisma.students.findUnique({
             where: { 
                 studentid: studentIdInt,
-                schoolId: req.user.schoolId // School check
+                schoolId: req.user.schoolId 
             },
             include: { 
                 class: { select: { class_name: true }}
@@ -134,7 +122,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
             ...student,
             id: student.studentid,
             name: getFullName(student),
-            class: student.class.class_name,
+            // --- YEH HAI AAPKA FIX 2 ---
+            class: student.class?.class_name || 'N/A', // 'student.class.class_name' ko 'student.class?.class_name' kiya
             rollNo: student.roll_number,
             parentName: student.father_name,
             parentContact: student.guardian_contact
@@ -147,11 +136,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// @route   PUT /api/students/:id
-// @desc    Update a student's details
-// @access  Private (Admin only)
-// --- YEH CODE AAPKA PURANA HAI (NO CHANGE) ---
-router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { // Role check Admin
+// PUT /api/students/:id
+router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { 
      try {
         const studentIdInt = parseInt(req.params.id);
         if (isNaN(studentIdInt)) {
@@ -167,7 +153,6 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { /
         const body = req.body;
         const currentEmail = student.email; 
         
-        // Map frontend fields to Prisma fields
         if (body.first_name) updateData.first_name = body.first_name;
         if (body.father_name) updateData.father_name = body.father_name;
         if (body.last_name) updateData.last_name = body.last_name;
@@ -178,14 +163,13 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { /
         if (body.address) updateData.address = body.address;
         if (body.email) updateData.email = body.email.toLowerCase();
         if (body.mother_name) updateData.mother_name = body.mother_name;
-        // ... 
         
         if (body.class && body.class !== student.class?.class_name) { 
             const classRecord = await prisma.classes.findUnique({
                 where: { schoolId_class_name: { schoolId: req.user.schoolId, class_name: body.class } }
             });
             if (classRecord) {
-                updateData.classId = classRecord.classid;
+                updateData.classid = classRecord.classid; // 'classId' ko 'classid' kiya
             } else {
                  console.warn(`Class '${body.class}' not found during student update.`);
             }
@@ -197,7 +181,6 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { /
             include: { class: { select: { class_name: true } } }
         });
 
-        // Linked User ko update karein
         if (updatedStudent.userId && (updateData.first_name || updateData.last_name || updateData.email)) {
             const userUpdatePayload = {};
             if (updateData.first_name || updateData.last_name) {
@@ -229,7 +212,8 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { /
             ...updatedStudent,
             id: updatedStudent.studentid,
             name: getFullName(updatedStudent),
-            class: updatedStudent.class.class_name,
+            // --- YEH HAI AAPKA FIX 3 ---
+            class: updatedStudent.class?.class_name || 'N/A', // 'updatedStudent.class.class_name' ko 'updatedStudent.class?.class_name' kiya
             rollNo: updatedStudent.roll_number,
             parentName: updatedStudent.father_name,
             parentContact: updatedStudent.guardian_contact
@@ -251,11 +235,8 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { /
 });
 
 
-// @route   DELETE /api/students/:id
-// @desc    Delete a student (AND their User account if linked)
-// @access  Private (Admin only)
-// --- YEH CODE AAPKA PURANA HAI (NO CHANGE) ---
-router.delete('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { // Role check Admin
+// DELETE /api/students/:id
+router.delete('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { 
     try {
         const studentIdInt = parseInt(req.params.id);
         if (isNaN(studentIdInt)) {
@@ -270,9 +251,6 @@ router.delete('/:id', [authMiddleware, authorize('Admin')], async (req, res) => 
         const linkedUserId = student.userId;
 
         await prisma.$transaction(async (tx) => {
-            // ... (Aapka delete logic yahaan) ...
-            
-            // Ab student delete karein
             await tx.students.delete({
                 where: { studentid: studentIdInt }
             });
@@ -287,7 +265,7 @@ router.delete('/:id', [authMiddleware, authorize('Admin')], async (req, res) => 
                 } catch (userDeleteError) {
                      if (userDeleteError.code !== 'P2025') { 
                          console.error(`[DELETE /students] Error deleting user ${linkedUserId}:`, userDeleteError);
-                         throw userDeleteError; // Rollback transaction
+                         throw userDeleteError; 
                      } else {
                           console.log(`[DELETE /students] Linked user ${linkedUserId} not found.`);
                      }
@@ -297,7 +275,8 @@ router.delete('/:id', [authMiddleware, authorize('Admin')], async (req, res) => 
 
         if (req.io) {
             req.io.emit('updateDashboard');
-            req.io.emit('student_deleted', { id: studentIdInt });
+            // FIX: 'id' ko 'studentid' kiya
+            req.io.emit('student_deleted', { id: studentIdInt, schoolId: req.user.schoolId });
         }
 
         res.json({ message: 'Student removed successfully' });
