@@ -1,0 +1,16 @@
+.avatarContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: #e2e8f0; // Light grey background
+  overflow: hidden;
+}
+
+.avatarIcon {
+  width: 60px;
+  height: 60px;
+  color: #94a3b8; // Darker grey for the icon
+}

@@ -1,0 +1,148 @@
+/* Main container for the teacher page */
+.pageContainer {
+  padding: 2rem 2.5rem;
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Page header section */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* === UPDATED BUTTON STYLES START HERE === */
+
+/* Container for the buttons on the right */
+.headerActions {
+  display: flex;
+  gap: 0.75rem; /* Slightly less gap */
+}
+
+/* Base style for all action buttons */
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1.2rem; /* Adjusted padding */
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 2px solid transparent; // Border for all buttons for consistent size
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  svg {
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+}
+
+/* Tertiary Action: Export Button (Outline Style) */
+.exportButton {
+  background-color: transparent;
+  color: #475569;
+  border-color: #cbd5e1;
+
+  &:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+  }
+}
+
+/* Secondary Action: Import Button (Soft Filled Style) */
+.importButton {
+  background-color: #e0e7ff;
+  color: #4338ca;
+  border-color: #e0e7ff;
+
+  &:hover {
+    background-color: #c7d2fe;
+  }
+}
+
+/* Primary Action: Add Button (Solid, High-Contrast Style) */
+.addButton {
+  background-color: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+  
+  &:hover {
+    background-color: #4338ca;
+    border-color: #4338ca;
+  }
+}
+
+/* === END OF UPDATED BUTTON STYLES === */
+
+
+/* Styles for the buttons inside the Export modal */
+.exportOptionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+.exportOptionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  color: #334155;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e1;
+    background-color: #f8fafc;
+  }
+}
+/* Yeh code TeachersPage.module.scss ke aakhir mein add karein */
+.dashboardLinkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  margin: 2rem auto 1rem auto; /* Page ke end mein center karega */
+  background-color: #374151; // Dark color
+  color: #ffffff;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  svg {
+    font-size: 1.25rem;
+  }
+
+  &:hover {
+    background-color: #4b5563; // Thoda light hover
+  }
+}

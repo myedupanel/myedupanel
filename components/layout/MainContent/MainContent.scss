@@ -1,0 +1,7 @@
+// file: components/layout/MainContent/MainContent.scss
+.main-content-container {
+  flex-grow: 1; /* Takes up remaining space */
+  padding: 20px;
+  background-color: #f9f9f9;
+  overflow-y: auto; /* Adds scroll if content is long */
+}

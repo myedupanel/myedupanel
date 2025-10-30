@@ -1,0 +1,126 @@
+/* src/components/admin/StudentSearch/StudentSearch.module.scss */
+
+.searchContainer {
+    position: relative;
+    width: 100%;
+}
+
+.inputWrapper {
+    position: relative;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem; // Padding for icon on the left
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box; // Ensure padding is included in width
+
+    &:focus {
+        outline: none;
+        border-color: #3b82f6; // Tailwind blue-500
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+}
+
+.searchIcon {
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8; // Tailwind slate-400
+    pointer-events: none; // Make icon non-interactive
+}
+
+.resultsList {
+    position: absolute;
+    top: 100%; // Position right below the input
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0; // Tailwind slate-200
+    border-top: none; // Avoid double border with input
+    border-radius: 0 0 8px 8px; // Rounded bottom corners
+    list-style: none;
+    padding: 0;
+    margin: 0; // Remove default margin
+    // margin-top: -1px; // Optional: Overlap slightly with input bottom border
+    max-height: 200px; // Limit height
+    overflow-y: auto; // Add scroll if needed
+    z-index: 10; // Ensure it's above other elements
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    li {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        font-size: 0.95rem; // Slightly smaller font for results
+
+        &:hover {
+            background-color: #f1f5f9; // Tailwind slate-100
+        }
+
+        &:not(:last-child) {
+            border-bottom: 1px solid #eef2f7; // Lighter border between items
+        }
+
+        strong {
+            font-weight: 600;
+        }
+    }
+}
+
+/* --- Loading, Error, and Message Styles --- */
+
+.loadingIcon {
+    position: absolute;
+    right: 0.8rem;
+    top: 50%;
+    color: #94a3b8;
+    animation: spin 1s linear infinite;
+    transform-origin: center; // Ensure rotation is centered
+    transform: translateY(-50%); // Initial vertical center
+}
+
+@keyframes spin {
+    from {
+        // Keep translateY for vertical centering
+        transform: translateY(-50%) rotate(0deg);
+    }
+    to {
+        transform: translateY(-50%) rotate(360deg);
+    }
+}
+
+/* Base style for message boxes below the search input */
+.messageBoxBase {
+    padding: 0.75rem 1rem;
+    font-size: 0.9em;
+    border: 1px solid #e2e8f0;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    text-align: center;
+    margin-top: -1px; // Overlap with input bottom border
+}
+
+/* Style for the "Fetching details..." message */
+.fetchingMessage {
+    @extend .messageBoxBase; // Inherit base styles
+    color: #555;
+    background-color: #f8f9fa; // Light gray background
+}
+
+/* Style for error messages */
+.errorMessage {
+    @extend .messageBoxBase; // Inherit base styles
+    color: #dc3545; // Bootstrap danger color
+    background-color: #f8d7da; // Light red background
+    border-color: #f5c6cb; // Red border
+}
+
+/* Style for "No results found" message */
+.noResults {
+    @extend .messageBoxBase; // Inherit base styles
+    color: #6c757d; // Bootstrap secondary color
+    background-color: #f8f9fa; // Light gray background
+}

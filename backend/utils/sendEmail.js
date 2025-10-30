@@ -1,0 +1,77 @@
+// Naya utils/sendEmail.js (Bina Nodemailer ke)
+
+const { google } = require('googleapis');
+
+// 1. Apni saari Google keys Environment se lein (Yeh pehle jaisa hi hai)
+const CLIENTid = process.env.GOOGLE_CLIENTid;
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
+const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+
+// 2. Google ka OAuth2 client set karein (Yeh bhi pehle jaisa hai)
+const oAuth2Client = new google.auth.OAuth2(CLIENTid, CLIENT_SECRET, REDIRECT_URI);
+oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+// 3. YEH NAYA FUNCTION HAI: Email ko Base64 format mein convert karne ke liye
+function createEmailMessage(options) {
+  // Email ke headers
+  const emailLines = [
+    `From: "MyEduPanel" <${ADMIN_EMAIL}>`, // Bhejne waale ka naam
+    `To: ${options.to}`,
+    `Subject: ${options.subject}`,
+    'Content-Type: text/html; charset=utf-8', // Hum HTML email bhej rahe hain
+    'MIME-Version: 1.0',
+    '', // Headers aur body ke beech ek blank line zaroori hai
+    options.html, // Aapka HTML content
+  ];
+
+  const email = emailLines.join('\r\n');
+
+  // Email ko Base64URL format mein encode karein jo API ko chahiye
+  const base64EncodedEmail = Buffer.from(email)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+
+  return base64EncodedEmail;
+}
+
+
+// 4. YEH HAMARA MAIN FUNCTION HAI (UPDATE HO GAYA)
+const sendEmail = async (options) => {
+  console.log('--- Email (Seedha Gmail API se) bhejne ki koshish... ---');
+
+  try {
+    // 5. Har baar email bhejne se pehle ek naya "Access Token" haasil karein
+    const { token: accessToken } = await oAuth2Client.getAccessToken();
+
+    if (!accessToken) {
+      throw new Error('Access Token nahi mila');
+    }
+
+    // 6. Gmail API client ko taiyaar karein
+    const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+
+    // 7. Email message ko Base64 mein convert karein
+    const rawMessage = createEmailMessage(options);
+
+    // 8. Email Bhejein! (Nodemailer ki jagah seedha API call)
+    const info = await gmail.users.messages.send({
+      userId: 'me', // 'me' ka matlab hai woh user jiska token hai (ADMIN_EMAIL)
+      requestBody: {
+        raw: rawMessage, // Yahaan hum apna Base64 email de rahe hain
+      },
+    });
+
+    console.log('--- Email safaltapoorvak bhej diya gaya! ---', info.data);
+  
+  } catch (error) {
+    // Error ko aache se log karein
+    console.error('--- EMAIL BHEJNE MEIN ERROR AAYA ---:', error.response ? error.response.data : error.message);
+    throw new Error('Email sending failed');
+  }
+};
+
+module.exports = sendEmail;

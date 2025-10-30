@@ -1,0 +1,70 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem; // 20px
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; // 8px
+
+  label {
+    font-weight: 600;
+    color: #374151; // Darker gray for better contrast
+  }
+
+  input {
+    padding: 0.75rem 1rem; // 12px 16px
+    border: 1px solid #D1D5DB; // Light gray border
+    border-radius: 0.5rem; // 8px
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      border-color: #3B82F6; // Blue
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+      outline: none;
+    }
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem; // 12px
+  margin-top: 1.5rem; // 24px
+
+  button {
+    padding: 0.625rem 1.25rem; // 10px 20px
+    border: none;
+    border-radius: 0.5rem; // 8px
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background-color 0.2s, transform 0.1s;
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  .cancelBtn {
+    background-color: #F3F4F6; // Lighter gray
+    color: #4B5563;
+    border: 1px solid #D1D5DB;
+    
+    &:hover {
+      background-color: #E5E7EB;
+    }
+  }
+
+  .submitBtn {
+    background-color: #3B82F6; // Blue
+    color: #ffffff;
+    
+    &:hover {
+      background-color: #2563EB; // Darker blue
+    }
+  }
+}

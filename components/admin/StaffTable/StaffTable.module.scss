@@ -1,0 +1,63 @@
+.tableContainer {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  overflow-x: auto; /* Scroll for small screens */
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #f1f2f6;
+    white-space: nowrap;
+  }
+
+  thead th {
+    font-size: 0.8rem;
+    color: #718096;
+    text-transform: uppercase;
+  }
+}
+
+.emptyMessage {
+  text-align: center;
+  padding: 3rem;
+  color: #718096;
+}
+
+/* NAYE STYLES */
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #a0aec0; /* Lighter default color */
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #edf2f7;
+    color: #4a5568; /* Darker hover color */
+  }
+}
+
+.deleteButton {
+  &:hover {
+    color: #e53e3e; // Red color for delete
+    background-color: #fed7d7; // Light red background
+  }
+}

@@ -1,0 +1,179 @@
+.pageContainer {
+  padding: 1.5rem;
+}
+
+.pageTitle {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  margin-bottom: 2rem;
+}
+
+.attendanceCard {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden; /* Card ke andar content ko corners se bahar nahi jaane dega */
+}
+
+.controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap; 
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #4a5568;
+  }
+
+  select, input {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    min-width: 200px;
+    transition: background-color 0.2s ease;
+
+    // Jab controls disable honge, tab yeh style lagega
+    &:disabled {
+      background-color: #f1f2f6;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  }
+}
+
+.showAllClassesButton {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #e2e8f0;
+  background-color: #f7fafc;
+  color: #4a5568;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: #edf2f7;
+  }
+
+  // Jab button active hoga, tab yeh style lagega
+  &.activeFilter {
+    background-color: #2f3640;
+    color: white;
+    border-color: #2f3640;
+  }
+}
+
+.studentList {
+  padding: 1.5rem;
+}
+
+.listHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.markAllButton {
+  background: none;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: #f7fafc;
+  }
+}
+
+.studentRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f1f2f6;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.attendanceButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.statusButton {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #f7fafc;
+  color: #a0aec0;
+  transition: all 0.2s ease;
+
+  // Hover states
+  &.present:hover { border-color: #2ecc71; }
+  &.absent:hover { border-color: #e74c3c; }
+  &.leave:hover { border-color: #f1c40f; }
+
+  // Active states
+  &.active {
+    &.present { background-color: #2ecc71; color: white; border-color: #2ecc71; }
+    &.absent { background-color: #e74c3c; color: white; border-color: #e74c3c; }
+    &.leave { background-color: #f1c40f; color: white; border-color: #f1c40f; }
+  }
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.submitButton {
+  padding: 0.75rem 2rem;
+  border: none;
+  background-color: #2f3640;
+  color: white;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #4a5568;
+  }
+}
+
+.noStudentsMessage {
+  text-align: center;
+  color: #718096;
+  padding: 3rem 0;
+}

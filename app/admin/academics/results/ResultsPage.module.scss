@@ -1,0 +1,116 @@
+.pageContainer {
+  padding: 1.5rem;
+  width: 100%;
+}
+
+.header {
+  margin-bottom: 2rem;
+  h1 { font-size: 1.75rem; color: #1e293b; margin: 0; }
+  p { font-size: 1rem; color: #64748b; margin-top: 0.25rem; }
+}
+
+.selectionPanel {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  label { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.5rem; color: #475569; }
+  select {
+    min-width: 200px;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+}
+
+.generateButton {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem;
+  background-color: #0ea5e9; color: #ffffff; border: none; border-radius: 8px;
+  font-weight: 600; cursor: pointer; height: fit-content;
+  transition: background-color 0.2s ease;
+  &:hover { background-color: #0284c7; }
+}
+
+.resultsContainer {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.resultsTable {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+  }
+
+  thead {
+    background-color: #f8fafc;
+    th { font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.resultBadge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  
+  &.pass {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+  &.fail {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+}
+
+.viewButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  &:hover { background-color: #e2e8f0; color: #1e293b; }
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
+  color: #94a3b8;
+
+  h2 { margin: 1.5rem 0 0.5rem; color: #475569; }
+  p { max-width: 400px; margin: 0; }
+}

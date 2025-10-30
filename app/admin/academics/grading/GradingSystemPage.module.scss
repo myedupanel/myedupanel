@@ -1,0 +1,86 @@
+.pageContainer {
+  padding: 1.5rem;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  h1 { font-size: 1.75rem; color: #1e293b; }
+}
+
+.saveButton {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem;
+  background-color: #22c55e; color: #ffffff; border: none; border-radius: 8px;
+  font-weight: 600; cursor: pointer; transition: background-color 0.2s ease;
+  &:hover { background-color: #16a3a4; } // Note: Hover color seems like a typo, maybe meant #15803d (darker green)?
+}
+
+.settingsPanel {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+}
+
+.gradeRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 80px;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f1f5f9;
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.headerRow {
+  padding-bottom: 1rem;
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  // Apply grid layout directly if needed for alignment
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 80px;
+  gap: 1rem;
+  align-items: center;
+}
+
+// .cell {} <-- REMOVED THIS EMPTY RULESET
+
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  &:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+  }
+}
+
+.deleteButton {
+  background: none; border: none; color: #ef4444; font-size: 1.25rem;
+  cursor: pointer; opacity: 0.7; transition: opacity 0.2s ease;
+  &:hover { opacity: 1; }
+}
+
+.actionsRow {
+  padding-top: 1.5rem;
+  margin-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.addButton {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem;
+  background-color: #f8fafc; color: #0ea5e9; border: 1px solid #e2e8f0; border-radius: 8px;
+  font-weight: 600; cursor: pointer; transition: background-color 0.2s ease;
+  &:hover { background-color: #f1f5f9; }
+}

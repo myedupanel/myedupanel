@@ -1,0 +1,68 @@
+/* Base Card Styles (Sabse naya version) */
+.card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    border: 1px solid #e9ecef;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+}
+
+.iconWrapper {
+    font-size: 2.25rem; /* 36px */
+    padding: 0.9rem; /* ~14px */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.textWrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    font-size: 0.85rem; /* ~13.6px */
+    font-weight: 600;
+    color: #6c757d; // Medium gray
+    margin: 0 0 0.25rem 0;
+    text-transform: uppercase;
+}
+
+.value {
+    font-size: 1.6rem; /* ~25.6px */
+    font-weight: 700;
+    color: #212529; // Dark gray
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin: 0.25rem 0 0 0;
+}
+
+/* --- Aapke Saare Color Themes (Puraane aur Naye) --- */
+
+/* Dashboard Card Themes */
+.blue .iconWrapper { color: #0d6efd; background-color: #cfe2ff; }
+.green .iconWrapper { color: #198754; background-color: #d1e7dd; }
+.orange .iconWrapper { color: #fd7e14; background-color: #ffe5d0; }
+.purple .iconWrapper { color: #6f42c1; background-color: #e2d9f3; }
+.teal .iconWrapper { color: #20c997; background-color: #d1f7eb; }
+.sky .iconWrapper { color: #0ea5e9; background-color: #cffafe; }
+
+/* Puraane Themes (jo file mein pehle se the) */
+.late .iconWrapper { color: #dc3545; background-color: #f8d7da; }
+.online .iconWrapper { color: #0d6efd; background-color: #cfe2ff; }
+.deposit .iconWrapper { color: #198754; background-color: #d1e7dd; }
+.school .iconWrapper { color: #ffc107; background-color: #fff3cd; }
+.red .iconWrapper { background-color: #e74c3c; }

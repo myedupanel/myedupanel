@@ -1,0 +1,223 @@
+.pageContainer {
+    padding: 2rem;
+    background-color: #f4f7fa;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.pageTitle {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.viewToggle {
+    display: flex;
+    background-color: #e9ecef;
+    border-radius: 6px;
+    padding: 4px;
+
+    button {
+        background: none;
+        border: none;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-weight: 500;
+        border-radius: 4px;
+        transition: all 0.2s ease-in-out;
+
+        &.active {
+            background-color: #ffffff;
+            color: #007bff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    }
+}
+
+.controls select {
+    padding: 0.6rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: #fff;
+}
+
+.timetableWrapper {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow-x: auto; // For responsiveness on small screens
+    padding: 1rem;
+}
+
+.timetableTable {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    
+    th, td {
+        border: 1px solid #e0e0e0;
+        padding: 0.5rem;
+        min-width: 150px; // Ensures columns don't get too squished
+    }
+
+    th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        padding: 0.75rem 0.5rem;
+        
+        span {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #6c757d;
+        }
+    }
+
+    td {
+        height: 80px;
+        vertical-align: top;
+    }
+}
+
+.periodEntry {
+    padding: 0.5rem;
+    border-radius: 4px;
+    background-color: #e7f3ff;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.subject {
+    font-weight: 600;
+    color: #0056b3;
+}
+
+.details {
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.addButton {
+    width: 100%;
+    height: 100%;
+    background: none;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #aaa;
+    transition: all 0.2s;
+
+    &:hover {
+        background-color: #f8f9fa;
+        color: #007bff;
+        border-color: #007bff;
+    }
+}
+
+.editButton {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #007bff;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+
+    .periodEntry:hover & {
+        opacity: 1;
+    }
+}
+
+.freeSlot {
+    color: #aaa;
+    font-style: italic;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+// Yeh styles file ke end mein add karein
+
+.emptyState {
+    text-align: center;
+    padding: 4rem 2rem;
+    
+    h2 {
+        font-size: 1.5rem;
+        color: #333;
+    }
+
+    p {
+        margin-top: 0.5rem;
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+}
+
+.settingsButton {
+    background-color: #007bff;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: #0056b3;
+    }
+}
+// Yeh styles file ke end mein add karein
+
+.breakCell {
+    background-color: #f8f9fa;
+    vertical-align: middle;
+}
+
+.breakText {
+    font-weight: 500;
+    color: #6c757d;
+}
+/* Yeh code TimetablePage.module.scss ke aakhir mein add karein */
+.dashboardLinkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  margin: 2rem auto 1rem auto; /* Page ke end mein center karega */
+  background-color: #374151; // Dark color
+  color: #ffffff;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  svg {
+    font-size: 1.25rem;
+  }
+
+  &:hover {
+    background-color: #4b5563; // Thoda light hover
+  }
+}

@@ -1,0 +1,121 @@
+.tableContainer {
+    padding: 1rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.table th, .table td {
+    padding: 0.9rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+.actionButton {
+    background-color: #e7f5ff;
+    color: #0d6efd;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.noData, .message, .messageError {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.messageError {
+    color: #dc3545;
+}
+
+.pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    border-top: 1px solid #e9ecef;
+
+    button {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        background: #fff;
+        border: 1px solid #ced4da;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+}
+.actionsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.actionButtons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.headerButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid #ced4da;
+    background-color: #f8f9fa;
+    color: #495057;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: #e9ecef;
+    }
+
+    svg {
+        font-size: 1rem;
+    }
+}
+
+.searchBar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 0 0.75rem;
+    
+    svg {
+        color: #6c757d;
+    }
+
+    input {
+        border: none;
+        outline: none;
+        padding: 0.6rem 0.25rem;
+        background: transparent;
+    }
+}

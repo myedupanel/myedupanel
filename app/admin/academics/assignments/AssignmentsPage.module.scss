@@ -1,0 +1,96 @@
+.pageContainer {
+  padding: 1.5rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  
+  h1 {
+    font-size: 1.75rem;
+    color: #1e293b;
+  }
+}
+
+.addButton {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem;
+  background-color: #0ea5e9; color: #ffffff; border: none; border-radius: 8px;
+  font-weight: 600; cursor: pointer; transition: background-color 0.2s ease;
+  &:hover { background-color: #0284c7; }
+}
+
+.filterContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.filterButton {
+  padding: 0.5rem 1rem; border: 1px solid #e2e8f0; background-color: #ffffff;
+  border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
+  margin-right: 0.5rem;
+  &:hover { background-color: #f8fafc; color: #0ea5e9; }
+  &.active { background-color: #0ea5e9; color: #ffffff; border-color: #0ea5e9; }
+}
+
+.classFilter {
+  padding: 0.6rem 1rem; border: 1px solid #e2e8f0; background-color: #ffffff;
+  border-radius: 8px; font-weight: 500; cursor: pointer;
+}
+
+.tableContainer {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.assignmentsTable { width: 100%; border-collapse: collapse; }
+.tableHead { background-color: #f8fafc; }
+
+.tableHeader, .tableCell {
+  padding: 1rem 1.25rem;
+  text-align: left;
+}
+
+.tableHeader {
+  font-size: 0.8rem; color: #64748b; text-transform: uppercase;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tableCell {
+  color: #334155;
+  vertical-align: middle; /* <-- YEH NAYI LINE HAI */
+}
+
+.tableRow {
+  border-bottom: 1px solid #f1f5f9;
+  &:last-child { border-bottom: none; }
+}
+
+.statusBadge {
+  font-size: 0.8rem; font-weight: 600; padding: 0.25rem 0.75rem;
+  border-radius: 999px; color: #ffffff;
+  &.graded { background-color: #22c5be; }
+  &.pending { background-color: #f97316; }
+  &.submitted { background-color: #3b82f6; }
+}
+
+.actionsCell {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.editButton, .deleteButton {
+  padding: 0.5rem; border: none; border-radius: 6px;
+  cursor: pointer; display: flex; color: #ffffff;
+  transition: opacity 0.2s ease;
+  &:hover { opacity: 0.85; }
+}
+
+.editButton { background-color: #f97316; }
+.deleteButton { background-color: #ef4444; }

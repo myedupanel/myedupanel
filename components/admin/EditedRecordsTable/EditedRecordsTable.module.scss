@@ -1,0 +1,39 @@
+.container {
+    padding: 1.5rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: 0.9rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+.discount {
+    color: #198754;
+    font-weight: 700;
+}
+
+.message, .messageError, .noData {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.messageError {
+    color: #dc3545;
+}
+
+.pagination {
+    /* ... same as before ... */
+}

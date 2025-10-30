@@ -1,0 +1,12 @@
+.container {
+  display: flex;
+  height: 100vh; /* Use vh for the main container */
+  width: 100vw;
+  overflow: hidden;
+}
+
+.content {
+  flex-grow: 1;
+  overflow-y: auto; /* Important for scrolling */
+  height: 100%;
+}

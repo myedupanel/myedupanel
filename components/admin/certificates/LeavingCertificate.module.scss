@@ -1,0 +1,167 @@
+/* components/admin/certificates/LeavingCertificate.module.scss */
+
+/* --- Form Styles (Can reuse from Bonafide or make specific) --- */
+.form { display: flex; flex-direction: column; gap: 1rem; }
+.formGroup { display: flex; flex-direction: column; label { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: #555; } input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.95rem; font-family: inherit; box-sizing: border-box; &:focus { border-color: #2980b9; outline: none; box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.2); } } textarea { resize: vertical; min-height: 60px; } }
+.formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; @media (max-width: 768px) { grid-template-columns: 1fr; } } // Basic grid
+// Add a 3-column grid variation if needed for point 14
+.formGrid3Col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; @media (max-width: 768px) { grid-template-columns: 1fr; } }
+
+
+/* --- Leaving Certificate Preview Styles --- */
+.certificatePaper {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 10mm 15mm 10mm 15mm;
+  box-sizing: border-box;
+  background: #fff;
+  color: #000;
+  font-family: Arial, sans-serif; // Or Times New Roman if preferred
+  font-size: 10pt; // Base size for LC seems smaller
+  line-height: 1.5;
+  border: 1px solid #999;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.certHeader {
+  display: flex;
+  justify-content: space-between; // Push affiliation info right
+  align-items: flex-start;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #000;
+
+  .logo {
+    width: 50px; // Slightly smaller logo for LC?
+    height: auto;
+    max-height: 50px;
+    margin-right: 10px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .schoolInfoBlock {
+    flex-grow: 1;
+    text-align: center;
+    margin-right: 10px; // Space before affiliation info
+  }
+
+  .schoolName1 { font-size: 8pt; font-weight: bold; margin: 0; }
+  .schoolName2 { font-size: 13pt; font-weight: bold; margin: 1px 0; color: #000; } // Black color for LC
+  .schoolAddress { font-size: 8pt; margin: 0; line-height: 1.2; }
+  .schoolContact { font-size: 8pt; margin: 2px 0 0 0; }
+  .schoolReg { // Combined Reg/UDISE line
+    font-size: 8pt;
+    margin: 3px auto 0 auto;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between; // Space out Reg/UDISE
+    max-width: 90%;
+  }
+
+  .affiliationInfo {
+    font-size: 8pt;
+    font-weight: bold;
+    text-align: right;
+    white-space: nowrap; // Prevent wrapping
+    flex-shrink: 0;
+    p { margin: 0; line-height: 1.3; }
+  }
+}
+
+.certTitle {
+  text-align: center;
+  margin: 5px 0 10px 0;
+  h2 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 0;
+    padding-bottom: 2px;
+    border-bottom: 2px solid #000; // Underline title
+    display: inline-block;
+  }
+}
+
+// Table Styles
+.studentInfoTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  font-size: 10pt;
+
+  td {
+    border: 1px solid #000;
+    padding: 4px 6px; // Adjust padding
+    vertical-align: top; // Align text top
+    line-height: 1.4;
+  }
+
+  // Column widths (approximate)
+  td:nth-child(1) { width: 5%; text-align: center; } // S.No.
+  td:nth-child(2) { width: 35%; } // Item
+  td:nth-child(3) { width: 60%; font-weight: bold; } // Details (Bold)
+}
+
+// Fill-in style for table details
+.fillIn, .fillInBlank {
+  font-weight: bold;
+  padding: 0 0.1em;
+  margin: 0 0.2em;
+  // border-bottom: 1px dotted #555; // Using dotted line for table? Or none?
+  display: inline-block; // Allow min-width
+  min-width: 20px;
+  white-space: normal; // Allow wrapping within table cell
+}
+.fillInBlank { // Empty spans need content for height
+  color: transparent;
+  user-select: none;
+  min-height: 1em; // Ensure some height
+  border-bottom: 1px dotted #555; // Add line only for blank ones in table
+  &::after { content: '_'; visibility: hidden; }
+}
+
+
+.certText { // Certification text below table
+  font-size: 10pt;
+  text-align: center;
+  margin-bottom: 1.5rem; // Space before footer
+}
+
+.certFooter {
+  margin-top: auto;
+  font-size: 10pt;
+  font-weight: bold;
+  background-color: transparent; // Ensure no background
+
+  .datePlace {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2.5rem; // More space for signatures/seal
+    p { margin: 0; }
+  }
+
+  .signatures {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end; // Align text to bottom
+    padding: 0 5%;
+  }
+
+  .sigBox {
+    width: 30%; // Allocate space for signatures
+    text-align: center;
+    padding-top: 20px; // Space above text (no line needed)
+    font-weight: bold;
+    color: #000; // Black text
+  }
+
+  .sealArea { // Placeholder for seal
+    width: 30%;
+    text-align: center;
+    font-size: 9pt;
+    color: #888;
+    align-self: center; // Vertically center the text
+  }
+}

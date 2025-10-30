@@ -1,0 +1,49 @@
+.container {
+    padding: 1.5rem;
+}
+
+.filterBar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.searchBar {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 0 0.75rem;
+
+    svg { color: #6c757d; }
+
+    input {
+        width: 100%;
+        border: none;
+        outline: none;
+        padding: 0.7rem 0.25rem;
+        background: transparent;
+        font-size: 1rem;
+    }
+}
+
+.statusSelect {
+    padding: 0.7rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background-color: #fff;
+    font-size: 1rem;
+}
+
+/* Baaki table, pagination, message styles LatePaymentsTable.module.scss se copy kar sakte hain */
+.table {
+    /* ... same as before ... */
+}
+.pagination {
+    /* ... same as before ... */
+}
+.message, .messageError, .noData {
+    /* ... same as before ... */
+}

@@ -1,0 +1,230 @@
+0000000000000000000000000000000000000000 c3815a6ab0ce5d20e59d545cfecc41be93060e52 Apple <apple@Apples-MacBook-Pro.local> 1758701552 +0530	commit (initial): Initial commit from Create Next App
+c3815a6ab0ce5d20e59d545cfecc41be93060e52 0000000000000000000000000000000000000000 Apple <apple@Apples-MacBook-Pro.local> 1761028574 +0530	Branch: renamed refs/heads/main to refs/heads/main
+c3815a6ab0ce5d20e59d545cfecc41be93060e52 c3815a6ab0ce5d20e59d545cfecc41be93060e52 Apple <apple@Apples-MacBook-Pro.local> 1761028574 +0530	Branch: renamed refs/heads/main to refs/heads/main
+c3815a6ab0ce5d20e59d545cfecc41be93060e52 0000000000000000000000000000000000000000 Apple <apple@Apples-MacBook-Pro.local> 1761029632 +0530	Branch: renamed refs/heads/main to refs/heads/main
+c3815a6ab0ce5d20e59d545cfecc41be93060e52 c3815a6ab0ce5d20e59d545cfecc41be93060e52 Apple <apple@Apples-MacBook-Pro.local> 1761029632 +0530	Branch: renamed refs/heads/main to refs/heads/main
+c3815a6ab0ce5d20e59d545cfecc41be93060e52 0000000000000000000000000000000000000000 Apple <apple@Apples-MacBook-Pro.local> 1761030178 +0530	Branch: renamed refs/heads/main to refs/heads/main
+c3815a6ab0ce5d20e59d545cfecc41be93060e52 c3815a6ab0ce5d20e59d545cfecc41be93060e52 Apple <apple@Apples-MacBook-Pro.local> 1761030178 +0530	Branch: renamed refs/heads/main to refs/heads/main
+c3815a6ab0ce5d20e59d545cfecc41be93060e52 cccabaaf6a503291e6e3badfd4a75a28131c6b29 Apple <apple@Apples-MacBook-Pro.local> 1761033346 +0530	commit: Initial commit
+cccabaaf6a503291e6e3badfd4a75a28131c6b29 0000000000000000000000000000000000000000 Apple <apple@Apples-MacBook-Pro.local> 1761033593 +0530	Branch: renamed refs/heads/main to refs/heads/main
+cccabaaf6a503291e6e3badfd4a75a28131c6b29 cccabaaf6a503291e6e3badfd4a75a28131c6b29 Apple <apple@Apples-MacBook-Pro.local> 1761033593 +0530	Branch: renamed refs/heads/main to refs/heads/main
+cccabaaf6a503291e6e3badfd4a75a28131c6b29 6ad4a9ad2306015e7262d44694c4571d610e3c59 Apple <apple@Apples-MacBook-Pro.local> 1761038360 +0530	commit: Fix: Resolve TypeScript errors in analytics page
+6ad4a9ad2306015e7262d44694c4571d610e3c59 5a74cc92a30bb9e39324623bbbbaacd8fa0597bf Apple <apple@Apples-MacBook-Pro.local> 1761039147 +0530	commit: Fix: Resolve errors in assignments and analytics pages
+5a74cc92a30bb9e39324623bbbbaacd8fa0597bf aada60fa9f32afe40b545c48d4b91bc042240436 Apple <apple@Apples-MacBook-Pro.local> 1761039605 +0530	commit: Fix: Resolve errors in assignments and exam-schedule pages
+aada60fa9f32afe40b545c48d4b91bc042240436 faeec19502853619ac5c7760b34a38503fd62298 Apple <apple@Apples-MacBook-Pro.local> 1761041292 +0530	commit: Fix: Resolve multiple component errors for Vercel build
+faeec19502853619ac5c7760b34a38503fd62298 2aa7b669783e3837599fda6c828c17935193ca62 Apple <apple@Apples-MacBook-Pro.local> 1761042503 +0530	commit: Fix: Final type safety errors for Vercel build
+2aa7b669783e3837599fda6c828c17935193ca62 be088a02bc60ce28e5396426ee2e5af56d2a6a9a Apple <apple@Apples-MacBook-Pro.local> 1761043146 +0530	commit: Fix: Final type safety errors for Vercel build
+be088a02bc60ce28e5396426ee2e5af56d2a6a9a 3f830083a1ad232301a0e4a1b61f394beb346377 Apple <apple@Apples-MacBook-Pro.local> 1761045433 +0530	commit: Deploy: Fix all outstanding TypeScript errors
+3f830083a1ad232301a0e4a1b61f394beb346377 5f0978d4c674e2a8e810e99b02ec2ea4680c1a92 Apple <apple@Apples-MacBook-Pro.local> 1761046141 +0530	commit: Build: Fix all remaining TypeScript errors
+5f0978d4c674e2a8e810e99b02ec2ea4680c1a92 36f7eeec01c1bf3f67e4e765108caf199c12dbf1 Apple <apple@Apples-MacBook-Pro.local> 1761047063 +0530	commit: Final: Fix all TypeScript errors and deploy
+36f7eeec01c1bf3f67e4e765108caf199c12dbf1 b9cb57c12d32d53d4779572b29337f13dd21ddf3 Apple <apple@Apples-MacBook-Pro.local> 1761048489 +0530	commit: Final: Fix all TypeScript errors and deploy
+b9cb57c12d32d53d4779572b29337f13dd21ddf3 00ce67dcd69cc58a7da8d5aaaea7c3fe73bb0f87 Apple <apple@Apples-MacBook-Pro.local> 1761051482 +0530	commit: Final: Fix all TypeScript errors and deploy
+00ce67dcd69cc58a7da8d5aaaea7c3fe73bb0f87 00ce67dcd69cc58a7da8d5aaaea7c3fe73bb0f87 Apple <apple@Apples-MacBook-Pro.local> 1761052035 +0530	reset: moving to HEAD
+00ce67dcd69cc58a7da8d5aaaea7c3fe73bb0f87 9b21e31bce42d2d5d701132d1f46ae1afe4833a0 Apple <apple@Apples-MacBook-Pro.local> 1761052053 +0530	pull origin main: Merge made by the 'recursive' strategy.
+9b21e31bce42d2d5d701132d1f46ae1afe4833a0 00ce67dcd69cc58a7da8d5aaaea7c3fe73bb0f87 Apple <apple@Apples-MacBook-Pro.local> 1761063510 +0530	reset: moving to HEAD~1
+00ce67dcd69cc58a7da8d5aaaea7c3fe73bb0f87 518d788626b77d83082f05021db4c87e66f5c4e0 Apple <apple@Apples-MacBook-Pro.local> 1761063526 +0530	commit: Your new, updated commit message
+518d788626b77d83082f05021db4c87e66f5c4e0 944173add2ff44e2963a95d4074f768f9bfcd343 Apple <apple@Apples-MacBook-Pro.local> 1761063603 +0530	pull origin main: Merge made by the 'recursive' strategy.
+944173add2ff44e2963a95d4074f768f9bfcd343 f8bda2b5cd96f03a2e2b69301e6cda1b2b3e1bd2 Apple <apple@Apples-MacBook-Pro.local> 1761064022 +0530	commit: Your new, updated commit message
+f8bda2b5cd96f03a2e2b69301e6cda1b2b3e1bd2 becfac3ec0d8c581e5fc52cc726ab42a22579f1a Apple <apple@Apples-MacBook-Pro.local> 1761064228 +0530	commit: Your new, updated commit message
+becfac3ec0d8c581e5fc52cc726ab42a22579f1a 3ec1fb6712722478678cd50d5e923a7cd6a06d60 Apple <apple@Apples-MacBook-Pro.local> 1761064943 +0530	commit: Your message here
+3ec1fb6712722478678cd50d5e923a7cd6a06d60 0c0a211680c1dbc66dfb63b2635ca1d015ff874f Apple <apple@Apples-MacBook-Pro.local> 1761065262 +0530	commit: Your message here
+0c0a211680c1dbc66dfb63b2635ca1d015ff874f fb9a4ed8a53bab51959c70e023dd82ca49304abf Apple <apple@Apples-MacBook-Pro.local> 1761066009 +0530	commit: Your message here
+fb9a4ed8a53bab51959c70e023dd82ca49304abf 2dd06209c7dfaa4f2e827fe6ec080d64c89244e0 Apple <apple@Apples-MacBook-Pro.local> 1761117769 +0530	commit: updaate Landing Page
+2dd06209c7dfaa4f2e827fe6ec080d64c89244e0 273f73f6ba76472ad9682b7b27279ca5789f5800 Apple <apple@Apples-MacBook-Pro.local> 1761118054 +0530	commit: updaate Landing Page
+273f73f6ba76472ad9682b7b27279ca5789f5800 6f0b45c3220b005315637860e034c30494074d65 Apple <apple@Apples-MacBook-Pro.local> 1761118735 +0530	commit: updaate Landing Page
+6f0b45c3220b005315637860e034c30494074d65 f94ffaaf414eb75a6ac64466d530b83008151b5c Apple <apple@Apples-MacBook-Pro.local> 1761118965 +0530	commit: Update App
+f94ffaaf414eb75a6ac64466d530b83008151b5c e1cfdef15e8d01e92046fedf57333ce12ad0ad9a Apple <apple@Apples-MacBook-Pro.local> 1761121038 +0530	commit: updaate Landing Page
+e1cfdef15e8d01e92046fedf57333ce12ad0ad9a 75b15163e326cec41483f3e9e736eb6c9085d826 Apple <apple@Apples-MacBook-Pro.local> 1761122112 +0530	commit: Update App
+75b15163e326cec41483f3e9e736eb6c9085d826 3b9c812d9115122727bda2853cf911f7722403ef Apple <apple@Apples-MacBook-Pro.local> 1761129221 +0530	commit: Update App
+3b9c812d9115122727bda2853cf911f7722403ef bb253b36940be3ef1e2b44d82d9f050217678920 Apple <apple@Apples-MacBook-Pro.local> 1761142890 +0530	commit: Update App
+bb253b36940be3ef1e2b44d82d9f050217678920 7bdd0d432aa9818a78ce3c2accb1bfa37d30ee44 Apple <apple@Apples-MacBook-Pro.local> 1761147496 +0530	commit: Update App
+7bdd0d432aa9818a78ce3c2accb1bfa37d30ee44 f9f93733bed117e0df22839bded4c24ef3e5b269 Apple <apple@Apples-MacBook-Pro.local> 1761149015 +0530	commit: Update API URL
+f9f93733bed117e0df22839bded4c24ef3e5b269 11a21d2c484e8cacfc8bb20193dd175958c85e97 Apple <apple@Apples-MacBook-Pro.local> 1761152461 +0530	commit: Fix: Replace all localhost URLs with relative paths and live socket URL
+11a21d2c484e8cacfc8bb20193dd175958c85e97 77cb8569551e99291b905f6250ea3d47c8508ce8 Apple <apple@Apples-MacBook-Pro.local> 1761153078 +0530	commit: Update app
+77cb8569551e99291b905f6250ea3d47c8508ce8 7b9c4565b52119fe63852cc6adab5867cf9582b5 Apple <apple@Apples-MacBook-Pro.local> 1761210503 +0530	commit: git push#
+7b9c4565b52119fe63852cc6adab5867cf9582b5 5f407d21e447be9e6156acaa94e92ed4bce47ae3 Apple <apple@Apples-MacBook-Pro.local> 1761217243 +0530	commit: Update App
+5f407d21e447be9e6156acaa94e92ed4bce47ae3 8989b2c795b9f0bb8bd6c0a55013ee17ae2cc69e Apple <apple@Apples-MacBook-Pro.local> 1761217972 +0530	commit: Feat: Add googleapis package for Gmail API
+8989b2c795b9f0bb8bd6c0a55013ee17ae2cc69e 86222d42e60f84d15ae39d47b4bc69f0310e55fb Apple <apple@Apples-MacBook-Pro.local> 1761227190 +0530	commit: update
+86222d42e60f84d15ae39d47b4bc69f0310e55fb 80275d1cdd93624ccfc56d2cad8057816af0350c Apple <apple@Apples-MacBook-Pro.local> 1761230215 +0530	commit: update
+80275d1cdd93624ccfc56d2cad8057816af0350c 026e59086610bd9fb7e191cb9342ee744fa046f4 Apple <apple@Apples-MacBook-Pro.local> 1761230689 +0530	commit: update
+026e59086610bd9fb7e191cb9342ee744fa046f4 419d521927cb45926ffb48d95baa7baf24775d54 Apple <apple@Apples-MacBook-Pro.local> 1761232253 +0530	commit: Update
+419d521927cb45926ffb48d95baa7baf24775d54 6049279e41f10d0508ee7107575e284ad98e9c4d Apple <apple@Apples-MacBook-Pro.local> 1761233302 +0530	commit: Update
+6049279e41f10d0508ee7107575e284ad98e9c4d 8613f14837b82cbd531043ad91b5f4c9d91e9d12 Apple <apple@Apples-MacBook-Pro.local> 1761236846 +0530	commit: Update
+8613f14837b82cbd531043ad91b5f4c9d91e9d12 cefec50e9dee90db0dd4088fed513f93c44ab04a Apple <apple@Apples-MacBook-Pro.local> 1761237430 +0530	commit: Update
+cefec50e9dee90db0dd4088fed513f93c44ab04a 8b9deaf1a0db7f09a48cd756fc7c0e2d12f2d9ac Apple <apple@Apples-MacBook-Pro.local> 1761240169 +0530	commit: Update
+8b9deaf1a0db7f09a48cd756fc7c0e2d12f2d9ac 287c8a9aecc6a5c487a76c6c980d8bdb7ff4d3b2 Apple <apple@Apples-MacBook-Pro.local> 1761243349 +0530	commit: Update
+287c8a9aecc6a5c487a76c6c980d8bdb7ff4d3b2 383bf35ae71eca9a41172142b996de0f500fb8dd Apple <apple@Apples-MacBook-Pro.local> 1761245140 +0530	commit: update
+383bf35ae71eca9a41172142b996de0f500fb8dd 641e37da5d72e472b07e5cb1e3289fb77dc4912b Apple <apple@Apples-MacBook-Pro.local> 1761246006 +0530	commit: Update
+641e37da5d72e472b07e5cb1e3289fb77dc4912b 3ad8c72162bbfbae15d28ce11205356eeac720d4 Apple <apple@Apples-MacBook-Pro.local> 1761289820 +0530	commit: Update
+3ad8c72162bbfbae15d28ce11205356eeac720d4 80094dac8414bad12c8b75dff05b2531e8157e3e Apple <apple@Apples-MacBook-Pro.local> 1761290193 +0530	commit: Update
+80094dac8414bad12c8b75dff05b2531e8157e3e 2ad68ab9f982d13ebccb427684f7404e60ca7307 Apple <apple@Apples-MacBook-Pro.local> 1761290822 +0530	commit: Update
+2ad68ab9f982d13ebccb427684f7404e60ca7307 45a3d6e5764a6e133092774436a48f046e08f221 Apple <apple@Apples-MacBook-Pro.local> 1761291782 +0530	commit: Update
+45a3d6e5764a6e133092774436a48f046e08f221 3af2d038a7fe4d4da443621ff4e87d7c861069ca Apple <apple@Apples-MacBook-Pro.local> 1761292380 +0530	commit: update
+3af2d038a7fe4d4da443621ff4e87d7c861069ca a868ed7050be0f9373c7d38390120a8214e77b62 Apple <apple@Apples-MacBook-Pro.local> 1761293651 +0530	commit: Update
+a868ed7050be0f9373c7d38390120a8214e77b62 d75f82b4eb4920dc2078c9482e5794b2f880a614 Apple <apple@Apples-MacBook-Pro.local> 1761294570 +0530	commit: Update
+d75f82b4eb4920dc2078c9482e5794b2f880a614 403691707416a1a8c0b90c6a691f1afdc2ff3eae Apple <apple@Apples-MacBook-Pro.local> 1761295424 +0530	commit: Update
+403691707416a1a8c0b90c6a691f1afdc2ff3eae 28d87ea2a179212a90a99419b456a6c27bc332fd Apple <apple@Apples-MacBook-Pro.local> 1761296195 +0530	commit: Update
+28d87ea2a179212a90a99419b456a6c27bc332fd bc9e07e92ed4ee48cf815e9f272a1b9fddeeca48 Apple <apple@Apples-MacBook-Pro.local> 1761296443 +0530	commit: Update
+bc9e07e92ed4ee48cf815e9f272a1b9fddeeca48 d24d09038fe85df2f71cd27c074499d37e92c63d Apple <apple@Apples-MacBook-Pro.local> 1761297442 +0530	commit: Update
+d24d09038fe85df2f71cd27c074499d37e92c63d 765141b809ede74a174b657128abe02dca2c8aad Apple <apple@Apples-MacBook-Pro.local> 1761298455 +0530	commit: Update
+765141b809ede74a174b657128abe02dca2c8aad b9cf20d01184d8a6035e6f97c4d0eb9319113196 Apple <apple@Apples-MacBook-Pro.local> 1761301987 +0530	commit: Update
+b9cf20d01184d8a6035e6f97c4d0eb9319113196 3d5e29e886aa06790f947366cddea4d9f87d0a4e Apple <apple@Apples-MacBook-Pro.local> 1761304827 +0530	commit: Update
+3d5e29e886aa06790f947366cddea4d9f87d0a4e d2747b504f35c08344631c4ada3e89824b146dac Apple <apple@Apples-MacBook-Pro.local> 1761306182 +0530	commit: Update
+d2747b504f35c08344631c4ada3e89824b146dac 6a79b01b3bd1f9ac4414c3d5b023eb3504950ea4 Apple <apple@Apples-MacBook-Pro.local> 1761318210 +0530	commit: Update
+6a79b01b3bd1f9ac4414c3d5b023eb3504950ea4 f4c9ad91f61fe7ce126213fa9a96db026624fc5c Apple <apple@Apples-MacBook-Pro.local> 1761320062 +0530	commit: Update
+f4c9ad91f61fe7ce126213fa9a96db026624fc5c cd670dd4558a8105cf5b4718a0063c6a60d6ce15 Apple <apple@Apples-MacBook-Pro.local> 1761321998 +0530	commit: Update
+cd670dd4558a8105cf5b4718a0063c6a60d6ce15 e3783920b0f661e5e1d4cdae54e1af566f9ce318 Apple <apple@Apples-MacBook-Pro.local> 1761322406 +0530	commit: Update
+e3783920b0f661e5e1d4cdae54e1af566f9ce318 040c5b4f14b48780a645080692e9ee3bca69f5a0 Apple <apple@Apples-MacBook-Pro.local> 1761322708 +0530	commit: Update
+040c5b4f14b48780a645080692e9ee3bca69f5a0 226ab9a8e41b378afb4bc909f399928618ce26d0 Apple <apple@Apples-MacBook-Pro.local> 1761323201 +0530	commit: Update
+226ab9a8e41b378afb4bc909f399928618ce26d0 5b5569ced55a9db5c8e157b0f61c61b47cbe5148 Apple <apple@Apples-MacBook-Pro.local> 1761324101 +0530	commit: Update
+5b5569ced55a9db5c8e157b0f61c61b47cbe5148 7f3fc2f322875fcd6bad50d739b7ac27a2256396 Apple <apple@Apples-MacBook-Pro.local> 1761328243 +0530	commit: Update
+7f3fc2f322875fcd6bad50d739b7ac27a2256396 6eb2fd0009f0ed0a4f4c295ae1c0c1fd7532261c Apple <apple@Apples-MacBook-Pro.local> 1761328425 +0530	commit (merge): Update
+6eb2fd0009f0ed0a4f4c295ae1c0c1fd7532261c 96dc4db4a140d5adacaf3f4221f5624794160e96 Apple <apple@Apples-MacBook-Pro.local> 1761328544 +0530	commit: Update
+96dc4db4a140d5adacaf3f4221f5624794160e96 7fae20550bd3d2b7e192260ef4ab213ad24ee46d Apple <apple@Apples-MacBook-Pro.local> 1761381556 +0530	commit: Update
+7fae20550bd3d2b7e192260ef4ab213ad24ee46d 005673059c6dc5f72c0c99e9690532b55fd22afa Apple <apple@Apples-MacBook-Pro.local> 1761382948 +0530	commit: Update
+005673059c6dc5f72c0c99e9690532b55fd22afa 825f6e64d3cce9e6673065963bb87dac8d34ae1b Apple <apple@Apples-MacBook-Pro.local> 1761383126 +0530	commit: Update
+825f6e64d3cce9e6673065963bb87dac8d34ae1b db1cd29bb8cf028d866758881046ea7b6a5cbe93 Apple <apple@Apples-MacBook-Pro.local> 1761386410 +0530	commit: Update
+db1cd29bb8cf028d866758881046ea7b6a5cbe93 13d87508ebf8370582d646ee972c9a32f0392896 Apple <apple@Apples-MacBook-Pro.local> 1761386668 +0530	commit: Update
+13d87508ebf8370582d646ee972c9a32f0392896 18291ffc5a197646ea101f49a5aec300f147fca5 Apple <apple@Apples-MacBook-Pro.local> 1761386918 +0530	commit: Update
+18291ffc5a197646ea101f49a5aec300f147fca5 ce1be2b84df69b36e4f05401affd0377511f5969 Apple <apple@Apples-MacBook-Pro.local> 1761412440 +0530	commit: Update
+ce1be2b84df69b36e4f05401affd0377511f5969 960e19bc598e716c346a1dccac7df1d49374a6a6 Apple <apple@Apples-MacBook-Pro.local> 1761413162 +0530	commit: Update
+960e19bc598e716c346a1dccac7df1d49374a6a6 a3d68ba86efcd65166414a320487eb2fcbe5eb95 Apple <apple@Apples-MacBook-Pro.local> 1761413304 +0530	commit: Update
+a3d68ba86efcd65166414a320487eb2fcbe5eb95 5a8d6f9b7e33391f850e7083e97c64e70467f53b Apple <apple@Apples-MacBook-Pro.local> 1761414469 +0530	commit: Update
+5a8d6f9b7e33391f850e7083e97c64e70467f53b 5a8d6f9b7e33391f850e7083e97c64e70467f53b Apple <apple@Apples-MacBook-Pro.local> 1761415080 +0530	reset: moving to origin/main
+5a8d6f9b7e33391f850e7083e97c64e70467f53b 830e614bef1a591315ea9ee49d6d54c7de4ee960 Apple <apple@Apples-MacBook-Pro.local> 1761415731 +0530	commit: Update
+830e614bef1a591315ea9ee49d6d54c7de4ee960 ad41695ddba7ad4526cb040a512aedf88a0e50a5 Apple <apple@Apples-MacBook-Pro.local> 1761461686 +0530	commit: Update
+ad41695ddba7ad4526cb040a512aedf88a0e50a5 4f8e915548752bbee0e3c382870ef25fe11ff53f Apple <apple@Apples-MacBook-Pro.local> 1761462066 +0530	commit: Update
+4f8e915548752bbee0e3c382870ef25fe11ff53f 10201b28747878a32f3ac475f318c1327db023e3 Apple <apple@Apples-MacBook-Pro.local> 1761462324 +0530	commit: Update
+10201b28747878a32f3ac475f318c1327db023e3 b787a9513ac104239ee09ae086bcbefbc4e32a0f Apple <apple@Apples-MacBook-Pro.local> 1761465279 +0530	commit: Update
+b787a9513ac104239ee09ae086bcbefbc4e32a0f 1167d25c1d83848beec793e056b6620a6f9ddeec Apple <apple@Apples-MacBook-Pro.local> 1761465760 +0530	commit: Update
+1167d25c1d83848beec793e056b6620a6f9ddeec 2498523f2af94747ba13d9b9cb53b8b81b7dbe71 Apple <apple@Apples-MacBook-Pro.local> 1761466117 +0530	commit: Update
+2498523f2af94747ba13d9b9cb53b8b81b7dbe71 2b603ec9c211b24432cea670d1597862dab9ca37 Apple <apple@Apples-MacBook-Pro.local> 1761466664 +0530	commit: Update
+2b603ec9c211b24432cea670d1597862dab9ca37 f205db4f85096deb1ae06e8cd1277456cce6c286 Apple <apple@Apples-MacBook-Pro.local> 1761466960 +0530	commit: Update
+f205db4f85096deb1ae06e8cd1277456cce6c286 ffebda8accd983c040965b01ed9c5aae473f3193 Apple <apple@Apples-MacBook-Pro.local> 1761467108 +0530	commit: Update
+ffebda8accd983c040965b01ed9c5aae473f3193 c07a0810546786aaca183febe1d7633f6f972c40 Apple <apple@Apples-MacBook-Pro.local> 1761467624 +0530	commit: Update
+c07a0810546786aaca183febe1d7633f6f972c40 32af7c66e119055d3c05f4d915e30b424eec5e07 Apple <apple@Apples-MacBook-Pro.local> 1761468624 +0530	commit: Update
+32af7c66e119055d3c05f4d915e30b424eec5e07 6b08d715db773403ad039395ad065e921e09c4aa Apple <apple@Apples-MacBook-Pro.local> 1761469107 +0530	commit: Update
+6b08d715db773403ad039395ad065e921e09c4aa d7feff305d256cc379aa4ea07f823c33730f55a8 Apple <apple@Apples-MacBook-Pro.local> 1761470295 +0530	commit: Update
+d7feff305d256cc379aa4ea07f823c33730f55a8 4e3462963c07214fe3d895eb95da8a04c1bcb1cc Apple <apple@Apples-MacBook-Pro.local> 1761471315 +0530	commit: Update
+4e3462963c07214fe3d895eb95da8a04c1bcb1cc ec09e9fcf43b34251e3a348450a2d9a26ed8cbe8 Apple <apple@Apples-MacBook-Pro.local> 1761473043 +0530	commit: Update
+ec09e9fcf43b34251e3a348450a2d9a26ed8cbe8 f969f90c864013201d603a63c2e2261e008afd48 Apple <apple@Apples-MacBook-Pro.local> 1761473295 +0530	commit: Update
+f969f90c864013201d603a63c2e2261e008afd48 0bbbeec4665c41b3b1628407687513d458421652 Apple <apple@Apples-MacBook-Pro.local> 1761474634 +0530	commit: Update
+0bbbeec4665c41b3b1628407687513d458421652 bfb3caa6eb983ca959cbfb5e6d9a4ad93f8f5d1d Apple <apple@Apples-MacBook-Pro.local> 1761475240 +0530	commit: Update
+bfb3caa6eb983ca959cbfb5e6d9a4ad93f8f5d1d 775b5b8df943d2fd0697d079b24a8c2a5c2cbbc2 Apple <apple@Apples-MacBook-Pro.local> 1761475400 +0530	commit: Update
+775b5b8df943d2fd0697d079b24a8c2a5c2cbbc2 1cc91fc36c30ed97fe140423bb515c22139476d8 Apple <apple@Apples-MacBook-Pro.local> 1761475814 +0530	commit: Update
+1cc91fc36c30ed97fe140423bb515c22139476d8 f47f4ca08ea9c69c69716164d3f06bba9835e8d2 Apple <apple@Apples-MacBook-Pro.local> 1761476435 +0530	commit: Update
+f47f4ca08ea9c69c69716164d3f06bba9835e8d2 f2bdefa0703e43f2e36519bf5d8274f119598388 Apple <apple@Apples-MacBook-Pro.local> 1761477865 +0530	commit: Update
+f2bdefa0703e43f2e36519bf5d8274f119598388 d1c41c74a2ed816f83342521cc70fec4f205bba4 Apple <apple@Apples-MacBook-Pro.local> 1761479709 +0530	commit: Update
+d1c41c74a2ed816f83342521cc70fec4f205bba4 30280ee69047d9e37f31e1c557aea1dc2eddcebb Apple <apple@Apples-MacBook-Pro.local> 1761480116 +0530	commit: Update
+30280ee69047d9e37f31e1c557aea1dc2eddcebb ae4a82e52cd8e925ed65bf63c313b19f5dd28f86 Apple <apple@Apples-MacBook-Pro.local> 1761482966 +0530	commit: Update
+ae4a82e52cd8e925ed65bf63c313b19f5dd28f86 8f1ec3f238fa7df592bbfb666cc810fff46b9129 Apple <apple@Apples-MacBook-Pro.local> 1761485101 +0530	commit: Update
+8f1ec3f238fa7df592bbfb666cc810fff46b9129 07c44b09780cb0d1fbed3db88e3096e6a3efd45e Apple <apple@Apples-MacBook-Pro.local> 1761486496 +0530	commit: Update
+07c44b09780cb0d1fbed3db88e3096e6a3efd45e 7e51b8db508d73b195c5e3145b129db97e8d9ec7 Apple <apple@Apples-MacBook-Pro.local> 1761486893 +0530	commit: Update
+7e51b8db508d73b195c5e3145b129db97e8d9ec7 a0e46946fcb0b60bd519c093fc727e26b9dcc24f Apple <apple@Apples-MacBook-Pro.local> 1761487263 +0530	commit: Update
+a0e46946fcb0b60bd519c093fc727e26b9dcc24f c0bb856db44c394e5c3c06118d9e53b769cf72d7 Apple <apple@Apples-MacBook-Pro.local> 1761488809 +0530	commit: Update
+c0bb856db44c394e5c3c06118d9e53b769cf72d7 7e450b173cf4731ca0bfc5dfdeb5ec1696e3eff1 Apple <apple@Apples-MacBook-Pro.local> 1761490625 +0530	commit: Update
+7e450b173cf4731ca0bfc5dfdeb5ec1696e3eff1 d075337dfe97d83e4ab19d9a4dd8fa311cafec52 Apple <apple@Apples-MacBook-Pro.local> 1761491672 +0530	commit: Update
+d075337dfe97d83e4ab19d9a4dd8fa311cafec52 6a7ddcc3a5ed9fd303a8c6e5e92d3c78ade30345 Apple <apple@Apples-MacBook-Pro.local> 1761492147 +0530	commit: Update
+6a7ddcc3a5ed9fd303a8c6e5e92d3c78ade30345 ba2dd919087f291b5d0eb7a7b41b6014f048ca96 Apple <apple@Apples-MacBook-Pro.local> 1761492744 +0530	commit: Update
+ba2dd919087f291b5d0eb7a7b41b6014f048ca96 6074bb69f61f836a32fad8cdac80780adbbd7410 Apple <apple@Apples-MacBook-Pro.local> 1761493076 +0530	commit: Update
+6074bb69f61f836a32fad8cdac80780adbbd7410 a85a716575ecc2b6cb30ea7ffeec3cfeea93aa95 Apple <apple@Apples-MacBook-Pro.local> 1761493933 +0530	commit: Update
+a85a716575ecc2b6cb30ea7ffeec3cfeea93aa95 22978e43190064b246a1e3d0cc2ad17c78638ccd Apple <apple@Apples-MacBook-Pro.local> 1761498688 +0530	commit: Update
+22978e43190064b246a1e3d0cc2ad17c78638ccd e894347f139df3e9056961553a5f94a0255ed4f7 Apple <apple@Apples-MacBook-Pro.local> 1761499183 +0530	commit: Update
+e894347f139df3e9056961553a5f94a0255ed4f7 f69dc43434f924229369d5fbc174f948c865afde Apple <apple@Apples-MacBook-Pro.local> 1761499592 +0530	commit: Update
+f69dc43434f924229369d5fbc174f948c865afde fb49bf93ce261f6db93356fb4135e5f228ac4818 Apple <apple@Apples-MacBook-Pro.local> 1761499801 +0530	commit: Update
+fb49bf93ce261f6db93356fb4135e5f228ac4818 8519e9cbcde1ea9253f4056421bb4b174317bd2f Apple <apple@Apples-MacBook-Pro.local> 1761500239 +0530	commit: Update
+8519e9cbcde1ea9253f4056421bb4b174317bd2f 5df94cc4f65275419cf36f08516f2bb92655e601 Apple <apple@Apples-MacBook-Pro.local> 1761500896 +0530	commit: Update
+5df94cc4f65275419cf36f08516f2bb92655e601 4bc5e5500df6bf5cddd23a5e6abd2bf3781838f0 Apple <apple@Apples-MacBook-Pro.local> 1761501120 +0530	commit: Update
+4bc5e5500df6bf5cddd23a5e6abd2bf3781838f0 c7e7dd5d4d645bea6bd70bbd063594a8a95facbf Apple <apple@Apples-MacBook-Pro.local> 1761501466 +0530	commit: Update
+c7e7dd5d4d645bea6bd70bbd063594a8a95facbf c9a11660cce82242c7ccca050d39fa883d9967ef Apple <apple@Apples-MacBook-Pro.local> 1761501864 +0530	commit: Update
+c9a11660cce82242c7ccca050d39fa883d9967ef 9b2b9657857d39f0b88e712b0748fef5bba962e8 Apple <apple@Apples-MacBook-Pro.local> 1761502262 +0530	commit: Update
+9b2b9657857d39f0b88e712b0748fef5bba962e8 12fce786f676e010f49c77ef03609c204810bd9d Apple <apple@Apples-MacBook-Pro.local> 1761505472 +0530	commit: Update
+12fce786f676e010f49c77ef03609c204810bd9d 90b219442cb7c6f8a7d8be1bdd9118583b2fbe56 Apple <apple@Apples-MacBook-Pro.local> 1761505773 +0530	commit: Update
+90b219442cb7c6f8a7d8be1bdd9118583b2fbe56 ab4fc9cd7d8becd609ee6ec75fc7ad54fc563790 Apple <apple@Apples-MacBook-Pro.local> 1761547673 +0530	commit: Update
+ab4fc9cd7d8becd609ee6ec75fc7ad54fc563790 c5bcfb3823df7ac55aa8ed09eefa631ad4a2389f Apple <apple@Apples-MacBook-Pro.local> 1761551108 +0530	commit: Update
+c5bcfb3823df7ac55aa8ed09eefa631ad4a2389f df81d193a4b604f9ec0ec3120a2b574094b311ff Apple <apple@Apples-MacBook-Pro.local> 1761552911 +0530	commit: Update
+df81d193a4b604f9ec0ec3120a2b574094b311ff 6c96bce72afb8daf6eab417a2cf3b1f0ab1c10c7 Apple <apple@Apples-MacBook-Pro.local> 1761553175 +0530	commit: Update
+6c96bce72afb8daf6eab417a2cf3b1f0ab1c10c7 cf1ff04dab33c97df790907d16432d353c603250 Apple <apple@Apples-MacBook-Pro.local> 1761567356 +0530	commit: Update
+cf1ff04dab33c97df790907d16432d353c603250 5c402fcc2314151d5c3f7f299f427e01f3139128 Apple <apple@Apples-MacBook-Pro.local> 1761567883 +0530	commit: Update
+5c402fcc2314151d5c3f7f299f427e01f3139128 b4e83e7ce30057d7ecba7fa9739a7add28af6ae3 Apple <apple@Apples-MacBook-Pro.local> 1761570523 +0530	commit: Update
+b4e83e7ce30057d7ecba7fa9739a7add28af6ae3 74fd01b9cbbf96a3021c58183275e8ef9fac2a53 Apple <apple@Apples-MacBook-Pro.local> 1761571816 +0530	commit: Update
+74fd01b9cbbf96a3021c58183275e8ef9fac2a53 1439402adf087c42a4d09846b962ee33816c8d5c Apple <apple@Apples-MacBook-Pro.local> 1761573676 +0530	commit: Update
+1439402adf087c42a4d09846b962ee33816c8d5c abf42f18b6422c5bbfec2a61f1d8b7ce0bb8b451 Apple <apple@Apples-MacBook-Pro.local> 1761573977 +0530	commit: Update
+abf42f18b6422c5bbfec2a61f1d8b7ce0bb8b451 3853fc9f1f82680e5908bd9c5cde1fe8c59af13e Apple <apple@Apples-MacBook-Pro.local> 1761574700 +0530	commit: Update
+3853fc9f1f82680e5908bd9c5cde1fe8c59af13e abb3b68f0847acd77679d984a3d6f6f375cc7686 Apple <apple@Apples-MacBook-Pro.local> 1761575340 +0530	commit: Update
+abb3b68f0847acd77679d984a3d6f6f375cc7686 bca8de170bc9d320141bf3f55eee3324a531c993 Apple <apple@Apples-MacBook-Pro.local> 1761576338 +0530	commit: Update
+bca8de170bc9d320141bf3f55eee3324a531c993 ad97dcc3ae7cddc376c30ad4320745f472696b00 Apple <apple@Apples-MacBook-Pro.local> 1761577155 +0530	commit: Update
+ad97dcc3ae7cddc376c30ad4320745f472696b00 655663f5095e6034c64242b1d4d62212c56af316 Apple <apple@Apples-MacBook-Pro.local> 1761577533 +0530	commit: Update
+655663f5095e6034c64242b1d4d62212c56af316 a19a1c52dc078655dc06515d2ec8f58a8ccf813e Apple <apple@Apples-MacBook-Pro.local> 1761578028 +0530	commit: Update
+a19a1c52dc078655dc06515d2ec8f58a8ccf813e 13ece17fea656e37a76a8116d496eb38e9367717 Apple <apple@Apples-MacBook-Pro.local> 1761578238 +0530	commit: Update
+13ece17fea656e37a76a8116d496eb38e9367717 04d92f66c7d9c863c2f05103bea67e326d450ccb Apple <apple@Apples-MacBook-Pro.local> 1761578648 +0530	commit: Update
+04d92f66c7d9c863c2f05103bea67e326d450ccb 6a8a954f2454fa0f0b8b25a6965d9525b97b2799 Apple <apple@Apples-MacBook-Pro.local> 1761579380 +0530	commit: Update
+6a8a954f2454fa0f0b8b25a6965d9525b97b2799 a66a9f1eef9a9981401d61a690e10ab4c100676e Apple <apple@Apples-MacBook-Pro.local> 1761589660 +0530	commit: Update
+a66a9f1eef9a9981401d61a690e10ab4c100676e 4c249001533dccdf160e977e180d972f7b659448 Apple <apple@Apples-MacBook-Pro.local> 1761589985 +0530	commit: Update
+4c249001533dccdf160e977e180d972f7b659448 deb30c94690792e606f2b8c698088d72c46c7219 Apple <apple@Apples-MacBook-Pro.local> 1761590770 +0530	commit: Update
+deb30c94690792e606f2b8c698088d72c46c7219 01aaf66fa30ca06efad08845bd0ff893dabead92 Apple <apple@Apples-MacBook-Pro.local> 1761593323 +0530	commit: Update
+01aaf66fa30ca06efad08845bd0ff893dabead92 52f3fe012eedef988b91f3fa1c2593adec20b00a Apple <apple@Apples-MacBook-Pro.local> 1761595866 +0530	commit: Update
+52f3fe012eedef988b91f3fa1c2593adec20b00a 0f056d7bf3ac947fa277b39fc54a2608f2148b3c Apple <apple@Apples-MacBook-Pro.local> 1761627606 +0530	commit: Update
+0f056d7bf3ac947fa277b39fc54a2608f2148b3c c0778164d41e1629ef380316f4f408dc1fbaf48a Apple <apple@Apples-MacBook-Pro.local> 1761635153 +0530	pull origin main: Fast-forward
+c0778164d41e1629ef380316f4f408dc1fbaf48a 0f056d7bf3ac947fa277b39fc54a2608f2148b3c Apple <apple@Apples-MacBook-Pro.local> 1761636707 +0530	reset: moving to 0f056d7
+0f056d7bf3ac947fa277b39fc54a2608f2148b3c 86863ac9fa3826a531d9434c19dbf55b233e11e8 Apple <apple@Apples-MacBook-Pro.local> 1761637610 +0530	commit: Update
+86863ac9fa3826a531d9434c19dbf55b233e11e8 36b64a56a91064dc8aa1456fa48432f3b8a9c59e Apple <apple@Apples-MacBook-Pro.local> 1761640216 +0530	commit: Update
+36b64a56a91064dc8aa1456fa48432f3b8a9c59e 848aba627d5024344b3e5d11ddf541ac909e049b Apple <apple@Apples-MacBook-Pro.local> 1761641096 +0530	commit: Update
+848aba627d5024344b3e5d11ddf541ac909e049b ab5d4de1208eb7e0eb9e2399d0fee5aca9a4de6e Apple <apple@Apples-MacBook-Pro.local> 1761641738 +0530	commit: Update
+ab5d4de1208eb7e0eb9e2399d0fee5aca9a4de6e 651d554c837e106e4e98a836e14c45f8769efa99 Apple <apple@Apples-MacBook-Pro.local> 1761642479 +0530	commit: Update
+651d554c837e106e4e98a836e14c45f8769efa99 f0b3d309f825b2ce7543cc6cb844b2ab34c0362e Apple <apple@Apples-MacBook-Pro.local> 1761642813 +0530	commit: Update
+f0b3d309f825b2ce7543cc6cb844b2ab34c0362e a5e4332b8e4823b72f3248e5f0a43a7847851706 Apple <apple@Apples-MacBook-Pro.local> 1761643869 +0530	commit: feat: Add update fee template API route
+a5e4332b8e4823b72f3248e5f0a43a7847851706 e21a4846cd3aa1e0a895771d396add17cf182564 Apple <apple@Apples-MacBook-Pro.local> 1761644362 +0530	commit: feat: Add delete fee template API route
+e21a4846cd3aa1e0a895771d396add17cf182564 efc29d5128d76a7f2f4ef9625b1777dee6f2b716 Apple <apple@Apples-MacBook-Pro.local> 1761644844 +0530	commit: update
+efc29d5128d76a7f2f4ef9625b1777dee6f2b716 1afeb0017ccf618f006ca276a68358243c7598ba Apple <apple@Apples-MacBook-Pro.local> 1761649730 +0530	commit: Update
+1afeb0017ccf618f006ca276a68358243c7598ba 15af7f8430acbfd5d2e9396275fe3c5c66532755 Apple <apple@Apples-MacBook-Pro.local> 1761649958 +0530	commit: Update
+15af7f8430acbfd5d2e9396275fe3c5c66532755 31a3525c13c56954398e80f0f3e36049eae59dd9 Apple <apple@Apples-MacBook-Pro.local> 1761651522 +0530	commit: Update
+31a3525c13c56954398e80f0f3e36049eae59dd9 53c20d648c066a71049eb975a448b7406c5e94f9 Apple <apple@Apples-MacBook-Pro.local> 1761651826 +0530	commit: Update
+53c20d648c066a71049eb975a448b7406c5e94f9 920f80cf7345daf4b89b77d73d18bee0ebbe319e Apple <apple@Apples-MacBook-Pro.local> 1761652179 +0530	commit: Update
+920f80cf7345daf4b89b77d73d18bee0ebbe319e 9d4c38f8afcdcdbd2e22ff22743f5c6b813bc8e4 Apple <apple@Apples-MacBook-Pro.local> 1761655318 +0530	commit: Update
+9d4c38f8afcdcdbd2e22ff22743f5c6b813bc8e4 3ac7a8809bcb21a6493cc356cd1829b01ca81d43 Apple <apple@Apples-MacBook-Pro.local> 1761655473 +0530	commit: Update
+3ac7a8809bcb21a6493cc356cd1829b01ca81d43 5ceba70abbabdd22b2b5f0511735835995236556 Apple <apple@Apples-MacBook-Pro.local> 1761659541 +0530	commit: Update
+5ceba70abbabdd22b2b5f0511735835995236556 8508c55d23326bfda69abec63ff4f4df0c6141da Apple <apple@Apples-MacBook-Pro.local> 1761659782 +0530	commit: Update
+8508c55d23326bfda69abec63ff4f4df0c6141da 7a81d9f9cb125ba313b7898367a7e4c54500930f Apple <apple@Apples-MacBook-Pro.local> 1761664013 +0530	commit: Update
+7a81d9f9cb125ba313b7898367a7e4c54500930f 81ff81dadcdeaf0dadcfbf15965331b70455c2b1 Apple <apple@Apples-MacBook-Pro.local> 1761664444 +0530	commit: Update
+81ff81dadcdeaf0dadcfbf15965331b70455c2b1 b4dd8d794f60c07a3d55d7bc31af40ef8568c7b6 Apple <apple@Apples-MacBook-Pro.local> 1761665174 +0530	commit: Update
+b4dd8d794f60c07a3d55d7bc31af40ef8568c7b6 b9cb8c0fa7b5b4049b0f628c1b0ffccf715d5da1 Apple <apple@Apples-MacBook-Pro.local> 1761666001 +0530	commit: Update
+b9cb8c0fa7b5b4049b0f628c1b0ffccf715d5da1 d0328c249f4dd77bdab13036ab2ea5e4d2251396 Apple <apple@Apples-MacBook-Pro.local> 1761666287 +0530	commit: Update
+d0328c249f4dd77bdab13036ab2ea5e4d2251396 a821190f37869a87c96bd514cbe06a38bfe46c85 Apple <apple@Apples-MacBook-Pro.local> 1761669682 +0530	commit: Update
+a821190f37869a87c96bd514cbe06a38bfe46c85 3d2992b52100f7ffc31e63ebe6c970b8bd4a357f Apple <apple@Apples-MacBook-Pro.local> 1761669811 +0530	commit: Update
+3d2992b52100f7ffc31e63ebe6c970b8bd4a357f be624f03f84eb0b6f090a6d71fbbcf842ebc09dc Apple <apple@Apples-MacBook-Pro.local> 1761671050 +0530	commit: Update
+be624f03f84eb0b6f090a6d71fbbcf842ebc09dc 9bda69606e8c7d471186ff6d3aaba4b718e6a472 Apple <apple@Apples-MacBook-Pro.local> 1761672101 +0530	commit: Update
+9bda69606e8c7d471186ff6d3aaba4b718e6a472 54c12d31bb2d27fb667d37106aa3933cf7cd7f03 Apple <apple@Apples-MacBook-Pro.local> 1761673324 +0530	commit: Update
+54c12d31bb2d27fb667d37106aa3933cf7cd7f03 e2645fa67702abe6d8f70e507a80a52c22674d90 Apple <apple@Apples-MacBook-Pro.local> 1761674757 +0530	commit: Update
+e2645fa67702abe6d8f70e507a80a52c22674d90 bd734995f4decfdffc20d241fb3f6ca0432bd46a Apple <apple@Apples-MacBook-Pro.local> 1761675420 +0530	commit: Update
+bd734995f4decfdffc20d241fb3f6ca0432bd46a 2ce3a5ffc91e012d85479ad58a3986387a35b434 Apple <apple@Apples-MacBook-Pro.local> 1761677706 +0530	commit: Update
+2ce3a5ffc91e012d85479ad58a3986387a35b434 4f8575d8b9573e66d1ec4bae8ca626bfc9cc2ad5 Apple <apple@Apples-MacBook-Pro.local> 1761727982 +0530	commit: Update
+4f8575d8b9573e66d1ec4bae8ca626bfc9cc2ad5 2250461c248ef9a1ad5bf0511fcd7dab3858fdc2 Apple <apple@Apples-MacBook-Pro.local> 1761729908 +0530	commit: Update
+2250461c248ef9a1ad5bf0511fcd7dab3858fdc2 eb7c0788910004786e266a0f4f6f1676318e4cb9 Apple <apple@Apples-MacBook-Pro.local> 1761732904 +0530	commit: Update
+eb7c0788910004786e266a0f4f6f1676318e4cb9 1cc3a3036c0bdb6ea3d395f8e5b3ab7e64b1761d Apple <apple@Apples-MacBook-Pro.local> 1761733835 +0530	commit: Update
+1cc3a3036c0bdb6ea3d395f8e5b3ab7e64b1761d c66d5ecfdbbfbef55a4d92461d96974c42cf1408 Apple <apple@Apples-MacBook-Pro.local> 1761734754 +0530	commit: Update
+c66d5ecfdbbfbef55a4d92461d96974c42cf1408 d94f2803f05722c294c46fcbaae41e712a387914 Apple <apple@Apples-MacBook-Pro.local> 1761736893 +0530	commit: Update
+d94f2803f05722c294c46fcbaae41e712a387914 391f02507bdce5a7888f288ccec1937f2063bd93 Apple <apple@Apples-MacBook-Pro.local> 1761737838 +0530	commit: Update
+391f02507bdce5a7888f288ccec1937f2063bd93 305919ff6ed01d78659b15aabb5f309c9d48c075 Apple <apple@Apples-MacBook-Pro.local> 1761738420 +0530	commit: Update
+305919ff6ed01d78659b15aabb5f309c9d48c075 2b2c1580b1693d90c1eb6cdcdc8bfb428a2efa01 Apple <apple@Apples-MacBook-Pro.local> 1761739520 +0530	commit: Update
+2b2c1580b1693d90c1eb6cdcdc8bfb428a2efa01 d975806a6965cb140b4ea766d681567aa44061af Apple <apple@Apples-MacBook-Pro.local> 1761739939 +0530	commit: Update
+d975806a6965cb140b4ea766d681567aa44061af a75386929d2a5675c3173b85b4e6310dd383c7e9 Apple <apple@Apples-MacBook-Pro.local> 1761740571 +0530	commit: Update
+a75386929d2a5675c3173b85b4e6310dd383c7e9 69a45c175d64a90a22004a3e261079e46a669b3c Apple <apple@Apples-MacBook-Pro.local> 1761741398 +0530	commit: Update
+69a45c175d64a90a22004a3e261079e46a669b3c a09af3191a5acf5b627778103eb88f491c2150da Apple <apple@Apples-MacBook-Pro.local> 1761741843 +0530	commit: Update
+a09af3191a5acf5b627778103eb88f491c2150da 4732c97cf5db273ebdaf6ef67373a1e92160dc18 Apple <apple@Apples-MacBook-Pro.local> 1761742276 +0530	commit: Update
+4732c97cf5db273ebdaf6ef67373a1e92160dc18 ef9aaf3f395be91efe1cca5a8a31b55b65bfab9a Apple <apple@Apples-MacBook-Pro.local> 1761742956 +0530	commit: Update
+ef9aaf3f395be91efe1cca5a8a31b55b65bfab9a a1dc7920eed3c0195c7bc33dee3795ee5b648848 Apple <apple@Apples-MacBook-Pro.local> 1761745008 +0530	commit: Update
+a1dc7920eed3c0195c7bc33dee3795ee5b648848 a201f4568ce4fbd7c64019356be2b133bbb82fb0 Apple <apple@Apples-MacBook-Pro.local> 1761745470 +0530	commit: Update
+a201f4568ce4fbd7c64019356be2b133bbb82fb0 569a39432813320750e2bacea4220e3ac470ffea Apple <apple@Apples-MacBook-Pro.local> 1761749834 +0530	commit: Update
+569a39432813320750e2bacea4220e3ac470ffea 366279ef509452de949231eb0342c86a9a4defc5 Apple <apple@Apples-MacBook-Pro.local> 1761777793 +0530	commit: Complete migration from Mongoose to Prisma
+366279ef509452de949231eb0342c86a9a4defc5 6d9e445371c88e0424561cc231084041d74c5f12 Apple <apple@Apples-MacBook-Pro.local> 1761778353 +0530	commit: Fix package.json and update prisma generate script
+6d9e445371c88e0424561cc231084041d74c5f12 5f6bf95b8a420e573934850aad120f9365277719 Apple <apple@Apples-MacBook-Pro.local> 1761809273 +0530	commit: Fix typo in studyMaterial.js
+5f6bf95b8a420e573934850aad120f9365277719 7583164f2a6a3895c4f65ef8d3b750d226bb0be8 Apple <apple@Apples-MacBook-Pro.local> 1761811894 +0530	commit: FINAL FIX: Removed Mongoose dependency causing ghost connection
+7583164f2a6a3895c4f65ef8d3b750d226bb0be8 38039290f84d9241953a1593a3c4d0f898f44810 Apple <apple@Apples-MacBook-Pro.local> 1761814974 +0530	commit: Cleaned backend package-lock for Mongoose removal
+38039290f84d9241953a1593a3c4d0f898f44810 bc393f990ad5456bd6f0177ae66ee53500ee06e8 Apple <apple@Apples-MacBook-Pro.local> 1761815305 +0530	commit: Update
+bc393f990ad5456bd6f0177ae66ee53500ee06e8 9a99c7d010a61e2099a5c1650af05116a84002b1 Apple <apple@Apples-MacBook-Pro.local> 1761815674 +0530	commit: Update
+9a99c7d010a61e2099a5c1650af05116a84002b1 c32119102c26757e5935f04a473cbd5bb051ddbd Apple <apple@Apples-MacBook-Pro.local> 1761818210 +0530	commit: Added start script for Render
+c32119102c26757e5935f04a473cbd5bb051ddbd c76da430bfd237ff538e3905b4f0a76a8b6d3bcf Apple <apple@Apples-MacBook-Pro.local> 1761819006 +0530	commit: Update
+c76da430bfd237ff538e3905b4f0a76a8b6d3bcf be23359b1ef2d99c850be123c4e325aa69bf427d Apple <apple@Apples-MacBook-Pro.local> 1761820785 +0530	commit: Update
+be23359b1ef2d99c850be123c4e325aa69bf427d 872a1f209b0d76e1a199a8b9f6a71480b04df666 Apple <apple@Apples-MacBook-Pro.local> 1761821330 +0530	commit: Fix frontend User interface for Prisma integer ID
+872a1f209b0d76e1a199a8b9f6a71480b04df666 06aca5c0fc12c5d32116b783afa36f56d09c6e55 Apple <apple@Apples-MacBook-Pro.local> 1761822010 +0530	commit: Update

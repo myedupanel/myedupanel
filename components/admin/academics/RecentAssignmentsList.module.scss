@@ -1,0 +1,64 @@
+.listContainer {
+  /* 'h4' ki jagah .listTitle use kiya taaki yeh component se match kare */
+  .listTitle {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #334155; // Dark slate grey
+    font-size: 1.1rem;
+    font-weight: 600; // Thoda bold title
+  }
+}
+
+.assignmentList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem; // Har item ke beech thoda space
+}
+
+.assignmentItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0.25rem; // Thodi padding
+  border-bottom: 1px solid #e2e8f0; // Subtle separator
+
+  // Last item se border hata dete hain
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem; // Title aur class info ke beech halka gap
+}
+
+.title {
+  font-weight: 600;
+  color: #334155; // Dark slate grey
+  font-size: 0.95rem;
+}
+
+.classInfo {
+  font-size: 0.85rem;
+  color: #64748b; // Lighter grey
+}
+
+.status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px; // Pill shape
+  color: #ffffff; // Text color safed
+  text-transform: capitalize; // "pending" -> "Pending"
+
+  /* Yeh dynamic classes hain */
+  &.graded { background-color: #22c55e; } /* Green */
+  &.pending { background-color: #f97316; } /* Orange */
+  &.submitted { background-color: #3b82f6; } /* Blue */
+}

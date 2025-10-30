@@ -1,0 +1,19 @@
+.feesLayoutContainer {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative; // Yeh zaroori hai
+}
+
+.feesContent {
+  flex-grow: 1;
+  overflow-y: auto;
+  
+  // --- YEH SABSE ZAROORI BADLAV HAI ---
+  // Sidebar ki width ke barabar left se margin de dein
+  // Agar aapka sidebar chhota ya bada hai to is value ko adjust karein
+  margin-left: 250px; 
+  
+  // Thodi padding add kar dein taaki content chipka hua na lage
+  padding: 2rem; 
+}

@@ -1,0 +1,498 @@
+/* app/admin/fee-counter/collection/FeeCollection.module.scss */
+
+// --- Variables ---
+$primary-color: #4a90e2; // Example blue
+$secondary-color: #f5a623; // Example orange
+$border-color: #e0e0e0;
+$background-light: #f9f9f9;
+$text-color: #333;
+$text-light: #666;
+$success-bg: #e6f7ec;
+$success-text: #0f5132;
+$error-bg: #fdecea;
+$error-text: #a94442;
+$warning-bg: #fffbe6;
+$warning-text: #8a6d3b;
+$pending-bg: lighten($secondary-color, 35%);
+$pending-text: darken($secondary-color, 20%);
+$paid-bg: $success-bg;
+$paid-text: $success-text;
+$partial-bg: lighten($primary-color, 45%);
+$partial-text: darken($primary-color, 10%);
+$failed-bg: $error-bg;
+$failed-text: $error-text;
+$box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+$border-radius: 6px;
+$input-padding: 10px 12px;
+
+// --- Overall Page Layout (Structure defined in page.tsx) ---
+.pageContainer {
+    display: grid;
+    grid-template-columns: 280px 1fr; // Slightly wider left panel
+    min-height: calc(100vh - 70px); // Adjust based on your header height
+    background-color: #f0f2f5;
+
+    @media (max-width: 1100px) {
+        grid-template-columns: 240px 1fr; // Narrower panel
+    }
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr; // Single column on mobile
+    }
+}
+
+// --- Left Panel Styling ---
+.leftPanel {
+    background-color: #fff;
+    border-right: 1px solid $border-color;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 70px); // Full height minus header
+    position: sticky; // Make it sticky
+    top: 70px; // Adjust based on header height
+
+    @media (max-width: 768px) {
+       height: auto; // Reset height for single column layout
+       position: static; // Reset position
+       border-right: none;
+       border-bottom: 1px solid $border-color;
+    }
+
+
+    .panelHeader {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 20px;
+        border-bottom: 1px solid $border-color;
+        font-size: 1.1em;
+        font-weight: 600;
+        color: $text-color;
+        svg { color: $primary-color; flex-shrink: 0; }
+        h3 { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    }
+
+    .panelContent {
+        padding: 20px;
+        overflow-y: auto; // Scroll if content overflows
+        flex-grow: 1;
+    }
+
+    .selectedStudentInfo {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: $background-light;
+        border-radius: $border-radius;
+        border: 1px solid $border-color;
+        p { margin: 0 0 5px 0; font-size: 0.9em; color: $text-light; }
+        strong { font-size: 1.1em; display: block; margin-bottom: 3px; color: $text-color; }
+        span { display: block; font-size: 0.9em; color: $text-light; margin-top: 2px; }
+    }
+
+    // Vertical Nav / Tabs
+    .verticalNav {
+        border-top: 1px solid $border-color;
+        flex-shrink: 0; // Prevent nav from shrinking
+        ul { list-style: none; padding: 10px 0; margin: 0; }
+        li {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            color: $text-light;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            &:hover { background-color: $background-light; color: $primary-color; }
+            &.active {
+                background-color: lighten($primary-color, 45%);
+                border-left-color: $primary-color;
+                color: $primary-color;
+                font-weight: 600;
+            }
+        }
+    }
+}
+
+// --- Main Content Area ---
+.mainContent {
+    padding: 15px; // Outer padding for spacing
+    overflow-y: auto; // Allow main content to scroll independently
+
+    .panelHeader {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 25px;
+        border-bottom: 1px solid $border-color;
+        background-color: #fff; // White header background
+        border-radius: $border-radius $border-radius 0 0; // Top corners rounded
+        margin-bottom: 15px; // Space below header
+        box-shadow: $box-shadow;
+
+
+        h3 { margin: 0; font-size: 1.3em; font-weight: 600; color: $text-color; }
+        .refreshButton {
+            background: none; border: none; color: $text-light;
+            cursor: pointer; font-size: 1.3em; padding: 5px; line-height: 1; // Align icon better
+            &:hover:not(:disabled) { color: $primary-color; }
+            &:disabled { color: lighten($text-light, 20%); cursor: default; }
+            svg.spin { animation: spin 1s linear infinite; }
+        }
+    }
+
+    .panelContent {
+        background-color: #fff; // White content background
+        padding: 25px;
+        border-radius: $border-radius;
+        box-shadow: $box-shadow;
+        min-height: 400px; // Ensure minimum height
+    }
+}
+
+// --- Placeholders & Error Messages ---
+.placeholder { text-align: center; color: $text-light; font-style: italic; margin: 40px 0; }
+.errorMessage {
+    text-align: center; color: $error-text; margin: 40px 0; font-weight: 500;
+    padding: 15px; background-color: $error-bg; border: 1px solid darken($error-bg, 10%); border-radius: $border-radius;
+}
+
+// --- Status Message (General Purpose - used for submit status) ---
+.statusMessage {
+    padding: 10px 15px; margin-bottom: 15px; border-radius: $border-radius;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font-size: 0.9em; border: 1px solid;
+
+    &.success { background-color: $success-bg; color: $success-text; border-color: darken($success-bg, 10%); }
+    &.error { background-color: $error-bg; color: $error-text; border-color: darken($error-bg, 10%); }
+
+    .printButtonSmall {
+        background-color: darken($success-bg, 5%); color: $success-text;
+        border: 1px solid darken($success-bg, 15%); border-radius: 4px;
+        padding: 3px 8px; font-size: 0.85em; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 4px; margin-left: auto;
+        &:hover { background-color: darken($success-bg, 10%); }
+        svg { font-size: 1em; }
+    }
+}
+
+// --- Fee Record Tab Layout (List + Form Side-by-Side) ---
+.feeRecordLayout {
+    display: grid;
+    grid-template-columns: 1fr; // Single column on small screens
+    gap: 30px;
+
+    @media (min-width: 1024px) { // Side-by-side on larger screens
+        grid-template-columns: minmax(0, 1fr) 380px; // List flexible, form fixed width
+    }
+     @media (min-width: 1280px) {
+        grid-template-columns: minmax(0, 1fr) 420px; // Slightly wider form
+    }
+}
+
+.recordListSection {
+    h4 { margin-top: 0; margin-bottom: 15px; font-weight: 600; color: $text-color; border-bottom: 1px solid $border-color; padding-bottom: 10px; }
+}
+
+// --- Fee Record List Styling ---
+.recordList { list-style: none; padding: 0; margin: 0; }
+.recordItem {
+    border: 1px solid $border-color; border-radius: $border-radius;
+    padding: 15px 20px; margin-bottom: 10px;
+    display: flex; flex-wrap: wrap; // Allow wrapping on small screens
+    justify-content: space-between; align-items: center; gap: 10px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+
+    &.selectedForCollection {
+        background-color: lighten($primary-color, 48%); border-left: 4px solid $primary-color;
+        padding-left: calc(20px - 4px);
+        box-shadow: 0 0 5px lighten($primary-color, 40%);
+    }
+}
+.recordInfo {
+    display: flex; flex-direction: column; gap: 4px; flex-grow: 1; // Take available space
+    span:first-child { font-weight: 600; color: $text-color; font-size: 1.05em; } // Template Name
+    .amountDue { color: #d9534f; font-weight: 500; }
+    .dueDate { font-size: 0.9em; color: $text-light; }
+}
+.recordActions {
+    display: flex; gap: 10px; flex-shrink: 0; // Prevent buttons shrinking
+    button {
+        padding: 7px 10px; border: 1px solid; border-radius: $border-radius;
+        cursor: pointer; display: flex; align-items: center; gap: 5px;
+        font-size: 0.85em; transition: all 0.2s ease;
+        svg { font-size: 1em; }
+        &:disabled { opacity: 0.5; cursor: not-allowed; }
+    }
+    .collectOfflineButton {
+        background-color: #fff; color: $primary-color; border-color: $primary-color;
+        &:hover:not(:disabled) { background-color: lighten($primary-color, 48%); }
+        .selectedForCollection & { // Style when selected (becomes Cancel)
+             background-color: #f0ad4e; color: #fff; border-color: #eea236;
+             &:hover:not(:disabled) { background-color: darken(#f0ad4e, 10%); }
+        }
+    }
+    .payOnlineButton {
+        background-color: $secondary-color; color: #fff; border-color: $secondary-color;
+        &:hover:not(:disabled) { background-color: darken($secondary-color, 10%); border-color: darken($secondary-color, 10%); }
+    }
+}
+
+// --- Collect Offline Form Styling ---
+.collectOfflineForm {
+    border: 1px solid $border-color; border-radius: $border-radius;
+    background-color: $background-light; display: flex; flex-direction: column;
+    height: fit-content; box-shadow: $box-shadow;
+}
+.formHeader {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 18px; border-bottom: 1px solid $border-color;
+    background-color: #fff; border-radius: $border-radius $border-radius 0 0;
+    h3 { margin: 0; font-size: 1.1em; font-weight: 600; }
+}
+.formContent { padding: 18px; }
+.selectedRecordInfoSmall {
+    p { margin: 0 0 5px 0; font-size: 0.9em; strong { color: $text-color; } }
+}
+.divider { border: none; border-top: 1px dashed $border-color; margin: 15px 0; }
+.formGrid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px; margin-bottom: 15px;
+}
+.formGroup {
+    margin-bottom: 15px;
+    label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9em; color: $text-light; }
+    input[type="number"], input[type="date"], textarea {
+        width: 100%; padding: $input-padding; border: 1px solid $border-color;
+        border-radius: $border-radius; font-size: 0.95em; box-sizing: border-box;
+        &:focus { outline: none; border-color: $primary-color; box-shadow: 0 0 0 2px lighten($primary-color, 40%); }
+    }
+    textarea { resize: vertical; min-height: 50px; }
+}
+.paymentModes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.radioGroup {
+    display: flex; align-items: center; gap: 5px; background-color: #fff;
+    padding: 7px 10px; border: 1px solid $border-color; border-radius: $border-radius;
+    cursor: pointer; transition: all 0.2s ease;
+    input[type="radio"] { cursor: pointer; margin: 0; }
+    label { margin: 0; font-weight: normal; font-size: 0.85em; color: $text-color; cursor: pointer; }
+    &:has(input[type="radio"]:checked) {
+        border-color: $primary-color; box-shadow: 0 0 0 1px $primary-color;
+        background-color: lighten($primary-color, 49%);
+    }
+    &:hover { border-color: darken($border-color, 10%); }
+}
+.totalSection {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 1.05em; margin-bottom: 18px;
+    span { color: $text-light; }
+    strong { color: $text-color; font-weight: 600; }
+}
+.proceedButton {
+    width: 100%; padding: 10px 15px; background-color: $primary-color; color: #fff;
+    border: none; border-radius: $border-radius; font-size: 0.95em; font-weight: 600;
+    cursor: pointer; transition: background-color 0.2s ease;
+    &:hover:not(:disabled) { background-color: darken($primary-color, 10%); }
+    &:disabled { background-color: lighten($primary-color, 20%); cursor: not-allowed; opacity: 0.8; }
+}
+
+// --- History Tab Specific Styles ---
+// .historyContainer {} // <-- REMOVED EMPTY RULESET
+
+.filterBar {
+    display: flex;
+    flex-wrap: wrap; // Allow wrapping
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: $background-light;
+    border-radius: $border-radius;
+    border: 1px solid $border-color;
+
+    .filterGroup { // For Search
+        display: flex;
+        align-items: center;
+        flex-grow: 1; // Allow search to grow
+        min-width: 200px;
+    }
+    .searchInput {
+        flex-grow: 1;
+        padding: $input-padding;
+        border: 1px solid $border-color;
+        border-radius: $border-radius 0 0 $border-radius; // Rounded left
+        font-size: 0.95em;
+        &:focus { outline: none; border-color: $primary-color; box-shadow: 0 0 0 2px lighten($primary-color, 40%); z-index: 1; }
+    }
+    .filterButton { // Search button
+        padding: $input-padding;
+        background-color: #fff;
+        border: 1px solid $border-color;
+        border-left: none;
+        border-radius: 0 $border-radius $border-radius 0; // Rounded right
+        cursor: pointer;
+        color: $text-light;
+        &:hover { background-color: darken($background-light, 3%); color: $primary-color; }
+        svg { display: block; font-size: 1.1em; }
+    }
+
+    .dateFilters {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        label { font-size: 0.9em; color: $text-light; }
+    }
+    .dateInput, .selectInput {
+        padding: 9px 10px; // Slightly smaller padding
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        font-size: 0.9em;
+        background-color: #fff;
+         &:focus { outline: none; border-color: $primary-color; box-shadow: 0 0 0 2px lighten($primary-color, 40%); }
+    }
+    .selectInput {
+        min-width: 130px; // Ensure dropdowns have minimum width
+    }
+
+    .applyFiltersButton, .clearFiltersButton {
+        padding: 9px 15px;
+        border: none;
+        border-radius: $border-radius;
+        cursor: pointer;
+        font-size: 0.9em;
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .applyFiltersButton {
+        background-color: $primary-color;
+        color: #fff;
+        &:hover:not(:disabled) { background-color: darken($primary-color, 10%); }
+    }
+    .clearFiltersButton {
+        background-color: $text-light;
+        color: #fff;
+        &:hover:not(:disabled) { background-color: darken($text-light, 10%); }
+    }
+    button:disabled {
+        opacity: 0.6; cursor: not-allowed;
+    }
+}
+
+
+// --- Table Styles (Shared by all tabs) ---
+.recordsTableContainer {
+  overflow-x: auto; // Horizontal scroll for tables
+}
+.recordsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.9em; // Slightly smaller table font
+
+    th, td {
+        border: 1px solid $border-color;
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: middle;
+    }
+    th {
+        background-color: $background-light;
+        font-weight: 600;
+        white-space: nowrap; // Prevent headers wrapping
+    }
+    td {
+        color: $text-light;
+        // Style specific columns if needed
+        &:nth-child(1) { // First column (e.g., Receipt ID)
+            font-weight: 500;
+            color: $text-color;
+            white-space: nowrap;
+        }
+    }
+    tr:nth-child(even) td {
+        background-color: lighten($background-light, 2%); // Subtle striping
+    }
+}
+
+// Action Button inside tables
+.actionButton {
+    padding: 5px 8px;
+    font-size: 0.85em;
+    border: 1px solid $border-color;
+    border-radius: 4px;
+    background-color: #fff;
+    color: $primary-color;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    svg { font-size: 0.9em; }
+    &:hover { background-color: $background-light; border-color: darken($border-color, 10%); }
+}
+
+// Status Badges
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 12px; // Pill shape
+    font-size: 0.8em;
+    font-weight: 500;
+    text-transform: uppercase;
+    white-space: nowrap;
+    svg { font-size: 0.9em; margin-bottom: -1px; } // Align icon better
+
+    // Specific Status Colors
+    &.pending { background-color: $pending-bg; color: $pending-text; }
+    &.partial { background-color: $partial-bg; color: $partial-text; }
+    &.paid, &.success { background-color: $paid-bg; color: $paid-text; }
+    &.failed { background-color: $failed-bg; color: $failed-text; }
+    &.late { background-color: $error-bg; color: $error-text; } // Example: Use error style for Late
+}
+
+
+// --- Pagination ---
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid $border-color;
+
+    button {
+        padding: 6px 12px;
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        background-color: #fff;
+        cursor: pointer;
+        color: $primary-color;
+        font-size: 0.9em;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        &:hover:not(:disabled) { background-color: $background-light; }
+        &:disabled { color: $text-light; cursor: not-allowed; opacity: 0.6; }
+        svg { font-size: 1.1em; }
+    }
+    span {
+        font-size: 0.9em;
+        color: $text-light;
+    }
+}
+
+.totalRecords {
+    text-align: center;
+    font-size: 0.85em;
+    color: $text-light;
+    margin-top: 8px;
+}
+
+
+// --- Spin Animation ---
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

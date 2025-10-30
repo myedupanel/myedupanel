@@ -1,0 +1,131 @@
+/* Main container for the entire sidebar */
+.sidebar-container {
+  background-color: #1f2937; // Dark background
+  color: #d1d5db; // Light text color
+  width: 260px; // Fixed width for the sidebar
+  height: 100vh; // Takes up 100% of the screen height
+  position: fixed; // Stays in place when the main page content scrolls
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column; // Stacks children vertically (logo, menu, footer)
+  z-index: 1000;
+}
+
+/* Logo at the top */
+.logo-section {
+  padding: 1.5rem;
+  border-bottom: 1px solid #374151;
+  h2 {
+    color: #ffffff;
+    font-size: 1.8rem;
+    margin: 0;
+    text-align: center;
+  }
+  a {
+    text-decoration: none;
+  }
+}
+
+/* This is the main navigation area that will grow to fill space */
+.menu-section {
+  flex-grow: 1; // Allows this section to expand and fill available space
+  overflow-y: auto; // Adds a scrollbar ONLY if the content is too tall
+  padding: 1rem 0;
+
+  /* Custom scrollbar styles (optional but looks premium) */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
+}
+
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-item {
+  margin: 0.25rem 0.75rem;
+  border-radius: 8px;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    color: #d1d5db;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .icon {
+    font-size: 1.5rem;
+  }
+
+  &:hover {
+    background-color: #374151;
+    color: #ffffff;
+  }
+
+  &.active {
+    background-color: #3b82f6;
+    a {
+      color: #ffffff;
+    }
+  }
+}
+
+/* --- YAHAN SE EMPTY BLOCK HATA DIYA GAYA HAI --- */
+/* Khaali .contextual-menu { } block yahan par tha, */
+/* jise error fix karne ke liye hata diya gaya hai. */
+/* Agar aapko contextual-menu ke styles add karne hain, */
+/* toh aap us block ko yahan naye styles ke saath bana sakte hain. */
+
+
+/* === NEW: Styles for the footer and dashboard button === */
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid #374151;
+}
+
+.footer-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  width: 100%;
+  border-radius: 8px;
+  background-color: #374151;
+  color: #e5e7eb;
+  text-decoration: none;
+  font-weight: 500;
+  text-align: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  svg {
+    font-size: 1.25rem;
+  }
+
+  &:hover {
+    background-color: #4b5563;
+    color: #ffffff;
+  }
+}
+.logout-button {
+  background-color: #ef4444 !important; // Red color for logout
+  color: #ffffff !important;
+
+  &:hover {
+    background-color: #dc2626 !important; // Darker red on hover
+  }
+}

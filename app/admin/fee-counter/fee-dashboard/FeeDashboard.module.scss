@@ -1,0 +1,249 @@
+/* --- Main Dashboard Page Styles --- */
+.dashboardContainer {
+    padding: 2rem;
+    background-color: #f8f9fa;
+}
+
+.pageTitle {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #343a40;
+    margin-bottom: 2rem;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* --- Loading and Error States --- */
+.loadingState, .errorState {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+    font-size: 1.2rem;
+    color: #6c757d;
+}
+
+.errorState {
+    color: #dc3545;
+}
+
+/* --- Phase 2: Main Content Grid Styles --- */
+.mainContentGrid {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* Left column chota, Right column bada */
+    gap: 1.5rem;
+}
+
+/* Common card styles for Phase 2 */
+.feeStructureCard,
+.feeDetailsCard {
+    background-color: #fff;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.cardHeader {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #343a40;
+    }
+}
+
+.templateCount {
+    background-color: #e7f5ff;
+    color: #0d6efd;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Template List Styles */
+.templateList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.templateItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f1f3f5;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    span {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    svg {
+        color: #adb5bd;
+    }
+
+    &:hover {
+        background-color: #f8f9fa;
+    }
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    /* Active Template Item Style */
+    &.active {
+        background-color: #e7f5ff;
+        span {
+            color: #0d6efd;
+            font-weight: 700;
+        }
+        svg {
+            color: #0d6efd;
+        }
+    }
+}
+
+.noTemplates {
+    padding: 1.5rem;
+    text-align: center;
+    color: #6c757d;
+}
+
+/* --- Fee Details Section Styles --- */
+.placeholder, .loadingDetails {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px; /* Adjust height as needed */
+    color: #adb5bd;
+}
+
+.loadingDetails {
+    font-size: 1.1rem;
+}
+
+.detailsContent {
+    padding: 1.5rem;
+    h4 {
+        margin-top: 0;
+        margin-bottom: 2rem;
+        font-size: 1.25rem;
+        color: #343a40;
+    }
+}
+
+.statItem {
+    margin-bottom: 1.5rem;
+}
+
+.statHeader {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    
+    span:last-child {
+        font-weight: 600;
+    }
+}
+
+.progress {
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.progressBar {
+    height: 100%;
+    background-color: #0d6efd;
+    border-radius: 8px;
+    transition: width 0.4s ease;
+}
+.recentActivityCard {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    
+    // NOTE: Aapko shayad .mainContentGrid ka CSS update karna pade.
+    // Example: grid-template-columns: 1fr 1fr 1fr;
+    // Aur .feeStructureCard aur .feeDetailsCard se 'grid-column' hatana pade.
+    // Abhi ke liye, yeh 2-column grid mein stack ho jayega.
+}
+
+.feedList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px; // List ko scrollable banayein agar lambi ho
+    overflow-y: auto;
+}
+
+.feedItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0.25rem;
+    border-bottom: 1px solid #f0f0f0;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards; // Animation add karein
+
+    &:first-child {
+        font-weight: 600;
+        color: #000;
+    }
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.feedName {
+    font-size: 0.95rem;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 10px;
+}
+
+.feedAmount {
+    font-size: 0.9rem;
+    color: #007bff; // Blue color
+    font-weight: 500;
+    white-space: nowrap;
+    margin-left: 1rem;
+}
+
+/* Simple fade-in animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Aapke paas placeholder style pehle se ho sakta hai, */
+/* agar nahi hai toh yeh use karein */
+.placeholder {
+    padding: 2rem;
+    text-align: center;
+    color: #777;
+    font-size: 1rem;
+}

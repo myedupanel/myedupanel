@@ -1,0 +1,75 @@
+.form {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    font-weight: 500;
+    color: #4a5568;
+    font-size: 0.9rem;
+  }
+
+  select {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 1rem;
+}
+
+.saveButton, .cancelButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.saveButton {
+  background-color: #2f3640;
+  color: white;
+}
+
+.cancelButton {
+  background-color: #f1f2f6;
+  color: #2f3640;
+}
+
+/* ===== YEH SECTION THEEK KIYA GAYA HAI ===== */
+// Sabhi :global selectors ko .selectWrapper ke andar daal diya gaya hai
+.selectWrapper {
+  :global(.react-select__control) {
+    border: 1px solid #e2e8f0 !important;
+    padding: 0.30rem !important;
+  }
+
+  :global(.react-select__control--is-focused) {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 1px #3b82f6 !important;
+  }
+
+  :global(.react-select__indicator-separator) {
+    display: none !important;
+  }
+
+  :global(.react-select__menu) {
+    z-index: 10;
+  }
+}

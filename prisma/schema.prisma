@@ -1,0 +1,424 @@
+// File: prisma/schema.prisma
+
+// 1. Data Source
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// 2. Generator
+generator client {
+  provider = "prisma-client-js"
+  
+}
+
+// ===================================
+// MODELS
+// ===================================
+
+// 3. School Model (Updated with new fields)
+model School {
+  id String @id @unique
+  name String @unique
+  // --- NAYE FIELDS ADD KIYE HAIN ---
+  name2             String? // For certificate second name
+  place             String? // For certificate footer place
+  address           String?
+  contactNumber     String? // For certificate mob no.
+  email             String? // For certificate email
+  recognitionNumber String? // For certificate Govt Reg.
+  udiseNo           String? @unique // For certificate UDISE No. (Should be unique)
+  logoUrl           String? // For certificate logo URL
+  // --- END NAYE FIELDS ---
+  logo              String? // Original logo field (agar alag hai)
+  session           String?
+  lateFineAmount    Float?  @default(100)
+
+  // Relations
+  users        User[]
+  students     Students[]
+  classes      Classes[]
+  teachers     Teachers[]
+  templates    FeeTemplate[]
+  feeRecords   FeeRecord[]
+  transactions Transaction[]
+  parents      Parent[]
+  attendances  Attendance[]
+  exams        Exam[]
+  marks        Mark[]
+  assignments  Assignment[]
+  todaysQuizId Int?       @unique
+  todaysQuiz   Quiz?      @relation("TodaysQuiz", fields: [todaysQuizId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  quizzes      Quiz[]     @relation("SchoolQuizLibrary")
+  events       Event[]
+  liveClasses  LiveClass[]
+  gradingScale GradingScale? // Ek school ka ek hi scale hoga (optional ?)
+  studyMaterials StudyMaterial[] // Ek school mein kayi study materials ho sakte hain
+}
+
+// 4. User Model
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String?
+  email     String   @unique
+  password  String
+  role      String
+  status    String?  @default("active")
+  isVerified Boolean @default(false)
+  details   Json?
+  otp                 String?
+  otpExpires          DateTime?
+  resetPasswordToken  String?
+  resetPasswordExpire DateTime?
+
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id])
+
+  createdById Int?
+  createdBy   User?    @relation("UserCreations", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usersCreated User[]   @relation("UserCreations")
+
+  transactions Transaction[]
+  student      Students? @relation("StudentUser")
+  parent       Parent?
+}
+
+// 5. Classes Model (Relation Added)
+model Classes {
+  classid   Int    @id @default(autoincrement())
+  class_name String @db.VarChar(100)
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  // Relations
+  students     Students[]
+  feeRecords   FeeRecord[]
+  transactions Transaction[]
+  // --- ADDED RELATION ---
+  assignments  Assignment[]
+  // --- END ADDED ---
+
+  @@unique([schoolId, class_name])
+}
+
+// 6. Students Model (Relations Added)
+model Students {
+  studentid  Int    @id @default(autoincrement())
+  first_name  String @db.VarChar(100)
+  father_name String @db.VarChar(100)
+  last_name   String @db.VarChar(100)
+  guardian_contact String    @db.VarChar(20)
+  roll_number      String    @db.VarChar(20)
+  dob              DateTime? @db.Date
+  address          String?   @db.Text
+  email            String?   @unique @db.VarChar(255)
+  uid_number       String?   @db.VarChar(20)
+  mother_name      String?   @db.VarChar(255)
+  nationality      String?   @db.VarChar(100)
+  caste            String?   @db.VarChar(100)
+  birth_place      String?   @db.VarChar(255)
+  previous_school  String?   @db.Text
+  admission_date   DateTime? @db.Date
+  progress         String?   @db.VarChar(100)
+  leaving_date     DateTime? @db.Date
+  leaving_reason   String?   @db.Text
+  remarks          String?   @db.Text
+
+  // Relations
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  userId   Int?      @unique
+  user     User?     @relation("StudentUser", fields: [userId], references: [id])
+
+  classid Int
+  class    Classes @relation(fields: [classid], references: [classid])
+
+  feeRecords   FeeRecord[]
+  transactions Transaction[]
+  parents      Parent[]
+  // --- ADDED RELATIONS ---
+  attendances  Attendance[]
+  marks        Mark[]
+  assignments  Assignment[]
+  // --- END ADDED ---
+}
+
+// 7. Teachers Model
+model Teachers {
+  teacher_dbid Int    @id @default(autoincrement())
+  teacherId     String @db.VarChar(100)
+  name          String @db.VarChar(255)
+  subject       String? @db.VarChar(255)
+  contactNumber String? @db.VarChar(50)
+  email         String @db.VarChar(255)
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  @@unique([schoolId, email])
+  @@unique([schoolId, teacherId])
+}
+
+// 8. FeeTemplate Model
+model FeeTemplate {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  items       Json
+  totalAmount Float
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  feeRecords   FeeRecord[]
+  transactions Transaction[]
+
+  @@unique([schoolId, name])
+}
+
+// 9. FeeRecord Model
+model FeeRecord {
+  id         Int     @id @default(autoincrement())
+  amount     Float
+  discount   Float   @default(0)
+  amountPaid Float   @default(0)
+  balanceDue Float
+  status     String
+  dueDate    DateTime
+  lateFine   Float   @default(0)
+  isDeposit  Boolean @default(false)
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  studentId Int
+  student   Students @relation(fields: [studentId], references: [studentid])
+
+  classId Int
+  class   Classes @relation(fields: [classId], references: [classid])
+
+  templateId Int
+  template   FeeTemplate @relation(fields: [templateId], references: [id])
+
+  transactions Transaction[]
+
+  @@unique([studentId, templateId, schoolId])
+}
+
+// 10. Transaction Model
+model Transaction {
+  id            Int      @id @default(autoincrement())
+  receiptId     String   @unique
+  amountPaid    Float
+  paymentDate   DateTime
+  paymentMode   String
+  status        String
+  notes         String?
+  chequeNumber  String?
+  bankName      String?
+  gatewayTransactionId String?
+  gatewayOrderId       String?
+  gatewayMethod        String?
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  studentId Int
+  student   Students @relation(fields: [studentId], references: [studentid])
+
+  classId Int
+  class   Classes @relation(fields: [classId], references: [classid])
+
+  templateId Int
+  template   FeeTemplate @relation(fields: [templateId], references: [id])
+
+  feeRecordId Int
+  feeRecord   FeeRecord @relation(fields: [feeRecordId], references: [id])
+
+  collectedById Int?
+  collectedBy   User? @relation(fields: [collectedById], references: [id])
+}
+
+// 11. Parent Model
+model Parent {
+  id            Int     @id @default(autoincrement())
+  name          String
+  contactNumber String
+  email         String
+  occupation    String?
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  studentId Int
+  student   Students @relation(fields: [studentId], references: [studentid])
+
+  userId    Int?     @unique
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@unique([schoolId, email])
+}
+
+// 12. Attendance Model
+model Attendance {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @db.Date
+  status    String
+  notes     String?
+
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id])
+
+  studentId Int
+  student   Students @relation(fields: [studentId], references: [studentid])
+
+  @@unique([studentId, date, schoolId])
+}
+
+// 13. Exam Model
+model Exam {
+  id      Int      @id @default(autoincrement())
+  name    String
+  date    DateTime? @db.Date
+  
+  // --- YEH FIELDS ADD KIYE HAIN ---
+  // (Aapke purane academics.js route ke hisaab se)
+  className String?
+  subject String?
+  startTime String?
+  endTime String?
+  maxMarks Float?
+  minPassMarks Float?
+  examType String?
+  // --- END ---
+
+  schoolId String
+  school   School  @relation(fields: [schoolId], references: [id])
+
+  marks    Mark[]
+
+  @@unique([schoolId, name, date])
+}
+
+// 14. Mark Model
+model Mark {
+  id            Int     @id @default(autoincrement())
+  marksObtained Float?
+  maxMarks      Float?
+  percentage    Float?
+  grade         String?
+  subject       String?
+  notes         String?
+
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id])
+
+  studentId Int
+  student   Students @relation(fields: [studentId], references: [studentid])
+
+  assessmentId Int?
+  assessment   Exam? @relation(fields: [assessmentId], references: [id])
+
+  @@unique([studentId, assessmentId, subject, schoolId])
+}
+
+// 15. Assignment Model
+model Assignment {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  dueDate     DateTime?
+  status      String?
+  grade       String?
+  subject   String?
+  
+  // --- YEH FIELD ADD KIYA HAI ---
+  // (Aapke purane academics.js route ke hisaab se)
+  classInfo String? // For "Class 5th" jaise text
+  // --- END ---
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  classId   Int?
+  class     Classes? @relation(fields: [classId], references: [classid])
+
+  studentId Int?
+  student   Students? @relation(fields: [studentId], references: [studentid])
+  
+  createdAt DateTime @default(now()) // Added for sorting
+}
+
+// 16. NAYA MODEL: Quiz
+model Quiz {
+  id        Int    @id @default(autoincrement())
+  title     String
+  questions Json // Stores [{ question: "...", options: [...], answer: "..." }]
+  
+  schoolId  String
+  school    School @relation("SchoolQuizLibrary", fields: [schoolId], references: [id])
+  // Relation: Kya yeh quiz aaj ka hai?
+  schoolsAsToday School[] @relation("TodaysQuiz")
+  
+  createdAt DateTime @default(now()) // Added for sorting
+}
+
+// --- YEH AAKHIRI 2 MODELS ADD KIYE HAIN ---
+// (Aapke pichle code imports ke hisaab se)
+
+// 17. Event Model
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  category    String   // e.g., "Holiday", "Exam", "Sports"
+  date        DateTime @db.Date
+  status      String   // e.g., "Upcoming", "Completed"
+  description String?
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+}
+
+// 18. LiveClass Model
+model LiveClass {
+  id          Int      @id @default(autoincrement())
+  topic       String
+  teacherName String
+  className   String
+  subject     String
+  date        DateTime @db.Date
+  time        String   // HH:MM format
+  meetingLink String
+  status      String   // e.g., "Scheduled", "Completed", "Cancelled"
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+}
+// 19. GradingScale Model
+model GradingScale {
+  id       Int    @id @default(autoincrement())
+  // Stores array like [{ grade: "A+", min: 90, max: 100 }, ...]
+  scale    Json   @default("[{\"grade\":\"A+\",\"min\":90,\"max\":100},{\"grade\":\"A\",\"min\":80,\"max\":89},{\"grade\":\"B\",\"min\":70,\"max\":79},{\"grade\":\"C\",\"min\":60,\"max\":69},{\"grade\":\"D\",\"min\":50,\"max\":59},{\"grade\":\"F\",\"min\":0,\"max\":49}]") // Default scale added
+  
+  schoolId String @unique // Ek school ka ek hi scale hoga
+  school   School @relation(fields: [schoolId], references: [id])
+}
+// 20. StudyMaterial Model
+model StudyMaterial {
+  id               Int      @id @default(autoincrement())
+  title            String
+  className        String   // Class ko text mein store karein (jaise "Class 5th") ya Classes model se link karein? Abhi text rakhte hain.
+  subject          String
+  category         String   // e.g., "Notes", "Assignment", "Worksheet"
+  fileUrl          String   // Cloudinary URL
+  fileType         String   // "PDF", "Word", "Image", "Other"
+  originalFilename String?
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  createdAt DateTime @default(now()) // Added for sorting
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,325 @@
+.pageContainer {
+  padding: 1.5rem;
+}
+
+.pageTitle {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 2rem;
+}
+
+.settingsCard {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.cardSubtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+  margin-bottom: 2rem;
+}
+
+.slotList {
+  margin-bottom: 2.5rem;
+}
+
+.slotItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.slotName {
+  font-weight: 600;
+  color: #334155;
+  flex-grow: 1;
+}
+
+.slotTime {
+  font-family: 'monospace', sans-serif;
+  color: #475569;
+  background-color: #e2e8f0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    background-color: #f1f2f6;
+    color: #e53e3e;
+  }
+}
+
+.addForm {
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.formTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #475569;
+}
+
+.formInputs {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+
+  input {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    flex: 1; /* Inputs ko barabar jagah dega */
+  }
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background-color: #2f3640;
+  color: white;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.pageContainer {
+    padding: 2rem;
+    background-color: #f4f7fa;
+    min-height: 100vh;
+}
+
+.pageTitle {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+.settingsCard {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+.cardTitle {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 0.75rem;
+}
+
+.form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    align-items: flex-end;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+        font-weight: 500;
+        color: #555;
+    }
+
+    input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+
+        &:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+    }
+}
+
+.buttonGroup {
+    grid-column: 1 / -1; // Span all columns
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.submitButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: #0056b3;
+    }
+}
+
+.cancelButton {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: #5a6268;
+    }
+}
+
+.slotsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+
+    th,
+    td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+}
+
+.actionsCell {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.iconButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.3rem;
+    color: #555;
+    transition: color 0.2s;
+
+    &:hover {
+        color: #007bff;
+    }
+}
+
+.deleteButton {
+    &:hover {
+        color: #dc3545; // Red for delete action
+    }
+}
+// Yeh styles file ke end mein add karein
+
+.checkboxContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.checkboxWrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    label {
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    input[type="checkbox"] {
+        width: 1.2rem;
+        height: 1.2rem;
+        cursor: pointer;
+    }
+}
+// Yeh styles file ke end mein add karein
+
+.checkboxFormGroup {
+    justify-content: flex-start;
+    align-self: flex-end;
+    padding-bottom: 0.75rem;
+}
+
+.breakTag {
+    background-color: #ffc107;
+    color: #333;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+/* Yeh code SettingsPage.module.scss ke aakhir mein add karein */
+.dashboardLinkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  margin: 2rem auto 1rem auto; /* Page ke end mein center karega */
+  background-color: #374151; // Dark color
+  color: #ffffff;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  svg {
+    font-size: 1.25rem;
+  }
+
+  &:hover {
+    background-color: #4b5563; // Thoda light hover
+  }
+}

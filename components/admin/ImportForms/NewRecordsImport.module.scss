@@ -1,0 +1,54 @@
+.container {
+    padding: 1rem 0;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.formFields {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    select, input {
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+}
+
+.fileUploadLabel {
+    /* ... styles from previous component ... */
+}
+
+.submitButton {
+    align-self: flex-start;
+    /* ... styles from previous component ... */
+}
+
+.helpSection {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+
+    h4 { margin-top: 0; }
+    ol { padding-left: 1.5rem; }
+    li { margin-bottom: 0.75rem; }
+    a { font-weight: 600; cursor: pointer; }
+}

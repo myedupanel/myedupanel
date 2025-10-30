@@ -1,0 +1,46 @@
+.tabsContainer {
+    margin-top: 2.5rem;
+    background-color: #fff;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.tabHeader {
+    border-bottom: 2px solid #e9ecef;
+    padding: 0 1.5rem;
+}
+
+.tabList {
+    display: flex; // Yeh tabs ko ek line mein laata hai
+    margin: 0;
+    padding: 0;
+    gap: 0.5rem;
+}
+
+.tabList button {
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #6c757d;
+    border: none;
+    background: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px; // Active border ko line ke upar laane ke liye
+    transition: all 0.2s ease;
+
+    &:hover:not(.active) {
+        color: #343a40;
+    }
+
+    /* Active tab ke liye style */
+    &.active {
+        color: #0d6efd;
+        border-bottom-color: #0d6efd;
+    }
+}
+
+.tabContent {
+    /* Iski padding har child component (jaise LatePaymentsTable) ke andar hai */
+}
