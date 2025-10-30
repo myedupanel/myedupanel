@@ -61,8 +61,13 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             prisma.students.findMany({ where: { schoolId }, orderBy: { studentid: 'desc' }, take: 5, select: { first_name: true, father_name: true, last_name: true, class: { select: { class_name: true } }, admission_date: true } }), 
             
             // --- YEH HAI AAPKA FIX ---
-            // FIX: 'teacher_dbid' ko 'id' se badla
-            prisma.teachers.findMany({ where: { schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, subject: true, id: true } }), 
+            // FIX: 'id' ko 'teacher_dbid' se badla (orderBy aur select dono mein)
+            prisma.teachers.findMany({ 
+                where: { schoolId }, 
+                orderBy: { teacher_dbid: 'desc' }, 
+                take: 5, 
+                select: { name: true, subject: true, teacher_dbid: true } 
+            }),
             // --- FIX ENDS HERE ---
 
             prisma.parent.findMany({ where: { schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, id: true } }), 
@@ -149,6 +154,13 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
 
         // --- Format Recent Lists ---
          const formattedRecentStudents = recentStudents.map(s => ({ ...s, name: getFullName(s), class: s.class?.class_name }));
+         
+         // --- FIX: recentTeachers ko format karein taaki frontend ko 'id' mile ---
+         const formattedRecentTeachers = recentTeachers.map(t => ({
+             ...t,
+             id: t.teacher_dbid // 'id' property add karein
+         }));
+
 
         // --- Final Data Object ---
         const dashboardData = {
@@ -159,7 +171,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             admissionsData,
             classCounts,
             recentStudents: formattedRecentStudents || [],
-            recentTeachers: recentTeachers || [], // Yeh ab 'id' ke saath pass hoga
+            recentTeachers: formattedRecentTeachers || [], // FIX: Naya formatted array bhejein
             recentParents: recentParents || [],
             recentStaff: recentStaff || [],
             recentFees
