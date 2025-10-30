@@ -57,13 +57,18 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             prisma.user.count({ where: { role: 'Parent', schoolId: schoolId } }),   
             prisma.user.count({ where: { role: { in: staffRoles }, schoolId: schoolId } }),
 
-            // Recent lists (Yeh pichhli baar fix ho gaya tha)
+            // Recent lists
             prisma.students.findMany({ where: { schoolId }, orderBy: { studentid: 'desc' }, take: 5, select: { first_name: true, father_name: true, last_name: true, class: { select: { class_name: true } }, admission_date: true } }), 
-            prisma.teachers.findMany({ where: { schoolId }, orderBy: { teacher_dbid: 'desc' }, take: 5, select: { name: true, subject: true, teacher_dbid: true } }), 
+            
+            // --- YEH HAI AAPKA FIX ---
+            // FIX: 'teacher_dbid' ko 'id' se badla
+            prisma.teachers.findMany({ where: { schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, subject: true, id: true } }), 
+            // --- FIX ENDS HERE ---
+
             prisma.parent.findMany({ where: { schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, id: true } }), 
             prisma.user.findMany({ where: { role: { in: staffRoles }, schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, role: true, id: true } }), 
 
-            // Recent Fee Records (Paid) (Yeh query pehle se theek thi)
+            // Recent Fee Records (Paid)
             prisma.feeRecord.findMany({
                 where: { schoolId: schoolId, status: 'Paid' },
                 orderBy: { id: 'desc' }, 
@@ -85,7 +90,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
              prisma.students.groupBy({
                  by: ['admission_date'], 
                  where: { schoolId: schoolId, admission_date: { not: null } },
-                 _count: { studentid: true }, // FIX 1: 'id' ko 'studentid' kiya
+                 _count: { studentid: true }, 
                  orderBy: { admission_date: 'asc'}
              }),
              
@@ -93,7 +98,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             prisma.students.groupBy({
                 by: ['classid'],
                 where: { schoolId: schoolId },
-                _count: { studentid: true }, // FIX 2: 'id' ko 'studentid' kiya
+                _count: { studentid: true }, 
             }),
 
         ]).catch(err => {
@@ -103,7 +108,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
 
         console.log(`[GET /dashboard-data] Counted Staff: ${staffCount}`);
 
-        // --- Process Admissions Data (Manual grouping by month) ---
+        // --- Process Admissions Data ---
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const admissionsMap = new Map(monthNames.map((name, index) => [index + 1, { name, admissions: 0 }]));
         
@@ -111,7 +116,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             if (item.admission_date) {
                  const month = item.admission_date.getMonth() + 1; 
                  if (admissionsMap.has(month)) {
-                    admissionsMap.get(month).admissions += item._count.studentid; // FIX 3: 'id' ko 'studentid' kiya
+                    admissionsMap.get(month).admissions += item._count.studentid; 
                  }
             }
         });
@@ -119,7 +124,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
         console.log("[GET /dashboard-data] Formatted Admissions (Month):", admissionsData);
 
 
-        // --- Process Class Counts Data (Fetch class names separately) ---
+        // --- Process Class Counts Data ---
          const classIds = classCountsRaw.map(item => item.classid);
          const classesInfo = await prisma.classes.findMany({
              where: { classid: { in: classIds } },
@@ -129,7 +134,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
              const classInfo = classesInfo.find(c => c.classid === item.classid);
              return {
                  name: classInfo?.class_name || `Unknown Class (${item.classid})`,
-                 count: item._count.studentid // FIX 4: 'id' ko 'studentid' kiya
+                 count: item._count.studentid 
              }
          }).sort((a, b) => a.name.localeCompare(b.name)); 
         console.log("[GET /dashboard-data] Formatted Class Counts:", classCounts);
@@ -154,7 +159,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             admissionsData,
             classCounts,
             recentStudents: formattedRecentStudents || [],
-            recentTeachers: recentTeachers || [],
+            recentTeachers: recentTeachers || [], // Yeh ab 'id' ke saath pass hoga
             recentParents: recentParents || [],
             recentStaff: recentStaff || [],
             recentFees
@@ -170,8 +175,6 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
 
 // @route PUT /api/admin/profile
 // (Aapka baaki ka code... profile route... seed-standard-classes route... bilkul same rahega)
-// ...
-// ... (Baaki saara code neeche)
 // ...
 router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => { 
     const { adminName, schoolName } = req.body;
