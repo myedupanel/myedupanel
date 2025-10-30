@@ -196,13 +196,14 @@ const addSingleStudent = async (req, res) => {
     }
 
     // 2. Data ko req.body se lein
-    // --- YEH HAI AAPKA FIX (Line 214) ---
+    // --- YEH HAI AAPKA FIX ---
     const { 
       first_name, 
       last_name, 
       class_name, 
       roll_number, 
-      parentName, // <-- Frontend se 'parentName' ko alag se nikaala
+      parentName, 
+      parentContact, // <-- Frontend se 'parentContact' ko alag se nikaala
       ...otherDetails 
     } = req.body;
     // --- FIX ENDS HERE ---
@@ -233,13 +234,14 @@ const addSingleStudent = async (req, res) => {
     }
 
     // 5. Student data ko Prisma ke liye taiyaar karein
-    // --- YEH HAI AAPKA FIX (Line 252) ---
+    // --- YEH HAI AAPKA FIX ---
     const studentData = {
       ...otherDetails, 
       first_name,
       last_name,
       roll_number,
       father_name: parentName, // <-- 'parentName' ko 'father_name' se map kiya
+      guardian_contact: parentContact, // <-- 'parentContact' ko 'guardian_contact' se map kiya
       classid: classRecord.classid,
       schoolId: schoolId,
     };
@@ -274,6 +276,7 @@ const addSingleStudent = async (req, res) => {
     }
     // Agar koi aur validation error aaye (jaise koi aur field missing ho)
     if (error.code === 'P2012' || error.name === 'PrismaClientValidationError') {
+        console.log("Validation Error Details:", error.message); // Server par error log karein
         return res.status(400).json({ message: 'Data validation error. Please check all fields.', details: error.message });
     }
     res.status(500).json({ message: 'Server error while adding student.' });
