@@ -5,29 +5,41 @@ import React, { useState, useEffect } from 'react';
 import styles from './AddStudentForm.module.scss';
 import api from '@/backend/utils/api'; // Ensure correct path
 
-// --- Interface FormData (UPDATED) ---
+// --- Interface FormData (UPDATED TO MATCH PRISMA SCHEMA) ---
 interface FormData {
-  studentId: string;
-  // FIX: 'name' ko 'first_name' aur 'last_name' se badla
+  // FIX: 'studentId' ko 'roll_number' se badla (yeh form ka "Student ID" field hai)
+  roll_number: string; 
   first_name: string;
   last_name: string;
-  // FIX: 'class' ko 'class_name' se badla
   class_name: string;
-  // FIX: 'rollNo' ko 'roll_number' se badla
-  roll_number: string;
+  
+  // FIX: 'parentName' ko 'father_name' se badla
+  father_name: string; 
+  // FIX: 'parentContact' ko 'guardian_contact' se badla
+  guardian_contact: string; 
+  
+  // Optional fields from schema
   dob?: string; 
   address?: string; 
-  parentName: string;
-  parentContact: string;
   email?: string;
+  
+  // --- NEW: Added all missing optional fields ---
+  mother_name?: string;
+  uid_number?: string; // Aadhar
+  nationality?: string;
+  caste?: string;
+  birth_place?: string;
+  previous_school?: string;
+  admission_date?: string; // YYYY-MM-DD
 }
 
 interface AddStudentFormProps {
   onClose: () => void;
   onSuccess: () => void;
   onUpdate?: (data: Partial<FormData>) => void;
+  // FIX: 'id' ko 'studentid' (number) kiya, jaisa parent page se aayega
   existingStudent?: {
-    id: string;
+    studentid: number; 
   } & Partial<FormData> | null;
 }
 
@@ -37,50 +49,67 @@ const classOptions = [
 ];
 
 const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onUpdate, existingStudent }) => {
-  // ✅ UPDATED initial state
+  
+  // ✅ UPDATED initial state with all new fields
   const [formData, setFormData] = useState<FormData>({
-    studentId: '', 
-    first_name: '', // FIX
-    last_name: '', // FIX
-    class_name: classOptions[0], // FIX
-    roll_number: '', // FIX
+    first_name: '', 
+    last_name: '', 
+    class_name: classOptions[0], 
+    roll_number: '', // Yeh "Student ID" field hai
     dob: '', 
     address: '', 
-    parentName: '', 
-    parentContact: '', 
+    father_name: '', 
+    guardian_contact: '', 
     email: '',
+    mother_name: '',
+    uid_number: '',
+    nationality: '',
+    caste: '',
+    birth_place: '',
+    previous_school: '',
+    admission_date: '',
   });
 
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    // Function to format date strings for input[type="date"]
+    const formatDate = (dateStr?: string) => {
+        if (!dateStr) return '';
+        try {
+            return new Date(dateStr).toISOString().split('T')[0];
+        } catch (e) {
+            return '';
+        }
+    };
+
     if (existingStudent) {
       setFormData({
-        studentId: existingStudent.studentId || '',
-        first_name: existingStudent.first_name || '', // FIX
-        last_name: existingStudent.last_name || '', // FIX
-        class_name: classOptions.includes(existingStudent.class_name || '') ? existingStudent.class_name || classOptions[0] : classOptions[0], // FIX
-        roll_number: existingStudent.roll_number || '', // FIX
-        dob: existingStudent.dob ? existingStudent.dob.split('T')[0] : '', 
+        roll_number: existingStudent.roll_number || '',
+        first_name: existingStudent.first_name || '',
+        last_name: existingStudent.last_name || '',
+        class_name: classOptions.includes(existingStudent.class_name || '') ? existingStudent.class_name || classOptions[0] : classOptions[0],
+        dob: formatDate(existingStudent.dob),
         address: existingStudent.address || '',
-        parentName: existingStudent.parentName || '',
-        parentContact: existingStudent.parentContact || '',
+        father_name: existingStudent.father_name || '',
+        guardian_contact: existingStudent.guardian_contact || '',
         email: existingStudent.email || '',
+        mother_name: existingStudent.mother_name || '',
+        uid_number: existingStudent.uid_number || '',
+        nationality: existingStudent.nationality || '',
+        caste: existingStudent.caste || '',
+        birth_place: existingStudent.birth_place || '',
+        previous_school: existingStudent.previous_school || '',
+        admission_date: formatDate(existingStudent.admission_date),
       });
     } else {
-      // Reset
+      // Reset all fields
       setFormData({
-        studentId: '', 
-        first_name: '', // FIX
-        last_name: '', // FIX
-        class_name: classOptions[0], // FIX
-        roll_number: '', // FIX
-        dob: '', 
-        address: '',
-        parentName: '', 
-        parentContact: '', 
-        email: '',
+        first_name: '', last_name: '', class_name: classOptions[0], roll_number: '',
+        dob: '', address: '', father_name: '', guardian_contact: '', email: '',
+        mother_name: '', uid_number: '', nationality: '', caste: '',
+        birth_place: '', previous_school: '', admission_date: '',
       });
     }
   }, [existingStudent]);
@@ -95,25 +124,25 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
     setError('');
 
     // Prepare data, remove empty optional fields
-    // Kyonki humne state keys badal di hain, dataToSend ab automatically sahi keys bhejega
     const dataToSend: Partial<FormData> = { ...formData };
     
-    if (!dataToSend.email?.trim()) {
-        delete dataToSend.email;
-    }
-    if (!dataToSend.dob?.trim()) {
-        delete dataToSend.dob;
-    }
-    if (!dataToSend.address?.trim()) {
-        delete dataToSend.address;
-    }
+    // Delete all optional keys if they are empty strings
+    (Object.keys(dataToSend) as Array<keyof FormData>).forEach(key => {
+        // Required fields ko chhodkar
+        if (key !== 'first_name' && key !== 'last_name' && key !== 'class_name' && key !== 'roll_number' && key !== 'father_name' && key !== 'guardian_contact') {
+            if (!dataToSend[key] || dataToSend[key] === '') {
+                delete dataToSend[key];
+            }
+        }
+    });
 
     try {
       if (existingStudent && onUpdate) {
+        // Update logic (agar zaroorat pade)
         await onUpdate(dataToSend);
         onClose();
       } else {
-        // Ab yeh '/students' endpoint ko sahi keys bhejega
+        // Create logic - Ab yeh backend ko sahi data bhejega
         await api.post('/students', dataToSend);
         onSuccess();
         onClose();
@@ -129,28 +158,30 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
+      
+      {/* --- Required Fields --- */}
       <div className={styles.inputGroup}>
-        <label htmlFor="studentId">Student ID</label>
-        <input type="text" id="studentId" name="studentId" value={formData.studentId} onChange={handleChange} required disabled={!!existingStudent || isLoading} />
+        {/* FIX: Yeh field ab 'roll_number' hai */}
+        <label htmlFor="roll_number">Student ID / Roll No.</label>
+        <input type="text" id="roll_number" name="roll_number" value={formData.roll_number} onChange={handleChange} required disabled={isLoading} />
       </div>
       
-      {/* --- FIX: "Student Name" ko "First Name" aur "Last Name" mein toda --- */}
       <div className={styles.inputGroup}>
         <label htmlFor="first_name">First Name</label>
         <input type="text" id="first_name" name="first_name" value={formData.first_name} onChange={handleChange} required disabled={isLoading} />
       </div>
+
       <div className={styles.inputGroup}>
         <label htmlFor="last_name">Last Name</label>
         <input type="text" id="last_name" name="last_name" value={formData.last_name} onChange={handleChange} required disabled={isLoading} />
       </div>
-      {/* --- END FIX --- */}
 
        <div className={styles.inputGroup}>
-        <label htmlFor="class_name">Class</label> {/* FIX: name attribute badla */}
+        <label htmlFor="class_name">Class</label>
         <select
           id="class_name"
-          name="class_name" // FIX
-          value={formData.class_name} // FIX
+          name="class_name"
+          value={formData.class_name}
           onChange={handleChange}
           required
           disabled={isLoading}
@@ -164,24 +195,66 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
         </select>
       </div>
 
-       <div className={styles.inputGroup}>
-        <label htmlFor="roll_number">Roll No.</label> {/* FIX: name attribute badla */}
-        <input type="text" id="roll_number" name="roll_number" value={formData.roll_number} onChange={handleChange} required disabled={isLoading} />
+      <div className={styles.inputGroup}>
+        {/* FIX: Renamed to 'father_name' */}
+        <label htmlFor="father_name">Parent's / Father's Name</label>
+        <input type="text" id="father_name" name="father_name" value={formData.father_name} onChange={handleChange} required disabled={isLoading} />
       </div>
 
-      {/* Baaki ke fields (DOB, Address, etc.) same rahenge */}
+      <div className={styles.inputGroup}>
+        {/* FIX: Renamed to 'guardian_contact' */}
+        <label htmlFor="guardian_contact">Parent's Contact</label>
+        <input type="tel" id="guardian_contact" name="guardian_contact" value={formData.guardian_contact} onChange={handleChange} required disabled={isLoading} />
+      </div>
+
+      {/* --- Optional Fields --- */}
+
+      <div className={styles.inputGroup}>
+        <label htmlFor="mother_name">Mother's Name (Optional)</label>
+        <input type="text" id="mother_name" name="mother_name" value={formData.mother_name || ''} onChange={handleChange} disabled={isLoading} />
+      </div>
+
       <div className={styles.inputGroup}>
         <label htmlFor="dob">Date of Birth (Optional)</label>
-        <input
-            type="date"
-            id="dob"
-            name="dob"
-            value={formData.dob || ''}
-            onChange={handleChange}
-            disabled={isLoading}
-            className={styles.dateInput} 
-        />
+        <input type="date" id="dob" name="dob" value={formData.dob || ''} onChange={handleChange} disabled={isLoading} className={styles.dateInput} />
       </div>
+      
+      <div className={styles.inputGroup}>
+        <label htmlFor="admission_date">Admission Date (Optional)</label>
+        <input type="date" id="admission_date" name="admission_date" value={formData.admission_date || ''} onChange={handleChange} disabled={isLoading} className={styles.dateInput} />
+      </div>
+
+      <div className={styles.inputGroup}>
+        <label htmlFor="email">Student Email (Optional)</label>
+        <input type="email" id="email" name="email" value={formData.email || ''} onChange={handleChange} disabled={isLoading} />
+        <small>If provided, login details will be sent here.</small>
+      </div>
+
+      <div className={styles.inputGroup}>
+        <label htmlFor="uid_number">Aadhar / UID Number (Optional)</label>
+        <input type="text" id="uid_number" name="uid_number" value={formData.uid_number || ''} onChange={handleChange} disabled={isLoading} />
+      </div>
+
+      <div className={styles.inputGroup}>
+        <label htmlFor="nationality">Nationality (Optional)</label>
+        <input type="text" id="nationality" name="nationality" value={formData.nationality || ''} onChange={handleChange} disabled={isLoading} />
+      </div>
+
+      <div className={styles.inputGroup}>
+        <label htmlFor="caste">Caste (Optional)</label>
+        <input type="text" id="caste" name="caste" value={formData.caste || ''} onChange={handleChange} disabled={isLoading} />
+      </div>
+
+      <div className={styles.inputGroup}>
+        <label htmlFor="birth_place">Birth Place (Optional)</label>
+        <input type="text" id="birth_place" name="birth_place" value={formData.birth_place || ''} onChange={handleChange} disabled={isLoading} />
+      </div>
+
+      <div className={styles.inputGroup}>
+        <label htmlFor="previous_school">Previous School (Optional)</label>
+        <input type="text" id="previous_school" name="previous_school" value={formData.previous_school || ''} onChange={handleChange} disabled={isLoading} />
+      </div>
+
       <div className={styles.inputGroup}>
         <label htmlFor="address">Address (Optional)</label>
         <textarea
@@ -193,27 +266,6 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
             disabled={isLoading}
             className={styles.textAreaInput} 
         />
-      </div>
-      
-      <div className={styles.inputGroup}>
-        <label htmlFor="parentName">Parent's Name</label>
-        <input type="text" id="parentName" name="parentName" value={formData.parentName} onChange={handleChange} required disabled={isLoading} />
-      </div>
-      <div className={styles.inputGroup}>
-        <label htmlFor="parentContact">Parent's Contact</label>
-        <input type="tel" id="parentContact" name="parentContact" value={formData.parentContact} onChange={handleChange} required disabled={isLoading} />
-      </div>
-      <div className={styles.inputGroup}>
-        <label htmlFor="email">Student Email (Optional)</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email || ''}
-          onChange={handleChange}
-          disabled={isLoading}
-        />
-        <small>If provided, login details will be sent here.</small>
       </div>
 
       {error && <p className={styles.error}>{error}</p>}
