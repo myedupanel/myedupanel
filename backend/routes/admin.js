@@ -51,8 +51,11 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             admissionsDataRaw,
             classCountsRaw
         ] = await Promise.all([
-            // Counts
-            prisma.user.count({ where: { role: 'Student', schoolId: schoolId } }), 
+            // --- YEH HAI AAPKA FIX ---
+            // FIX: 'User' table ke bajaye 'Students' table ko count kiya
+            prisma.students.count({ where: { schoolId: schoolId } }), 
+            // --- FIX ENDS HERE ---
+
             prisma.user.count({ where: { role: 'Teacher', schoolId: schoolId } }), 
             prisma.user.count({ where: { role: 'Parent', schoolId: schoolId } }),   
             prisma.user.count({ where: { role: { in: staffRoles }, schoolId: schoolId } }),
@@ -60,15 +63,12 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             // Recent lists
             prisma.students.findMany({ where: { schoolId }, orderBy: { studentid: 'desc' }, take: 5, select: { first_name: true, father_name: true, last_name: true, class: { select: { class_name: true } }, admission_date: true } }), 
             
-            // --- YEH HAI AAPKA FIX ---
-            // FIX: 'id' ko 'teacher_dbid' se badla (orderBy aur select dono mein)
             prisma.teachers.findMany({ 
                 where: { schoolId }, 
                 orderBy: { teacher_dbid: 'desc' }, 
                 take: 5, 
                 select: { name: true, subject: true, teacher_dbid: true } 
             }),
-            // --- FIX ENDS HERE ---
 
             prisma.parent.findMany({ where: { schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, id: true } }), 
             prisma.user.findMany({ where: { role: { in: staffRoles }, schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, role: true, id: true } }), 
@@ -155,23 +155,22 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
         // --- Format Recent Lists ---
          const formattedRecentStudents = recentStudents.map(s => ({ ...s, name: getFullName(s), class: s.class?.class_name }));
          
-         // --- FIX: recentTeachers ko format karein taaki frontend ko 'id' mile ---
          const formattedRecentTeachers = recentTeachers.map(t => ({
              ...t,
-             id: t.teacher_dbid // 'id' property add karein
+             id: t.teacher_dbid 
          }));
 
 
         // --- Final Data Object ---
         const dashboardData = {
-            totalStudents: studentCount || 0,
+            totalStudents: studentCount || 0, // <-- Yeh ab 'Students' table se aa raha hai
             totalTeachers: teacherCount || 0,
             totalParents: parentCount || 0,
             totalStaff: staffCount || 0,
             admissionsData,
             classCounts,
             recentStudents: formattedRecentStudents || [],
-            recentTeachers: formattedRecentTeachers || [], // FIX: Naya formatted array bhejein
+            recentTeachers: formattedRecentTeachers || [], 
             recentParents: recentParents || [],
             recentStaff: recentStaff || [],
             recentFees
@@ -186,8 +185,6 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
 });
 
 // @route PUT /api/admin/profile
-// (Aapka baaki ka code... profile route... seed-standard-classes route... bilkul same rahega)
-// ...
 router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => { 
     const { adminName, schoolName } = req.body;
     const userId = req.user.id; 
