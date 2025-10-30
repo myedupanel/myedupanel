@@ -34,7 +34,7 @@ function getCanonicalKey(header) {
   return null;
 }
 
-// 4. FUNCTION 1: addStudentsInBulk (Yeh Excel import ke liye hai, koi change nahi)
+// 4. FUNCTION 1: addStudentsInBulk (Koi change nahi)
 const addStudentsInBulk = async (req, res) => {
   try {
     const schoolId = req.user.schoolId;
@@ -43,7 +43,6 @@ const addStudentsInBulk = async (req, res) => {
     }
 
     const studentsData = req.body;
-    // YEH CHECK 'ADD SINGLE STUDENT' MEIN FAIL HO RAHA THA
     if (!studentsData || !Array.isArray(studentsData)) {
       return res.status(400).json({ message: 'No student data provided. Expected an array for bulk import.' });
     }
@@ -159,7 +158,7 @@ const addStudentsInBulk = async (req, res) => {
   }
 };
 
-// 5. FUNCTION 2: getAllStudents (schoolId ke saath)
+// 5. FUNCTION 2: getAllStudents (Koi change nahi)
 const getAllStudents = async (req, res) => {
   try {
     const schoolId = req.user.schoolId;
@@ -187,8 +186,7 @@ const getAllStudents = async (req, res) => {
 };
 
 
-// 6. --- NAYA FUNCTION: ADD SINGLE STUDENT ---
-// Yeh function aapke "Add a New Student" form ke liye hai
+// 6. FUNCTION 3: addSingleStudent (UPDATED)
 const addSingleStudent = async (req, res) => {
   try {
     // 1. School ID token se lein
@@ -197,21 +195,25 @@ const addSingleStudent = async (req, res) => {
       return res.status(401).json({ message: 'User not authorized or missing school ID.' });
     }
 
-    // 2. Data ko req.body se lein (yeh ek object hai)
+    // 2. Data ko req.body se lein
+    // --- YEH HAI AAPKA FIX (Line 214) ---
     const { 
       first_name, 
       last_name, 
       class_name, 
       roll_number, 
-      ...otherDetails // Baaki saari details (dob, address, email, etc.)
+      parentName, // <-- Frontend se 'parentName' ko alag se nikaala
+      ...otherDetails 
     } = req.body;
+    // --- FIX ENDS HERE ---
+
 
     // 3. Zaroori fields check karein
     if (!first_name || !last_name || !class_name || !roll_number) {
       return res.status(400).json({ message: 'Missing required fields: First Name, Last Name, Class, and Roll Number are required.' });
     }
     
-    // 4. Class ko find karein ya create karein (same logic)
+    // 4. Class ko find karein ya create karein
     let classRecord = await prisma.classes.findUnique({
       where: { 
         schoolId_class_name: {
@@ -231,16 +233,19 @@ const addSingleStudent = async (req, res) => {
     }
 
     // 5. Student data ko Prisma ke liye taiyaar karein
+    // --- YEH HAI AAPKA FIX (Line 252) ---
     const studentData = {
-      ...otherDetails, // dob, address, email, etc.
+      ...otherDetails, 
       first_name,
       last_name,
       roll_number,
+      father_name: parentName, // <-- 'parentName' ko 'father_name' se map kiya
       classid: classRecord.classid,
       schoolId: schoolId,
     };
+    // --- FIX ENDS HERE ---
 
-    // 6. Date fields ko handle karein (same logic)
+    // 6. Date fields ko handle karein
     if (studentData.dob) {
       try {
         const parsedDate = new Date(studentData.dob);
@@ -267,14 +272,18 @@ const addSingleStudent = async (req, res) => {
     if (error.code === 'P2002') { // Duplicate entry error
        return res.status(400).json({ message: `Duplicate entry: A student with Roll Number ${req.body.roll_number} may already exist in ${req.body.class_name}.` });
     }
+    // Agar koi aur validation error aaye (jaise koi aur field missing ho)
+    if (error.code === 'P2012' || error.name === 'PrismaClientValidationError') {
+        return res.status(400).json({ message: 'Data validation error. Please check all fields.', details: error.message });
+    }
     res.status(500).json({ message: 'Server error while adding student.' });
   }
 };
 
 
-// 7. EXPORTS (Naye function ke saath)
+// 7. EXPORTS (Koi change nahi)
 module.exports = {
   addStudentsInBulk,
   getAllStudents,
-  addSingleStudent, // <-- Yahaan naya function add kiya
+  addSingleStudent, 
 };
