@@ -1,4 +1,5 @@
-// src/components/admin/students/AddStudentForm.tsx (or wherever it is)
+// src/components/admin/students/AddStudentForm.tsx
+
 "use client";
 import React, { useState, useEffect } from 'react';
 import styles from './AddStudentForm.module.scss';
@@ -7,12 +8,15 @@ import api from '@/backend/utils/api'; // Ensure correct path
 // --- Interface FormData (UPDATED) ---
 interface FormData {
   studentId: string;
-  name: string;
-  class: string;
-  rollNo: string;
-  // ✅ ADDED dob and address (optional)
-  dob?: string; // Date of Birth as string (YYYY-MM-DD)
-  address?: string; // Address
+  // FIX: 'name' ko 'first_name' aur 'last_name' se badla
+  first_name: string;
+  last_name: string;
+  // FIX: 'class' ko 'class_name' se badla
+  class_name: string;
+  // FIX: 'rollNo' ko 'roll_number' se badla
+  roll_number: string;
+  dob?: string; 
+  address?: string; 
   parentName: string;
   parentContact: string;
   email?: string;
@@ -35,9 +39,16 @@ const classOptions = [
 const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onUpdate, existingStudent }) => {
   // ✅ UPDATED initial state
   const [formData, setFormData] = useState<FormData>({
-    studentId: '', name: '', class: classOptions[0],
-    rollNo: '', dob: '', address: '', // Initialize dob and address
-    parentName: '', parentContact: '', email: '',
+    studentId: '', 
+    first_name: '', // FIX
+    last_name: '', // FIX
+    class_name: classOptions[0], // FIX
+    roll_number: '', // FIX
+    dob: '', 
+    address: '', 
+    parentName: '', 
+    parentContact: '', 
+    email: '',
   });
 
   const [error, setError] = useState('');
@@ -47,26 +58,33 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
     if (existingStudent) {
       setFormData({
         studentId: existingStudent.studentId || '',
-        name: existingStudent.name || '',
-        class: classOptions.includes(existingStudent.class || '') ? existingStudent.class || classOptions[0] : classOptions[0],
-        rollNo: existingStudent.rollNo || '',
-        // ✅ Load dob and address if they exist
-        dob: existingStudent.dob ? existingStudent.dob.split('T')[0] : '', // Format date for input
+        first_name: existingStudent.first_name || '', // FIX
+        last_name: existingStudent.last_name || '', // FIX
+        class_name: classOptions.includes(existingStudent.class_name || '') ? existingStudent.class_name || classOptions[0] : classOptions[0], // FIX
+        roll_number: existingStudent.roll_number || '', // FIX
+        dob: existingStudent.dob ? existingStudent.dob.split('T')[0] : '', 
         address: existingStudent.address || '',
         parentName: existingStudent.parentName || '',
         parentContact: existingStudent.parentContact || '',
         email: existingStudent.email || '',
       });
     } else {
-      // ✅ Reset dob and address too
+      // Reset
       setFormData({
-        studentId: '', name: '', class: classOptions[0], rollNo: '', dob: '', address: '',
-        parentName: '', parentContact: '', email: '',
+        studentId: '', 
+        first_name: '', // FIX
+        last_name: '', // FIX
+        class_name: classOptions[0], // FIX
+        roll_number: '', // FIX
+        dob: '', 
+        address: '',
+        parentName: '', 
+        parentContact: '', 
+        email: '',
       });
     }
   }, [existingStudent]);
 
-  // ✅ UPDATED handleChange to include textarea
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -77,11 +95,12 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
     setError('');
 
     // Prepare data, remove empty optional fields
+    // Kyonki humne state keys badal di hain, dataToSend ab automatically sahi keys bhejega
     const dataToSend: Partial<FormData> = { ...formData };
+    
     if (!dataToSend.email?.trim()) {
         delete dataToSend.email;
     }
-    // ✅ Remove dob and address if empty
     if (!dataToSend.dob?.trim()) {
         delete dataToSend.dob;
     }
@@ -91,11 +110,10 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
 
     try {
       if (existingStudent && onUpdate) {
-        // Assuming onUpdate sends the data correctly
         await onUpdate(dataToSend);
         onClose();
       } else {
-        // Ensure backend '/students' endpoint accepts dob and address
+        // Ab yeh '/students' endpoint ko sahi keys bhejega
         await api.post('/students', dataToSend);
         onSuccess();
         onClose();
@@ -111,21 +129,28 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
-      {/* Student ID, Name, Class (No change) */}
       <div className={styles.inputGroup}>
         <label htmlFor="studentId">Student ID</label>
         <input type="text" id="studentId" name="studentId" value={formData.studentId} onChange={handleChange} required disabled={!!existingStudent || isLoading} />
       </div>
+      
+      {/* --- FIX: "Student Name" ko "First Name" aur "Last Name" mein toda --- */}
       <div className={styles.inputGroup}>
-        <label htmlFor="name">Student Name</label>
-        <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required disabled={isLoading} />
+        <label htmlFor="first_name">First Name</label>
+        <input type="text" id="first_name" name="first_name" value={formData.first_name} onChange={handleChange} required disabled={isLoading} />
       </div>
+      <div className={styles.inputGroup}>
+        <label htmlFor="last_name">Last Name</label>
+        <input type="text" id="last_name" name="last_name" value={formData.last_name} onChange={handleChange} required disabled={isLoading} />
+      </div>
+      {/* --- END FIX --- */}
+
        <div className={styles.inputGroup}>
-        <label htmlFor="class">Class</label>
+        <label htmlFor="class_name">Class</label> {/* FIX: name attribute badla */}
         <select
-          id="class"
-          name="class"
-          value={formData.class}
+          id="class_name"
+          name="class_name" // FIX
+          value={formData.class_name} // FIX
           onChange={handleChange}
           required
           disabled={isLoading}
@@ -139,13 +164,12 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
         </select>
       </div>
 
-      {/* Roll No (No change) */}
        <div className={styles.inputGroup}>
-        <label htmlFor="rollNo">Roll No.</label>
-        <input type="text" id="rollNo" name="rollNo" value={formData.rollNo} onChange={handleChange} required disabled={isLoading} />
+        <label htmlFor="roll_number">Roll No.</label> {/* FIX: name attribute badla */}
+        <input type="text" id="roll_number" name="roll_number" value={formData.roll_number} onChange={handleChange} required disabled={isLoading} />
       </div>
 
-      {/* === ADDED DOB and ADDRESS Fields === */}
+      {/* Baaki ke fields (DOB, Address, etc.) same rahenge */}
       <div className={styles.inputGroup}>
         <label htmlFor="dob">Date of Birth (Optional)</label>
         <input
@@ -155,7 +179,7 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
             value={formData.dob || ''}
             onChange={handleChange}
             disabled={isLoading}
-            className={styles.dateInput} // Optional class for styling
+            className={styles.dateInput} 
         />
       </div>
       <div className={styles.inputGroup}>
@@ -165,15 +189,12 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
             name="address"
             value={formData.address || ''}
             onChange={handleChange}
-            rows={3} // Adjust rows as needed
+            rows={3} 
             disabled={isLoading}
-            className={styles.textAreaInput} // Optional class for styling
+            className={styles.textAreaInput} 
         />
       </div>
-      {/* === END ADDED Fields === */}
-
-
-      {/* Parent Name, Parent Contact, Email (No change) */}
+      
       <div className={styles.inputGroup}>
         <label htmlFor="parentName">Parent's Name</label>
         <input type="text" id="parentName" name="parentName" value={formData.parentName} onChange={handleChange} required disabled={isLoading} />
