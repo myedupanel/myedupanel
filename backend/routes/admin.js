@@ -47,7 +47,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             recentTeachers,
             recentParents,
             recentStaff,
-            recentPaidFeeRecords, // <--- YEH QUERY AB THEEK HO GAYI HAI
+            recentPaidFeeRecords,
             admissionsDataRaw,
             classCountsRaw
         ] = await Promise.all([
@@ -58,22 +58,21 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             prisma.user.count({ where: { role: { in: staffRoles }, schoolId: schoolId } }),
 
             // Recent lists
-            prisma.students.findMany({ where: { schoolId }, orderBy: { studentid: 'desc' }, take: 5, select: { first_name: true, father_name: true, last_name: true, class: { select: { class_name: true } }, admission_date: true } }), 
+            // FIX 1: 'studentid' ko 'id' se badla
+            prisma.students.findMany({ where: { schoolId }, orderBy: { id: 'desc' }, take: 5, select: { first_name: true, father_name: true, last_name: true, class: { select: { class_name: true } }, admission_date: true } }), 
             prisma.teachers.findMany({ where: { schoolId }, orderBy: { teacher_dbid: 'desc' }, take: 5, select: { name: true, subject: true, teacher_dbid: true } }), 
             prisma.parent.findMany({ where: { schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, id: true } }), 
             prisma.user.findMany({ where: { role: { in: staffRoles }, schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, role: true, id: true } }), 
 
-            // --- YEH HAI AAPKA FIX (Line 89-98) ---
-            // Recent Fee Records (Paid)
+            // Recent Fee Records (Paid) - Yeh query humne pehle hi fix kar di thi
             prisma.feeRecord.findMany({
                 where: { schoolId: schoolId, status: 'Paid' },
                 orderBy: { id: 'desc' }, 
                 take: 5,
-                // 'include' hata diya gaya
-                select: { // Sirf 'select' ka istemaal
+                select: { 
                     id: true, 
                     amount: true, 
-                    student: { // 'include' ke logic ko 'select' ke andar nest kar diya
+                    student: { 
                         select: {
                             first_name: true,
                             father_name: true,
@@ -82,13 +81,12 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                     }
                 } 
             }),
-            // --- FIX ENDS HERE ---
 
             // Admission Chart Aggregation
              prisma.students.groupBy({
                  by: ['admission_date'], 
                  where: { schoolId: schoolId, admission_date: { not: null } },
-                 _count: { studentid: true },
+                 _count: { id: true }, // FIX 2: 'studentid' ko 'id' kiya
                  orderBy: { admission_date: 'asc'}
              }),
              
@@ -96,12 +94,12 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             prisma.students.groupBy({
                 by: ['classId'],
                 where: { schoolId: schoolId },
-                _count: { studentid: true },
+                _count: { id: true }, // FIX 3: 'studentid' ko 'id' kiya
             }),
 
         ]).catch(err => {
             console.error("[GET /dashboard-data] Error during Promise.all:", err);
-            throw err; // Error ko aage bhejein
+            throw err; 
         });
 
         console.log(`[GET /dashboard-data] Counted Staff: ${staffCount}`);
@@ -114,7 +112,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             if (item.admission_date) {
                  const month = item.admission_date.getMonth() + 1; 
                  if (admissionsMap.has(month)) {
-                    admissionsMap.get(month).admissions += item._count.studentid;
+                    admissionsMap.get(month).admissions += item._count.id; // FIX 4: 'studentid' ko 'id' kiya
                  }
             }
         });
@@ -132,13 +130,12 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
              const classInfo = classesInfo.find(c => c.classid === item.classId);
              return {
                  name: classInfo?.class_name || `Unknown Class (${item.classId})`,
-                 count: item._count.studentid
+                 count: item._count.id // FIX 5: 'studentid' ko 'id' kiya
              }
          }).sort((a, b) => a.name.localeCompare(b.name)); 
         console.log("[GET /dashboard-data] Formatted Class Counts:", classCounts);
 
         // --- Format Recent Payments ---
-        // Yeh code ab sahi se kaam karega kyonki 'record.student' mein naam hai
         const recentFees = recentPaidFeeRecords.map(record => ({
             id: record.id, 
             student: getFullName(record.student) || 'Unknown Student',
@@ -167,13 +164,20 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
         res.json(dashboardData);
 
     } catch (err) {
-        // Ab error message mein poora validation error dikhega
-        console.error("[GET /dashboard-data] CATCH BLOCK ERROR: \n", err); 
+        console.error("[GET /dashboard-data] CATCH BLOCK ERROR:\n", err); // Improved logging
         res.status(500).send('Server Error fetching dashboard data');
     }
 });
 
 // @route PUT /api/admin/profile
+// (Aapka baaki ka code... profile route... seed-standard-classes route... bilkul same rahega)
+// ...
+// ... (Baaki saara code neeche)
+// ...
+
+// @route PUT /api/admin/profile
+// @desc Update admin's profile name AND associated school name
+// @access Private (Admin only)
 router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => { 
     const { adminName, schoolName } = req.body;
     const userId = req.user.id; 
@@ -188,12 +192,10 @@ router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => {
 
     try {
         const result = await prisma.$transaction(async (tx) => {
-            // 1. User ko fetch karein
             const user = await tx.user.findUnique({ where: { id: userId } });
             if (!user) throw new Error('User not found');
             if (user.role !== 'Admin') throw new Error('Forbidden.'); 
 
-            // 2. School ko fetch karein
             const school = await tx.school.findUnique({ where: { id: user.schoolId } });
             if (!school) throw new Error('Associated school not found.');
             console.log(`[PUT /profile] Found User: ${user.name}, School: ${school.name}`);
@@ -202,7 +204,6 @@ router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => {
             let userUpdateData = {};
             let newSchoolNameForToken = school.name; 
 
-            // 3. School Name Update Logic
             if (requestedSchoolNameTrimmed && requestedSchoolNameTrimmed !== school.name) {
                 console.log(`[PUT /profile] School name change requested.`);
                 if (user.schoolNameLastUpdated) {
@@ -224,13 +225,11 @@ router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => {
                 console.log(`[PUT /profile] School name marked for update.`);
             }
 
-            // 4. Admin Name Update Logic
             if (requestedAdminNameTrimmed && requestedAdminNameTrimmed !== user.name) {
                 console.log(`[PUT /profile] Admin name change requested.`);
                 userUpdateData.name = requestedAdminNameTrimmed;
             }
 
-            // 5. Perform updates
             let updatedUser = user; 
             if (Object.keys(schoolUpdateData).length > 0) {
                  await tx.school.update({ where: { id: user.schoolId }, data: schoolUpdateData });
@@ -245,11 +244,10 @@ router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => {
             
             return { updatedUser, newSchoolNameForToken };
             
-        }); // --- Transaction Khatam ---
+        }); 
 
         console.log(`[PUT /profile] Documents saved successfully.`);
 
-        // Generate new token
         const payload = {
             id: result.updatedUser.id,
             role: result.updatedUser.role,
@@ -293,7 +291,6 @@ const seedStandardClasses = async (req, res) => {
 
         const standardClasses = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 
-        // Find existing classes
         const existingClasses = await prisma.classes.findMany({
             where: { schoolId: schoolId, class_name: { in: standardClasses } },
             select: { class_name: true }
@@ -309,7 +306,6 @@ const seedStandardClasses = async (req, res) => {
             return res.status(200).json({ message: 'All standard classes already exist.', added: 0 });
         }
 
-        // Create missing classes
         const newClassDocs = missingClassNames.map(name => ({
             class_name: name,
             schoolId: schoolId,
@@ -335,7 +331,6 @@ const seedStandardClasses = async (req, res) => {
     }
 };
 
-// Add the route for seeding classes
 router.post('/seed-standard-classes', [authMiddleware, adminMiddleware], seedStandardClasses);
 
 module.exports = router;
