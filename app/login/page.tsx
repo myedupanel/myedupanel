@@ -60,16 +60,16 @@ export default function LoginPage() {
       if (user) {
         // Role ke hisaab se sahi dashboard par bhejna
         switch (user.role) {
-          case 'admin':
+          case 'Admin':
             router.push('/admin/dashboard');
             break;
-          case 'teacher':
+          case 'Teacher':
             router.push('/teacher/dashboard');
             break;
-          case 'student':
+          case 'Student':
             router.push('/student/dashboard');
             break;
-          case 'parent':
+          case 'Parent':
             router.push('/parent/dashboard');
             break;
           default:
