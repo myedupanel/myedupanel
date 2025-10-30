@@ -1,11 +1,11 @@
 // backend/routes/students.js
 const express = require('express');
 const router = express.Router();
-const prisma = require('../config/prisma'); // Prisma client import karein
-const bcrypt = require('bcryptjs'); // Password hashing ke liye
-const generatePassword = require('generate-password'); // Temp password ke liye
+const prisma = require('../config/prisma'); 
+const bcrypt = require('bcryptjs'); 
+const generatePassword = require('generate-password'); 
 const sendEmail = require('../utils/sendEmail');
-const { authMiddleware, authorize } = require('../middleware/authMiddleware'); // Updated middleware
+const { authMiddleware, authorize } = require('../middleware/authMiddleware'); 
 
 // Helper: Get Full Name
 const getFullName = (student) => {
@@ -19,20 +19,13 @@ const {
   getAllStudents 
 } = require('../controllers/studentController'); 
 
-// --- Primary Routes (Controller se) ---
-
-// POST /api/students (Add single student)
+// --- Routes using Controller ---
 router.post('/', [authMiddleware, authorize('Admin')], addSingleStudent);
-
-// POST /api/students/bulk (Add bulk students)
 router.post('/bulk', [authMiddleware, authorize('Admin')], addStudentsInBulk);
+router.get('/', [authMiddleware, authorize('Admin', 'Teacher')], getAllStudents);
 
-// GET /api/students (Get all students)
-router.get('/', [authMiddleware, authorize('Admin', 'Teacher')], getAllStudents); 
-
-// --- Baaki Routes (Jo pehle se file mein the) ---
-
-// GET /api/students/classes
+// @route   GET /api/students/classes
+// (Yeh code pehle se sahi tha)
 router.get('/classes', [authMiddleware], async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
@@ -56,90 +49,54 @@ router.get('/classes', [authMiddleware], async (req, res) => {
 });
 
 
+// @route   GET /api/students/search
+// (Yeh route crash ho raha tha)
 router.get('/search', authMiddleware, async (req, res) => {
-
      try {
-
         const schoolId = req.user.schoolId;
-
         const studentName = req.query.name || '';
-
         
-
         if (!schoolId) return res.status(400).json({ msg: 'School information not found.' });
-
         if (studentName.length < 2) return res.json([]);
 
-
-
         const students = await prisma.students.findMany({
-
             where: {
-
                 schoolId: schoolId,
-
+                // --- YEH HAI AAPKA FIX ---
+                // MySQL default case-insensitive hai, isliye 'mode' ki zaroorat nahi hai
                 OR: [
-
-                  { first_name: { contains: studentName, mode: 'insensitive' } },
-
-                  { father_name: { contains: studentName, mode: 'insensitive' } },
-
-                  { last_name: { contains: studentName, mode: 'insensitive' } },
-
+                  { first_name: { contains: studentName } }, // 'mode' hata diya
+                  { father_name: { contains: studentName } }, // 'mode' hata diya
+                  { last_name: { contains: studentName } },  // 'mode' hata diya
                 ]
-
+                // --- FIX ENDS HERE ---
             },
-
             select: {
-
                 studentid: true,
-
                 first_name: true,
-
                 father_name: true,
-
                 last_name: true,
-
-                class: { select: { class_name: true } } // Query sahi hai
-
+                class: { select: { class_name: true } } 
             },
-
             take: 10
-
         });
 
-
-
-        // --- YEH HAI AAPKA FIX ---
-
-        // Hum 's.class.class_name' ko 's.class?.class_name' se badal rahe hain
-
+        // Yeh code pehle se theek tha (s.class?.class_name)
         const formattedStudents = students.map(s => ({
-
             id: s.studentid,
-
             name: getFullName(s),
-
-            class: s.class?.class_name || 'N/A' // FIX: Optional chaining ka istemaal
-
+            class: s.class?.class_name || 'N/A' 
         }));
 
-        // --- FIX ENDS HERE ---
-
-
-
         res.json(formattedStudents);
-
     } catch (error) {
-
         console.error("Error searching students:", error.message);
-
-        res.status(500).send("Server Error"); // Yahi error aapko dikh raha hai
-
+        res.status(500).send("Server Error");
     }
-
 });
-// GET /api/students/:id
+
+// @route   GET /api/students/:id
+// (Yeh code pehle se sahi tha)
 router.get('/:id', authMiddleware, async (req, res) => {
     try {
         const studentIdInt = parseInt(req.params.id);
@@ -153,7 +110,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
                 schoolId: req.user.schoolId 
             },
             include: { 
-                class: { select: { class_name: true }}
+                class: true 
             }
         });
         
@@ -163,8 +120,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
             ...student,
             id: student.studentid,
             name: getFullName(student),
-            // --- YEH HAI AAPKA FIX 2 ---
-            class: student.class?.class_name || 'N/A', // 'student.class.class_name' ko 'student.class?.class_name' kiya
+            class: student.class?.class_name || 'N/A', 
             rollNo: student.roll_number,
             parentName: student.father_name,
             parentContact: student.guardian_contact
@@ -177,7 +133,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// PUT /api/students/:id
+// @route   PUT /api/students/:id
+// (Yeh code pehle se sahi tha)
 router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { 
      try {
         const studentIdInt = parseInt(req.params.id);
@@ -186,8 +143,10 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => {
         }
         
         const student = await prisma.students.findUnique({
-             where: { studentid: studentIdInt, schoolId: req.user.schoolId }
+             where: { studentid: studentIdInt, schoolId: req.user.schoolId },
+             include: { class: true } 
         });
+        
         if (!student) return res.status(404).json({ message: 'Student not found or access denied.' });
 
         const updateData = {};
@@ -210,7 +169,7 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => {
                 where: { schoolId_class_name: { schoolId: req.user.schoolId, class_name: body.class } }
             });
             if (classRecord) {
-                updateData.classid = classRecord.classid; // 'classId' ko 'classid' kiya
+                updateData.classid = classRecord.classid;
             } else {
                  console.warn(`Class '${body.class}' not found during student update.`);
             }
@@ -219,7 +178,7 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => {
         const updatedStudent = await prisma.students.update({
             where: { studentid: studentIdInt },
             data: updateData,
-            include: { class: { select: { class_name: true } } }
+            include: { class: true } 
         });
 
         if (updatedStudent.userId && (updateData.first_name || updateData.last_name || updateData.email)) {
@@ -253,8 +212,7 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => {
             ...updatedStudent,
             id: updatedStudent.studentid,
             name: getFullName(updatedStudent),
-            // --- YEH HAI AAPKA FIX 3 ---
-            class: updatedStudent.class?.class_name || 'N/A', // 'updatedStudent.class.class_name' ko 'updatedStudent.class?.class_name' kiya
+            class: updatedStudent.class?.class_name || 'N/A', 
             rollNo: updatedStudent.roll_number,
             parentName: updatedStudent.father_name,
             parentContact: updatedStudent.guardian_contact
@@ -276,7 +234,8 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => {
 });
 
 
-// DELETE /api/students/:id
+// @route   DELETE /api/students/:id
+// (Yeh code pehle se sahi tha)
 router.delete('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { 
     try {
         const studentIdInt = parseInt(req.params.id);
@@ -316,8 +275,7 @@ router.delete('/:id', [authMiddleware, authorize('Admin')], async (req, res) => 
 
         if (req.io) {
             req.io.emit('updateDashboard');
-            // FIX: 'id' ko 'studentid' kiya
-            req.io.emit('student_deleted', { id: studentIdInt, schoolId: req.user.schoolId });
+            req.io.emit('student_deleted', { id: studentIdInt });
         }
 
         res.json({ message: 'Student removed successfully' });
