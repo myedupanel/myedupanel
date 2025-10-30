@@ -9,7 +9,7 @@ const crypto = require('crypto'); // Webhook ke liye zaroori
 
 // Razorpay initialization (Same)
 const razorpay = new Razorpay({
-    keyid: process.env.RAZORPAY_KEYID,
+    key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
