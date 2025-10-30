@@ -197,22 +197,27 @@ const addSingleStudent = async (req, res) => {
 
     // 2. Data ko req.body se lein
     // --- YEH HAI AAPKA FIX ---
+    // Hum ab 'parentName' ke bajaye 'father_name' aur 'guardian_contact' ko seedha expect kar rahe hain
     const { 
       first_name, 
       last_name, 
       class_name, 
-      roll_number, 
-      parentName, 
-      parentContact, // <-- Frontend se 'parentContact' ko alag se nikaala
+      roll_number,
+      father_name,       // <-- FIX: 'parentName' ko 'father_name' se badla
+      guardian_contact,  // <-- FIX: Yeh add kiya
       ...otherDetails 
     } = req.body;
     // --- FIX ENDS HERE ---
 
 
     // 3. Zaroori fields check karein
-    if (!first_name || !last_name || !class_name || !roll_number) {
-      return res.status(400).json({ message: 'Missing required fields: First Name, Last Name, Class, and Roll Number are required.' });
+    // --- YEH HAI AAPKA FIX ---
+    // Humne check ko bhi update kar diya hai
+    if (!first_name || !last_name || !class_name || !roll_number || !father_name || !guardian_contact) {
+      return res.status(400).json({ message: 'Missing required fields: First Name, Last Name, Class, Roll Number, Parent Name, and Parent Contact are required.' });
     }
+    // --- FIX ENDS HERE ---
+
     
     // 4. Class ko find karein ya create karein
     let classRecord = await prisma.classes.findUnique({
@@ -235,13 +240,14 @@ const addSingleStudent = async (req, res) => {
 
     // 5. Student data ko Prisma ke liye taiyaar karein
     // --- YEH HAI AAPKA FIX ---
+    // Ab hum 'father_name' aur 'guardian_contact' ko seedha pass kar rahe hain
     const studentData = {
       ...otherDetails, 
       first_name,
       last_name,
       roll_number,
-      father_name: parentName, // <-- 'parentName' ko 'father_name' se map kiya
-      guardian_contact: parentContact, // <-- 'parentContact' ko 'guardian_contact' se map kiya
+      father_name,       // <-- FIX
+      guardian_contact,  // <-- FIX
       classid: classRecord.classid,
       schoolId: schoolId,
     };
@@ -274,10 +280,12 @@ const addSingleStudent = async (req, res) => {
     if (error.code === 'P2002') { // Duplicate entry error
        return res.status(400).json({ message: `Duplicate entry: A student with Roll Number ${req.body.roll_number} may already exist in ${req.body.class_name}.` });
     }
-    // Agar koi aur validation error aaye (jaise koi aur field missing ho)
     if (error.code === 'P2012' || error.name === 'PrismaClientValidationError') {
-        console.log("Validation Error Details:", error.message); // Server par error log karein
-        return res.status(400).json({ message: 'Data validation error. Please check all fields.', details: error.message });
+        // Log se error message extract karein
+        const match = error.message.match(/Argument `(.*)` is missing/);
+        const missingField = match ? match[1] : 'a required field';
+        console.error(`Validation Error: Missing field: ${missingField}`);
+        return res.status(400).json({ message: `Data validation error. Please check all fields. Missing: ${missingField}` });
     }
     res.status(500).json({ message: 'Server error while adding student.' });
   }
