@@ -6,8 +6,17 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require("socket.io");
 
+// --- YEH AAPKA FIX HAI ---
+// Hum yahaan sabhi allowed URLs ki list bana rahe hain
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:3000", // Aapka local
+  "http://localhost:3000",
+  "https://myedupanel.vercel.app" // Aapka Vercel production URL
+];
+// --- FIX ENDS HERE ---
+
+
 // --- Route Imports (Same) ---
-// In routes mein ab Mongoose ke bajaye Prisma use hoga
 const academicRoutes = require('./routes/academics');
 const eventRoutes = require('./routes/events');
 const settingRoutes = require('./routes/settings');
@@ -24,14 +33,22 @@ const staffRoutes = require('./routes/staff');
 const quizRoutes = require('./routes/quiz');
 const analyticsRoutes = require('./routes/analytics');
 const classRoutes = require('./routes/classes');
-// const dashboardRoutes = require('./routes/dashboard'); // Agar use karna hai toh uncomment karein
+// const dashboardRoutes = require('./routes/dashboard'); 
 
 // --- Express App Setup ---
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- Standard Middlewares (Same) ---
-app.use(cors());
+// --- Standard Middlewares (Updated) ---
+
+// --- YEH AAPKA FIX HAI ---
+// Hum Express 'cors' ko bhi specific list de rahe hain
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE"]
+}));
+// --- FIX ENDS HERE ---
+
 app.use(express.json());
 
 // --- Debugging Middleware (Same) ---
@@ -40,11 +57,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// --- HTTP Server and Socket.IO Setup (Same) ---
+// --- HTTP Server and Socket.IO Setup (Updated) ---
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [process.env.FRONTEND_URL || "http://localhost:3000", "http://localhost:3000"],
+    // --- YEH AAPKA FIX HAI ---
+    // Hum Socket.IO 'cors' ko bhi wahi same list de rahe hain
+    origin: allowedOrigins,
+    // --- FIX ENDS HERE ---
     methods: ["GET", "POST", "PUT", "DELETE"]
   }
 });
@@ -60,7 +80,7 @@ app.use((req, res, next) => {
 
 // --- Register API Routes (Same) ---
 app.get('/', (req, res) => {
-  res.send('SchoolPro Backend is running (Prisma Version)!'); // Message update kar diya
+  res.send('SchoolPro Backend is running (Prisma Version)!'); 
 });
 
 // Saare routes register karein (Same)
@@ -90,8 +110,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// --- Start Server (Simplified) ---
-// Prisma apna connection khud manage karta hai, isliye mongoose.connect() ki zaroorat nahi.
-server.listen(PORT, '0.0.0.0', () => { // Render ke liye '0.0.0.0' par listen karein
+// --- Start Server (Same) ---
+server.listen(PORT, '0.0.0.0', () => { 
   console.log(`Server (Prisma Version) is running on port: ${PORT}`);
 });
