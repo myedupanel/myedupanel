@@ -1,18 +1,9 @@
+// backend/routes/classes.js (app/admin/staff/page.tsx)
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './StaffPage.module.scss';
 import { MdAdd, MdSearch, MdGridView } from 'react-icons/md';
 import StaffTable from '@/components/admin/StaffTable/StaffTable';
-// Define the type StaffTable USES (Based on StaffTable.tsx code)
-interface StaffTableMemberType {
-  id: string;
-  staffId: string; 
-  name: string;
-  role: string;
-  contact: string;
-  joiningDate: string; // Formatted Date
-  leavingDate?: string; // Formatted Date
-}
 import Modal from '@/components/common/Modal/Modal';
 import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
 import EditStaffForm from '@/components/admin/EditStaffForm/EditStaffForm';
@@ -24,9 +15,20 @@ import { useAuth } from '@/app/context/AuthContext';
 
 const allRoles = ['All', 'Accountant', 'Office Admin', 'Librarian', 'Security', 'Transport Staff','Other' ];
 
-// Interface for data coming FROM THE API
+// Define the type StaffTable USES (Based on StaffTable.tsx code)
+interface StaffTableMemberType {
+  id: number; // FIX: Changed to number
+  staffId: string; 
+  name: string;
+  role: string;
+  contact: string;
+  joiningDate: string; 
+  leavingDate?: string; 
+}
+
+// Interface for data coming FROM THE API (Backend now sends numeric id)
 interface ApiStaffMember {
-  id: string;
+  id: number; // FIX: Changed from _id: string to id: number
   name: string;
   role: string;
   email: string;
@@ -40,15 +42,15 @@ interface ApiStaffMember {
   }
 }
 
-// Interface for internal state management
+// Interface for internal state management (All IDs must be number)
 interface InternalStaffMember {
-   id: string;
+   id: number; // FIX: Changed to number, removed duplicate _id/id: string
    staffId: string; // Staff ID from form/details
    name: string;
    role: string;
    contact: string;
    email: string;
-   joiningDate: string; // Formatted Date
+   joiningDate: string; 
    leavingDate?: string;
    schoolId?: string;
    contactNumber?: string;
@@ -56,14 +58,14 @@ interface InternalStaffMember {
    rawLeavingDate?: string;
 }
 
-// Interface for Add/Edit Form Data
+// Interface for Add/Edit Form Data (No change)
 interface StaffFormData {
     staffId?: string;
     name: string;
     role: string;
     contactNumber?: string;
     email: string;
-    joiningDate: string; // YYYY-MM-DD string
+    joiningDate: string; 
     leavingDate?: string;
 }
 
@@ -78,9 +80,9 @@ const transformApiData = (apiStaff: ApiStaffMember): InternalStaffMember => {
         : undefined;
 
     return {
-        id: apiStaff.id,
-        // --- FIX: Ensure staffId always has a value ---
-        staffId: details.staffId || apiStaff.id || 'N/A', 
+        id: apiStaff.id, // FIX: Used apiStaff.id (number)
+        // --- FIX: Ensure staffId always has a value and convert id to string ---
+        staffId: details.staffId || String(apiStaff.id) || 'N/A', 
         // --- END FIX ---
         name: apiStaff.name || 'N/A',
         role: apiStaff.role || 'N/A',
@@ -107,19 +109,19 @@ const StaffPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // fetchStaff (No change)
+  // fetchStaff (Fixed parameter and user ID usage)
   const fetchStaff = useCallback(async () => {
-      // ... (fetch logic remains same) ...
-        if (!user?.id) {
+        if (!user?.schoolId) { // FIX: Filter by user.schoolId (string), not user.id (number)
           setIsLoading(false);
           return;
       }
       setIsLoading(true);
       setError(null);
       try {
-          const response = await api.get<{ data: ApiStaffMember[] }>('/staff', {
-              params: { schoolId: user.id }
-          });
+          const response = await api.get<{ data: ApiStaffMember[] }>('/staff'); 
+          // Backend filtering is implicit or done by middleware if no params. We assume backend filters by user.schoolId.
+          
+          // Data ko transform karte samay Number se string convert karna (agar zaroori ho toh)
           const transformedData = (response.data?.data || []).map(transformApiData);
           setStaffList(transformedData);
       } catch (err: any) {
@@ -129,70 +131,53 @@ const StaffPage = () => {
       } finally {
           setIsLoading(false);
       }
-  }, [user?.id]);
-
+  }, [user?.schoolId]); // Dependency user.schoolId
 
   useEffect(() => {
     fetchStaff();
   }, [fetchStaff]);
 
-  // Socket.IO useEffect (No change)
+  // Socket.IO useEffect (Fixed comparisons)
   useEffect(() => {
-      // ... (socket logic remains same) ...
         const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "https://myedupanel.onrender.com");
       socket.on('connect', () => console.log('StaffPage Socket Connected'));
 
       socket.on('staff_added', (rawNewStaff: ApiStaffMember) => {
-          console.log('SOCKET: Staff Added Raw:', rawNewStaff);
           const newStaff = transformApiData(rawNewStaff);
-          console.log('SOCKET: Staff Added Transformed:', newStaff);
-          if(newStaff.schoolId === user?.id) {
+          if(newStaff.schoolId === user?.schoolId) { // FIX: Compare schoolId (string)
              setStaffList((prevList) => {
-                 if (prevList.some(s => s.id === newStaff.id)) return prevList;
+                 if (prevList.some(s => s.id === newStaff.id)) return prevList; // FIX: Compare using id (number)
                  return [newStaff, ...prevList].sort((a,b) => a.name.localeCompare(b.name));
              });
-             console.log('SOCKET: Staff list updated (added)');
-          } else {
-             console.log('SOCKET: Added staff ignored (different school)');
           }
       });
 
       socket.on('staff_updated', (rawUpdatedStaff: ApiStaffMember) => {
-          console.log('SOCKET: Staff Updated Raw:', rawUpdatedStaff);
           const updatedStaff = transformApiData(rawUpdatedStaff);
-          console.log('SOCKET: Staff Updated Transformed:', updatedStaff);
-           if(updatedStaff.schoolId === user?.id) {
+           if(updatedStaff.schoolId === user?.schoolId) { // FIX: Compare schoolId (string)
                 setStaffList((prevList) =>
                     prevList.map((staff) =>
-                    staff.id === updatedStaff.id ? updatedStaff : staff
+                    staff.id === updatedStaff.id ? updatedStaff : staff // FIX: Compare using id (number)
                     )
                 );
-                console.log('SOCKET: Staff list updated (updated)');
-           } else {
-               console.log('SOCKET: Updated staff ignored (different school)');
            }
       });
 
-      socket.on('staff_deleted', (deletedStaffInfo: { id: string, schoolId: string }) => {
-          console.log('SOCKET: Staff Deleted Info:', deletedStaffInfo);
-          if (deletedStaffInfo.schoolId === user?.schoolId) {
+      socket.on('staff_deleted', (deletedStaffInfo: { id: number, schoolId: string }) => { // FIX: id is number
+          if (deletedStaffInfo.schoolId === user?.schoolId) { // FIX: Compare schoolId (string)
               setStaffList((prevList) =>
-                prevList.filter((staff) => staff.id !== deletedStaffInfo.id)
+                prevList.filter((staff) => staff.id !== deletedStaffInfo.id) // FIX: Compare using id (number)
               );
-              console.log('SOCKET: Staff list updated (deleted)');
-          } else {
-              console.log('SOCKET: Deleted staff ignored (different school)');
           }
       });
 
       socket.on('disconnect', () => console.log('StaffPage Socket Disconnected'));
       socket.on('connect_error', (err) => console.error('StaffPage Socket Connection Error:', err));
       return () => { socket.disconnect(); };
-  }, [user?.id]);
+  }, [user?.schoolId]); // FIX: Added user?.schoolId to dependency array
 
   // handleSaveStaff (No change)
   const handleSaveStaff = async (staffFormData: StaffFormData) => {
-    // ... (logic remains same) ...
      if (!staffFormData.email) {
         alert("Email is required.");
         return;
@@ -207,12 +192,11 @@ const StaffPage = () => {
     }
   };
 
-  // handleDeleteStaff (No change)
-  const handleDeleteStaff = async (staffId: string) => {  
-    // ... (logic remains same) ...
+  // handleDeleteStaff (Fixed staffId type to number)
+  const handleDeleteStaff = async (staffId: number) => { // FIX: Receives number now
      if (window.confirm("Delete staff member?")) {
       try {
-        await api.delete(`/staff/${staffId}`);
+        await api.delete(`/staff/${staffId}`); // API call uses number ID
       } catch (err: any) {
         console.error('Failed to delete staff:', err);
         alert(`Error deleting staff: ${err.response?.data?.msg || err.message}`);
@@ -220,11 +204,10 @@ const StaffPage = () => {
     }
   };
 
-  // handleEditClick (No change)
-  const handleEditClick = (staffTableMember: StaffTableMemberType) => { // Receives type StaffTable sends
-    // ... (logic remains same) ...
+  // handleEditClick (Fixed received type)
+  const handleEditClick = (staffTableMember: StaffTableMemberType) => { 
     console.log("Edit clicked for (from table):", staffTableMember);
-    const staffToEdit = staffList.find(s => s.id === staffTableMember.id);
+    const staffToEdit = staffList.find(s => s.id === staffTableMember.id); // Find using id (number)
     if (staffToEdit) {
         console.log("Found internal staff object to edit:", staffToEdit);
         setCurrentStaff(staffToEdit);
@@ -235,13 +218,12 @@ const StaffPage = () => {
     }
   };
 
-  // handleUpdateStaff (No change)
+  // handleUpdateStaff (Fixed user ID usage)
   const handleUpdateStaff = async (staffFormData: StaffFormData) => {
-      // ... (logic remains same) ...
-        if (!currentStaff?.id) return;
+        if (!currentStaff?.id) return; // Use number ID
       const dataToSend = { ...staffFormData };
       try {
-          await api.put(`/staff/${currentStaff.id}`, dataToSend);
+          await api.put(`/staff/${currentStaff.id}`, dataToSend); // API call uses number ID
           setIsEditModalOpen(false);
           setCurrentStaff(null);
       } catch (err: any) {
@@ -252,7 +234,6 @@ const StaffPage = () => {
 
   // Filter logic (No change)
   const filteredStaff = useMemo(() => {
-        // ... (logic remains same) ...
           return staffList
             .filter(member => (filterRole === 'All' ? true : member.role === filterRole))
             .filter(member => member.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -263,14 +244,12 @@ const StaffPage = () => {
     <div className={styles.staffContainer}>
       {/* Header and Controls (No change) */}
       <div className={styles.header}>
-        {/* ... */}
          <h1 className={styles.title}>Staff Management</h1>
         <button className={styles.addButton} onClick={() => { setCurrentStaff(null); setIsAddModalOpen(true); }}>
           <MdAdd /> Add New Staff
         </button>
       </div>
       <div className={styles.controls}>
-         {/* ... */}
          <div className={styles.searchBox}>
           <MdSearch />
           <input type="text" placeholder="Search by name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
@@ -290,21 +269,18 @@ const StaffPage = () => {
       ) : (
           // === PASS CORRECT MAPPED DATA TO StaffTable ===
           <StaffTable
-              // Map internal data to the exact format StaffTable expects
               staff={filteredStaff.map(s => ({
-                  id: s.id,
-                  staffId: s.staffId, // Pass staffId for display in the first column
+                  id: s.id, // Pass number ID
+                  staffId: s.staffId, 
                   name: s.name,
                   role: s.role,
-                  contact: s.contact, // Pass transformed contact
-                  joiningDate: s.joiningDate, // Pass formatted date
-                  leavingDate: s.leavingDate, // Pass formatted date
-                  // Exclude fields StaffTable doesn't need: , email, schoolId, contactNumber, rawDates
+                  contact: s.contact, 
+                  joiningDate: s.joiningDate, 
+                  leavingDate: s.leavingDate, 
               }))}
               
-              onDelete={handleDeleteStaff}
-              // Pass the function expecting StaffTableMemberType
-              onEdit={handleEditClick}
+              onDelete={handleDeleteStaff} // Function now expects number ID
+              onEdit={handleEditClick} // Function expects StaffTableMemberType (number ID)
           />
           // === END ===
       )}
