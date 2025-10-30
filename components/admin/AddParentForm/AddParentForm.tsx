@@ -1,70 +1,95 @@
-// components/admin/AddParentForm.module.scss
-
+// components/admin/AddParentForm/AddParentForm.tsx
 "use client";
 import React, { useState, useEffect } from 'react';
 import styles from './AddParentForm.module.scss';
-import axios from 'axios';
-import Select from 'react-select'; 
-import api from '@/backend/utils/api'; // <-- axios ke bajaye api instance ka istemaal karein
+import api from '@/backend/utils/api'; 
+import AsyncSelect from 'react-select/async'; 
 
-// --- FIX 1: Interface ko API response se match karein ---
-interface ApiStudent {
-  studentid: number;
-  first_name: string;
-  last_name: string;
-  class: { class_name: string } | null;
-  // (Baaki fields ki zaroorat nahi hai, lekin API yeh bhejta hai)
+// --- Interface Definitions ---
+interface StudentSearchResult {
+  id: number; 
+  name: string; 
+  class: string;
 }
 
-// --- FIX 2: FormData mein studentId ko number karein ---
 interface FormData {
   name: string;
   contactNumber: string;
   email: string;
   occupation: string;
-  studentId: number | null; // <-- String se number (ya null) kiya
+  studentId: number | null; 
 }
 
-// --- FIX 3: existingParent prop mein bhi ID ko number karein ---
+interface SelectOption {
+  value: number;
+  label: string;
+}
+
 interface AddParentFormProps {
   onClose: () => void;
   onSubmit: (data: FormData) => void;
-  existingParent?: { studentId: { id: number } } & Omit<FormData, 'studentId'> | null;
+  existingParent?: { 
+    // FIX: 'studentid' ko 'number | null' kiya
+    studentid: number | null; 
+    studentName: string; 
+  } & Omit<FormData, 'studentId'> | null;
 }
 
-// Dropdown ke liye premium styling (No Change)
+// Dropdown ke liye styling
 const customStyles = {
-  // ... (aapke styles same rahenge)
+  control: (provided: any) => ({
+    ...provided,
+    border: '1px solid #D1D5DB',
+    borderRadius: '0.5rem',
+    padding: '0.3rem',
+    boxShadow: 'none',
+    '&:hover': {
+      borderColor: '#3B82F6',
+    },
+  }),
+  option: (provided: any, state: { isSelected: boolean; isFocused: boolean; }) => ({
+    ...provided,
+    backgroundColor: state.isSelected ? '#3B82F6' : state.isFocused ? '#EFF6FF' : '#ffffff',
+    color: state.isSelected ? '#ffffff' : '#374151',
+  }),
 };
 
-// --- FIX 4: Student ka poora naam jodne ke liye helper function ---
-const getFullName = (s: { first_name?: string, last_name?: string }) => [s.first_name, s.last_name].filter(Boolean).join(' ');
+// --- Live Search Function ---
+const loadStudentOptions = (
+  inputValue: string,
+  callback: (options: SelectOption[]) => void) => {
+  if (!inputValue || inputValue.length < 2) {
+    callback([]);
+    return;
+  }
+  api.get(`/students/search?name=${inputValue}`)
+    .then(res => {
+      const results: StudentSearchResult[] = res.data;
+      const options = results.map(student => ({
+        value: student.id, 
+        label: `${student.name} (Class: ${student.class})`,
+      }));
+      callback(options);
+    })
+    .catch(err => {
+      console.error("Failed to search students", err);
+      callback([]);
+    });
+};
 
+// --- Component ---
 const AddParentForm: React.FC<AddParentFormProps> = ({ onClose, onSubmit, existingParent }) => {
   const [formData, setFormData] = useState<FormData>({
     name: '',
     contactNumber: '',
     email: '',
     occupation: '',
-    studentId: null, // <-- Default null rakha
+    studentId: null,
   });
   
-  const [students, setStudents] = useState<ApiStudent[]>([]); // <-- FIX: Naya interface use kiya
+  const [defaultStudentOption, setDefaultStudentOption] = useState<SelectOption | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        // --- FIX 5: axios.get ko api.get se badla ---
-        const res = await api.get('/students'); // API ab poora student list bhejta hai
-        setStudents(res.data);
-      } catch (error) {
-        console.error("Failed to fetch students for form", error);
-      }
-    };
-    fetchStudents();
-  }, []);
-  
   useEffect(() => {
     if (existingParent) {
       setFormData({
@@ -72,8 +97,15 @@ const AddParentForm: React.FC<AddParentFormProps> = ({ onClose, onSubmit, existi
         contactNumber: existingParent.contactNumber,
         email: existingParent.email,
         occupation: existingParent.occupation,
-        studentId: existingParent.studentId?.id || null, // <-- ID ab number hai
+        studentId: existingParent.studentid || null, // Yeh ab 'number | null' se match karega
       });
+      
+      if (existingParent.studentid && existingParent.studentName) {
+        setDefaultStudentOption({ 
+            value: existingParent.studentid, 
+            label: existingParent.studentName,
+        });
+      }
     }
   }, [existingParent]);
 
@@ -81,8 +113,8 @@ const AddParentForm: React.FC<AddParentFormProps> = ({ onClose, onSubmit, existi
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleStudentSelect = (selectedOption: any) => {
-    setFormData({ ...formData, studentId: selectedOption.value }); // <-- Value ab number hai
+  const handleStudentSelect = (selectedOption: SelectOption | null) => {
+    setFormData({ ...formData, studentId: selectedOption ? selectedOption.value : null });
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -96,12 +128,6 @@ const AddParentForm: React.FC<AddParentFormProps> = ({ onClose, onSubmit, existi
     setIsLoading(false);
   };
   
-  // --- FIX 6: Student data ko react-select format mein sahi se map karein ---
-  const studentOptions = students.map(student => ({
-    value: student.studentid, // <-- Sahi ID (number)
-    label: `${getFullName(student)} (Class: ${student.class?.class_name || 'N/A'})` // <-- Sahi Naam
-  }));
-
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       <div className={styles.formGroup}>
@@ -123,16 +149,17 @@ const AddParentForm: React.FC<AddParentFormProps> = ({ onClose, onSubmit, existi
       
       <div className={styles.formGroup}>
         <label htmlFor="studentId">Select Student</label>
-        <Select
+        <AsyncSelect
           id="studentId"
           name="studentId"
-          options={studentOptions} // <-- Ab ismein sahi data hai
+          loadOptions={loadStudentOptions} 
           styles={customStyles}
-          placeholder="Search and select a student..."
+          placeholder="Type to search a student..."
           onChange={handleStudentSelect}
-          // --- FIX 7: Value ko find karne ka logic update kiya ---
-          value={studentOptions.find(option => option.value === formData.studentId)}
-          isDisabled={isLoading}
+          defaultValue={defaultStudentOption} 
+          isDisabled={isLoading || !!existingParent} 
+          cacheOptions
+          defaultOptions
         />
       </div>
 
@@ -145,5 +172,4 @@ const AddParentForm: React.FC<AddParentFormProps> = ({ onClose, onSubmit, existi
     </form>
   );
 };
-
 export default AddParentForm;
