@@ -8,7 +8,7 @@ const getFullName = (student) => {
   return [student.first_name, student.father_name, student.last_name].filter(Boolean).join(' ');
 }
 
-// GET Classes (Aapka existing function, no change)
+// GET Classes (No Change)
 exports.getClasses = async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
@@ -24,8 +24,7 @@ exports.getClasses = async (req, res) => {
                 classid: true
             },
             orderBy: {
-                // class_name ko 'Nursery', 'LKG', 'UKG', '1', '2' ... '12' order mein sort karna tricky ho sakta hai
-                // Abhi ke liye alphabetical sort rakhte hain
+                // TODO: Is order ko numeric/custom banana hoga (e.g., Nursery, LKG, 1, 2... 12)
                 class_name: 'asc'
             }
         });
@@ -36,7 +35,7 @@ exports.getClasses = async (req, res) => {
     }
 };
 
-// POST Class (Aapka existing function, no change)
+// POST Class (No Change)
 exports.addClass = async (req, res) => {
     const { name } = req.body;
     const schoolId = req.user.schoolId;
@@ -67,10 +66,10 @@ exports.addClass = async (req, res) => {
     }
 };
 
-// --- YEH NAYA FUNCTION ADD KIYA GAYA HAI (UPDATE/EDIT) ---
+// --- FIX: updateClass function ko update kiya ---
 exports.updateClass = async (req, res) => {
-    const { name } = req.body; // Naya naam
-    const classIdInt = parseInt(req.params.id); // Class ki ID (URL se)
+    const { name } = req.body;
+    const classIdInt = parseInt(req.params.id);
     const schoolId = req.user.schoolId;
 
     // Validation
@@ -83,7 +82,7 @@ exports.updateClass = async (req, res) => {
     }
 
     try {
-        // Check karein ki naya naam pehle se toh nahi hai
+        // 1. Check karein ki naya naam pehle se toh nahi hai
         const existingClass = await prisma.classes.findFirst({
             where: {
                 class_name: trimmedName,
@@ -98,36 +97,42 @@ exports.updateClass = async (req, res) => {
             return res.status(400).json({ msg: `A class with the name '${trimmedName}' already exists.` });
         }
 
-        // Class ko update karein
-        const updatedClass = await prisma.classes.update({
+        // 2. Class ko update karne ke liye updateMany use karein
+        // Yeh check karega ki class ID aur school ID dono match ho
+        const result = await prisma.classes.updateMany({
             where: {
-                classid_schoolId: { // Prisma schema ke @unique(classid, schoolId) ke hisaab se
-                    classid: classIdInt,
-                    schoolId: schoolId
-                }
+                classid: classIdInt,  // <-- Primary key
+                schoolId: schoolId    // <-- Security check
             },
             data: {
                 class_name: trimmedName
             }
         });
 
+        // 3. Check karein ki update hua ya nahi
+        if (result.count === 0) {
+            // Ya toh class mili nahi, ya woh is school ki nahi thi
+            return res.status(404).json({ msg: 'Class not found or access denied.' });
+        }
+        
+        // 4. Updated data ko wapas bhejein
+        // updateMany poora object return nahi karta, isliye hum naya object bhej rahe hain
+        const updatedClass = { classid: classIdInt, class_name: trimmedName, schoolId: schoolId }; 
         res.status(200).json(updatedClass);
 
     } catch (err) {
         console.error("Error in updateClass:", err);
-        if (err.code === 'P2025') { // Record to update not found
-            return res.status(404).json({ msg: 'Class not found or access denied.' });
-        }
         if (err.code === 'P2002') { // Unique constraint (just in case)
              return res.status(400).json({ msg: `A class with the name '${trimmedName}' already exists.` });
         }
         res.status(500).send('Server Error');
     }
 };
+// --- END FIX ---
 
-// --- YEH NAYA FUNCTION ADD KIYA GAYA HAI (DELETE) ---
+// --- FIX: deleteClass function ko update kiya ---
 exports.deleteClass = async (req, res) => {
-    const classIdInt = parseInt(req.params.id); // Class ki ID (URL se)
+    const classIdInt = parseInt(req.params.id);
     const schoolId = req.user.schoolId;
 
     // Validation
@@ -136,22 +141,24 @@ exports.deleteClass = async (req, res) => {
     }
 
     try {
-        // --- IMPORTANT: Delete karne se pehle check karein ---
-
+        // --- Pehle checks (Same as before) ---
         // 1. Check karein ki class ka naam kisi student ko assigned toh nahi hai
-        // (Kyunki Student model 'class' ko string ki tarah save karta hai)
         const classInfo = await prisma.classes.findUnique({
-            where: { classid: classIdInt, schoolId: schoolId },
+            where: { 
+                classid: classIdInt, 
+                schoolId: schoolId 
+            },
             select: { class_name: true }
         });
 
         if (!classInfo) {
-            return res.status(404).json({ msg: 'Class not found.' });
+            return res.status(404).json({ msg: 'Class not found or access denied.' });
         }
 
+        // 2. Check Students (using class name string)
         const studentInClass = await prisma.students.findFirst({
             where: {
-                class: classInfo.class_name, // String name se check
+                class: classInfo.class_name,
                 schoolId: schoolId
             }
         });
@@ -160,10 +167,10 @@ exports.deleteClass = async (req, res) => {
             return res.status(400).json({ msg: 'Cannot delete class. Students are still assigned to this class name.' });
         }
 
-        // 2. Check karein ki classId kisi FeeRecord se linked toh nahi hai
+        // 3. Check FeeRecords (using class ID)
         const feeRecordInClass = await prisma.feeRecord.findFirst({
             where: {
-                classId: classIdInt, // ID se check
+                classId: classIdInt,
                 schoolId: schoolId
             }
         });
@@ -171,24 +178,31 @@ exports.deleteClass = async (req, res) => {
         if (feeRecordInClass) {
             return res.status(400).json({ msg: 'Cannot delete class. Fee records are linked to this class ID.' });
         }
+        // --- End Checks ---
 
-        // --- Sab check ho gaya, ab delete karein ---
-        await prisma.classes.delete({
+        // --- Delete karne ke liye deleteMany use karein ---
+        const result = await prisma.classes.deleteMany({
             where: {
-                classid_schoolId: { // Prisma schema ke @unique(classid, schoolId) ke hisaab se
-                    classid: classIdInt,
-                    schoolId: schoolId
-                }
+                classid: classIdInt,  // <-- Primary key
+                schoolId: schoolId    // <-- Security check
             }
         });
+
+        // Check karein ki delete hua ya nahi
+        if (result.count === 0) {
+            // Yeh nahi hona chahiye kyunki humne upar check kiya tha, but safety first
+            return res.status(404).json({ msg: 'Class not found or access denied (deleteMany).' });
+        }
 
         res.status(200).json({ msg: 'Class deleted successfully.' });
 
     } catch (err) {
         console.error("Error in deleteClass:", err);
-        if (err.code === 'P2025') { // Record to delete not found
+        // P2025: Record not found (agar 'findUnique' ke baad 'deleteMany' fail ho)
+        if (err.code === 'P2025') {
             return res.status(404).json({ msg: 'Class not found or access denied.' });
         }
         res.status(500).send('Server Error');
     }
 };
+// --- END FIX ---
