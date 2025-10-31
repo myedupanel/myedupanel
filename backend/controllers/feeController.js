@@ -260,73 +260,79 @@ const sendLateFeeReminders = async (req, res) => {
 };
 
 // 7. Get All Student Fee Records with Filters
-const getStudentFeeRecords = async (req, res) => { 
-    try {
-        const schoolId = req.user.schoolId;
-        const { page = 1, limit = 10, studentName, studentId, status, classId, templateId, dueDateStart, dueDateEnd } = req.query;
-        const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-        
-        let query = { schoolId };
-        
-        if (status) {
-             const statusArray = status.split(',').map(s => s.trim()).filter(s => s);
-             if (statusArray.length > 0) {
-                query.status = { in: statusArray };
-             }
-        }
-        if (classId) query.classId = parseInt(classId);
-        if (templateId) query.templateId = parseInt(templateId);
-        
-        if (dueDateStart || dueDateEnd) {
-            query.dueDate = {};
-            if (dueDateStart) query.dueDate.gte = new Date(dueDateStart); // gte = greater than or equal
-            if (dueDateEnd) query.dueDate.lte = new Date(dueDateEnd);   // lte = less than or equal
-        }
+const getStudentFeeRecords = async (req, res) => { 
+    try {
+        const schoolId = req.user.schoolId;
+        const { page = 1, limit = 10, studentName, studentId, status, classId, templateId, dueDateStart, dueDateEnd } = req.query;
+        const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+        
+        let query = { schoolId };
+        
+        if (status) {
+             const statusArray = status.split(',').map(s => s.trim()).filter(s => s);
+             if (statusArray.length > 0) {
+                query.status = { in: statusArray };
+             }
+        }
+        if (classId) query.classId = parseInt(classId);
+        if (templateId) query.templateId = parseInt(templateId);
+        
+        if (dueDateStart || dueDateEnd) {
+            query.dueDate = {};
+            if (dueDateStart) query.dueDate.gte = new Date(dueDateStart); 
+            if (dueDateEnd) query.dueDate.lte = new Date(dueDateEnd);   
+        }
 
-        if (studentName || studentId) {
-            let studentWhereClause = { schoolId };
-            if (studentName) {
-                studentWhereClause.OR = [
-                  { first_name: { contains: studentName, mode: 'insensitive' } },
-                  { father_name: { contains: studentName, mode: 'insensitive' } },
-                  { last_name: { contains: studentName, mode: 'insensitive' } },
-                ];
-            }
-            if (studentId) {
-                 studentWhereClause.roll_number = { contains: studentId, mode: 'insensitive' }; // Mongoose code 'studentId' (string) ko search kar raha tha, hum 'roll_number' ko search karenge
-            }
-            query.student = studentWhereClause; // Relation par search
+        // --- YEH HAI AAPKA FIX ---
+        // 'studentId' (e.g., "1") frontend se string ki tarah aa raha hai
+        const studentIdInt = parseInt(studentId);
+        if (studentIdInt) {
+            // Agar studentId (number) hai, toh seedha filter karein
+            query.studentId = studentIdInt;
+        } else if (studentName) {
+            // Agar studentId nahi hai, tabhi 'studentName' se search karein
+            query.student = {
+                schoolId: schoolId, 
+                OR: [
+                  { first_name: { contains: studentName } }, // 'mode' hata diya
+                  { father_name: { contains: studentName } }, // 'mode' hata diya
+                  { last_name: { contains: studentName } }, // 'mode' hata diya
+                ]
+            };
         }
-        
-        const records = await prisma.feeRecord.findMany({
-            where: query,
-            include: {
-                student: { select: { first_name: true, father_name: true, last_name: true, class: { select: { class_name: true }}, roll_number: true } },
-                template: { select: { name: true } }
-            },
-            orderBy: { id: 'desc' }, // createdAt ke bajaye 'id' (jo auto-incrementing hai)
-            take: parseInt(limit, 10),
-            skip: skip
-        });
+        // Purana 'roll_number' search (jo crash ho raha tha) hata diya gaya
+        // --- END FIX ---
+        
+        const records = await prisma.feeRecord.findMany({
+            where: query,
+            include: {
+                student: { select: { first_name: true, father_name: true, last_name: true, class: { select: { class_name: true }}, roll_number: true } },
+                template: { select: { name: true } }
+            },
+            orderBy: { id: 'desc' }, 
+            take: parseInt(limit, 10),
+            skip: skip
+        });
 
-        // Data ko frontend ke liye format karein
-        const formattedRecords = records.map(r => ({
-            ...r,
-            studentId: { // Mongoose .populate('studentId', 'name class studentId') jaisa object banayein
-                ...r.student,
-                name: getFullName(r.student),
-                class: r.student.class.class_name,
-                studentId: r.student.roll_number, // Mongoose code custom 'studentId' field use kar raha tha
-            },
-            templateId: r.template
-        }));
-            
-        const totalDocuments = await prisma.feeRecord.count({ where: query });
-        
-        res.status(200).json({ data: formattedRecords, totalPages: Math.ceil(totalDocuments / parseInt(limit, 10)), currentPage: parseInt(page, 10) });
-      } catch (error) { console.error("Error in getStudentFeeRecords:", error); res.status(500).send("Server Error"); }
+        const formattedRecords = records.map(r => ({
+            ...r,
+            studentId: { 
+                ...r.student,
+                name: getFullName(r.student),
+                class: r.student?.class?.class_name, 
+                studentId: r.student?.roll_number, 
+            },
+            templateId: r.template
+        }));
+            
+        const totalDocuments = await prisma.feeRecord.count({ where: query });
+        
+        res.status(200).json({ data: formattedRecords, totalPages: Math.ceil(totalDocuments / parseInt(limit, 10)), currentPage: parseInt(page, 10) });
+      } catch (error) { 
+        console.error("Error in getStudentFeeRecords:", error); 
+        res.status(500).send("Server Error"); 
+    }
 };
-
 // 8. Get Processing Payments
 const getProcessingPayments = async (req, res) => { 
      try {
