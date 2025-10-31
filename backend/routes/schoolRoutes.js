@@ -10,7 +10,7 @@ const prisma = require('../config/prisma'); // Prisma client
 // --- FIX ENDS HERE ---
 
 // --- YEH HAI AAPKA FIX (PROBLEM 1) ---
-// (Yeh check karein ki yeh dependencies installed hain: npm install multer streamifier)
+// (Yeh dependencies 'backend' folder mein installed honi chahiye)
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
@@ -123,7 +123,7 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
       return res.status(404).json({ msg: 'School profile not found' });
     }
 
-    // Yeh line (137) ab fail nahi honi chahiye (agar multer installed hai)
+    // Yeh line (128) ab fail nahi honi chahiye (agar multer installed hai)
     const {
       name, name2, place, address, contactNumber, email,
       recognitionNumber, udiseNo, session
