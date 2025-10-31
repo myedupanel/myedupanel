@@ -107,7 +107,9 @@ router.post('/', [authMiddleware, authorize('Admin')], async (req, res) => { // 
              }
         }
          if (err instanceof Prisma.PrismaClientValidationError) { // Prisma validation error
-            return res.status(400).json({ msg: 'Invalid data provided.' });
+            // YEH ERROR AAYEGA KYUNKI 'details' FIELD EXIST NAHI KARTA
+            console.error("Prisma Validation Error (Hint: Check if 'details' field exists in User schema):", err.message);
+            return res.status(400).json({ msg: 'Invalid data provided. (Check schema)' });
         }
         res.status(500).send('Server Error creating staff.');
     }
@@ -137,7 +139,9 @@ router.get('/', [authMiddleware, authorize('Admin')], async (req, res) => { // R
                 name: true,
                 role: true,
                 email: true,
-                details: true,
+                // --- YEH HAI AAPKA FIX ---
+                // details: true, // <-- YEH LINE CRASH HO RAHI THI, ISLIYE COMMENT OUT KI
+                // --- END FIX ---
                 createdAt: true,
                 schoolId: true
                 // Password automatically exclude ho jaata hai agar select use karein
@@ -238,7 +242,9 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { /
              }
         }
          if (err instanceof Prisma.PrismaClientValidationError) {
-            return res.status(400).json({ msg: 'Invalid data provided.' });
+             // YEH ERROR AAYEGA KYUNKI 'details' FIELD EXIST NAHI KARTA
+            console.error("Prisma Validation Error (Hint: Check if 'details' field exists in User schema):", err.message);
+            return res.status(400).json({ msg: 'Invalid data provided. (Check schema)' });
         }
         res.status(500).send('Server Error updating staff.');
     }
