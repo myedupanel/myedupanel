@@ -1,10 +1,9 @@
 // backend/controllers/classController.js
-
 const prisma = require('../config/prisma');
 
-// Helper function (Aapke code se)
+// Helper function (No Change)
 const getFullName = (student) => {
-  if (!student) return ''; // Safety check
+  if (!student) return ''; 
   return [student.first_name, student.father_name, student.last_name].filter(Boolean).join(' ');
 }
 
@@ -24,7 +23,6 @@ exports.getClasses = async (req, res) => {
                 classid: true
             },
             orderBy: {
-                // TODO: Is order ko numeric/custom banana hoga (e.g., Nursery, LKG, 1, 2... 12)
                 class_name: 'asc'
             }
         });
@@ -66,13 +64,12 @@ exports.addClass = async (req, res) => {
     }
 };
 
-// --- FIX: updateClass function ko update kiya ---
+// PUT/UPDATE Class (No Change)
 exports.updateClass = async (req, res) => {
     const { name } = req.body;
     const classIdInt = parseInt(req.params.id);
     const schoolId = req.user.schoolId;
 
-    // Validation
     if (isNaN(classIdInt)) {
         return res.status(400).json({ msg: 'Invalid Class ID.' });
     }
@@ -97,8 +94,7 @@ exports.updateClass = async (req, res) => {
             return res.status(400).json({ msg: `A class with the name '${trimmedName}' already exists.` });
         }
 
-        // 2. Class ko update karne ke liye updateMany use karein
-        // Yeh check karega ki class ID aur school ID dono match ho
+        // 2. Class ko update karein (updateMany use karke)
         const result = await prisma.classes.updateMany({
             where: {
                 classid: classIdInt,  // <-- Primary key
@@ -109,65 +105,48 @@ exports.updateClass = async (req, res) => {
             }
         });
 
-        // 3. Check karein ki update hua ya nahi
         if (result.count === 0) {
-            // Ya toh class mili nahi, ya woh is school ki nahi thi
             return res.status(404).json({ msg: 'Class not found or access denied.' });
         }
         
-        // 4. Updated data ko wapas bhejein
-        // updateMany poora object return nahi karta, isliye hum naya object bhej rahe hain
         const updatedClass = { classid: classIdInt, class_name: trimmedName, schoolId: schoolId }; 
         res.status(200).json(updatedClass);
 
     } catch (err) {
         console.error("Error in updateClass:", err);
-        if (err.code === 'P2002') { // Unique constraint (just in case)
+        if (err.code === 'P2002') { 
              return res.status(400).json({ msg: `A class with the name '${trimmedName}' already exists.` });
         }
         res.status(500).send('Server Error');
     }
 };
-// --- END FIX ---
 
 // --- FIX: deleteClass function ko update kiya ---
 exports.deleteClass = async (req, res) => {
     const classIdInt = parseInt(req.params.id);
     const schoolId = req.user.schoolId;
 
-    // Validation
     if (isNaN(classIdInt)) {
         return res.status(400).json({ msg: 'Invalid Class ID.' });
     }
 
     try {
-        // --- Pehle checks (Same as before) ---
-        // 1. Check karein ki class ka naam kisi student ko assigned toh nahi hai
-        const classInfo = await prisma.classes.findUnique({
-            where: { 
-                classid: classIdInt, 
-                schoolId: schoolId 
-            },
-            select: { class_name: true }
-        });
-
-        if (!classInfo) {
-            return res.status(404).json({ msg: 'Class not found or access denied.' });
-        }
-
-        // 2. Check Students (using class name string)
+        // --- Pehle checks ---
+        
+        // 1. Check Students (FIXED: Ab string ke bajaye ID se check karega)
         const studentInClass = await prisma.students.findFirst({
             where: {
-                class: classInfo.class_name,
+                classId: classIdInt,  // <-- YEH HAI FIX (Pehle yahaan 'class: className' tha)
                 schoolId: schoolId
             }
         });
 
         if (studentInClass) {
-            return res.status(400).json({ msg: 'Cannot delete class. Students are still assigned to this class name.' });
+            // Frontend ko yahi error message dikha raha tha
+            return res.status(400).json({ msg: 'Cannot delete class. Students are still assigned to this class ID.' });
         }
 
-        // 3. Check FeeRecords (using class ID)
+        // 2. Check FeeRecords (Yeh pehle se hi sahi tha)
         const feeRecordInClass = await prisma.feeRecord.findFirst({
             where: {
                 classId: classIdInt,
@@ -180,17 +159,15 @@ exports.deleteClass = async (req, res) => {
         }
         // --- End Checks ---
 
-        // --- Delete karne ke liye deleteMany use karein ---
+        // --- Ab delete karein (Yeh pehle se hi sahi tha) ---
         const result = await prisma.classes.deleteMany({
             where: {
-                classid: classIdInt,  // <-- Primary key
-                schoolId: schoolId    // <-- Security check
+                classid: classIdInt,
+                schoolId: schoolId
             }
         });
 
-        // Check karein ki delete hua ya nahi
         if (result.count === 0) {
-            // Yeh nahi hona chahiye kyunki humne upar check kiya tha, but safety first
             return res.status(404).json({ msg: 'Class not found or access denied (deleteMany).' });
         }
 
@@ -198,7 +175,6 @@ exports.deleteClass = async (req, res) => {
 
     } catch (err) {
         console.error("Error in deleteClass:", err);
-        // P2025: Record not found (agar 'findUnique' ke baad 'deleteMany' fail ho)
         if (err.code === 'P2025') {
             return res.status(404).json({ msg: 'Class not found or access denied.' });
         }
