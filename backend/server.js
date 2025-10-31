@@ -1,10 +1,7 @@
-// backend/server.js
-
-// --- FIX: Only run dotenv in development (non-production) ---
 if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config(); // Environment variables load karein (sirf local par)
+  require('dotenv').config(); 
+  console.log("Running in development mode, loaded .env file.");
 }
-// --- END FIX ---
 
 const express = require('express');
 const cors = require('cors');

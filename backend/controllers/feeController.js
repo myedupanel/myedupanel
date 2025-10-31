@@ -743,12 +743,21 @@ const getStudentReportByClass = async (req, res) => { /* ... (Poora function cod
 // 24. Create Payment Order (Razorpay)
 const createPaymentOrder = async (req, res) => { 
      try {
-        // --- FIX: Initialize Razorpay inside the function ---
-        const razorpay = new Razorpay({
-            key_id: process.env.RAZORPAY_KEY_ID,
-            key_secret: process.env.RAZORPAY_KEY_SECRET,
-        });
-        // --- END FIX ---
+let razorpay;if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+
+    razorpay = new Razorpay({
+
+        key_id: process.env.RAZORPAY_KEY_ID,
+
+        key_secret: process.env.RAZORPAY_KEY_SECRET,
+
+    });
+
+   } else {
+
+    console.warn("RAZORPAY KEYS NOT SET. Online payments will fail. Server will start.");
+
+}
 
         const { amount, feeRecordId } = req.body;
         const schoolId = req.user.schoolId;
