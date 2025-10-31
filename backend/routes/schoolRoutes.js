@@ -2,41 +2,44 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, authorize } = require('../middleware/authMiddleware');
-const prisma = require('../config/prisma'); // Prisma client
 
-// --- NAYA KADAM 1: File upload ke liye dependencies import karein ---
+// --- YEH HAI AAPKA FIX (PROBLEM 2) ---
+// Hum 'Prisma' library ko import kar rahe hain taaki 'instanceof' error theek ho
+const { Prisma } = require('@prisma/client'); 
+const prisma = require('../config/prisma'); // Prisma client
+// --- FIX ENDS HERE ---
+
+// --- YEH HAI AAPKA FIX (PROBLEM 1) ---
+// (Yeh check karein ki yeh dependencies installed hain: npm install multer streamifier)
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
-require('../config/cloudinaryConfig'); // Aapka Cloudinary config (jisse 'api_key' milti hai)
+require('../config/cloudinaryConfig'); // Aapka Cloudinary config
+// --- FIX ENDS HERE ---
 
-// --- NAYA KADAM 2: Multer ko setup karein ---
-// Hum file ko disk par save nahi karenge, memory mein rakhenge
+// Multer setup
 const storage = multer.memoryStorage();
 const upload = multer({ 
     storage: storage,
-    limits: { fileSize: 800 * 1024 } // 800KB limit (jo aapne request ki thi)
+    limits: { fileSize: 800 * 1024 } // 800KB limit
 });
 
-// --- NAYA KADAM 3: Cloudinary upload ke liye helper function ---
-// Yeh function ek file buffer lega aur use Cloudinary par upload karke URL dega
+// Cloudinary upload helper
 const uploadToCloudinary = (fileBuffer) => {
   return new Promise((resolve, reject) => {
-    // Cloudinary uploader ko ek stream chahiye
     const cld_upload_stream = cloudinary.uploader.upload_stream(
       { 
-        folder: "school_logos", // Cloudinary mein 'school_logos' naam ka folder ban jayega
+        folder: "school_logos", 
         resource_type: "image"
       },
       (error, result) => {
         if (result) {
-          resolve(result.secure_url); // Upload successful, naya URL return karein
+          resolve(result.secure_url); 
         } else {
-          reject(error); // Upload fail
+          reject(error); 
         }
       }
     );
-    // File buffer ko stream mein convert karke Cloudinary ko pipe karein
     streamifier.createReadStream(fileBuffer).pipe(cld_upload_stream);
   });
 };
@@ -44,10 +47,8 @@ const uploadToCloudinary = (fileBuffer) => {
 
 /*
  * @route   GET /api/school/profile
- * @desc    Get logged-in user's school profile
- * @access  Private
+ * (Is route mein koi badlaav nahi)
  */
-// (Is route mein koi badlaav nahi)
 router.get('/profile', [authMiddleware], async (req, res) => {
   try {
     const schoolId = req.user.schoolId;
@@ -69,12 +70,10 @@ router.get('/profile', [authMiddleware], async (req, res) => {
   }
 });
 
-/**
+/*
  * @route   GET /api/school/info
- * @desc    Get basic school info for report cards
- * @access  Private
+ * (Is route mein koi badlaav nahi)
  */
-// (Is route mein koi badlaav nahi)
 router.get('/info', [authMiddleware], async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
@@ -107,17 +106,10 @@ router.get('/info', [authMiddleware], async (req, res) => {
 });
 
 
-// =======================================================
-// === YEH ROUTE POORI TARAH UPDATE KIYA GAYA HAI ===
-// =======================================================
-
 /*
  * @route   PUT /api/school/profile
- * @desc    Update logged-in user's school profile (with file upload)
- * @access  Private (Admin only)
+ * (Yeh route pehle se hi file upload ke liye sahi hai)
  */
-// --- NAYA KADAM 4: 'upload.single('logo')' middleware ko add karein ---
-// 'logo' wahi key hai jo humne frontend 'FormData' mein (data.append('logo', ...)) set ki thi
 router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo')], async (req, res) => {
   console.log("[PUT /profile] Request received (multipart/form-data).");
   try {
@@ -131,12 +123,11 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
       return res.status(404).json({ msg: 'School profile not found' });
     }
 
-    // --- NAYA KADAM 5: Text data ko 'req.body' se lein ---
-    // (Multer 'FormData' se text fields ko 'req.body' mein daal deta hai)
+    // Yeh line (137) ab fail nahi honi chahiye (agar multer installed hai)
     const {
       name, name2, place, address, contactNumber, email,
       recognitionNumber, udiseNo, session
-    } = req.body;
+    } = req.body; 
 
     const updateFields = {};
     if (name !== undefined) updateFields.name = name;
@@ -149,27 +140,19 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
     if (udiseNo !== undefined) updateFields.udiseNo = udiseNo;
     if (session !== undefined) updateFields.session = session;
 
-    // --- NAYA KADAM 6: File ko 'req.file' se lein aur upload karein ---
-    // (Multer file ko 'req.file' mein daalta hai)
     if (req.file) {
       console.log("[PUT /profile] New logo file detected. Uploading to Cloudinary...");
       try {
         const imageUrl = await uploadToCloudinary(req.file.buffer);
-        updateFields.logoUrl = imageUrl; // Database mein naya URL save karein
+        updateFields.logoUrl = imageUrl; 
         console.log(`[PUT /profile] Upload successful. URL: ${imageUrl}`);
       } catch (uploadError) {
         console.error("[PUT /profile] Cloudinary upload failed:", uploadError);
-        // Agar upload fail ho toh bhi profile update hone dein (bina logo ke)
-        // Ya aap yahaan error bhej sakte hain:
-        // return res.status(500).json({ msg: 'Image upload failed.' });
       }
     } else {
       console.log("[PUT /profile] No new logo file detected.");
-      // Agar user ne nayi image nahi di, toh hum 'logoUrl' ko nahi chhedenge
-      // (frontend se 'logoUrl' text field ab aa hi nahi raha hai)
     }
 
-    // --- NAYA KADAM 7: Database ko update karein ---
     const updatedSchool = await prisma.school.update({
       where: { id: schoolId },
       data: updateFields
@@ -179,28 +162,27 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
        req.io.emit('school_profile_updated', updatedSchool);
     }
 
-    // Frontend ko naya data (aur token agar zaroori ho) bhejein
-    // (Humne token logic ko 'admin.js' mein move kar diya hai, yahaan seedha response bhej sakte hain)
     res.json({ msg: 'School profile updated successfully', school: updatedSchool });
 
   } catch (err) {
     console.error("[PUT /profile] Error:", err);
 
+    // --- YEH HAI AAPKA FIX (PROBLEM 2) ---
+    // 'prisma.PrismaClientValidationError' ko 'Prisma.PrismaClientValidationError' kiya
+    if (err instanceof Prisma.PrismaClientValidationError) {
+         return res.status(400).json({ msg: 'Validation error. Please check your data.' });
+    }
+    // --- FIX ENDS HERE ---
+
     if (err.code === 'P2002' && err.meta?.target?.includes('udiseNo')) {
         return res.status(400).json({ message: `Error: This UDISE No. is already in use.` });
     }
-    if (err instanceof prisma.PrismaClientValidationError) {
-         return res.status(400).json({ msg: 'Validation error. Please check your data.' });
-    }
-    // Multer error (File too large)
+    
     if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
          return res.status(413).json({ message: 'File is too large. Max 800KB allowed.' });
     }
     res.status(500).send('Server Error');
   }
 });
-// =======================================================
-// === END UPDATED ROUTE ===
-// =======================================================
 
 module.exports = router;
