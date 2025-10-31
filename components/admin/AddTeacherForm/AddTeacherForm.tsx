@@ -1,8 +1,9 @@
+// components/admin/AddTeacherForm/AddTeacherForm.tsx
 "use client";
 import React, { useState, useEffect } from 'react';
 import styles from './AddTeacherForm.module.scss';
 
-// --- BADLAV 1: "teacherId" ko data shape mein add karein ---
+// Yeh interface form ke fields ko define karta hai
 interface TeacherData {
   teacherId: string;
   name: string;
@@ -11,14 +12,28 @@ interface TeacherData {
   email: string;
 }
 
+// --- YEH HAI AAPKA FIX ---
+// Yeh interface 'page.tsx' se aa rahe data ko define karta hai
+interface TeacherDataFromParent {
+  teacher_dbid: number; // FIX: 'id: string' ko 'teacher_dbid: number' se badla
+  teacherId: string;
+  name: string;
+  subject: string;
+  contactNumber: string;
+  email: string;
+  schoolId?: string;
+  schoolName?: string;
+}
+
 interface AddTeacherFormProps {
   onClose: () => void;
   onSubmit: (data: TeacherData) => void;
-  existingTeacher?: { id: string } & TeacherData | null;
+  // FIX: 'existingTeacher' ab naya 'TeacherDataFromParent' type expect karega
+  existingTeacher?: TeacherDataFromParent | null;
 }
+// --- FIX ENDS HERE ---
 
 const AddTeacherForm: React.FC<AddTeacherFormProps> = ({ onClose, onSubmit, existingTeacher }) => {
-  // --- BADLAV 2: Initial state mein "teacherId" add karein ---
   const [formData, setFormData] = useState<TeacherData>({
     teacherId: '',
     name: '',
@@ -32,7 +47,7 @@ const AddTeacherForm: React.FC<AddTeacherFormProps> = ({ onClose, onSubmit, exis
 
   useEffect(() => {
     if (existingTeacher) {
-      // --- BADLAV 3: Edit karte waqt "teacherId" ko bhi set karein ---
+      // Yeh 'existingTeacher' (naye type) se form ko set karega
       setFormData({
         teacherId: existingTeacher.teacherId,
         name: existingTeacher.name,
@@ -55,8 +70,10 @@ const AddTeacherForm: React.FC<AddTeacherFormProps> = ({ onClose, onSubmit, exis
     setIsLoading(true);
     setError('');
     try {
+        // Yeh 'onSubmit' ko call karega, jo 'page.tsx' mein 'handleFormSubmit' hai
         await onSubmit(formData);
     } catch (err: any) {
+        // Agar 'handleFormSubmit' (API call) fail hota hai, toh error yahaan dikhega
         setError(err.response?.data?.message || 'An error occurred.');
     } finally {
         setIsLoading(false);
@@ -65,7 +82,6 @@ const AddTeacherForm: React.FC<AddTeacherFormProps> = ({ onClose, onSubmit, exis
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
-      {/* --- BADLAV 4: "Teacher ID" ka naya input field --- */}
       <div className={styles.formGroup}>
         <label htmlFor="teacherId">Teacher ID</label>
         <input 
@@ -85,7 +101,7 @@ const AddTeacherForm: React.FC<AddTeacherFormProps> = ({ onClose, onSubmit, exis
         <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required disabled={isLoading} />
       </div>
       <div className={styles.formGroup}>
-        <label htmlFor="subject">Subject 2</label>
+        <label htmlFor="subject">Subject</label> {/* "Subject 2" ko "Subject" kar diya */}
         <input type="text" id="subject" name="subject" value={formData.subject} onChange={handleChange} required disabled={isLoading} />
       </div>
       <div className={styles.formGroup}>
@@ -110,4 +126,3 @@ const AddTeacherForm: React.FC<AddTeacherFormProps> = ({ onClose, onSubmit, exis
 };
 
 export default AddTeacherForm;
-

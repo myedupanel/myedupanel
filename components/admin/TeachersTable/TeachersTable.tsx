@@ -1,12 +1,13 @@
+// components/admin/TeachersTable/TeachersTable.tsx
 "use client";
 import React from 'react';
 import styles from './TeachersTable.module.scss';
 import { FiEdit, FiTrash2 } from 'react-icons/fi';
 
-// Step 1: Add teacherId to the interface
-interface Teacher {
-  id: string;
-  teacherId: string;
+// --- FIX: Interface ko 'page.tsx' ke 'TeacherData' se match kiya ---
+interface TeacherDataProp {
+  teacher_dbid: number; // Database ID (ab number hai)
+  teacherId: string;    // Form waali ID (jaise "T-101")
   name: string;
   subject: string;
   contactNumber: string;
@@ -14,9 +15,9 @@ interface Teacher {
 }
 
 interface TeachersTableProps {
-  teachers: Teacher[];
-  onDelete: (id: string) => void;
-  onEdit: (teacher: Teacher) => void;
+  teachers: TeacherDataProp[]; // FIX: Naya type use kiya
+  onDelete: (id: number) => void; // FIX: ID ab number hai
+  onEdit: (teacher: TeacherDataProp) => void; // FIX: Naya type use kiya
 }
 
 const TeachersTable: React.FC<TeachersTableProps> = ({ teachers, onDelete, onEdit }) => {
@@ -25,7 +26,6 @@ const TeachersTable: React.FC<TeachersTableProps> = ({ teachers, onDelete, onEdi
       <table className={styles.table}>
         <thead>
           <tr>
-            {/* Step 2: Add the new column header */}
             <th>Teacher ID</th>
             <th>Teacher Name</th>
             <th>Subject</th>
@@ -36,8 +36,8 @@ const TeachersTable: React.FC<TeachersTableProps> = ({ teachers, onDelete, onEdi
         </thead>
         <tbody>
           {teachers.map((teacher) => (
-            <tr key={teacher.id}>
-              {/* Step 3: Add the data cell for the ID */}
+            // FIX: Key ko 'teacher_dbid' (number ID) kiya
+            <tr key={teacher.teacher_dbid}>
               <td>{teacher.teacherId}</td>
               <td>{teacher.name}</td>
               <td>{teacher.subject}</td>
@@ -48,7 +48,8 @@ const TeachersTable: React.FC<TeachersTableProps> = ({ teachers, onDelete, onEdi
                   <button onClick={() => onEdit(teacher)} className={`${styles.actionBtn} ${styles.edit}`}>
                     <FiEdit />
                   </button>
-                  <button onClick={() => onDelete(teacher.id)} className={`${styles.actionBtn} ${styles.delete}`}>
+                  {/* FIX: 'onDelete' ab number ID (teacher_dbid) bhejega */}
+                  <button onClick={() => onDelete(teacher.teacher_dbid)} className={`${styles.actionBtn} ${styles.delete}`}>
                     <FiTrash2 />
                   </button>
                 </div>
