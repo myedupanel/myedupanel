@@ -2,10 +2,71 @@
 
 /* --- Form Styles (Can reuse from Bonafide or make specific) --- */
 .form { display: flex; flex-direction: column; gap: 1rem; }
-.formGroup { display: flex; flex-direction: column; label { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: #555; } input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.95rem; font-family: inherit; box-sizing: border-box; &:focus { border-color: #2980b9; outline: none; box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.2); } } textarea { resize: vertical; min-height: 60px; } }
-.formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; @media (max-width: 768px) { grid-template-columns: 1fr; } } // Basic grid
-// Add a 3-column grid variation if needed for point 14
-.formGrid3Col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; @media (max-width: 768px) { grid-template-columns: 1fr; } }
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #555;
+  }
+  input[type="text"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    box-sizing: border-box;
+    &:focus {
+      border-color: #2980b9;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.2);
+    }
+  }
+  textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+}
+
+.formGrid { // 2 Columns
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// --- FIX 1: Renamed to formGrid3 ---
+.formGrid3 { // 3 Columns
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+// --- END FIX ---
+
+// --- FIX 2: Added formGrid4 ---
+.formGrid4 { // 4 Columns
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  @media (max-width: 992px) { // Break earlier for 4 columns
+    grid-template-columns: 1fr 1fr; // Go to 2 columns
+  }
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr; // Go to 1 column
+  }
+}
+// --- END FIX ---
 
 
 /* --- Leaving Certificate Preview Styles --- */

@@ -1,6 +1,6 @@
-/* app/admin/students/generate-leaving-certificate/LeavingCertificate.module.scss */
+/* components/admin/certificates/LeavingCertificate.module.scss */
 
-/* --- Page Layout --- */
+/* --- Page Layout (Used by the page.tsx) --- */
 .pageContainer { padding: 2rem; background-color: #f4f7fa; }
 .header { margin-bottom: 2rem; h1 { font-size: 2rem; font-weight: 700; color: #2c3e50; } p { font-size: 1rem; color: #555; } }
 .builderLayout { display: grid; grid-template-columns: 350px 1fr; gap: 2rem; align-items: flex-start; }
@@ -15,13 +15,41 @@
 .dashboardLinkButton { display: inline-flex; align-items: center; gap: 8px; margin-top: 2rem; padding: 12px 20px; background-color: #34495e; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: background-color 0.2s ease; &:hover { background-color: #2c3e50; } }
 .note { font-size: 0.85rem; color: #7f8c8d; background-color: #fdfaf3; border: 1px solid #f3e5ab; padding: 10px; border-radius: 4px; margin-top: 1rem; }
 
-/* --- Form Styles (Can reuse from Bonafide or make specific) --- */
+/* --- Form Styles (Used by LeavingCertificateForm.tsx) --- */
 .form { display: flex; flex-direction: column; gap: 1rem; }
 .formGroup { display: flex; flex-direction: column; label { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: #555; } input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.95rem; font-family: inherit; box-sizing: border-box; &:focus { border-color: #2980b9; outline: none; box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.2); } } textarea { resize: vertical; min-height: 60px; } }
 .formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; @media (max-width: 768px) { grid-template-columns: 1fr; } } // Basic grid
 
+// --- FIX: ADDED .formGrid3 and .formGrid4 ---
+.formGrid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); // 3 equal columns
+  gap: 1rem;
 
-/* --- ✅ Leaving Certificate Preview Styles --- */
+  @media (max-width: 992px) { // Tablet par
+    grid-template-columns: 1fr 1fr; // 2 column
+  }
+  @media (max-width: 768px) { // Mobile par
+    grid-template-columns: 1fr; // 1 column
+  }
+}
+
+.formGrid4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); // 4 equal columns
+  gap: 1rem;
+
+  @media (max-width: 1200px) { // Chhote desktop par
+    grid-template-columns: 1fr 1fr; // 2 column
+  }
+  @media (max-width: 768px) { // Mobile par
+    grid-template-columns: 1fr; // 1 column
+  }
+}
+// --- END FIX ---
+
+
+/* --- Leaving Certificate Preview Styles (No Change) --- */
 .certificatePaper {
   width: 210mm;
   min-height: 297mm;
@@ -37,7 +65,7 @@
   display: flex;
   flex-direction: column;
 }
-
+// ... (baaki sabhi styles .certHeader se .certFooter tak same rahenge) ...
 .certHeader {
   display: flex;
   justify-content: space-between; // Push affiliation info right

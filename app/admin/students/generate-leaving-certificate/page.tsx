@@ -1,7 +1,6 @@
 // app/admin/students/generate-leaving-certificate/page.tsx
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
-// ✅ Use the new SCSS file
 import styles from './LeavingCertificate.module.scss';
 import StudentSearch from '@/components/admin/StudentSearch/StudentSearch';
 import { FiDownload, FiPrinter } from 'react-icons/fi';
@@ -12,28 +11,36 @@ import Link from 'next/link';
 import { MdGridView } from 'react-icons/md';
 import { useAuth } from '@/app/context/AuthContext';
 
-// ✅ Import the new components and ensure correct paths
 import LeavingCertificatePreview from '@/components/admin/LeavingCertificatePreview/LeavingCertificatePreview';
-import LeavingCertificateForm from '@/components/admin/certificates/LeavingCertificateForm';
+import LeavingCertificateForm from '@/components/admin/certificates/LeavingCertificateForm'; // Path sahi hai
 
-// --- Interfaces (Defined within the page for clarity, or import from types file) ---
-export interface Student { // Base Student + LC specific fields StudentSearch MUST return
-  id: string;
-  name: string;
-  class?: string; // Current Class
-  dob?: string;
+// --- FIX 1: Student interface ko update kiya taaki saari details aa sakein ---
+// (StudentSearch ko yeh sab return karna hoga)
+export interface Student {
+  id: string; // Prisma 'studentid' (Int) - StudentSearch ko string mein convert karna hoga
+  name: string; // Poora naam
+  class?: string; // Current Class name (e.g., "7")
+  dob?: string; // YYYY-MM-DD format mein
   address?: string;
-  studentId?: string; // Register No (S.No 1)
-  aadhaarNo?: string; // U.I.D (S.No 2)
-  motherName?: string; // (S.No 4)
-  nationality?: string; // (S.No 5) - Default to Indian if missing?
-  caste?: string; // (S.No 6)
-  birthPlace?: string; // (S.No 7)
-  dobInWords?: string; // (S.No 9) - Ideally generate this if not stored
-  // Add any other fields StudentSearch returns
+  studentId?: string; // Register No (Point 1 - Prisma 'roll_number')
+  aadhaarNo?: string; // U.I.D (Point 2 - Prisma 'uid_number')
+  motherName?: string; // (Point 4 - Prisma 'mother_name')
+  nationality?: string; // (Point 5)
+  motherTongue?: string; // (Point 5)
+  religion?: string; // (Point 5)
+  caste?: string; // (Point 5)
+  birthPlace?: string; // (Point 6)
+  birthTaluka?: string; // (Point 6)
+  birthDistrict?: string; // (Point 6)
+  birthState?: string; // (Point 6)
+  dobInWords?: string; // (Point 8)
+  dateOfAdmission?: string; // (Point 10)
+  standardAdmitted?: string; // (Point 10)
+  previousSchool?: string; // (Point 9)
 }
+// --- END FIX ---
 
-export interface SchoolDetails { // Include Affiliation info
+export interface SchoolDetails {
   name: string;
   name2?: string;
   address: string;
@@ -43,25 +50,44 @@ export interface SchoolDetails { // Include Affiliation info
   udiseNo?: string;
   logoUrl?: string;
   place?: string;
-  affiliationIndex?: string; // INDEX No.
-  affiliationDetails?: string; // Affiliated: XXXX
+  affiliationIndex?: string;
+  affiliationDetails?: string;
 }
 
-export interface LeavingFormData { // Form fields specific to LC
-  previousSchool?: string; // (S.No 10)
-  dateOfAdmission?: string; // (S.No 11)
-  standardAdmitted?: string; // (S.No 11)
-  progress?: string; // (S.No 12)
-  conduct?: string; // (S.No 12)
-  dateOfLeaving?: string; // (S.No 13)
-  standardLeaving?: string; // (S.No 14 - e.g., "5th")
-  standardLeavingWords?: string; // (S.No 14 - e.g., "Fifth")
-  sinceWhenLeaving?: string; // (S.No 14 - e.g., "June 2025")
-  reasonForLeaving?: string; // (S.No 15)
-  remarks?: string; // (S.No 16)
-  issueDate?: string; // (Footer)
-  signatoryRole?: string; // (Footer)
+// --- FIX 2: LeavingFormData interface ko Form component se match kiya ---
+export interface LeavingFormData {
+  // Fields from image header
+  genRegNo?: string;
+  regNo?: string;
+  
+  // Fields from image body
+  studentAadharNo?: string; // Point 2
+  nationality?: string;     // Point 5
+  motherTongue?: string;    // Point 5
+  religion?: string;        // Point 5
+  caste?: string;           // Point 5
+  birthPlace?: string;      // Point 6
+  birthTaluka?: string;     // Point 6
+  birthDistrict?: string;   // Point 6
+  birthState?: string;      // Point 6
+  dobWords?: string;        // Point 8
+
+  // Aapke existing fields (Points 9-16 & Footer)
+  previousSchool?: string;    // Point 9
+  dateOfAdmission?: string;   // Point 10
+  standardAdmitted?: string;  // Point 10
+  progress?: string;          // Point 11
+  conduct?: string;           // Point 12
+  dateOfLeaving?: string;     // Point 13
+  standardLeaving?: string;   // Point 14
+  standardLeavingWords?: string; // Point 14
+  sinceWhenLeaving?: string;  // Point 14
+  reasonForLeaving?: string;  // Point 15
+  remarks?: string;           // Point 16
+  issueDate?: string;         // Footer
+  signatoryRole?: string;     // Footer
 }
+// --- END FIX ---
 
 
 // --- MAIN PAGE COMPONENT ---
@@ -70,66 +96,111 @@ const LeavingCertificateBuilderPage = () => {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const certificateRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ Use the correct LeavingFormData state
+  // --- FIX 3: formData state ko naye interface se match kiya ---
   const [formData, setFormData] = useState<LeavingFormData>({
+    // Header
+    genRegNo: '',
+    regNo: '',
+    // Point 2-8 (Student se pre-fill honge)
+    studentAadharNo: '',
+    nationality: 'Indian', // Default
+    motherTongue: '',
+    religion: '',
+    caste: '',
+    birthPlace: '',
+    birthTaluka: '',
+    birthDistrict: '',
+    birthState: '',
+    dobWords: '',
+    // Point 9-16 & Footer
     previousSchool: '',
     dateOfAdmission: '',
     standardAdmitted: '',
-    progress: 'Good',
-    conduct: 'Good',
+    progress: 'Good', // Default
+    conduct: 'Good', // Default
     dateOfLeaving: new Date().toISOString().split('T')[0],
-    standardLeaving: '', // Will be set from student's current class
+    standardLeaving: '',
     standardLeavingWords: '',
     sinceWhenLeaving: '',
-    reasonForLeaving: '',
+    reasonForLeaving: "Parent's Application", // Default
     remarks: '',
     issueDate: new Date().toISOString().split('T')[0],
     signatoryRole: 'Head Master'
   });
+  // --- END FIX ---
 
-  // ✅ Use the correct SchoolDetails state
-  const [schoolDetails, setSchoolDetails] = useState<SchoolDetails>({
+  const [schoolDetails, setSchoolDetails] = useState<SchoolDetails>({ /* ... (existing state) ... */
     name: "Loading...", name2: "", address: "Loading...",
     mobNo: "Loading...", email: "Loading...", govtReg: "Loading...",
     udiseNo: "Loading...", place: "Loading...", logoUrl: undefined,
     affiliationIndex: "Loading...", affiliationDetails: "Loading..."
   });
 
-   // Update form data (like leaving standard) when student changes
+   // --- FIX 4: useEffect ko update kiya taaki student data se form pre-fill ho ---
    useEffect(() => {
-    if (selectedStudent?.class) {
+    
+    // Helper function to format date
+    const formatDate = (dateStr?: string) => {
+        if (!dateStr) return '';
+        try { return new Date(dateStr).toISOString().split('T')[0]; } catch (e) { return ''; }
+    };
+
+    if (selectedStudent) {
       setFormData(prev => ({
           ...prev,
-          standardLeaving: selectedStudent.class,
-          // Reset other fields that might depend on previous student?
-          // Or pre-fill based on selected student if applicable
+          // Student data se fields pre-fill karein
+          studentAadharNo: selectedStudent.aadhaarNo || '',
+          nationality: selectedStudent.nationality || 'Indian', // Default to Indian
+          motherTongue: selectedStudent.motherTongue || '',
+          religion: selectedStudent.religion || '',
+          caste: selectedStudent.caste || '',
+          birthPlace: selectedStudent.birthPlace || '',
+          birthTaluka: selectedStudent.birthTaluka || '',
+          birthDistrict: selectedStudent.birthDistrict || '',
+          birthState: selectedStudent.birthState || '',
+          dobWords: selectedStudent.dobInWords || '',
+          previousSchool: selectedStudent.previousSchool || '',
+          dateOfAdmission: formatDate(selectedStudent.dateOfAdmission),
+          standardAdmitted: selectedStudent.standardAdmitted || '',
+          
+          // Current class se leaving standard set karein
+          standardLeaving: selectedStudent.class || '', 
+          
+          // TODO: Generate standardLeavingWords from standardLeaving
+          // (e.g., "5th" -> "Fifth")
+          // TODO: Generate sinceWhenLeaving (usually start of session)
        }));
     } else {
-       // Clear leaving standard if no student is selected
-       setFormData(prev => ({ ...prev, standardLeaving: '' }));
+       // Clear fields if no student is selected
+       setFormData(prev => ({ 
+           ...prev, 
+           standardLeaving: '',
+           studentAadharNo: '',
+           // ... baaki fields bhi clear kar sakte hain
+       }));
     }
    }, [selectedStudent]);
+   // --- END FIX ---
 
-  // Fetch School Profile
+  // Fetch School Profile (No Change)
   useEffect(() => {
-    const fetchSchoolProfile = async () => {
+    const fetchSchoolProfile = async () => { /* ... (existing function) ... */
       console.log("Fetching school profile for LC...");
       try {
-        // Ensure this endpoint returns all fields in SchoolDetails interface
         const res = await api.get('/api/school/profile');
         if (res.data) {
           setSchoolDetails({
             name: res.data.name || "N/A",
-            name2: res.data.name2 || res.data.name, // Use name2 if available
+            name2: res.data.name2 || res.data.name,
             logoUrl: res.data.logoUrl || undefined,
             address: res.data.address || "N/A",
-            mobNo: res.data.contactNumber || "N/A", // Map backend field name
+            mobNo: res.data.contactNumber || "N/A",
             email: res.data.email || "N/A",
-            govtReg: res.data.recognitionNumber || "N/A", // Map backend field name
+            govtReg: res.data.recognitionNumber || "N/A",
             udiseNo: res.data.udiseNo || "N/A",
             place: res.data.place || "N/A",
-            affiliationIndex: res.data.affiliationIndex || "N/A", // Map backend field name
-            affiliationDetails: res.data.affiliationDetails || "N/A" // Map backend field name
+            affiliationIndex: res.data.affiliationIndex || "N/A",
+            affiliationDetails: res.data.affiliationDetails || "N/A"
           });
         } else { throw new Error("No data"); }
       } catch (err) {
@@ -137,7 +208,6 @@ const LeavingCertificateBuilderPage = () => {
         setSchoolDetails(prev => ({
             ...prev,
             name: user?.schoolName || "Error", name2: user?.schoolName || "Error",
-            // Set other fields to "Error" or similar
             address: "Error", mobNo: "Error", email: "Error", govtReg: "Error",
             udiseNo: "Error", place: "Error", affiliationIndex: "Error", affiliationDetails: "Error"
         }));
@@ -149,8 +219,8 @@ const LeavingCertificateBuilderPage = () => {
   }, [user]);
 
 
-  // --- Print/Download functions (Adjust filename) ---
-  const handlePrint = () => {
+  // --- Print/Download functions (No Change) ---
+  const handlePrint = () => { /* ... (existing function) ... */
     const input = certificateRef.current;
     if (!input || !selectedStudent) { alert("Please select a student first."); return; }
     html2canvas(input, { scale: 2.5, useCORS: true } as any).then((canvas) => {
@@ -163,8 +233,7 @@ const LeavingCertificateBuilderPage = () => {
       }
     }).catch(err => { console.error("Print LC Error:", err); alert("Error generating print preview."); });
   };
-
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = () => { /* ... (existing function) ... */
     const input = certificateRef.current;
     if (!selectedStudent) { alert("Please select a student first."); return; }
     if (!input) { alert("Preview element not found."); return; }
@@ -179,9 +248,10 @@ const LeavingCertificateBuilderPage = () => {
         if (imgHeight > pdfHeight - (margin * 2)) { imgHeight = pdfHeight - (margin * 2); imgWidth = imgHeight * ratio; xOffset = (pdfWidth - imgWidth) / 2; }
         else { yOffset = (pdfHeight - imgHeight) / 2; }
         pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
-        pdf.save(`Leaving_Certificate_${selectedStudent.name.replace(/ /g, '_')}.pdf`); // Changed filename
+        pdf.save(`Leaving_Certificate_${selectedStudent.name.replace(/ /g, '_')}.pdf`);
       }).catch(err => { console.error("PDF LC Error:", err); alert("Error generating PDF."); });
   };
+
 
   return (
     <div className={styles.pageContainer}>
@@ -191,11 +261,10 @@ const LeavingCertificateBuilderPage = () => {
       </header>
 
       <div className={styles.builderLayout}>
-        {/* Controls Column */}
+        {/* Controls Column (No Change) */}
         <div className={styles.controlsColumn}>
           <div className={styles.controlSection}>
             <h2>1. Select Student</h2>
-             {/* IMPORTANT: Ensure StudentSearch fetches ALL needed fields in the 'Student' interface */}
             <StudentSearch onStudentSelect={(student) => setSelectedStudent(student as Student)} />
              <p className={styles.note}>
               Ensure Student Search provides all details listed in the certificate table (Aadhaar, Mother's Name etc.).
@@ -205,7 +274,7 @@ const LeavingCertificateBuilderPage = () => {
             <>
               <div className={styles.controlSection}>
                 <h2>2. Fill Leaving Details</h2>
-                {/* Use the new Leaving Certificate Form */}
+                {/* Form ab updated state use karega */}
                 <LeavingCertificateForm
                   formData={formData}
                   setFormData={setFormData}
@@ -223,12 +292,11 @@ const LeavingCertificateBuilderPage = () => {
           )}
         </div>
 
-        {/* Preview Column */}
+        {/* Preview Column (No Change) */}
         <div className={styles.previewColumn}>
           <h2>Live Preview</h2>
           <div className={styles.previewWrapper}>
              <div ref={certificateRef}>
-                {/* Use the new Leaving Certificate Preview */}
                <LeavingCertificatePreview
                  student={selectedStudent}
                  formData={formData}
