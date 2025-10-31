@@ -1,12 +1,17 @@
+// backend/server.js
+
+// --- FIX: Only run dotenv in development ---
 if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config(); 
+  require('dotenv').config(); // Environment variables load karein (sirf local par)
   console.log("Running in development mode, loaded .env file.");
 }
+// --- END FIX ---
 
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require("socket.io");
+const prisma = require('./config/prisma'); // <-- 1. PRISMA CLIENT IMPORT KAREIN
 
 // --- Allowed URLs ki list (No Change) ---
 const allowedOrigins = [
@@ -28,7 +33,7 @@ const adminRoutes = require('./routes/admin');
 const studentRoutes = require('./routes/students');
 const teacherRoutes = require('./routes/teachers');
 const parentRoutes = require('./routes/parents');
-const schoolRoutes = require('./routes/schoolRoutes'); // <-- School route
+const schoolRoutes = require('./routes/schoolRoutes');
 const feeRoutes = require('./routes/fees');
 const staffRoutes = require('./routes/staff');
 const quizRoutes = require('./routes/quiz');
@@ -40,7 +45,16 @@ const classRoutes = require('./routes/classes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- Standard Middlewares (Updated) ---
+// --- 2. MONGOOSE MODEL IMPORTS HATA DIYE ---
+// require('./models/School'); // <-- Removed
+// require('./models/User'); // <-- Removed
+// require('./models/Student'); // <-- Removed
+// require('./models/Teacher'); // <-- Removed
+// require('./models/Parent'); // <-- Removed
+// require('./models/FeeRecord'); // <-- Removed
+// --- END FIX ---
+
+// Standard Middlewares
 app.use(cors({
   origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE"]
@@ -62,9 +76,9 @@ const io = new Server(server, {
   }
 });
 
-app.set('socketio', io); // Attach io for webhook access
+app.set('socketio', io);
 app.use((req, res, next) => {
-    req.io = io; // Attach io for standard request access
+    req.io = io;
     next();
 });
 
@@ -73,22 +87,14 @@ app.get('/', (req, res) => {
   res.send('SchoolPro Backend is running (Prisma Version)!'); 
 });
 
-
-// KADAM 1: File-upload (multer) waale route ko JSON parser se PEHLE rakhein
 app.use('/api/school', schoolRoutes); 
-
-// KADAM 2: Ab global JSON parser ko add karein (limit badha di hai)
 app.use(express.json({ limit: '2mb' })); 
-// --- FIX ENDS HERE ---
 
-
-// KADAM 3: Baaki saare routes (jo JSON expect karte hain)
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/parents', parentRoutes);
-// app.use('/api/school', schoolRoutes); // <-- Yeh line upar (KADAM 1) chali gayi hai
 app.use('/api/fees', feeRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/academics', academicRoutes);
@@ -109,7 +115,24 @@ io.on('connection', (socket) => {
   });
 });
 
-// --- Start Server (No Change) ---
-server.listen(PORT, '0.0.0.0', () => { 
-  console.log(`Server (Prisma Version) is running on port: ${PORT}`);
-});
+// --- 3. DATABASE CONNECTION & START SERVER (Updated for Prisma) ---
+async function startServer() {
+  try {
+    // Prisma client ko connect karein
+    await prisma.$connect();
+    console.log("Prisma Database connected successfully!");
+
+    // Database connect hone ke baad hi server listen karein
+    server.listen(PORT, '0.0.0.0', () => { 
+      console.log(`Server (Prisma Version) is running on port: ${PORT}`);
+    });
+
+  } catch (err) {
+    console.error("Database connection error:", err);
+    process.exit(1); // Agar connect na ho toh exit karein
+  }
+}
+
+// Server ko start karein
+startServer();
+// --- END FIX ---
