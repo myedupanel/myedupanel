@@ -2,9 +2,9 @@
 
 // 1. IMPORTS (Prisma Client aur naye modules)
 const prisma = require('../config/prisma');
-const bcrypt = require('bcryptjs'); // <-- FIX: Password hash ke liye add kiya
-const crypto = require('crypto'); // <-- FIX: Random password ke liye add kiya
-const sendEmail = require('../utils/sendEmail'); // <-- FIX: Email bhejne ke liye add kiya
+const bcrypt = require('bcryptjs'); 
+const crypto = require('crypto'); 
+const sendEmail = require('../utils/sendEmail'); 
 
 // 2. HEADER MAPPINGS (Koi change nahi)
 const headerMappings = {
@@ -121,7 +121,14 @@ const addStudentsInBulk = async (req, res) => {
 
         // --- 6. FIX: Student aur User ko ek saath Transaction mein create karein ---
         const studentFullName = `${studentData.first_name} ${studentData.last_name}`;
-        const studentEmail = studentData.email ? studentData.email.toLowerCase() : null;
+        
+        // --- YEH HAI NAYA DUMMY EMAIL LOGIC ---
+        const realEmail = studentData.email ? studentData.email.toLowerCase() : null;
+        // Roll number se spaces/special chars hata kar safe email banayein
+        const safeRollNumber = studentData.roll_number.replace(/[\s\W]+/g, '');
+        const dummyEmail = `${safeRollNumber}@${schoolId}.local`;
+        const emailForUserTable = realEmail || dummyEmail;
+        // --- END DUMMY EMAIL LOGIC ---
 
         await prisma.$transaction(async (tx) => {
           // Kadam 6a: Student create karein
@@ -129,24 +136,23 @@ const addStudentsInBulk = async (req, res) => {
             data: studentData,
           });
 
-          // Kadam 6b: Agar email hai, toh User (login) bhi create karein
-          if (studentEmail) {
-            const tempPassword = crypto.randomBytes(8).toString('hex');
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(tempPassword, salt);
-            
-            await tx.user.create({
-              data: {
-                schoolId: schoolId,
-                name: studentFullName,
-                email: studentEmail, 
-                password: hashedPassword,
-                role: 'student',
-                isVerified: true, // Admin bana raha hai, isliye verified
-              }
-            });
-            // Note: Bulk import se welcome email nahi bhej rahe hain (performance)
-          }
+          // Kadam 6b: Hamesha User (login) create karein
+          // (Pehle yahaan 'if (studentEmail)' tha)
+          const tempPassword = crypto.randomBytes(8).toString('hex');
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(tempPassword, salt);
+          
+          await tx.user.create({
+            data: {
+              schoolId: schoolId,
+              name: studentFullName,
+              email: emailForUserTable, // <-- Real ya dummy email use karein
+              password: hashedPassword,
+              role: 'student',
+              isVerified: true, // Admin bana raha hai, isliye verified
+            }
+          });
+          // Note: Bulk import se welcome email nahi bhej rahe hain
         });
         // --- END FIX ---
         
@@ -155,10 +161,9 @@ const addStudentsInBulk = async (req, res) => {
       } catch (error) {
          console.error("Error creating individual student:", error);
         if (error.code === 'P2002') { 
-           // Ab yeh error duplicate roll_number ya duplicate email, dono pakad lega
            const target = error.meta?.target || [];
            if (target.includes('email')) {
-               errors.push(`Duplicate email for student: ${student.first_name || 'N/A'} (Email: ${student.email})`);
+               errors.push(`Duplicate email for student: ${student.first_name || 'N/A'} (Email: ${student.email || 'dummy'})`);
            } else {
                errors.push(`Duplicate entry for student: ${student.first_name || 'N/A'} (Roll No: ${student.roll_number || 'N/A'})`);
            }
@@ -285,8 +290,14 @@ const addSingleStudent = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(tempPassword, salt);
     const studentFullName = `${first_name} ${last_name}`;
-    // 'email' ko otherDetails se lein (agar hai)
-    const studentEmail = studentData.email ? studentData.email.toLowerCase() : null; 
+    
+    // --- YEH HAI NAYA DUMMY EMAIL LOGIC ---
+    const realEmail = studentData.email ? studentData.email.toLowerCase() : null;
+    // Roll number se spaces/special chars hata kar safe email banayein
+    const safeRollNumber = roll_number.replace(/[\s\W]+/g, '');
+    const dummyEmail = `${safeRollNumber}@${schoolId}.local`;
+    const emailForUserTable = realEmail || dummyEmail;
+    // --- END DUMMY EMAIL LOGIC ---
 
     const newStudent = await prisma.$transaction(async (tx) => {
       
@@ -295,50 +306,50 @@ const addSingleStudent = async (req, res) => {
         data: studentData,
       });
 
-      // Kadam 7b: Agar email diya hai, toh User entry (login) bhi create karein
-      if (studentEmail) {
-        await tx.user.create({
-          data: {
-            schoolId: schoolId,
-            name: studentFullName,
-            email: studentEmail,
-            password: hashedPassword,
-            role: 'student',
-            isVerified: true, // Admin create kar raha hai, isliye verified
-          }
-        });
-      }
+      // Kadam 7b: Hamesha User entry (login) create karein
+      // (Pehle yahaan 'if (studentEmail)' tha)
+      await tx.user.create({
+        data: {
+          schoolId: schoolId,
+          name: studentFullName,
+          email: emailForUserTable, // <-- Real ya dummy email use karein
+          password: hashedPassword,
+          role: 'student',
+          isVerified: true, // Admin create kar raha hai, isliye verified
+        }
+      });
+      // --- END FIX ---
       
       return createdStudent; // Transaction se student return karein
     });
-    // --- END FIX ---
+    // --- END TRANSACTION ---
 
 
-    // --- 8. FIX: Welcome email bhejein (agar email tha) ---
-    if (studentEmail) {
+    // --- 8. FIX: Welcome email (sirf REAL email par) bhejein ---
+    if (realEmail) { // 'studentEmail' ke bajaye 'realEmail' check karein
       try {
-        const schoolName = req.user.schoolName || 'MyEduPanel'; // Token se school ka naam lein
-        const message = `<h1>Welcome to ${schoolName}!</h1><p>An account has been created for your child, ${studentFullName}.</p><p>You can use these details to log in to the student/parent portal.</p><p><strong>Email:</strong> ${studentEmail}</p><p><strong>Temporary Password:</strong> ${tempPassword}</p><p>Please log in and change your password at your earliest convenience.</p>`;
-        await sendEmail({ to: studentEmail, subject: `Your Account for ${schoolName}`, html: message });
+        const schoolName = req.user.schoolName || 'MyEduPanel';
+        const message = `<h1>Welcome to ${schoolName}!</h1><p>An account has been created for your child, ${studentFullName}.</p><p>You can use these details to log in to the student/parent portal.</p><p><strong>Email:</strong> ${realEmail}</p><p><strong>Temporary Password:</strong> ${tempPassword}</p><p>Please log in and change your password at your earliest convenience.</p>`;
+        await sendEmail({ to: realEmail, subject: `Your Account for ${schoolName}`, html: message });
       } catch (emailError) {
         console.error("Student added, but failed to send welcome email:", emailError);
-        // Request ko fail na karein, bas error log karein
       }
     }
     // --- END FIX ---
 
 
-    // 9. Success response bhejein
+    // 9. Success response bhejein (No Change)
     res.status(201).json({ message: 'Student added successfully!', student: newStudent });
 
   } catch (error) {
     console.error("Error creating single student:", error);
     
-    // --- 10. FIX: Catch block ko update karein taaki User email errors bhi pakde ---
-    if (error.code === 'P2002') { // Duplicate entry error
+    // 10. FIX: Catch block (No Change, pehle se hi sahi tha)
+    if (error.code === 'P2002') { 
        const target = error.meta?.target || [];
        if (target.includes('email')) {
-           return res.status(400).json({ message: `An account with this email (${req.body.email}) already exists in the User table.` });
+           // Ab yeh real email aur dummy email, dono ke duplicate ko pakad lega
+           return res.status(400).json({ message: `An account with this email (${req.body.email || 'dummy email'}) already exists in the User table.` });
        }
        if (target.includes('roll_number')) {
            return res.status(400).json({ message: `Duplicate entry: A student with Roll Number ${req.body.roll_number} may already exist in ${req.body.class_name}.` });

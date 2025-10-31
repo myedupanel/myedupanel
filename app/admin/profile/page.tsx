@@ -306,20 +306,20 @@ const SchoolProfilePage = () => {
           {/* School Name 2 (Tagline) */}
           <div className={styles.formGroup}>
             <label htmlFor="name2">School Name Line 2 (For Certificates) *</label>
-            <input type="text" id="name2" name="name2" value={formData.name2} onChange={handleInputChange} required disabled={isSubmitting} placeholder="e.g., Khandeshwar Sec. & Higher Sec. School" />
+            <input type="text" id="name2" name="name2" value={formData.name2} onChange={handleInputChange} required disabled={isSubmitting} placeholder="e.x., MyEduPanel Sec. & Higher Sec. School" />
             <small>This will be the main name shown on certificates.</small>
           </div>
 
           {/* Address */}
           <div className={styles.formGroup}>
             <label htmlFor="address">School Address *</label>
-            <textarea id="address" name="address" value={formData.address} onChange={handleInputChange} rows={3} required disabled={isSubmitting} placeholder="e.g., Devgaon Road, Paranda, Dist. Dharashiv" />
+            <textarea id="address" name="address" value={formData.address} onChange={handleInputChange} rows={3} required disabled={isSubmitting} placeholder="e.x., Pune, Pune, Dist. Pune" />
           </div>
 
           {/* Place (for Footer) */}
           <div className={styles.formGroup}>
             <label htmlFor="place">Place (For Certificate Footer) *</label>
-            <input type="text" id="place" name="place" value={formData.place} onChange={handleInputChange} required disabled={isSubmitting} placeholder="e.g., Paranda" />
+            <input type="text" id="place" name="place" value={formData.place} onChange={handleInputChange} required disabled={isSubmitting} placeholder="e.x., Pune" />
           </div>
 
           {/* Login Email (Read-Only) */}
@@ -340,12 +340,12 @@ const SchoolProfilePage = () => {
           <div className={styles.formGrid}>
             <div className={styles.formGroup}>
               <label htmlFor="mobNo">Contact Number</label>
-              <input type="tel" id="mobNo" name="mobNo" value={formData.mobNo} onChange={handleInputChange} disabled={isSubmitting} placeholder="e.g., 7030325343" />
+              <input type="tel" id="mobNo" name="mobNo" value={formData.mobNo} onChange={handleInputChange} disabled={isSubmitting} placeholder="e.x. 9835356347, " />
             </div>
 
             <div className={styles.formGroup}>
               <label htmlFor="email">Public Email (For Certificates)</label>
-              <input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} disabled={isSubmitting} placeholder="e.g., contact@school.com" />
+              <input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} disabled={isSubmitting} placeholder="e.x., contact@school.com" />
             </div>
           </div>
 
@@ -353,12 +353,12 @@ const SchoolProfilePage = () => {
           <div className={styles.formGrid}>
             <div className={styles.formGroup}>
               <label htmlFor="udiseNo">UDISE No.</label>
-              <input type="text" id="udiseNo" name="udiseNo" value={formData.udiseNo} onChange={handleInputChange} disabled={isSubmitting} placeholder="e.g., 27290606424" />
+              <input type="text" id="udiseNo" name="udiseNo" value={formData.udiseNo} onChange={handleInputChange} disabled={isSubmitting} placeholder="e.g., 58483739466" />
             </div>
 
             <div className={styles.formGroup}>
               <label htmlFor="govtReg">Govt. Reg. No.</label>
-              <input type="text" id="govtReg" name="govtReg" value={formData.govtReg} onChange={handleInputChange} disabled={isSubmitting} placeholder="e.g., SFS-1114/PK-40/SM-2" />
+              <input type="text" id="govtReg" name="govtReg" value={formData.govtReg} onChange={handleInputChange} disabled={isSubmitting} placeholder="e.g., GFH-1714/PN-49/SK-4" />
             </div>
           </div>
 
