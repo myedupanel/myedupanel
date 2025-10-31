@@ -1,9 +1,12 @@
 "use client";
+
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+
 // Hum aapke purane sidebar ki styling hi yahan istemal karenge
 import '../../../components/layout/Sidebar/Sidebar.scss'; 
+
 import { 
   MdDashboard, 
   MdReceipt,
@@ -11,7 +14,7 @@ import {
   MdPayment,
   MdArrowBack,
   MdListAlt,
-  MdClass // <-- 1. Naya icon "MdClass" import kiya
+  // MdClass // <-- 1. 'MdClass' icon import HATA diya
 } from 'react-icons/md';
 
 const feeMenuItems = [
@@ -30,13 +33,15 @@ const feeMenuItems = [
     path: '/admin/fee-counter/templates',
     icon: <MdListAlt />,
   },
-  // --- 2. YEH NAYA LINK ADD KIYA GAYA HAI ---
-  {
-    title: 'Manage Classes', // Title update kiya
-    path: '/admin/fee-counter/classes', // Naya path add kiya jo humne banaya tha
-    icon: <MdClass />, // Naya icon add kiya
-  },
-  // --- END NAYA LINK ---
+  
+  // --- 2. "Manage Classes" waala block yahaan se HATA diya gaya hai ---
+  // {
+  //   title: 'Manage Classes',
+  //   path: '/admin/fee-counter/classes',
+  //   icon: <MdClass />,
+  // },
+  // --- END ---
+
   {
     title: 'Import/Export',
     path: '/admin/fee-counter/fee-import-export',
@@ -49,7 +54,7 @@ const feeMenuItems = [
   },
   {
     title: 'Go to Dashboard',
-    path: '/admin/school',
+    path: '/admin/school', // Path update kiya dashboard ke liye
     icon: <MdArrowBack />,
     isExternal: true, // Yeh link alag section mein rahega
   },

@@ -5,11 +5,12 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import api from '@/backend/utils/api'; 
 import styles from './ClassesPage.module.scss'; // ✅ Import SCSS styles
 
-// Interface for class data
+// --- FIX 1: Interface ko backend se match karwaya ---
 interface SchoolClass {
-    id: string; 
-    name: string;
+    classid: number;    // 'id: string' ko 'classid: number' se badla
+    class_name: string; // 'name: string' ko 'class_name: string' se badla
 }
+// --- END FIX ---
 
 const ClassesPage = () => {
     // State variables
@@ -28,6 +29,7 @@ const ClassesPage = () => {
             setIsLoading(true);
             setFetchError(null); 
             try {
+                // Yeh API call ab data [ { classid: 1, class_name: "Nursery" }, ... ] return karega
                 const res = await api.get('/api/classes'); 
                 setClasses(res.data || []); 
             } catch (err) {
@@ -55,10 +57,11 @@ const ClassesPage = () => {
         setAddError(null);
 
         try {
-            // NOTE: Ensure your backend has a POST /api/classes route
+            // Backend POST /api/classes ko call karega
             const res = await api.post('/api/classes', { name: trimmedName });
             
-            // Add the new class to the list *optimistically* // (or you could refetch the entire list)
+            // Backend naya class object { classid: 5, class_name: "New Class" } return karega
+            // Jo ab hamare SchoolClass interface se match karta hai
             setClasses(prevClasses => [...prevClasses, res.data]); 
             setNewClassName(''); // Clear the input field
             
@@ -85,10 +88,12 @@ const ClassesPage = () => {
                     
                     {!isLoading && !fetchError && classes.length > 0 && (
                         <ul className={styles.classList}>
+                            {/* --- FIX 2: List ko 'classid' aur 'class_name' se render kiya --- */}
                             {classes.map(cls => (
-                                <li key={cls.id}>{cls.name}</li>
+                                <li key={cls.classid}>{cls.class_name}</li>
                                 // TODO: Add Edit/Delete buttons here later if needed
                             ))}
+                            {/* --- END FIX --- */}
                         </ul>
                     )}
                     
@@ -99,6 +104,7 @@ const ClassesPage = () => {
 
                 {/* Section to Add a New Class */}
                 <section className={styles.addClassSection}>
+                    {/* ... (Poora Add New Class form code waisa hi rahega) ... */}
                     <h2>Add New Class</h2>
                     <form onSubmit={handleAddClass}>
                         <div className={styles.formGroup}>

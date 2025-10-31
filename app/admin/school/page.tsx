@@ -12,7 +12,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import {
     MdPeople, MdSchool, MdFamilyRestroom, MdBadge,
     MdEventAvailable, MdAttachMoney, MdSchedule,
-    MdAssessment, MdSettings, MdPersonAdd
+    MdAssessment, MdSettings, MdPersonAdd,
+    MdClass // <-- 1. YEH NAYA ICON IMPORT KIYA HAI
 } from 'react-icons/md';
 
 import Modal from '@/components/common/Modal/Modal';
@@ -36,6 +37,15 @@ const schoolMenuItems: MenuItem[] = [
     { id: 'teachers', title: 'Teachers', path: '/admin/teachers', icon: <MdSchool />, color: '#8b5cf6' },
     { id: 'parents', title: 'Parents', path: '/admin/parents', icon: <MdFamilyRestroom />, color: '#ef4444' },
     { id: 'staff', title: 'Staff', path: '/admin/staff', icon: <MdBadge />, color: '#f97316' },
+    // --- 2. YEH NAYA LINK "STAFF" KE NEECHE ADD KIYA HAI ---
+    { 
+      id: 'manage-classes', 
+      title: 'Manage Classes', 
+      path: '/admin/academics/classes', // Path to your classes page
+      icon: <MdClass />, 
+      color: '#64748b' // Using Timetable Settings color
+    },
+    // --- END NAYA LINK ---
     { id: 'attendance', title: 'Attendance', path: '/admin/attendance/student', icon: <MdEventAvailable />, color: '#10b981' },
     { id: 'fee-counter', title: 'Fee Counter', path: '/admin/fee-counter', icon: <MdAttachMoney />, color: '#14b8a6' },
     { id: 'timetable', title: 'Timetable', path: '/admin/timetable', icon: <MdSchedule />, color: '#6366f1' },
@@ -53,6 +63,8 @@ interface DashboardData {
 }
 
 const DashboardControlCenter = () => {
+    // ... (Poora DashboardControlCenter component code waisa hi rahega) ...
+    // ... (No changes needed inside this component) ...
     const { token } = useAuth();
     const router = useRouter();
     const [data, setData] = useState<DashboardData | null>(null);
@@ -63,38 +75,30 @@ const DashboardControlCenter = () => {
     const openModal = (modalName: string) => setActiveModal(modalName);
     const closeModal = () => setActiveModal(null);
 
-    // Generic submit handler (might need adjustment based on form needs)
     const handleFormSubmit = async () => {
         return new Promise<void>((resolve) => {
              console.log("Form submitted!");
-             // Potentially trigger a data refresh here if needed
-             // fetchData(); // Be cautious with immediate refetching
              closeModal();
              resolve();
         });
     };
 
-    // Specific success handlers
     const handleStudentSuccess = () => {
         console.log("Student added!");
-        // Optionally refetch data if dashboard needs immediate update beyond socket
-        // fetchData();
         closeModal();
     }
-     const handleTeacherSuccess = () => { // Assuming AddTeacherForm's onSubmit doesn't need data
+     const handleTeacherSuccess = () => {
         console.log("Teacher added!");
         closeModal();
     }
-      const handleParentSuccess = () => { // Assuming AddParentForm's onSubmit doesn't need data
+      const handleParentSuccess = () => {
         console.log("Parent added!");
         closeModal();
     }
-     const handleStaffSuccess = async (staffData: any) => { // Matches AddStaffForm's onSave signature
+     const handleStaffSuccess = async (staffData: any) => {
         console.log("Staff potentially added/updated via API call inside AddStaffForm", staffData);
-        // AddStaffForm's onSave handles the API call and returns a promise
-        // We just close the modal here, assuming socket updates relevant lists/counts
         closeModal();
-        return Promise.resolve(); // Fulfill the promise expected by AddStaffForm
+        return Promise.resolve();
     }
 
 
@@ -213,26 +217,25 @@ const DashboardControlCenter = () => {
 
             </div>
 
-            {/* === YAHAN BADLAAV KIYA GAYA HAI === */}
+            {/* Modal definition */}
             <Modal isOpen={!!activeModal} onClose={closeModal} title={getModalTitle()}>
-                {/* Wrap conditional components in a Fragment */}
                 <>
                     {activeModal === 'add-student' && <AddStudentForm onClose={closeModal} onSuccess={handleStudentSuccess} />}
-                    {activeModal === 'add-teacher' && <AddTeacherForm onClose={closeModal} onSubmit={handleTeacherSuccess} />} {/* Adjust if onSubmit needs async/promise */}
-                    {activeModal === 'add-parent' && <AddParentForm onClose={closeModal} onSubmit={handleParentSuccess} />} {/* Adjust if onSubmit needs async/promise */}
+                    {activeModal === 'add-teacher' && <AddTeacherForm onClose={closeModal} onSubmit={handleTeacherSuccess} />}
+                    {activeModal === 'add-parent' && <AddParentForm onClose={closeModal} onSubmit={handleParentSuccess} />}
                     {activeModal === 'add-staff' && <AddStaffForm onClose={closeModal} onSave={handleStaffSuccess} />}
                 </>
             </Modal>
-            {/* === END BADLAAV === */}
         </div>
     );
 };
 
 
-// Main Page Component (No structural changes needed)
+// Main Page Component
 const SchoolPage = () => {
     return (
         <div className={styles.schoolPageContainer}>
+            {/* Sidebar ab updated 'schoolMenuItems' list use karega */}
             <Sidebar menuItems={schoolMenuItems} />
             <main className={styles.mainContent}>
                 <DashboardControlCenter />
