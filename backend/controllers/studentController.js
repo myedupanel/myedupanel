@@ -1,12 +1,12 @@
 // File: backend/controllers/studentController.js
 
-// 1. IMPORTS (Prisma Client aur naye modules)
+// 1. IMPORTS (No Change)
 const prisma = require('../config/prisma');
 const bcrypt = require('bcryptjs'); 
 const crypto = require('crypto'); 
 const sendEmail = require('../utils/sendEmail'); 
 
-// 2. HEADER MAPPINGS (Koi change nahi)
+// 2. HEADER MAPPINGS (No Change)
 const headerMappings = {
   first_name: ['firstname', 'first name', 'student name', 'name'],
   father_name: ['fathername', 'father name', 'middle name', 'parentname', 'parent name'],
@@ -25,7 +25,7 @@ const headerMappings = {
   admission_date: ['admission date', 'admissiondate'],
 };
 
-// 3. HELPER FUNCTION (Koi change nahi)
+// 3. HELPER FUNCTION (No Change)
 function getCanonicalKey(header) {
   if (!header) return null;
   const normalizedHeader = header.toLowerCase().replace(/[\s_-]/g, '');
@@ -80,23 +80,13 @@ const addStudentsInBulk = async (req, res) => {
       try {
         const className = student.class_name;
         
-        // 4. Class ko schoolId ke saath Find karein (No Change)
+        // 4. Class ko find/create karein (No Change)
         let classRecord = await prisma.classes.findUnique({
-          where: { 
-            schoolId_class_name: { 
-              schoolId: schoolId,
-              class_name: className 
-            }
-          },
+          where: { schoolId_class_name: { schoolId: schoolId, class_name: className } },
         });
-
-        // Agar class nahi mili, toh nayi class banayein (No Change)
         if (!classRecord) {
           classRecord = await prisma.classes.create({
-            data: { 
-              class_name: className,
-              schoolId: schoolId 
-            },
+            data: { class_name: className, schoolId: schoolId },
           });
         }
         
@@ -105,39 +95,43 @@ const addStudentsInBulk = async (req, res) => {
         studentData.classid = classRecord.classid; 
         studentData.schoolId = schoolId; 
 
-        // Date fields ko handle karein (No Change)
+        // --- 6. FIX: Date fields ko handle karein ---
+        // DOB (optional reh sakta hai, null theek hai)
         if (studentData.dob) {
            try {
             const parsedDate = new Date(studentData.dob);
             if (!isNaN(parsedDate)) { studentData.dob = parsedDate; } else { studentData.dob = null; }
           } catch (e) { studentData.dob = null; }
         }
+        
+        // Admission Date (DEFAULT TO TODAY agar missing ya invalid hai)
         if (studentData.admission_date) {
            try {
              const parsedDate = new Date(studentData.admission_date);
-             if (!isNaN(parsedDate)) { studentData.admission_date = parsedDate; } else { studentData.admission_date = null; }
-           } catch (e) { studentData.admission_date = null; }
+             // Agar date invalid hai, toh aaj ki date set karein
+             studentData.admission_date = !isNaN(parsedDate) ? parsedDate : new Date(); 
+           } catch (e) { 
+             studentData.admission_date = new Date(); // Error par aaj ki date
+           }
+        } else {
+           studentData.admission_date = new Date(); // Agar field tha hi nahi, toh aaj ki date
         }
+        // --- END FIX ---
 
-        // --- 6. FIX: Student aur User ko ek saath Transaction mein create karein ---
+        // 7. Student aur User Transaction (No Change)
         const studentFullName = `${studentData.first_name} ${studentData.last_name}`;
-        
-        // --- YEH HAI NAYA DUMMY EMAIL LOGIC ---
         const realEmail = studentData.email ? studentData.email.toLowerCase() : null;
-        // Roll number se spaces/special chars hata kar safe email banayein
         const safeRollNumber = studentData.roll_number.replace(/[\s\W]+/g, '');
         const dummyEmail = `${safeRollNumber}@${schoolId}.local`;
         const emailForUserTable = realEmail || dummyEmail;
-        // --- END DUMMY EMAIL LOGIC ---
 
         await prisma.$transaction(async (tx) => {
-          // Kadam 6a: Student create karein
+          // 7a: Student create karein
           await tx.students.create({
-            data: studentData,
+            data: studentData, // Ismein ab admission_date hamesha hogi
           });
 
-          // Kadam 6b: Hamesha User (login) create karein
-          // (Pehle yahaan 'if (studentEmail)' tha)
+          // 7b: Hamesha User (login) create karein
           const tempPassword = crypto.randomBytes(8).toString('hex');
           const salt = await bcrypt.genSalt(10);
           const hashedPassword = await bcrypt.hash(tempPassword, salt);
@@ -146,19 +140,18 @@ const addStudentsInBulk = async (req, res) => {
             data: {
               schoolId: schoolId,
               name: studentFullName,
-              email: emailForUserTable, // <-- Real ya dummy email use karein
+              email: emailForUserTable,
               password: hashedPassword,
               role: 'student',
-              isVerified: true, // Admin bana raha hai, isliye verified
+              isVerified: true,
             }
           });
-          // Note: Bulk import se welcome email nahi bhej rahe hain
         });
-        // --- END FIX ---
         
         createdCount++;
 
       } catch (error) {
+         // ... (existing error handling)
          console.error("Error creating individual student:", error);
         if (error.code === 'P2002') { 
            const target = error.meta?.target || [];
@@ -173,7 +166,7 @@ const addStudentsInBulk = async (req, res) => {
       }
     }
 
-    // 7. Final response (No Change)
+    // 8. Final response (No Change)
     res.status(201).json({
       message: `${createdCount} of ${validStudents.length} students were added successfully.`,
       errors: errors,
@@ -187,25 +180,17 @@ const addStudentsInBulk = async (req, res) => {
   }
 };
 
-// 5. FUNCTION 2: getAllStudents (Koi change nahi)
+// 5. FUNCTION 2: getAllStudents (No Change)
 const getAllStudents = async (req, res) => {
   try {
     const schoolId = req.user.schoolId;
     if (!schoolId) {
       return res.status(400).json({ message: 'Invalid or missing school ID in user token.' });
     }
-
     const students = await prisma.students.findMany({
-      where: {
-        schoolId: schoolId
-      },
-      include: {
-        class: true, 
-      },
-      orderBy: [
-        { class: { class_name: 'asc' } }, 
-        { first_name: 'asc' },           
-      ],
+      where: { schoolId: schoolId },
+      include: { class: true },
+      orderBy: [ { class: { class_name: 'asc' } }, { first_name: 'asc' } ],
     });
     res.json(students);
   } catch (error) {
@@ -218,7 +203,7 @@ const getAllStudents = async (req, res) => {
 // 6. FUNCTION 3: addSingleStudent (UPDATED)
 const addSingleStudent = async (req, res) => {
   try {
-    // 1. School ID token se lein (No Change)
+    // 1. School ID (No Change)
     const schoolId = req.user.schoolId;
     if (!schoolId) {
       return res.status(401).json({ message: 'User not authorized or missing school ID.' });
@@ -232,7 +217,7 @@ const addSingleStudent = async (req, res) => {
       roll_number,
       father_name,
       guardian_contact,
-      ...otherDetails // 'email' ab 'otherDetails' mein aayega
+      ...otherDetails
     } = req.body;
 
     // 3. Zaroori fields check karein (No Change)
@@ -240,22 +225,13 @@ const addSingleStudent = async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields: First Name, Last Name, Class, Roll Number, Parent Name, and Parent Contact are required.' });
     }
     
-    // 4. Class ko find karein ya create karein (No Change)
+    // 4. Class ko find/create karein (No Change)
     let classRecord = await prisma.classes.findUnique({
-      where: { 
-        schoolId_class_name: {
-          schoolId: schoolId,
-          class_name: class_name 
-        }
-      },
+      where: { schoolId_class_name: { schoolId: schoolId, class_name: class_name } },
     });
-
     if (!classRecord) {
       classRecord = await prisma.classes.create({
-        data: { 
-          class_name: class_name,
-          schoolId: schoolId 
-        },
+        data: { class_name: class_name, schoolId: schoolId },
       });
     }
 
@@ -271,62 +247,63 @@ const addSingleStudent = async (req, res) => {
       schoolId: schoolId,
     };
 
-    // 6. Date fields ko handle karein (No Change)
+    // --- 6. FIX: Date fields ko handle karein ---
+    // DOB (optional reh sakta hai, null theek hai)
     if (studentData.dob) {
       try {
         const parsedDate = new Date(studentData.dob);
         studentData.dob = !isNaN(parsedDate) ? parsedDate : null;
       } catch (e) { studentData.dob = null; }
     }
+    
+    // Admission Date (DEFAULT TO TODAY agar missing ya invalid hai)
     if (studentData.admission_date) {
        try {
          const parsedDate = new Date(studentData.admission_date);
-         studentData.admission_date = !isNaN(parsedDate) ? parsedDate : null;
-       } catch (e) { studentData.admission_date = null; }
+         // Agar date invalid hai, toh aaj ki date set karein
+         studentData.admission_date = !isNaN(parsedDate) ? parsedDate : new Date();
+       } catch (e) { 
+         studentData.admission_date = new Date(); // Error par aaj ki date
+       }
+    } else {
+       studentData.admission_date = new Date(); // Agar field tha hi nahi, toh aaj ki date
     }
+    // --- END FIX ---
 
-    // --- 7. FIX: Naya student aur user transaction mein create karein ---
+
+    // 7. Transaction (No Change)
     const tempPassword = crypto.randomBytes(8).toString('hex');
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(tempPassword, salt);
     const studentFullName = `${first_name} ${last_name}`;
-    
-    // --- YEH HAI NAYA DUMMY EMAIL LOGIC ---
     const realEmail = studentData.email ? studentData.email.toLowerCase() : null;
-    // Roll number se spaces/special chars hata kar safe email banayein
     const safeRollNumber = roll_number.replace(/[\s\W]+/g, '');
     const dummyEmail = `${safeRollNumber}@${schoolId}.local`;
     const emailForUserTable = realEmail || dummyEmail;
-    // --- END DUMMY EMAIL LOGIC ---
 
     const newStudent = await prisma.$transaction(async (tx) => {
-      
-      // Kadam 7a: Naya student create karein
+      // 7a: Naya student create karein
       const createdStudent = await tx.students.create({
-        data: studentData,
+        data: studentData, // Ismein ab admission_date hamesha hogi
       });
 
-      // Kadam 7b: Hamesha User entry (login) create karein
-      // (Pehle yahaan 'if (studentEmail)' tha)
+      // 7b: Hamesha User entry (login) create karein
       await tx.user.create({
         data: {
           schoolId: schoolId,
           name: studentFullName,
-          email: emailForUserTable, // <-- Real ya dummy email use karein
+          email: emailForUserTable,
           password: hashedPassword,
           role: 'student',
-          isVerified: true, // Admin create kar raha hai, isliye verified
+          isVerified: true,
         }
       });
-      // --- END FIX ---
       
-      return createdStudent; // Transaction se student return karein
+      return createdStudent;
     });
-    // --- END TRANSACTION ---
 
-
-    // --- 8. FIX: Welcome email (sirf REAL email par) bhejein ---
-    if (realEmail) { // 'studentEmail' ke bajaye 'realEmail' check karein
+    // 8. Welcome email (sirf REAL email par) bhejein (No Change)
+    if (realEmail) { 
       try {
         const schoolName = req.user.schoolName || 'MyEduPanel';
         const message = `<h1>Welcome to ${schoolName}!</h1><p>An account has been created for your child, ${studentFullName}.</p><p>You can use these details to log in to the student/parent portal.</p><p><strong>Email:</strong> ${realEmail}</p><p><strong>Temporary Password:</strong> ${tempPassword}</p><p>Please log in and change your password at your earliest convenience.</p>`;
@@ -335,20 +312,16 @@ const addSingleStudent = async (req, res) => {
         console.error("Student added, but failed to send welcome email:", emailError);
       }
     }
-    // --- END FIX ---
 
-
-    // 9. Success response bhejein (No Change)
+    // 9. Success response (No Change)
     res.status(201).json({ message: 'Student added successfully!', student: newStudent });
 
   } catch (error) {
+    // 10. Catch block (No Change)
     console.error("Error creating single student:", error);
-    
-    // 10. FIX: Catch block (No Change, pehle se hi sahi tha)
     if (error.code === 'P2002') { 
        const target = error.meta?.target || [];
        if (target.includes('email')) {
-           // Ab yeh real email aur dummy email, dono ke duplicate ko pakad lega
            return res.status(400).json({ message: `An account with this email (${req.body.email || 'dummy email'}) already exists in the User table.` });
        }
        if (target.includes('roll_number')) {
@@ -356,8 +329,6 @@ const addSingleStudent = async (req, res) => {
        }
        return res.status(400).json({ message: `Duplicate entry error on: ${target.join(', ')}` });
     }
-    // --- END FIX ---
-
     if (error.code === 'P2012' || error.name === 'PrismaClientValidationError') {
         const match = error.message.match(/Argument `(.*)` is missing/);
         const missingField = match ? match[1] : 'a required field';
@@ -369,9 +340,9 @@ const addSingleStudent = async (req, res) => {
 };
 
 
-// 7. EXPORTS (Koi change nahi)
+// 7. EXPORTS (No Change)
 module.exports = {
   addStudentsInBulk,
   getAllStudents,
-  addSingleStudent,
+  addSingleStudent, 
 };
