@@ -252,3 +252,31 @@
   // form .addButton { width: 100%; } 
   // (Yeh aapke existing JSX ke hisaab se pehle se hi kaam karna chahiye)
 }
+/* ... existing styles ... */
+
+.sidebarColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; // Add/Edit section aur link ke beech gap
+}
+
+.dashboardLinkButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #343a40;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+
+  &:hover {
+    background-color: #e9ecef;
+    color: #000;
+  }
+}

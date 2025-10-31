@@ -133,10 +133,10 @@ exports.deleteClass = async (req, res) => {
     try {
         // --- Pehle checks ---
         
-        // 1. Check Students (FIXED: Ab string ke bajaye ID se check karega)
+        // 1. Check Students (FIXED: Ab 'classId' (camelCase) ke bajaye 'classid' (lowercase) use karega)
         const studentInClass = await prisma.students.findFirst({
             where: {
-                classId: classIdInt,  // <-- YEH HAI FIX (Pehle yahaan 'class: className' tha)
+                classid: classIdInt,  // <-- YEH HAI FIX
                 schoolId: schoolId
             }
         });
@@ -146,10 +146,10 @@ exports.deleteClass = async (req, res) => {
             return res.status(400).json({ msg: 'Cannot delete class. Students are still assigned to this class ID.' });
         }
 
-        // 2. Check FeeRecords (Yeh pehle se hi sahi tha)
+        // 2. Check FeeRecords (Yeh pehle se hi sahi tha, FeeRecord model 'classId' (camelCase) use karta hai)
         const feeRecordInClass = await prisma.feeRecord.findFirst({
             where: {
-                classId: classIdInt,
+                classId: classIdInt, // <-- Yeh 'classId' hi rahega
                 schoolId: schoolId
             }
         });

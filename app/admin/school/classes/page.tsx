@@ -4,8 +4,10 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import api from '@/backend/utils/api'; 
 import styles from './ClassesPage.module.scss';
-import { FiEdit, FiTrash2 } from 'react-icons/fi'; // <-- 1. Icons Import kiye
-import Modal from '@/components/common/Modal/Modal'; // <-- 1. Modal Import kiya
+import Link from 'next/link'; // <-- 1. YEH ADD KIYA
+import { FiEdit, FiTrash2 } from 'react-icons/fi'; 
+import { MdGridView } from 'react-icons/md'; // <-- 2. YEH ADD KIYA
+import Modal from '@/components/common/Modal/Modal'; 
 
 interface SchoolClass {
     classid: number;
@@ -21,13 +23,12 @@ const ClassesPage = () => {
     const [isAdding, setIsAdding] = useState(false);
     const [addError, setAddError] = useState<string | null>(null);
 
-    // --- 2. Edit/Delete ke liye naye States ---
-    const [isDeleting, setIsDeleting] = useState<{[key: number]: boolean}>({}); // Individual delete loading
-    const [classToEdit, setClassToEdit] = useState<SchoolClass | null>(null); // Kaunsi class edit ho rahi hai
-    const [editName, setEditName] = useState(''); // Edit form mein naya naam
-    const [isEditing, setIsEditing] = useState(false); // Edit modal submit loading
-    const [editError, setEditError] = useState<string | null>(null); // Edit modal error
-    // ---
+    // Edit/Delete States (No Change)
+    const [isDeleting, setIsDeleting] = useState<{[key: number]: boolean}>({});
+    const [classToEdit, setClassToEdit] = useState<SchoolClass | null>(null);
+    const [editName, setEditName] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
+    const [editError, setEditError] = useState<string | null>(null);
 
     // Fetch existing classes (No Change)
     useEffect(() => {
@@ -56,6 +57,7 @@ const ClassesPage = () => {
         setIsAdding(true); setAddError(null);
         try {
             const res = await api.post('/api/classes', { name: trimmedName });
+            // Sahi se add karne ke liye, backend se aane waale data ko use karein
             setClasses(prevClasses => [...prevClasses, res.data]); 
             setNewClassName(''); 
         } catch (err: any) {
@@ -66,37 +68,30 @@ const ClassesPage = () => {
         }
     };
 
-    // --- 3. NAYA FUNCTION: Delete Class Handler ---
+    // Delete Class Handler (No Change)
     const handleDeleteClass = async (classId: number, className: string) => {
-        // Confirm karein
         if (!window.confirm(`Are you sure you want to delete class "${className}"? This action cannot be undone.`)) {
             return;
         }
-
-        setIsDeleting(prev => ({ ...prev, [classId]: true })); // Set loading for this specific button
-        setFetchError(null); // Clear main error
+        setIsDeleting(prev => ({ ...prev, [classId]: true })); 
+        setFetchError(null); 
 
         try {
-            // Backend DELETE /api/classes/:id ko call karega
             await api.delete(`/api/classes/${classId}`);
-            
-            // List se class ko remove karein
             setClasses(prevClasses => prevClasses.filter(cls => cls.classid !== classId));
-            
         } catch (err: any) {
             console.error("Failed to delete class:", err);
-            // Error ko list ke upar dikhayein
             setFetchError(err.response?.data?.msg || 'Failed to delete class. It might be in use by students or fee records.');
         } finally {
-            setIsDeleting(prev => ({ ...prev, [classId]: false })); // Loading complete
+            setIsDeleting(prev => ({ ...prev, [classId]: false })); 
         }
     };
 
-    // --- 3. NAYE FUNCTIONS: Edit Modal Handlers ---
+    // Edit Modal Handlers (No Change)
     const openEditModal = (cls: SchoolClass) => {
-        setClassToEdit(cls); // Set karein kaunsi class edit ho rahi hai
-        setEditName(cls.class_name); // Input field mein purana naam daalein
-        setEditError(null); // Purana error clear karein
+        setClassToEdit(cls); 
+        setEditName(cls.class_name); 
+        setEditError(null); 
     };
 
     const closeEditModal = () => {
@@ -116,7 +111,7 @@ const ClassesPage = () => {
             return;
         }
         if (trimmedName === classToEdit.class_name) {
-            closeEditModal(); // Koi change nahi hua, bas band kar do
+            closeEditModal(); 
             return;
         }
 
@@ -124,16 +119,13 @@ const ClassesPage = () => {
         setEditError(null);
 
         try {
-            // Backend PUT /api/classes/:id ko call karega
             const res = await api.put(`/api/classes/${classToEdit.classid}`, { name: trimmedName });
-            
-            // List mein class ko update karein
             setClasses(prevClasses => 
                 prevClasses.map(cls => 
-                    cls.classid === classToEdit.classid ? res.data : cls // Purani class ko nayi se replace karein
+                    cls.classid === classToEdit.classid ? res.data : cls 
                 )
             );
-            closeEditModal(); // Modal band karein
+            closeEditModal(); 
             
         } catch (err: any) {
             console.error("Failed to update class:", err);
@@ -142,7 +134,6 @@ const ClassesPage = () => {
             setIsEditing(false);
         }
     };
-    // ---
 
     return (
         <div className={styles.pageContainer}>
@@ -159,7 +150,6 @@ const ClassesPage = () => {
                     
                     {!isLoading && !fetchError && classes.length > 0 && (
                         <ul className={styles.classList}>
-                            {/* --- 4. JSX UPDATE: Buttons add kiye --- */}
                             {classes.map(cls => (
                                 <li key={cls.classid}>
                                     <span>{cls.class_name}</span>
@@ -175,14 +165,13 @@ const ClassesPage = () => {
                                             onClick={() => handleDeleteClass(cls.classid, cls.class_name)} 
                                             className={`${styles.actionButton} ${styles.deleteButton}`} 
                                             title="Delete Class"
-                                            disabled={isDeleting[cls.classid]} // Disable only this button
+                                            disabled={isDeleting[cls.classid]}
                                         >
                                             {isDeleting[cls.classid] ? '...' : <FiTrash2 />}
                                         </button>
                                     </div>
                                 </li>
                             ))}
-                            {/* --- END JSX UPDATE --- */}
                         </ul>
                     )}
                     
@@ -191,39 +180,48 @@ const ClassesPage = () => {
                     )}
                 </section>
 
-                {/* Section to Add a New Class (No Change) */}
-                <section className={styles.addClassSection}>
-                    <h2>Add New Class</h2>
-                    <form onSubmit={handleAddClass}>
-                        {/* ... (Existing Add Class Form - No Change) ... */}
-                        <div className={styles.formGroup}>
-                            <label htmlFor="newClassName">Class Name</label>
-                            <input 
-                                type="text"
-                                id="newClassName"
-                                className={styles.inputField}
-                                value={newClassName}
-                                onChange={(e) => setNewClassName(e.target.value)}
-                                placeholder="e.g., Nursery, Class 10th A"
-                                required 
+                {/* --- 3. FIX: Wrapper div add kiya --- */}
+                <div className={styles.sidebarColumn}>
+                    {/* Section to Add a New Class (No Change) */}
+                    <section className={styles.addClassSection}>
+                        <h2>Add New Class</h2>
+                        <form onSubmit={handleAddClass}>
+                            <div className={styles.formGroup}>
+                                <label htmlFor="newClassName">Class Name</label>
+                                <input 
+                                    type="text"
+                                    id="newClassName"
+                                    className={styles.inputField}
+                                    value={newClassName}
+                                    onChange={(e) => setNewClassName(e.target.value)}
+                                    placeholder="e.g., Nursery, Class 10th A"
+                                    required 
+                                    disabled={isAdding}
+                                />
+                            </div>
+                            {addError && <p className={styles.errorMessage}>{addError}</p>}
+                            <button 
+                                type="submit" 
+                                className={styles.addButton}
                                 disabled={isAdding}
-                            />
-                        </div>
-                        {addError && <p className={styles.errorMessage}>{addError}</p>}
-                        <button 
-                            type="submit" 
-                            className={styles.addButton}
-                            disabled={isAdding}
-                        >
-                            {isAdding ? 'Adding...' : '+ Add Class'}
-                        </button>
-                    </form>
-                </section>
+                            >
+                                {isAdding ? 'Adding...' : '+ Add Class'}
+                            </button>
+                        </form>
+                    </section>
+
+                    {/* --- 3. YEH NAYA LINK ADD KIYA HAI --- */}
+                    <Link href="/admin/school" className={styles.dashboardLinkButton}>
+                        <MdGridView /> Go to Dashboard
+                    </Link>
+                    {/* --- END NAYA LINK --- */}
+                </div>
+                {/* --- END FIX --- */}
             </div>
 
-            {/* --- 4. JSX UPDATE: Edit Modal add kiya --- */}
+            {/* Edit Modal (No Change) */}
             <Modal
-                isOpen={!!classToEdit} // Modal tab khulega jab classToEdit null nahi hai
+                isOpen={!!classToEdit} 
                 onClose={closeEditModal}
                 title={`Edit Class: ${classToEdit?.class_name}`}
             >
@@ -246,7 +244,7 @@ const ClassesPage = () => {
                     <div className={styles.modalActions}>
                         <button 
                             type="button" 
-                            className={styles.cancelButton} // Aapko in styles ko .scss file mein add karna hoga
+                            className={styles.cancelButton} 
                             onClick={closeEditModal}
                             disabled={isEditing}
                         >
@@ -254,7 +252,7 @@ const ClassesPage = () => {
                         </button>
                         <button 
                             type="submit" 
-                            className={styles.addButton} // Reuse add button style
+                            className={styles.addButton} 
                             disabled={isEditing}
                         >
                             {isEditing ? 'Saving...' : 'Save Changes'}
@@ -262,7 +260,6 @@ const ClassesPage = () => {
                     </div>
                 </form>
             </Modal>
-            {/* --- END JSX UPDATE --- */}
 
         </div>
     );
