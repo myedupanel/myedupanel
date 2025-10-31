@@ -73,13 +73,128 @@
     font-size: 1rem;
     color: #495057;
     
+    // --- FIX: ADDED FLEXBOX STYLES ---
+    display: flex;
+    justify-content: space-between; // Naam ko left, buttons ko right rakhega
+    align-items: center; // Vertically center karega
+    gap: 1rem; // Naam aur buttons ke beech thoda gap
+    // --- END FIX ---
+
     &:last-child {
       border-bottom: none;
     }
-    // Add hover effect if needed
-    // &:hover { background-color: #f8f9fa; }
+
+    // Naam ke liye (taaki woh shrink na ho)
+    span {
+      flex-grow: 1; // Naam ko available space dega
+    }
   }
 }
+
+// --- FIX: ADDED NEW STYLES FOR BUTTONS AND MODAL ---
+
+// Container for Edit/Delete buttons
+.classActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0; // Buttons ko shrink hone se rokega
+}
+
+// Style for individual icon buttons (Edit/Delete)
+.actionButton {
+  background-color: transparent;
+  border: none;
+  color: #6c757d; // Neutral icon color
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background-color: #e9ecef;
+    color: #343a40;
+  }
+
+  &:disabled {
+    color: #adb5bd;
+    cursor: not-allowed;
+    background-color: transparent;
+  }
+
+  // Specific color for delete button on hover
+  &.deleteButton:hover {
+    background-color: #f8d7da;
+    color: #dc3545;
+  }
+}
+
+// Edit Modal Form
+.editForm {
+  padding-top: 1rem; // Modal header se thoda gap
+}
+
+// Container for modal buttons (Cancel, Save)
+.modalActions {
+  display: flex;
+  justify-content: flex-end; // Buttons ko right align karega
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+// Generic button style for modal
+.modalButton {
+  padding: 0.6rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Cancel button style (uses modalButton base)
+.cancelButton {
+  @extend .modalButton; // Base style apply karega
+  background-color: #f8f9fa;
+  color: #495057;
+  border: 1px solid #ced4da;
+
+  &:hover:not(:disabled) {
+    background-color: #e9ecef;
+  }
+}
+
+// Re-using add button style for Save/Submit
+.addButton {
+  @extend .modalButton; // Base style apply karega
+  color: #ffffff;
+  background-color: #198754; // Green for adding/saving
+
+  &:hover:not(:disabled) {
+    background-color: #157347;
+  }
+  
+  &:disabled {
+    background-color: #6c757d; // Keep disabled style
+  }
+}
+
+// --- END ADDED STYLES ---
 
 .formGroup {
   margin-bottom: 1rem;
@@ -109,6 +224,7 @@
   }
 }
 
+// --- FIX: Updated .addButton to NOT be full width by default ---
 .addButton {
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
@@ -119,8 +235,8 @@
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
-  width: 100%; // Make button full width of its container
-
+  // width: 100%; // <-- Yeh line hata di taaki modal mein bhi use ho sake
+  
   &:hover {
     background-color: #157347;
   }
@@ -129,4 +245,10 @@
     background-color: #6c757d;
     cursor: not-allowed;
   }
+
+  // Agar 'Add New Class' form mein button ko full width chahiye, toh form ko style karein
+  // Example (In .addClassSection > form):
+  // form { display: flex; flex-direction: column; }
+  // form .addButton { width: 100%; } 
+  // (Yeh aapke existing JSX ke hisaab se pehle se hi kaam karna chahiye)
 }

@@ -4,13 +4,13 @@ const router = express.Router();
 const { authMiddleware, authorize } = require('../middleware/authMiddleware'); // authMiddleware import karein
 const classController = require('../controllers/classController'); // Controller import karein
 
-// --- YEH HAIN AAPKE ROUTES ---
+// --- YEH HAIN AAPKE ROUTES (FIXED) ---
 
 // GET /api/classes
 // Saari classes ki list fetch karega
 router.get(
     '/', 
-    [authMiddleware], // Sirf logged-in user
+    [authMiddleware, authorize('Admin')], // <-- FIX: 'admin' ko 'Admin' (Capital A) kiya
     classController.getClasses
 );
 
@@ -18,7 +18,7 @@ router.get(
 // Nayi class add karega
 router.post(
     '/', 
-    [authMiddleware, authorize('admin')], // Sirf admin
+    [authMiddleware, authorize('Admin')], // <-- FIX: 'admin' ko 'Admin' (Capital A) kiya
     classController.addClass
 );
 
@@ -26,7 +26,7 @@ router.post(
 // Ek class ko update (edit) karega
 router.put(
     '/:id', 
-    [authMiddleware, authorize('admin')], // Sirf admin
+    [authMiddleware, authorize('Admin')], // <-- FIX: 'admin' ko 'Admin' (Capital A) kiya
     classController.updateClass
 );
 
@@ -34,7 +34,7 @@ router.put(
 // Ek class ko delete karega
 router.delete(
     '/:id', 
-    [authMiddleware, authorize('admin')], // Sirf admin
+    [authMiddleware, authorize('Admin')], // <-- FIX: 'admin' ko 'Admin' (Capital A) kiya
     classController.deleteClass
 );
 
