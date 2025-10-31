@@ -1,18 +1,41 @@
 // backend/routes/classes.js
 const express = require('express');
 const router = express.Router();
+const { authMiddleware, authorize } = require('../middleware/authMiddleware'); // authMiddleware import karein
+const classController = require('../controllers/classController'); // Controller import karein
 
-// ✅ FIX: Import adminMiddleware for authorization
-const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware'); 
-const classController = require('../controllers/classController');
+// --- YEH HAIN AAPKE ROUTES ---
 
-// Existing GET route (no change)
-router.get('/', authMiddleware, classController.getClasses);
+// GET /api/classes
+// Saari classes ki list fetch karega
+router.get(
+    '/', 
+    [authMiddleware], // Sirf logged-in user
+    classController.getClasses
+);
 
-// ✅ FIX: Add the POST route for creating a new class
-// This tells Express: "When a POST request comes to /api/classes, 
-// first check authentication (authMiddleware), then check if the user is an admin (adminMiddleware), 
-// and if both pass, run the classController.addClass function."
-router.post('/', [authMiddleware, adminMiddleware], classController.addClass); 
+// POST /api/classes
+// Nayi class add karega
+router.post(
+    '/', 
+    [authMiddleware, authorize('admin')], // Sirf admin
+    classController.addClass
+);
+
+// PUT /api/classes/:id
+// Ek class ko update (edit) karega
+router.put(
+    '/:id', 
+    [authMiddleware, authorize('admin')], // Sirf admin
+    classController.updateClass
+);
+
+// DELETE /api/classes/:id
+// Ek class ko delete karega
+router.delete(
+    '/:id', 
+    [authMiddleware, authorize('admin')], // Sirf admin
+    classController.deleteClass
+);
 
 module.exports = router;
