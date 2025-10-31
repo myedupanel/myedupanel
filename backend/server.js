@@ -1,6 +1,6 @@
 // backend/server.js
 
-// --- FIX: Only run dotenv in development ---
+// --- FIX: Only run dotenv in development (non-production) ---
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config(); // Environment variables load karein (sirf local par)
 }
@@ -65,9 +65,9 @@ const io = new Server(server, {
   }
 });
 
-app.set('socketio', io);
+app.set('socketio', io); // Attach io for webhook access
 app.use((req, res, next) => {
-    req.io = io;
+    req.io = io; // Attach io for standard request access
     next();
 });
 
@@ -77,14 +77,10 @@ app.get('/', (req, res) => {
 });
 
 
-// --- YEH HAI AAPKA FIX ---
 // KADAM 1: File-upload (multer) waale route ko JSON parser se PEHLE rakhein
-// Taaki 'multipart/form-data' request corrupt na ho
 app.use('/api/school', schoolRoutes); 
 
-// KADAM 2: Ab global JSON parser ko add karein (aapki 800kb waali request ke liye limit badha di hai)
-// Yeh baaki sabhi routes (login, add student, etc.) ke liye zaroori hai
-// Humne limit ko 2mb kar diya hai taaki 800kb se badi JSON request bhi pass ho sake.
+// KADAM 2: Ab global JSON parser ko add karein (limit badha di hai)
 app.use(express.json({ limit: '2mb' })); 
 // --- FIX ENDS HERE ---
 
