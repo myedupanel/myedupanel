@@ -39,9 +39,9 @@ const schoolMenuItems: MenuItem[] = [
     { id: 'staff', title: 'Staff', path: '/admin/staff', icon: <MdBadge />, color: '#f97316' },
     // --- 2. YEH NAYA LINK "STAFF" KE NEECHE ADD KIYA HAI ---
     { 
-      id: 'manage-classes', 
+      id: 'manage-classes',
       title: 'Manage Classes', 
-      path: '/admin/academics/classes', // Path to your classes page
+      path: '/admin/school/classes', // Path to your classes page
       icon: <MdClass />, 
       color: '#64748b' // Using Timetable Settings color
     },
