@@ -3,30 +3,28 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import styles from './ProfilePage.module.scss'; // Ensure this SCSS file exists and is styled
+import styles from './ProfilePage.module.scss'; 
 import { useAuth, User } from '../../context/AuthContext';
 import DefaultAvatar from '../../../components/common/DefaultAvatar';
 import api from '@/backend/utils/api';
-import { FiAlertCircle, FiCheckCircle, FiLoader } from 'react-icons/fi'; // Added FiLoader
+import { FiAlertCircle, FiCheckCircle, FiLoader } from 'react-icons/fi'; 
 
-// Interface includes name2 and place
 interface SchoolFormData {
   name: string;
-  name2: string; // School Name 2 (Main Name for Certificate)
+  name2: string; 
   address: string;
-  mobNo: string; // Contact Number (Frontend State)
-  email: string; // School's PUBLIC email
+  mobNo: string; 
+  email: string; 
   udiseNo: string;
-  govtReg: string; // Government Registration No. (Frontend State)
-  place: string; // Place for Certificate Footer
-  logoUrl: string; // Base64 string or URL
+  govtReg: string; 
+  place: string; 
+  logoUrl: string; // Yeh ab sirf existing URL ya Base64 preview ke liye hai
 }
 
 const SchoolProfilePage = () => {
   const router = useRouter();
   const { user, login } = useAuth() as { user: User | null; login: (token: string) => Promise<any> };
 
-  // State includes name2 and place
   const [formData, setFormData] = useState<SchoolFormData>({
     name: '',
     name2: '',
@@ -39,13 +37,18 @@ const SchoolProfilePage = () => {
     logoUrl: ''
   });
 
+  // --- YEH HAI AAPKA FIX (KADAM 1) ---
+  // Hum file ko preview ke liye Base64 (imagePreview) aur submit ke liye File object (imageFile) mein save karenge
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null); // Naya state file object ke liye
+  // --- FIX ENDS HERE ---
+
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 90-day rule logic
+  // 90-day rule logic (No change)
   const [canUpdateSchoolName, setCanUpdateSchoolName] = useState(true);
   const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
 
@@ -70,12 +73,10 @@ const SchoolProfilePage = () => {
     }
   }, [user]);
 
-  // useEffect fetches school profile
+  // useEffect fetches school profile (No change)
   useEffect(() => {
     const fetchSchoolProfile = async () => {
       if (!user) {
-        // If user is null after initial load, maybe redirect to login?
-        // For now, just stop loading and show potential error later if needed.
         setIsLoading(false);
         return;
       }
@@ -88,11 +89,10 @@ const SchoolProfilePage = () => {
           name: res.data.name || user.schoolName || '',
           name2: res.data.name2 || '',
           address: res.data.address || '',
-          // Use correct mapping from backend fields
-          mobNo: res.data.contactNumber || '', // Assuming backend uses contactNumber
+          mobNo: res.data.contactNumber || '', 
           email: res.data.email || '',
           udiseNo: res.data.udiseNo || '',
-          govtReg: res.data.recognitionNumber || '', // Assuming backend uses recognitionNumber
+          govtReg: res.data.recognitionNumber || '', 
           place: res.data.place || '',
           logoUrl: res.data.logoUrl || ''
         });
@@ -104,7 +104,6 @@ const SchoolProfilePage = () => {
       } catch (err: any) {
         console.error("Failed to fetch school profile:", err);
         setError('Failed to load school profile. Please ensure you have completed setup or try refreshing.');
-        // Set name from context as fallback even on error
         if (user.schoolName) {
            setFormData(prev => ({...prev, name: user.schoolName}));
         }
@@ -114,30 +113,38 @@ const SchoolProfilePage = () => {
     };
 
     fetchSchoolProfile();
-  }, [user]); // Re-run when user context is available
+  }, [user]); 
 
   // Input handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    // Clear messages when user starts typing again
     setError('');
     setSuccessMessage('');
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  // --- YEH HAI AAPKA FIX (KADAM 2) ---
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError('');
     setSuccessMessage('');
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) { // 2MB limit
-          setError("File is too large. Please select an image under 2MB.");
+      // --- YEH HAI AAPKI 800KB LIMIT ---
+      if (file.size > 800 * 1024) { // 800KB limit
+          setError("File is too large. Please select an image under 800KB.");
+          setImageFile(null); // File ko clear karein
           return;
       }
+      
+      // Nayi file ko state mein save karein (submit ke liye)
+      setImageFile(file);
+
+      // File ka preview generate karein (UI ke liye)
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result as string;
         setImagePreview(base64String);
-        setFormData(prevData => ({ ...prevData, logoUrl: base64String }));
+        // Hum ab Base64 ko 'formData' mein save NAHI kar rahe hain
+        // setFormData(prevData => ({ ...prevData, logoUrl: base64String })); // <-- YEH LINE HATA DI GAYI
       };
       reader.onerror = () => {
           setError("Failed to read the image file.");
@@ -145,16 +152,19 @@ const SchoolProfilePage = () => {
       reader.readAsDataURL(file);
     }
   };
+  // --- FIX ENDS HERE ---
+
   const handleInputClick = (e: React.MouseEvent<HTMLInputElement>) => { (e.target as HTMLInputElement).value = ''; };
 
-  // handleFormSubmit sends name2 and place
+  // --- YEH HAI AAPKA FIX (KADAM 3) ---
+  // handleFormSubmit ab Base64 ke bajaye 'FormData' bhejega
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); // Clear previous errors
-    setSuccessMessage(''); // Clear previous success messages
+    setError(''); 
+    setSuccessMessage(''); 
     setIsSubmitting(true);
 
-    // Basic Validations
+    // Validations (No change)
     if (!formData.name) {
         setError('School Name (Main/Trust) is required.');
         setIsSubmitting(false);
@@ -175,62 +185,69 @@ const SchoolProfilePage = () => {
         setIsSubmitting(false);
         return;
     }
-     // Add more specific validations if needed (e.g., UDISE format)
 
     try {
-      // Prepare payload mapping frontend state names to backend model names
-      const payload = {
-        name: formData.name,
-        name2: formData.name2,
-        address: formData.address,
-        contactNumber: formData.mobNo, // Map mobNo to contactNumber
-        email: formData.email,
-        udiseNo: formData.udiseNo,
-        recognitionNumber: formData.govtReg, // Map govtReg to recognitionNumber
-        place: formData.place,
-        logoUrl: formData.logoUrl // Send Base64 or existing URL
-      };
+      // JSON 'payload' ke bajaye, hum 'FormData' object banayenge
+      const data = new FormData();
 
-      console.log("Submitting school profile:", payload); // Log payload before sending
-      const response = await api.put('/api/school/profile', payload);
-      console.log("API Response:", response.data); // Log API response
+      // Saare text fields ko append karein
+      data.append('name', formData.name);
+      data.append('name2', formData.name2);
+      data.append('address', formData.address);
+      data.append('contactNumber', formData.mobNo); // Map mobNo to backend 'contactNumber'
+      data.append('email', formData.email);
+      data.append('udiseNo', formData.udiseNo);
+      data.append('recognitionNumber', formData.govtReg); // Map govtReg to backend 'recognitionNumber'
+      data.append('place', formData.place);
+      
+      // Sirf tabhi image append karein jab user ne nayi file select ki ho
+      if (imageFile) {
+        data.append('logo', imageFile); // 'logo' woh key hai jo backend (multer) expect karega
+      }
+      // Hum 'logoUrl' ko yahaan NAHI bhej rahe hain.
 
-      // Update user context/token if backend sends a new one
+      console.log("Submitting school profile as FormData..."); // Naya log
+      
+      // Axios ko 'FormData' bhejein.
+      // Axios automatically 'Content-Type' ko 'multipart/form-data' set kar dega.
+      const response = await api.put('/api/school/profile', data); 
+      
+      console.log("API Response:", response.data); 
+
       if (response.data.token) {
         console.log("Received new token, updating context.");
         await login(response.data.token);
       }
 
-      // Update local state with the actual saved data returned by backend
-      const savedData = response.data.school; // Assume backend returns updated school object
+      const savedData = response.data.school; 
       if (savedData) {
         setFormData({
             name: savedData.name || '',
             name2: savedData.name2 || '',
             address: savedData.address || '',
-            mobNo: savedData.contactNumber || '', // Update from contactNumber
+            mobNo: savedData.contactNumber || '', 
             email: savedData.email || '',
             udiseNo: savedData.udiseNo || '',
-            govtReg: savedData.recognitionNumber || '', // Update from recognitionNumber
+            govtReg: savedData.recognitionNumber || '', 
             place: savedData.place || '',
             logoUrl: savedData.logoUrl || ''
         });
         if(savedData.logoUrl) {
             setImagePreview(savedData.logoUrl);
         }
+        setImageFile(null); // Nayi file ko reset karein
       } else {
-          // If backend doesn't return updated data, just show success
           console.warn("Backend did not return updated school data in response.school");
       }
 
       setSuccessMessage('School profile updated successfully!');
 
-      // ✅ ADDED REDIRECTION LOGIC
       setTimeout(() => {
-        router.push('/admin/dashboard'); // Redirect to dashboard after 1.5 seconds
+        router.push('/admin/dashboard'); 
       }, 1500);
 
     } catch (err: any) {
+      // 'Payload Too Large' error ab nahi aana chahiye
       const backendError = err.response?.data?.message || err.response?.data?.msg || 'Failed to update profile. Please check details and try again.';
       setError(backendError);
       console.error("Profile update error:", err.response?.data || err);
@@ -238,19 +255,18 @@ const SchoolProfilePage = () => {
       setIsSubmitting(false);
     }
   };
+  // --- FIX ENDS HERE ---
 
   const handleCancel = () => {
     if (!isSubmitting) {
-      router.back(); // Use router.back() to go to previous page
+      router.back(); 
     }
   };
 
-  // Loading state while fetching initial data
   if (isLoading) {
     return <div className={styles.loadingScreen}><FiLoader /> Loading profile...</div>;
   }
 
-  // Handle case where user context is still null after loading attempt (rare)
   if (!user && !isLoading) {
       return <div className={styles.loadingScreen}>Error loading user data. Please try logging in again.</div>;
   }
@@ -267,13 +283,12 @@ const SchoolProfilePage = () => {
             {imagePreview ? (
               <Image src={imagePreview} alt="School Logo" width={100} height={100} className={styles.profileImage} />
             ) : (
-              // Use formData.name or user.schoolName for DefaultAvatar
               <DefaultAvatar name={formData.name || user?.schoolName || 'S'} size={100} />
             )}
             <div className={styles.imageUploadWrapper}>
               <label htmlFor="imageUpload" className={styles.uploadButton}>Change Logo</label>
               <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/webp" onChange={handleImageChange} onClick={handleInputClick} style={{ display: 'none' }} disabled={isSubmitting} />
-               <small className={styles.uploadHint}>Max 2MB (PNG, JPG, WEBP)</small>
+               <small className={styles.uploadHint}>Max 800KB (PNG, JPG, WEBP)</small> {/* <-- Limit update ki */}
             </div>
           </div>
 
@@ -314,9 +329,9 @@ const SchoolProfilePage = () => {
               type="email"
               id="loginEmail"
               name="loginEmail"
-              value={user?.email || 'Loading...'} // Use optional chaining
+              value={user?.email || 'Loading...'} 
               disabled
-              readOnly // Use readOnly for better semantics
+              readOnly 
               className={styles.disabledInput}
             />
           </div>
