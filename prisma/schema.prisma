@@ -63,7 +63,6 @@ model User {
   email     String   @unique
   password  String
   role      String
-  details  Json?
   status    String?  @default("active")
   isVerified Boolean @default(false)
   details   Json?
