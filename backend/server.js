@@ -1,6 +1,11 @@
 // backend/server.js
 
-require('dotenv').config(); // Environment variables load karein
+// --- FIX: Only run dotenv in development ---
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config(); // Environment variables load karein (sirf local par)
+}
+// --- END FIX ---
+
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
