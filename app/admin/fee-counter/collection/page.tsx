@@ -1,96 +1,72 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
-import api from '@/backend/utils/api'; // Assuming correct path
-import styles from './FeeCollection.module.scss'; // Use the SCSS code provided earlier
-import Modal from '@/components/common/Modal/Modal'; // Assuming correct path
-import FeeReceipt from '@/components/admin/fees/FeeReceipt'; // Assuming correct path
+import api from '@/backend/utils/api'; 
+import styles from './FeeCollection.module.scss'; 
+import Modal from '@/components/common/Modal/Modal'; 
+
+// Import *only* the default component 'FeeReceipt'
+import FeeReceipt from '@/components/admin/fees/FeeReceipt'; 
+
 import { FiUser, FiCreditCard, FiRefreshCw, FiDollarSign, FiPrinter, FiXCircle, FiCalendar, FiSearch, FiCheckCircle, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import StudentSearch from '@/components/admin/StudentSearch/StudentSearch'; // Assuming correct path
+import StudentSearch from '@/components/admin/StudentSearch/StudentSearch'; 
 
-// --- Interface Definitions for Populated Data (Mirroring FeeReceipt) ---
-interface SchoolInfo {
-    name?: string; address?: string; logo?: string;
-    session?: string; phone?: string; email?: string;
-}
-interface StudentInfo {
-    id: string; name: string; studentId?: string; // Custom ID
-    class?: string; rollNo?: string;
-}
-interface TemplateInfo {
-    id: string; name: string;
-    items: { name: string; amount: number }[];
-    totalAmount: number;
-}
-interface FeeRecordInfo {
-    id: string; discount?: number; lateFine?: number;
-}
-interface CollectorInfo {
-    name: string;
+// --- FIX 4 (UPAR): Interface definitions ko error ke hisaab se update kiya ---
+
+// 'items' ko naye error ke hisaab se correct type diya
+export interface TemplateInfo {
+  id: string; // Component ko templateId.id string chahiye (pichle error se)
+  name: string;
+  items?: { name: string; amount: number; }[]; // Naye error se
+  totalAmount?: number; 
 }
 
-// --- UPDATED Transaction Interface (Matches FeeReceipt's expected props) ---
-interface Transaction {
-    id: string;
-    receiptId: string;
-    // Use the specific interfaces for populated fields
-    studentId?: StudentInfo; // Expect populated object
-    templateId?: TemplateInfo; // Expect populated object
-    feeRecordId?: FeeRecordInfo; // Optional populated Fee Record
-    collectedBy?: CollectorInfo; // Expect populated object
-    schoolInfo?: SchoolInfo; // Expect populated object
-
-    amountPaid: number;
-    paymentMode: string;
-    paymentDate: string; // ISO String or Date
-    notes?: string;
-    status: 'Success' | 'Pending' | 'Failed';
-
-    // Conditional Payment Details
-    transactionId?: string;
-    chequeNumber?: string;
-    bankName?: string;
-    walletName?: string;
-    gatewayMethod?: string;
-
-    // Keep fallbacks ONLY if backend might NOT populate everything
-    studentName?: string; // Fallback name
-    className?: string; // Fallback class
-    studentRegId?: string; // Fallback custom ID
-    templateName?: string; // Fallback template name
-    collectedByName?: string; // Fallback collector name
-    totalFeeAmount?: number; // Fallback total
-    discountGiven?: number; // Fallback discount
-    lateFineApplied?: number; // Fallback late fine
+export interface Transaction {
+  id: number; // Component ko transaction.id number chahiye (naye error se)
+  receiptId: string;
+  amountPaid: number;
+  paymentMode: string;
+  paymentDate: string;
+  status: 'Success' | 'Pending' | 'Failed';
+  templateName?: string;
+  templateId?: TemplateInfo; 
 }
 
+// Baaki types waise hi rahenge
+export interface StudentInfo { [key: string]: any; }
+export interface FeeRecordInfo { [key: string]: any; }
+export interface CollectorInfo { [key: string]: any; }
+export interface SchoolInfo { [key: string]: any; }
 
-// Interface for the list in the Fee Record tab (Simpler)
+export interface ReceiptData extends Transaction {
+  studentInfo?: StudentInfo;
+  schoolInfo?: SchoolInfo;
+  collectorInfo?: CollectorInfo;
+  feeRecordInfo?: FeeRecordInfo;
+}
+// --- END FIX ---
+
+
+// --- Interface Definitions (Only keeping local types that FeeReceipt does NOT use) ---
 interface FeeRecordListItem {
-  id: string;
+  id: number; 
   amount: number;
   amountPaid: number;
   balanceDue: number;
   dueDate: string;
   status: 'Pending' | 'Partial' | 'Paid' | 'Late';
-  templateId: { id: string; name: string }; // Simple template info for list
-  studentId: string;
+  templateId: { id: number; name: string }; 
+  studentId: number; 
   classId: string;
   studentName?: string;
   className?: string;
 }
 
-// Interface for student search result
 interface StudentSearchResult {
-  id: string;
+  id: string; 
   name: string;
   class: string;
-  studentId?: string; // Optional registration ID
+  studentId?: string; 
 }
-
-
-// --- UPDATED ReceiptData Interface (Extends the updated Transaction) ---
-// This now correctly aligns with the Transaction type FeeReceipt expects
-interface ReceiptData extends Transaction {}
 // ---
 
 const FeeCollectionPage: React.FC = () => {
@@ -100,13 +76,11 @@ const FeeCollectionPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Use specific type for Fee Record list
   const [feeRecords, setFeeRecords] = useState<FeeRecordListItem[]>([]);
   const [paidTransactions, setPaidTransactions] = useState<Transaction[]>([]);
   const [failedTransactions, setFailedTransactions] = useState<Transaction[]>([]);
   const [historyTransactions, setHistoryTransactions] = useState<Transaction[]>([]);
 
-  // Use specific type for Fee Record list item
   const [recordToCollectOffline, setRecordToCollectOffline] = useState<FeeRecordListItem | null>(null);
   const [manualAmount, setManualAmount] = useState<string>('');
   const [manualPaymentMode, setManualPaymentMode] = useState<string>('Cash');
@@ -127,14 +101,13 @@ const FeeCollectionPage: React.FC = () => {
   const HISTORY_LIMIT = 15;
 
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
-  const [receiptDataForModal, setReceiptDataForModal] = useState<ReceiptData | null>(null); // State uses ReceiptData
+  const [receiptDataForModal, setReceiptDataForModal] = useState<ReceiptData | null>(null); 
   const [loadingReceipt, setLoadingReceipt] = useState(false);
   const [receiptError, setReceiptError] = useState<string | null>(null);
 
 
   // --- Helper: Format Currency ---
   const formatCurrency = (amount: number): string => {
-    // Show paise
     if (isNaN(amount) || amount === null || amount === undefined) return '₹ 0.00';
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
   };
@@ -150,42 +123,44 @@ const FeeCollectionPage: React.FC = () => {
 
   // --- Main Data Fetching Logic ---
   const fetchData = useCallback(async (page = 1) => {
-    if (!selectedStudent?.id) {
+    const studentIdForBackend = selectedStudent?.id ? parseInt(selectedStudent.id, 10) : null; 
+    
+    if (!studentIdForBackend) {
       setFeeRecords([]); setPaidTransactions([]); setFailedTransactions([]); setHistoryTransactions([]);
       return;
     }
     setLoading(true); setError(null); setSubmitStatus(null);
     if(activeSubTab !== 'feeRecord') setLastTransactionForReceipt(null);
     let url = '';
-    const params = new URLSearchParams({ studentId: selectedStudent.id });
+    const params = new URLSearchParams({ studentId: studentIdForBackend.toString() }); 
     try {
       switch (activeSubTab) {
-        case 'feeRecord': // Fetches FeeRecordListItem[]
+        case 'feeRecord': 
           params.append('status', 'Pending,Partial');
-          url = `/api/fees/student-records?${params.toString()}`; // Endpoint for fee records
+          url = `/api/fees/student-records?${params.toString()}`; 
           const resFR = await api.get(url);
           setFeeRecords(resFR.data.data || []);
           break;
-        case 'paid': // Fetches Transaction[]
+        case 'paid': 
           params.append('status', 'Success'); params.append('limit', HISTORY_LIMIT.toString()); params.append('page', '1');
-          url = `/api/fees/transactions?${params.toString()}`; // Endpoint for transactions
+          url = `/api/fees/transactions?${params.toString()}`; 
           const resPaid = await api.get(url);
           setPaidTransactions(resPaid.data.data || []);
           break;
-        case 'failed': // Fetches Transaction[]
+        case 'failed': 
           params.append('status', 'Failed,Pending'); params.append('limit', HISTORY_LIMIT.toString()); params.append('page', '1');
-          url = `/api/fees/transactions?${params.toString()}`; // Endpoint for transactions
+          url = `/api/fees/transactions?${params.toString()}`; 
           const resFailed = await api.get(url);
           setFailedTransactions(resFailed.data.data || []);
           break;
-        case 'history': // Fetches Transaction[]
+        case 'history': 
           params.append('page', page.toString()); params.append('limit', HISTORY_LIMIT.toString());
           if (historySearch) params.append('search', historySearch);
           if (historyStartDate) params.append('startDate', historyStartDate);
           if (historyEndDate) params.append('endDate', historyEndDate);
           if (historyStatusFilter) params.append('status', historyStatusFilter);
           if (historyPaymentModeFilter) params.append('paymentMode', historyPaymentModeFilter);
-          url = `/api/fees/transactions?${params.toString()}`; // Endpoint for transactions
+          url = `/api/fees/transactions?${params.toString()}`; 
           const resHist = await api.get(url);
           setHistoryTransactions(resHist.data.data || []);
           setHistoryTotalPages(resHist.data.totalPages || 1);
@@ -205,10 +180,8 @@ const FeeCollectionPage: React.FC = () => {
 
   // --- useEffect Hooks (No changes) ---
   useEffect(() => {
-    if(activeSubTab === 'history' || selectedStudent?.id !== historyTransactions[0]?.studentId?.id){ // Optional chaining for safety
-      setHistoryPage(1);
-    }
-    fetchData(activeSubTab === 'history' ? historyPage : 1);
+    setHistoryPage(1);
+    fetchData(activeSubTab === 'history' ? historyPage : 1); 
     if (activeSubTab !== 'feeRecord') {
       setRecordToCollectOffline(null);
     }
@@ -224,10 +197,10 @@ const FeeCollectionPage: React.FC = () => {
 
 
   // --- Handlers ---
-  const handleSelectForOffline = (record: FeeRecordListItem) => { // Use FeeRecordListItem type
+  const handleSelectForOffline = (record: FeeRecordListItem) => { 
     if (recordToCollectOffline?.id === record.id) { setRecordToCollectOffline(null); return; }
     setRecordToCollectOffline(record);
-    setManualAmount(record.balanceDue.toString()); // Convert number to string
+    setManualAmount(record.balanceDue.toString()); 
     setManualPaymentMode('Cash');
     setManualPaymentDate(new Date().toISOString().split('T')[0]);
     setManualNotes('');
@@ -249,31 +222,26 @@ const FeeCollectionPage: React.FC = () => {
       const payload = {
         feeRecordId: recordToCollectOffline.id, amountPaid: amountToPay,
         paymentMode: manualPaymentMode, paymentDate: manualPaymentDate, notes: manualNotes,
-        studentId: recordToCollectOffline.studentId,
-        // Conditionally add cheque details - adapt based on backend expectation
-        ...(manualPaymentMode === 'Cheque' && { chequeNumber: manualNotes /* Or extract specific parts */, bankName: 'N/A' /* Extract if possible */ })
+        studentId: recordToCollectOffline.studentId, 
+        ...(manualPaymentMode === 'Cheque' && { chequeNumber: manualNotes, bankName: 'N/A' })
       };
-      // Endpoint for manual collection
       const response = await api.post('/api/fees/collect-manual', payload);
       setSubmitStatus({ message: 'Payment collected successfully!', type: 'success' });
-      // The response.data.transaction should match the updated Transaction type
       setLastTransactionForReceipt(response.data.transaction);
       setRecordToCollectOffline(null);
       setManualAmount('');
-      fetchData(); // Refetch data for the current tab
+      fetchData(); 
     } catch (error: any) {
       console.error("Error collecting manual payment:", error);
       setSubmitStatus({ message: error.response?.data?.message || 'Failed to save payment.', type: 'error' });
     } finally { setIsSubmittingManual(false); }
   };
 
-  // Fetches data specifically for the receipt modal
-  const handleViewReceipt = async (transactionId: string) => {
+  const handleViewReceipt = async (transactionId: number) => { 
     setReceiptDataForModal(null); setReceiptError(null); setLoadingReceipt(true); setIsReceiptModalOpen(true);
     try {
-      // Endpoint to get fully populated transaction details for receipt
       const res = await api.get(`/api/fees/transaction/${transactionId}`);
-      setReceiptDataForModal(res.data); // Should match ReceiptData interface now
+      setReceiptDataForModal(res.data); 
     } catch (err: any) {
       console.error("Failed to fetch receipt data:", err);
       setReceiptError(err.response?.data?.message || 'Failed to load receipt details.');
@@ -284,9 +252,8 @@ const FeeCollectionPage: React.FC = () => {
   const clearHistoryFilters = () => {
     setHistorySearch(''); setHistoryStartDate(''); setHistoryEndDate('');
     setHistoryStatusFilter(''); setHistoryPaymentModeFilter('');
-    // Fetch page 1 with cleared filters only if needed
     if (historyPage !== 1 || historySearch || historyStartDate || historyEndDate || historyStatusFilter || historyPaymentModeFilter) {
-         setHistoryPage(1); // Setting page will trigger fetchData via useEffect
+         setHistoryPage(1); 
     }
   };
 
@@ -295,7 +262,6 @@ const FeeCollectionPage: React.FC = () => {
     <div className={styles.pageContainer}>
       {/* --- Left Panel --- */}
       <aside className={styles.leftPanel}>
-         {/* ... Left Panel Content ... */}
          <div className={styles.panelHeader}><FiUser /><h3>Select Student</h3></div>
         <div className={styles.panelContent}>
           <StudentSearch onStudentSelect={(student: StudentSearchResult | null) => { setSelectedStudent(student); setActiveSubTab('feeRecord'); }} />
@@ -320,7 +286,6 @@ const FeeCollectionPage: React.FC = () => {
 
       {/* --- Main Content Area --- */}
       <main className={styles.mainContent}>
-        {/* ... Main Content Header ... */}
         <div className={styles.panelHeader}>
           <h3>
             {activeSubTab === 'feeRecord' && 'Fee Record & Collection'}
@@ -346,7 +311,6 @@ const FeeCollectionPage: React.FC = () => {
                   loading && feeRecords.length === 0 ? (<p>Loading...</p>) :
                   (
                     <div className={styles.feeRecordLayout}>
-                      {/* ... Fee Record List (using FeeRecordListItem) ... */}
                        <div className={styles.recordListSection}>
                         <h4>Pending / Partial Fees</h4>
                         {submitStatus?.type === 'success' && lastTransactionForReceipt && (
@@ -366,9 +330,7 @@ const FeeCollectionPage: React.FC = () => {
                               <li key={record.id} className={`${styles.recordItem} ${recordToCollectOffline?.id === record.id ? styles.selectedForCollection : ''}`}>
                                 <div className={styles.recordInfo}>
                                   <span>{record.templateId?.name || 'Fee Record'}</span>
-                                  {/* Use formatCurrency with paise */}
                                   <span className={styles.amountDue}>Balance: {formatCurrency(record.balanceDue)}</span>
-                                  {/* Format date */}
                                   <span className={styles.dueDate}>Due: {formatDate(record.dueDate)}</span>
                                 </div>
                                 <div className={styles.recordActions}>
@@ -385,14 +347,12 @@ const FeeCollectionPage: React.FC = () => {
                           </ul>
                         )}
                       </div>
-                      {/* ... Manual Collection Form ... */}
                        {recordToCollectOffline && (
                         <div className={styles.collectOfflineForm}>
                          <div className={styles.formHeader}><h3>Collect Offline Payment</h3></div>
                           <div className={styles.formContent}>
                             <div className={styles.selectedRecordInfoSmall}>
                               <p><strong>Record:</strong> {recordToCollectOffline.templateId?.name}</p>
-                              {/* Use formatCurrency with paise */}
                               <p><strong>Balance:</strong> {formatCurrency(recordToCollectOffline.balanceDue)}</p>
                             </div>
                             <hr className={styles.divider} />
@@ -440,7 +400,7 @@ const FeeCollectionPage: React.FC = () => {
                 {activeSubTab === 'paid' && (
                   loading ? <p>Loading...</p> :
                   paidTransactions.length === 0 ? <p className={styles.placeholder}>No paid transactions found.</p> :
-                  ( /* ... Table structure ... */
+                  ( 
                      <div className={styles.recordsTableContainer}>
                       <table className={styles.recordsTable}>
                          <thead><tr><th>Receipt ID</th><th>Fee Name</th><th>Amount</th><th>Mode</th><th>Date</th><th>Actions</th></tr></thead>
@@ -464,20 +424,19 @@ const FeeCollectionPage: React.FC = () => {
                  {activeSubTab === 'failed' && (
                   loading ? <p>Loading...</p> :
                   failedTransactions.length === 0 ? <p className={styles.placeholder}>No failed or pending transactions found.</p> :
-                  ( /* ... Table structure ... */
+                  ( 
                      <div className={styles.recordsTableContainer}>
                        <table className={styles.recordsTable}>
                           <thead><tr><th>Receipt ID</th><th>Fee Name</th><th>Amount</th><th>Mode</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
                           <tbody>
                             {failedTransactions.map((tx) => (
                               <tr key={tx.id}>
-                                <td>{tx.receiptId}</td>
+                                G<td>{tx.receiptId}</td>
                                 <td>{tx.templateName || tx.templateId?.name || 'N/A'}</td>
                                 <td>{formatCurrency(tx.amountPaid)}</td>
                                 <td>{tx.paymentMode}</td>
                                 <td>{formatDate(tx.paymentDate)}</td>
                                 <td><span className={`${styles.statusBadge} ${styles[tx.status.toLowerCase()]}`}>{tx.status}</span></td>
-                                {/* Maybe view receipt for details even if failed? */}
                                 <td><button className={styles.actionButton} onClick={() => handleViewReceipt(tx.id)}>Details</button></td>
                               </tr>
                             ))}
@@ -489,7 +448,6 @@ const FeeCollectionPage: React.FC = () => {
                 {/* History */}
                 {activeSubTab === 'history' && (
                   <div className={styles.historyContainer}>
-                    {/* ... History Filters ... */}
                      <div className={styles.filterBar}>
                       <div className={styles.filterGroup}>
                         <input type="text" className={styles.searchInput} placeholder="Search Receipt ID..." value={historySearch} onChange={(e) => setHistorySearch(e.target.value)} onKeyPress={(e) => { if (e.key === 'Enter') applyHistoryFilters(); }}/>
@@ -504,7 +462,6 @@ const FeeCollectionPage: React.FC = () => {
                       <button className={styles.applyFiltersButton} onClick={applyHistoryFilters} disabled={loading}>Apply</button>
                       <button className={styles.clearFiltersButton} onClick={clearHistoryFilters} disabled={loading}><FiXCircle /> Clear</button>
                     </div>
-                    {/* ... History Table and Pagination ... */}
                     {loading && historyTransactions.length === 0 ? <p>Loading history...</p> :
                     historyTransactions.length === 0 ? <p className={styles.placeholder}>No history found matching filters.</p> :
                     (
@@ -543,14 +500,35 @@ const FeeCollectionPage: React.FC = () => {
       </main>
 
       {/* --- Receipt Modal --- */}
-      {/* Passes receiptDataForModal (type ReceiptData) to FeeReceipt */}
       {isReceiptModalOpen && (
         <Modal isOpen={isReceiptModalOpen} onClose={() => setIsReceiptModalOpen(false)} title={`Fee Receipt - ${receiptDataForModal?.receiptId || ''}`}>
           {loadingReceipt ? <p>Loading Receipt...</p> :
             receiptError ? <p className={styles.errorMessage}>{receiptError}</p> :
-            // THIS LINE IS CORRECT: receiptDataForModal (type ReceiptData) matches FeeReceipt's transaction prop (type Transaction)
-            receiptDataForModal ? <FeeReceipt transaction={receiptDataForModal} /> :
-            <p>Could not load receipt data.</p>}
+            
+            // --- FIX 4 (NICHE): Dono naye errors ko fix karne ke liye object ko manually banaya ---
+            receiptDataForModal ? (
+              <FeeReceipt 
+                transaction={{
+                  ...receiptDataForModal, // Baaki saari properties (status, amountPaid, etc.)
+                  
+                  // FIX 1: 'id' ko NUMBER hi pass kiya
+                  id: receiptDataForModal.id, 
+                  
+                  // FIX 2: 'templateId' ko manually banaya taaki types match karein
+                  templateId: {
+                    // Pichla error chahta tha ki 'id' string ho
+                    id: String(receiptDataForModal.templateId?.id || '0'), 
+                    name: receiptDataForModal.templateId?.name || 'N/A',
+                    // Naya error chahta tha ki 'items' ek valid array ho
+                    items: receiptDataForModal.templateId?.items || [], 
+                    totalAmount: receiptDataForModal.templateId?.totalAmount || 0
+                  }
+                }} 
+              />
+            ) : (
+              <p>Could not load receipt data.</p>
+            )}
+            
         </Modal>
       )}
 
