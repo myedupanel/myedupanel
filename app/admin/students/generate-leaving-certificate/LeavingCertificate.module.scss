@@ -196,33 +196,24 @@
   }
 }
 
-@media (max-width: 600px) {
-  .pageContainer { padding: 16px; }
-  .controlSection {
-     h2 { padding: 16px; }
-     & > :global(div), & > form { padding: 16px; }
-  }
-  .actionsWrapper { padding: 16px; }
-  .note { margin: 0 16px 12px 16px; }
-}
-
 @media print {
 
-    /* --- FIX YAHAN HAI --- */
-    /* Humne body aur .pageContainer ko alag-alag likha hai */
-    :global(body) {
-        padding: 0;
-        margin: 0;
-        background: #fff;
+    /* --- YEH RAHA NAYA FIX --- */
+    /* :global(body) ko :global { ... } block ke andar daal diya hai */
+    :global {
+        body {
+            padding: 0 !important;
+            margin: 0 !important;
+            background: #fff !important;
+        }
     }
+    /* --- END NAYA FIX --- */
 
     .pageContainer {
         padding: 0;
         margin: 0;
         background: #fff;
     }
-    /* --- END FIX --- */
-    
     
     /* Print karte waqt sabkuch hide karein... */
     .controlsColumn, .header, .previewColumn h2, .actionsWrapper, .dashboardLinkButton {
