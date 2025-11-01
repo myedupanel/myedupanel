@@ -94,25 +94,21 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* --- FIX: POORA HEADER AAPKE NAYE PLAN KE MUTAABIK BADLA GAYA HAI --- */}
         <header className={styles.certHeader}>
           
-          {/* 1. School Info Block (Sabse Upar, Center) */}
           <div className={styles.schoolInfoBlock}>
-            {/* Logo ko naye design se hata diya hai */}
             <div className={styles.schoolName1}>{schoolDetails.name}</div>
             <div className={styles.schoolName2}>{schoolDetails.name2 || schoolDetails.name}</div>
             <div className={styles.schoolAddressCode}>
               {schoolDetails.address}
               <br/>
-              Code No.: {schoolDetails.govtReg}
+              {/* --- FIX 4 (Header Text): "Code No." ko "UDISE NO" kiya --- */}
+              UDISE NO: {schoolDetails.govtReg}
             </div>
           </div>
           
-          {/* 2. Nayi Title Row (Left, Center, Right) */}
           <div className={styles.titleRow}>
             <div className={styles.headerSrNo}>
-              {/* Sr. No ab header mein hai */}
               Sr. No: {fill(student?.studentId, '100px')}
             </div>
             
@@ -123,12 +119,8 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             </div>
           </div>
         </header>
-        {/* --- END FIX --- */}
 
-
-        {/* Student Info Table (No Change) */}
-        {/* Note: Ab "Sr. No." header aur table dono mein hai. */}
-        {/* Agar aapko table se hatana ho toh bata dein. */}
+        {/* Student Info Table */}
         <table className={styles.studentInfoTable}>
           <tbody>
             <tr>
@@ -155,7 +147,8 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>5</td>
               <td>Nationality</td>
               <td>
-                <SubField label="Nationality" value={formData.nationality || 'Indian'} minWidth="80px" />
+                {/* --- FIX 2 (Nationality Field): "|| 'Indian'" ko hataya --- */}
+                <SubField label="Nationality" value={formData.nationality} minWidth="80px" />
                 <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
                 <SubField label="Religion" value={formData.religion} minWidth="80px" />
               </td>
@@ -176,6 +169,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                 <SubField label="State" value={formData.birthState} minWidth="80px" />
               </td>
             </tr>
+            {/* ... baaki rows 8 se 16 tak koi badlaav nahi ... */}
             <tr>
               <td>8</td>
               <td>Date of Birth (Words)</td>
@@ -239,7 +233,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           School General Register No. {fill(formData.genRegNo, '80px')}
         </p>
 
-        {/* Footer (No Change from previous fix) */}
+        {/* Footer (No Change) */}
         <footer className={styles.certFooterWrapper}>
           <div className={styles.datePlace}>
             <span>Date: {fill(null, '50px')} / {fill(null, '50px')} / {fill(null, '70px')}</span>

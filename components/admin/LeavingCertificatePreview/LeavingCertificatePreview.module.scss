@@ -1,6 +1,7 @@
 /* src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss */
 
-/* --- Main Paper Style (Print Fix Included) --- */
+/* --- FIX 1 (PRINT BREAK) --- */
+/* Paper aur Border ko flexbox banaya taaki woh A4 page mein fit ho sakein */
 .certificatePaper {
   width: 210mm;
   padding: 10mm;
@@ -12,7 +13,7 @@
   border: 1px solid #ccc;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
-  display: flex; /* Print fix */
+  display: flex; /* <-- ADDED */
 }
 
 .outerBorder {
@@ -21,8 +22,10 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  flex-grow: 1; /* Print fix */
+  flex-grow: 1; /* <-- ADDED (min-height hataya) */
 }
+/* --- END FIX 1 --- */
+
 
 /* --- Data Fill-in Styles --- */
 .fill {
@@ -37,51 +40,43 @@
   padding: 0 4px;
 }
 
-/* --- FIX: NAYA HEADER STYLE --- */
+/* --- Header Style --- */
 .certHeader {
   display: flex;
-  flex-direction: column; /* Top-to-bottom layout */
-  align-items: center; /* Sabkuch center mein */
+  flex-direction: column;
+  align-items: center;
   gap: 10px;
   border-bottom: 1.5px solid #000;
   padding-bottom: 10px;
   margin-bottom: 15px;
 
-  /* Logo ko hide kar diya */
-  .logo {
-    display: none;
-  }
+  .logo { display: none; }
   
-  /* School Info Block (Upar, Center) */
   .schoolInfoBlock {
     flex-grow: 0;
     text-align: center;
     padding: 0;
-    
     .schoolName1 { font-size: 13pt; font-weight: bold; margin: 0; }
     .schoolName2 { font-size: 20pt; font-weight: bold; margin: 2px 0; }
     .schoolAddressCode { font-size: 11pt; margin: 0; line-height: 1.4; }
   }
   
-  /* Title Block (Hide) */
-  .titleBlock {
-    display: none;
-  }
+  .titleBlock { display: none; }
 }
 
-/* Nayi Title Row (Left, Center, Right) */
+/* --- FIX 3 (HEADER ALIGNMENT) --- */
 .titleRow {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Yeh Sr.No aur Reg.No ko corners mein push karega */
   align-items: center;
   width: 100%;
-  margin-top: 10px; /* Thoda space */
+  margin-top: 10px;
 
   h2 { /* Title */
     font-size: 16pt;
     font-weight: bold;
     margin: 0;
-    padding: 0;
+    padding: 0 10px; /* Title ko side elements se thoda space dega */
     text-align: center;
     flex-grow: 1; /* Beech ki jagah lega */
   }
@@ -90,8 +85,8 @@
     font-size: 12pt;
     font-weight: bold;
     white-space: nowrap;
-    /* Width/Basis taaki title perfect center mein rahe */
-    flex-basis: 150px; 
+    /* flex-basis ko 120px kiya taaki title ko zyada jagah mile */
+    flex-basis: 120px; 
     flex-shrink: 0;
   }
 
@@ -103,10 +98,10 @@
     text-align: right;
   }
 }
-/* --- END HEADER FIX --- */
+/* --- END FIX 3 --- */
 
 
-/* --- Student Info Table (Nationality Fix Included) --- */
+/* --- Student Info Table (Nationality Fix) --- */
 .studentInfoTable {
   width: 100%;
   border-collapse: collapse;
@@ -127,13 +122,14 @@
     width: 60%;
     font-weight: bold;
     display: flex;
-    flex-wrap: wrap; /* Agar zaroorat pade toh wrap karega */
+    flex-wrap: wrap; 
     align-items: center;
-    gap: 5px 20px; /* Vertical aur Horizontal gap */
+    gap: 5px 20px; /* Fields ke beech horizontal gap */
   }
   
-  /* Kuch rows ko block par waapas set kiya taaki <br> kaam kare */
-  tbody tr:nth-child(7) td:nth-child(3), // Birthplace
+  /* Kuch rows ko 'block' par waapas set kiya taaki <br> aur textareas kaam karein */
+  tbody tr:nth-child(7) td:nth-child(3),  // Birthplace
+  tbody tr:nth-child(9) td:nth-child(3),  // DOB in words
   tbody tr:nth-child(15) td:nth-child(3), // Reason
   tbody tr:nth-child(16) td:nth-child(3)  // Remarks
   {
@@ -187,20 +183,20 @@
 /* --- END FOOTER --- */
 
 
-/* --- Print Fix --- */
+/* --- Print Fix (Final) --- */
 @media print {
   .certificatePaper {
     box-shadow: none;
     border: none;
     margin: 0;
     padding: 0;
-    height: 100%;
+    height: 100%; /* Page height tak stretch karega */
   }
   .outerBorder {
     border: 1px solid #000;
     padding: 10mm 8mm;
     min-height: 0;
-    height: 100%;
+    height: 100%; /* Poore printable area ko cover karega */
   }
   .studentInfoTable tbody tr td {
     border-bottom: none;
