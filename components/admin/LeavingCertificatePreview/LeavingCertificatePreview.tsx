@@ -10,7 +10,6 @@ interface Student {
   aadhaarNo?: string; // Point 2 (UID)
   motherName?: string; // Point 4
 }
-
 interface SchoolDetails {
   name: string; // Mandal Name
   name2?: string; // School Name
@@ -19,7 +18,6 @@ interface SchoolDetails {
   logoUrl?: string; // Logo
   place?: string; // Footer
 }
-
 export interface LeavingFormData {
   regNo?: string; // Header
   nationality?: string;
@@ -83,28 +81,25 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     }
     return <span className={styles.fillBlank} style={{ minWidth }}>&nbsp;</span>;
   }
-
   const SubField = ({ label, value, minWidth = '50px' }: { label: string, value: string | undefined | null, minWidth?: string }) => (
     <span className={styles.subField}>
       {label}: {fill(value, minWidth)}
     </span>
   );
-
   const dateOfAdmission = formatDate(formData.dateOfAdmission);
   const dateOfLeaving = formatDate(formData.dateOfLeaving);
-  // const issueDate = formatDate(formData.issueDate); // <-- Ab hum ise use nahi kar rahe
   const studentDobFormatted = formatDate(student?.dob);
 
   return (
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* Header (No Change) */}
+        {/* --- FIX: POORA HEADER AAPKE NAYE PLAN KE MUTAABIK BADLA GAYA HAI --- */}
         <header className={styles.certHeader}>
-          {schoolDetails.logoUrl && (
-            <img src={schoolDetails.logoUrl} alt="School Logo" className={styles.logo} />
-          )}
+          
+          {/* 1. School Info Block (Sabse Upar, Center) */}
           <div className={styles.schoolInfoBlock}>
+            {/* Logo ko naye design se hata diya hai */}
             <div className={styles.schoolName1}>{schoolDetails.name}</div>
             <div className={styles.schoolName2}>{schoolDetails.name2 || schoolDetails.name}</div>
             <div className={styles.schoolAddressCode}>
@@ -113,18 +108,29 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               Code No.: {schoolDetails.govtReg}
             </div>
           </div>
-          <div className={styles.titleBlock}>
+          
+          {/* 2. Nayi Title Row (Left, Center, Right) */}
+          <div className={styles.titleRow}>
+            <div className={styles.headerSrNo}>
+              {/* Sr. No ab header mein hai */}
+              Sr. No: {fill(student?.studentId, '100px')}
+            </div>
+            
             <h2>LEAVING CERTIFICATE</h2>
-            <div className={styles.regNo}>
-              Reg. No: {fill(formData.regNo, '80px')}
+            
+            <div className={styles.headerRegNo}>
+              Reg. No: {fill(formData.regNo, '100px')}
             </div>
           </div>
         </header>
+        {/* --- END FIX --- */}
+
 
         {/* Student Info Table (No Change) */}
+        {/* Note: Ab "Sr. No." header aur table dono mein hai. */}
+        {/* Agar aapko table se hatana ho toh bata dein. */}
         <table className={styles.studentInfoTable}>
           <tbody>
-            {/* ... (saari rows 1 se 16 tak same rahengi) ... */}
             <tr>
               <td>1</td>
               <td>Sr. No.</td>
@@ -148,7 +154,6 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             <tr>
               <td>5</td>
               <td>Nationality</td>
-              {/* Point 5 ka JSX same hai, iska fix SCSS mein hai */}
               <td>
                 <SubField label="Nationality" value={formData.nationality || 'Indian'} minWidth="80px" />
                 <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
@@ -166,7 +171,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>
                 <SubField label="Place" value={formData.birthPlace} minWidth="80px" />
                 <SubField label="Taluka" value={formData.birthTaluka} minWidth="80px" />
-                <br/> {/* Blueprint jaisa Dist/State neeche */}
+                <br/>
                 <SubField label="Dist" value={formData.birthDistrict} minWidth="80px" />
                 <SubField label="State" value={formData.birthState} minWidth="80px" />
               </td>
@@ -234,15 +239,11 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           School General Register No. {fill(formData.genRegNo, '80px')}
         </p>
 
-        {/* --- FIX 2: Naya Footer Layout --- */}
-        {/* Poore footer ko naye layout se replace kar diya hai */}
+        {/* Footer (No Change from previous fix) */}
         <footer className={styles.certFooterWrapper}>
-          {/* Date (Day/Month/Year) blanks - Left Aligned */}
           <div className={styles.datePlace}>
             <span>Date: {fill(null, '50px')} / {fill(null, '50px')} / {fill(null, '70px')}</span>
           </div>
-          
-          {/* 3 Signature boxes */}
           <div className={styles.signatures}>
             <div className={styles.sigBox}>
               <span>Class Teacher</span>
@@ -255,8 +256,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             </div>
           </div>
         </footer>
-        {/* --- END FIX 2 --- */}
-
+        
       </div> {/* End outerBorder */}
     </div>
   );

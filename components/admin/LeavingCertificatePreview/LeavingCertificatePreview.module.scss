@@ -1,8 +1,8 @@
 /* src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss */
 
-/* --- Main Paper Style --- */
+/* --- Main Paper Style (Print Fix Included) --- */
 .certificatePaper {
-  width: 210mm; /* A4 width */
+  width: 210mm;
   padding: 10mm;
   margin: 20px auto;
   font-family: 'Times New Roman', Times, serif;
@@ -12,10 +12,7 @@
   border: 1px solid #ccc;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
-
-  /* --- FIX 1 (PRINT BREAK) --- */
-  /* min-height hataya aur display:flex add kiya */
-  display: flex;
+  display: flex; /* Print fix */
 }
 
 .outerBorder {
@@ -24,11 +21,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  
-  /* --- FIX 1 (PRINT BREAK) --- */
-  /* min-height hataya aur flex-grow: 1 add kiya */
-  /* Yeh border ko paper ke andar poori jagah lene dega */
-  flex-grow: 1; 
+  flex-grow: 1; /* Print fix */
 }
 
 /* --- Data Fill-in Styles --- */
@@ -44,42 +37,76 @@
   padding: 0 4px;
 }
 
-/* --- Header Section (Khandeshwar Blueprint jaisa) --- */
+/* --- FIX: NAYA HEADER STYLE --- */
 .certHeader {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column; /* Top-to-bottom layout */
+  align-items: center; /* Sabkuch center mein */
   gap: 10px;
   border-bottom: 1.5px solid #000;
   padding-bottom: 10px;
   margin-bottom: 15px;
 
+  /* Logo ko hide kar diya */
   .logo {
-    max-width: 90px;
-    max-height: 90px;
-    object-fit: contain;
-    flex-shrink: 0;
+    display: none;
   }
+  
+  /* School Info Block (Upar, Center) */
   .schoolInfoBlock {
-    flex-grow: 1;
-    text-align: center; /* School info ko center kiya */
-    padding: 0 10px;
+    flex-grow: 0;
+    text-align: center;
+    padding: 0;
     
     .schoolName1 { font-size: 13pt; font-weight: bold; margin: 0; }
     .schoolName2 { font-size: 20pt; font-weight: bold; margin: 2px 0; }
     .schoolAddressCode { font-size: 11pt; margin: 0; line-height: 1.4; }
   }
+  
+  /* Title Block (Hide) */
   .titleBlock {
-    min-width: 180px;
-    text-align: right;
-    flex-shrink: 0;
-    
-    h2 { font-size: 14pt; font-weight: bold; margin: 0; padding-top: 10px; }
-    .regNo { font-size: 12pt; font-weight: bold; margin-top: 5px; }
+    display: none;
   }
 }
 
-/* --- Student Info Table --- */
+/* Nayi Title Row (Left, Center, Right) */
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 10px; /* Thoda space */
+
+  h2 { /* Title */
+    font-size: 16pt;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    flex-grow: 1; /* Beech ki jagah lega */
+  }
+
+  .headerSrNo, .headerRegNo {
+    font-size: 12pt;
+    font-weight: bold;
+    white-space: nowrap;
+    /* Width/Basis taaki title perfect center mein rahe */
+    flex-basis: 150px; 
+    flex-shrink: 0;
+  }
+
+  .headerSrNo {
+    text-align: left;
+  }
+  
+  .headerRegNo {
+    text-align: right;
+  }
+}
+/* --- END HEADER FIX --- */
+
+
+/* --- Student Info Table (Nationality Fix Included) --- */
 .studentInfoTable {
   width: 100%;
   border-collapse: collapse;
@@ -95,8 +122,7 @@
   tbody tr td:nth-child(1) { width: 35px; text-align: center; font-weight: normal; }
   tbody tr td:nth-child(2) { width: 35%; font-weight: normal; }
   
-  /* --- FIX 2 (NATIONALITY LAYOUT) --- */
-  /* Value waale column ko Flexbox banaya */
+  /* Nationality Fix: Value column ko Flexbox banaya */
   tbody tr td:nth-child(3) {
     width: 60%;
     font-weight: bold;
@@ -106,8 +132,8 @@
     gap: 5px 20px; /* Vertical aur Horizontal gap */
   }
   
-  /* Point 7 (Birthplace) ko block par waapas set kiya taaki <br> kaam kare */
-  tbody tr:nth-child(7) td:nth-child(3),
+  /* Kuch rows ko block par waapas set kiya taaki <br> kaam kare */
+  tbody tr:nth-child(7) td:nth-child(3), // Birthplace
   tbody tr:nth-child(15) td:nth-child(3), // Reason
   tbody tr:nth-child(16) td:nth-child(3)  // Remarks
   {
@@ -115,10 +141,9 @@
   }
 }
 
-/* SubField ko ab flex item ki tarah style kiya */
 .subField {
   font-weight: normal;
-  white-space: nowrap; /* Label ko break hone se rokega */
+  white-space: nowrap;
   .fill, .fillBlank {
     font-weight: bold;
   }
@@ -132,20 +157,19 @@
   line-height: 1.6;
 }
 
-/* --- FIX 3 (FOOTER LAYOUT) --- */
-/* Footer ko naye layout ke liye poora rewrite kiya */
+/* --- Footer Layout (3-Signature) --- */
 .certFooterWrapper {
-  margin-top: auto; /* Footer ko hamesha neeche rakhega */
+  margin-top: auto; /* Hamesha neeche */
   padding-top: 30px;
   font-size: 13pt;
   font-weight: bold;
-  background: #fff !important; /* Force white background */
+  background: #fff !important;
   color: #000 !important;
 }
 
 .datePlace {
   text-align: left;
-  margin-bottom: 40px; /* Date aur signature line ke beech space */
+  margin-bottom: 40px;
 }
 
 .signatures {
@@ -160,27 +184,24 @@
   padding-top: 40px;
   border-top: 1px solid #000; /* Signature line */
 }
-/* --- END FIX 3 --- */
+/* --- END FOOTER --- */
 
 
-/* --- FIX 1 (PRINT BREAK) - FINAL FIX --- */
-/* Print karte waqt faltu styles hata dega */
+/* --- Print Fix --- */
 @media print {
   .certificatePaper {
     box-shadow: none;
     border: none;
     margin: 0;
     padding: 0;
-    height: 100%; // Page height tak stretch karega
+    height: 100%;
   }
   .outerBorder {
     border: 1px solid #000;
     padding: 10mm 8mm;
     min-height: 0;
-    height: 100%; // Poore printable area ko cover karega
+    height: 100%;
   }
-  
-  /* Print ke waqt Table ki lines hide karein (optional, clean look) */
   .studentInfoTable tbody tr td {
     border-bottom: none;
   }
