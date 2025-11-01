@@ -209,11 +209,15 @@
 /* --- Print Styles --- */
 /* Print karte waqt UI ko hide karega */
 @media print {
-    body, .pageContainer {
+
+    /* --- YAHAN FIX KIYA GAYA HAI --- */
+    /* `body` ko `:global()` mein wrap kar diya hai */
+    :global(body), .pageContainer {
         padding: 0;
         margin: 0;
         background: #fff;
     }
+    /* --- END FIX --- */
     
     /* Print karte waqt sabkuch hide karein... */
     .controlsColumn, .header, .previewColumn h2, .actionsWrapper, .dashboardLinkButton {
