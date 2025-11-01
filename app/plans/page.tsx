@@ -1,63 +1,79 @@
-"use client"; // Navbar aur Modals ke liye yeh zaroori hai
+"use client"; 
 
-import React, { useState } from 'react'; // useState ko import kiya
+import React, { useState } from 'react';
 import styles from './PlansPage.module.scss';
 import { FiCheck } from 'react-icons/fi';
-import Link from 'next/link'; // Link ko import kiya
+import Link from 'next/link'; 
+import Navbar from '@/components/Navbar'; // Aapke components folder se
+import Footer from '@/components/Footer'; // Aapke components folder se
 
-// --- YEH DONO IMPORTS ADD KIYE HAIN ---
-import Navbar from '@/components/Navbar'; // Aapke landing page se
-import Footer from '@/components/Footer'; // Aapke landing page se
-
-// Plan interface (No Change)
+// --- FIX 1: Interface ko naye blueprint ke hisaab se update kiya ---
 interface Plan {
   name: string;
   price: number;
-  perks: string[];
+  description: string; // Har plan ke liye ek chhota description
+  features: string[]; // Core features
+  plusFeatures?: string[]; // Extra features jo agle plan mein hain
   isPopular?: boolean;
 }
 
-// Dummy data (No Change)
+// --- FIX 2: Naya 'Tiered Module' Blueprint Data ---
 const plansData: Plan[] = [
   {
-    name: 'Starter',
-    price: 0,
-    perks: [
-      'Manage up to 50 students',
-      'Basic Fee Collection',
-      'Attendance Tracking',
-      'Limited Support',
+    name: 'Starter (The Core)',
+    price: 4999,
+    description: 'Basic digitalization aur record-keeping ke liye perfect.',
+    features: [
+      'Admin Dashboard (Basic)',
+      'Unlimited Student Management',
+      'Unlimited Staff Management',
+      'Basic Attendance Tracking',
+      'School Settings',
     ],
+    plusFeatures: [ // Yeh features is plan mein nahi hain
+      'Fee Counter & Online Payment',
+      'Parent & Student Login Portals',
+      'Advanced Exams & Certificates',
+      'Transport & Library Modules',
+      'Premium Support'
+    ]
   },
   {
-    name: 'Plus',
-    price: 4999,
-    perks: [
-      'Unlimited Student Management',
-      'Complete Admin Dashboard',
-      'Fee Management & Online Payment',
-      'Attendance Tracking',
-      'Parent & Student Login Portals',
+    name: 'Plus (The Standard)',
+    price: 9999,
+    description: 'Best for schools needing fee management and parent communication.',
+    features: [
+      'Everything in Starter',
+      'Finance Module (Fee Counter, Online Payments, Receipts)',
+      'Communication Module (Parent & Student Logins)',
+      'Digital Noticeboard',
+      'Basic SMS/Email Alerts',
+    ],
+    plusFeatures: [ // Yeh features is plan mein nahi hain
+      'Advanced Exams & Certificates',
+      'Transport & Library Modules',
+      'Premium Support'
     ],
     isPopular: true,
   },
   {
-    name: 'Pro',
-    price: 9999,
-    perks: [
-      'All features in Plus',
-      'Advanced Timetable Management',
-      'Custom Report Generation',
-      '24/7 Customer Support',
-      'Dedicated Account Manager',
+    name: 'Pro (The All-in-One)',
+    price: 19999,
+    description: 'The complete all-in-one solution for large schools.',
+    features: [
+      'Everything in Plus',
+      'Advanced Academics Module (Timetable, Exams, Report Cards)',
+      'Certificate Generation (Leaving, Bonafide)',
+      'Premium Resource Modules (Transport, Library, Hostel)',
+      'Dedicated Account Manager (Premium Support)',
     ],
   },
 ];
+// --- END FIX 2 ---
 
 const PlansPage = () => {
 
-  // --- NAVBAR KE LIYE MODAL STATE LOGIC ADD KIYA GAYA HAI ---
-  // (Yeh code aapke Home page se liya gaya hai taaki Navbar sahi se kaam kare)
+  // --- Modal State Logic (No Change) ---
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [isSignupModalVisible, setIsSignupModalVisible] = useState(false);
   const [isFeaturesModalVisible, setIsFeaturesModalVisible] = useState(false);
@@ -69,59 +85,50 @@ const PlansPage = () => {
     setIsFeaturesModalVisible(false);
     setIsForgotModalVisible(false);
   };
-
   const hideOnOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
       hideModals();
     }
   };
-
   const switchToSignup = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsLoginModalVisible(false);
     setIsSignupModalVisible(true);
   };
-
   const switchToLogin = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsSignupModalVisible(false);
     setIsLoginModalVisible(true);
   };
-  
   const switchToForgot = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsLoginModalVisible(false);
     setIsForgotModalVisible(true);
   };
-
-  // Login form submit logic (agar zaroorat pade)
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
      e.preventDefault();
-     // Yahaan aap login logic daal sakte hain
      console.log("Login submitted");
-     // Example: router.push('/admin');
   };
   // --- END MODAL LOGIC ---
 
 
   return (
-    // Fragment ka istemaal taaki Navbar/Footer add kar sakein
     <> 
-      {/* --- NAVBAR ADD KIYA GAYA HAI --- */}
+      {/* Navbar (No Change) */}
       <Navbar
         showLogin={() => setIsLoginModalVisible(true)}
         showSignup={() => setIsSignupModalVisible(true)}
         showFeatures={() => setIsFeaturesModalVisible(true)}
-        activeSection={'pricing-section'} // 'pricing' ko active dikha sakte hain
+        activeSection={'pricing-section'}
       />
 
-      {/* Aapka original page content */}
       <div className={styles.plansPageContainer}>
         <header className={styles.header}>
-          <h1>Simple, Transparent Pricing</h1>
-          <p>Choose the plan that's right for your school.</p>
+          <h1>Our Pricing Plans</h1>
+          <p>Choose the plan that's right for your school's needs.</p>
         </header>
 
+        {/* --- FIX 3: Naya Card Layout --- */}
         <main className={styles.plansGrid}>
           {plansData.map((plan) => (
             <div 
@@ -134,6 +141,9 @@ const PlansPage = () => {
               
               <h3 className={styles.planName}>{plan.name}</h3>
               
+              {/* Plan ka naya description */}
+              <p className={styles.planDescription}>{plan.description}</p>
+
               <div className={styles.planPrice}>
                 {plan.price === 0 ? (
                   'Free'
@@ -143,29 +153,43 @@ const PlansPage = () => {
                 <span>{plan.price > 0 ? '/ per year' : ''}</span>
               </div>
               
-              <ul className={styles.perksList}>
-                {plan.perks.map((perk, index) => (
-                  <li key={index}>
+              {/* "Included Features" list */}
+              <ul className={styles.featuresList}>
+                {plan.features.map((feature, index) => (
+                  <li key={index} className={styles.included}>
                     <FiCheck className={styles.perkIcon} />
-                    <span>{perk}</span>
+                    <span>{feature}</span>
                   </li>
                 ))}
               </ul>
+
+              {/* "Plus Features" (jo agle plan mein milenge) */}
+              {/* Yeh un features ko dikhayega jo is plan mein nahi hain */}
+              {plan.plusFeatures && plan.plusFeatures.length > 0 && (
+                <ul className={styles.featuresList}>
+                  {plan.plusFeatures.map((feature, index) => (
+                    <li key={index} className={styles.excluded}>
+                      <span className={styles.perkIcon}>&times;</span> {/* Cross icon */}
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
               
-              {/* Button (ab yeh Link component ho sakta hai agar signup page pe jaana ho) */}
-              <Link href="/signup" className={styles.ctaButton}>
+              {/* Button */}
+              <Link href="/signup" className={`${styles.ctaButton} ${styles[plan.name.split(' ')[0].toLowerCase()]}`}>
                 {plan.price === 0 ? 'Get Started' : 'Grab Now Deal'}
               </Link>
             </div>
           ))}
         </main>
+        {/* --- END FIX 3 --- */}
       </div>
       
-      {/* --- FOOTER ADD KIYA GAYA HAI --- */}
+      {/* Footer (No Change) */}
       <Footer />
 
-      {/* --- MODALS ADD KIYE GAYE HAIN (NAVBAR KE LIYE) --- */}
-      {/* (Yeh code bhi aapke Home page se liya gaya hai) */}
+      {/* Modals (No Change) */}
       {isLoginModalVisible && (
         <div className="modal-overlay" onClick={hideOnOverlayClick}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -181,11 +205,8 @@ const PlansPage = () => {
           </div>
         </div>
       )}
-
       {isSignupModalVisible && ( <div className="modal-overlay" onClick={hideOnOverlayClick}><div className="modal-content" onClick={(e) => e.stopPropagation()}><a href="#" onClick={(e) => { e.preventDefault(); hideModals(); }} className="close-btn">&times;</a><h2>Sign Up for My EduPanel</h2><form><div className="form-group"><label htmlFor="school-name">School Name</label><input type="text" id="school-name" name="school-name" required /></div><div className="form-group"><label htmlFor="signup-email">Email</label><input type="email" id="signup-email" name="signup-email" required /></div><div className="form-group"><label htmlFor="signup-password">Password</label><input type="password" id="signup-password" name="signup-password" required /></div><button type="submit" className="submit-btn">Sign Up</button></form><p>Already have an account? <a href="#" onClick={switchToLogin}>Log in</a></p></div></div>)}
       {isForgotModalVisible && ( <div className="modal-overlay" onClick={hideOnOverlayClick}><div className="modal-content" onClick={(e) => e.stopPropagation()}><a href="#" onClick={(e) => { e.preventDefault(); hideModals(); }} className="close-btn">&times;</a><h2>Reset Your Password</h2><p style={{ textAlign: 'center', marginTop: '-20px', marginBottom: '30px', fontSize: '0.95rem' }}>Enter your email address and we will send you a verification code.</p><form><div className="form-group"><label htmlFor="reset-email">Email</label><input type="email" id="reset-email" name="reset-email" placeholder="you@example.com" required /></div><button type="submit" className="submit-btn">Send Verification Code</button></form></div></div>)}
-      
-      {/* Aapka Features modal bhi yahaan add kar sakte hain agar Navbar use dikhaata hai */}
     </>
   );
 };
