@@ -705,11 +705,54 @@ const collectManualFee = async (req, res) => { /* ... (Poora function code waisa
 const getTransactionById = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
      try {
         const transactionIdInt = parseInt(req.params.id); const schoolId = req.user.schoolId; if (isNaN(transactionIdInt)) return res.status(400).json({ message: 'Invalid Transaction ID' });
+        
         const transaction = await prisma.transaction.findUnique({ where: { id: transactionIdInt, schoolId: schoolId }, include: { student: { include: { class: { select: { class_name: true } } } }, template: { select: { name: true, items: true } }, collectedBy: { select: { name: true } } } });
+        
         if (!transaction) return res.status(404).json({ message: 'Transaction not found or access denied.' });
-        const feeRecord = await prisma.feeRecord.findUnique({ where: { id: transaction.feeRecordId }, select: { amount: true, discount: true, lateFine: true } });
+        
+        // --- FIX YAHIN HAI ---
+        // Humne `balanceDue` aur `status` ko `select` mein add kar diya hai
+        const feeRecord = await prisma.feeRecord.findUnique({ 
+            where: { id: transaction.feeRecordId }, 
+            select: { 
+                amount: true, 
+                discount: true, 
+                lateFine: true, 
+                balanceDue: true, // <-- ADDED
+                status: true      // <-- ADDED
+            } 
+        });
+        // --- END FIX ---
+        
         const schoolInfo = await prisma.school.findUnique({ where: { id: schoolId }, select: { name: true, address: true, logo: true, session: true } });
-        const receiptData = { ...transaction, studentName: getFullName(transaction.student) || 'N/A', studentRegId: transaction.student?.roll_number || 'N/A', className: transaction.student?.class?.class_name || 'N/A', templateName: transaction.template?.name || 'N/A', templateItems: transaction.template?.items, collectedByName: transaction.collectedBy?.name || (transaction.paymentMode === 'Online' ? 'System (Online)' : 'N/A'), totalFeeAmount: feeRecord?.amount || 0, discountGiven: feeRecord?.discount || 0, lateFineApplied: feeRecord?.lateFine || 0, schoolInfo: { name: schoolInfo?.name || 'School Name', address: schoolInfo?.address || 'School Address', logo: schoolInfo?.logo, session: schoolInfo?.session || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}` } };
+        
+        // --- FIX YAHIN HAI ---
+        // Humne naye data ko response mein add kar diya hai
+        const receiptData = { 
+            ...transaction, 
+            studentName: getFullName(transaction.student) || 'N/A', 
+            studentRegId: transaction.student?.roll_number || 'N/A', 
+            className: transaction.student?.class?.class_name || 'N/A', 
+            templateName: transaction.template?.name || 'N/A', 
+            templateItems: transaction.template?.items, 
+            collectedByName: transaction.collectedBy?.name || (transaction.paymentMode === 'Online' ? 'System (Online)' : 'N/A'), 
+            totalFeeAmount: feeRecord?.amount || 0, 
+            discountGiven: feeRecord?.discount || 0, 
+            lateFineApplied: feeRecord?.lateFine || 0, 
+            
+            // In fields ko add kiya taaki frontend inka istemaal kar sake
+            currentBalanceDue: feeRecord?.balanceDue ?? 0, // ?? 0 taaki 'null' na jaaye
+            feeRecordStatus: feeRecord?.status || 'Pending', // Default 'Pending'
+
+            schoolInfo: { 
+                name: schoolInfo?.name || 'School Name', 
+                address: schoolInfo?.address || 'School Address', 
+                logo: schoolInfo?.logo, 
+                session: schoolInfo?.session || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}` 
+            } 
+        };
+        // --- END FIX ---
+
         delete receiptData.student; delete receiptData.template; delete receiptData.collectedBy;
         res.status(200).json(receiptData);
       } catch (error) { console.error("Error fetching transaction for receipt:", error); res.status(500).send("Server Error"); }

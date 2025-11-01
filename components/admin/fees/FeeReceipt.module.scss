@@ -1,243 +1,301 @@
 /* src/components/admin/fees/FeeReceipt.module.scss */
 
+/* Main container for the modal content */
 .receiptContainer {
-  background-color: #f8f9fa; // Light background for the container within the modal
-  color: #212529; // Default dark text
-  font-family: 'Times New Roman', Times, serif; // More formal font
-  font-size: 10pt; // Standard print size
-  line-height: 1.4;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #333;
+  background-color: #f9f9f9;
 }
 
-.noData {
-  padding: 2rem; text-align: center; color: #6c757d;
-}
-
-/* Actions Bar (Hidden in Print) */
+/* Action buttons (Download/Print) */
 .actions {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #dee2e6;
-  text-align: right;
-  background-color: #e9ecef; // Slightly darker background for actions
-}
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 
-.printButton, .downloadButton {
-  padding: 0.5rem 1rem;
-  border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;
-  display: inline-flex; align-items: center; gap: 0.4rem;
-  margin-left: 0.5rem; transition: background-color 0.2s, box-shadow 0.2s;
-  font-weight: 500;
-}
+  .downloadButton,
+  .printButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
 
-.printButton {
-  background-color: #0d6efd; color: white; // Bootstrap primary blue
-  &:hover { background-color: #0b5ed7; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-}
-.downloadButton {
-  background-color: #198754; color: white; // Bootstrap success green
-  &:hover { background-color: #157347; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-}
+    svg {
+      font-size: 1.1em;
+    }
+  }
 
-/* Main Receipt Content Area */
-.receiptContent {
-  padding: 1.5rem; // Padding for screen view
-  background-color: #fff; // White background for the receipt paper
-  border: 1px solid #dee2e6; // Border on screen
-  margin: 1rem; // Margin on screen
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); // Subtle shadow on screen
+  .downloadButton {
+    background-color: #007bff;
+    color: #ffffff;
+    &:hover { background-color: #0056b3; }
+  }
 
-  @media print {
-    padding: 0; border: none; margin: 0; box-shadow: none; // Reset for print
+  .printButton {
+    background-color: #6c757d;
+    color: #ffffff;
+    &:hover { background-color: #5a6268; }
   }
 }
 
-/* Header Section */
+/* The actual white paper receipt */
+.receiptContent {
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  margin: 16px; /* Space inside the modal */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Header */
 .header {
-  display: flex; align-items: center; gap: 1rem;
-  border-bottom: 3px double #adb5bd; // Double line border
-  padding-bottom: 0.75rem; margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 16px;
+
+  .logo {
+    max-width: 70px;
+    max-height: 70px;
+    object-fit: contain;
+  }
+
+  .schoolDetails {
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #000;
+      margin: 0 0 4px 0;
+    }
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #555;
+      line-height: 1.5;
+    }
+  }
 }
 
-.logo {
-  height: 60px; // Slightly larger logo
-  max-width: 180px; object-fit: contain;
-}
-
-.schoolDetails {
-  flex-grow: 1; text-align: center;
-  h1 { font-size: 1.6rem; font-weight: 700; margin: 0 0 0.1rem 0; color: #000; }
-  p { font-size: 0.8rem; color: #495057; margin: 0; line-height: 1.3; }
-}
-
-/* Title and Meta Section */
+/* Title and Meta (Receipt No, Date) */
 .titleMeta {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  margin-bottom: 1.25rem; padding-bottom: 0.6rem; border-bottom: 1px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin: 20px 0;
 
   h2 {
-    font-size: 1.2rem; font-weight: 700; margin: 0; color: #000;
-    text-transform: uppercase; letter-spacing: 1px;
-    border-bottom: 2px solid #000; display: inline-block; padding-bottom: 2px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .metaInfo {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #444;
+    p { margin: 0 0 4px 0; }
   }
 }
 
-.metaInfo {
-  text-align: right; font-size: 0.75rem; color: #343a40;
-  p { margin: 0; line-height: 1.4; strong { font-weight: 600; color: #000; } }
-}
-
-/* Details Sections (Student, Payment) */
+/* Student Info / Payment Details */
 .detailsSection {
-  margin-bottom: 1.25rem;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 16px;
+
   h3 {
-    font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
-    color: #343a40; margin: 0 0 0.6rem 0; padding-bottom: 0.25rem;
-    border-bottom: 1px solid #e9ecef; letter-spacing: 0.5px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #007bff; /* Blue heading */
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 16px;
+    font-size: 0.95rem;
+
+    p { margin: 0; }
+    strong { color: #000; }
+  }
+
+  .paidAmount {
+    font-size: 1.1rem;
+    color: #28a745; /* Green */
+  }
+
+  .notes {
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 12px;
   }
 }
 
-.grid {
-  display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: 0.3rem 1.5rem; font-size: 0.85rem; // Slightly larger font
-  p { margin: 0.15rem 0; color: #495057; strong { font-weight: 600; color: #000; } }
-}
-
-.notes {
-  margin-top: 0.5rem; font-size: 0.8rem; color: #495057; font-style: italic;
-  strong { color: #212529; font-style: normal; font-weight: 600; }
-}
-
-/* Items Section & Table */
+/* Fee Particulars Table */
 .itemsSection {
-  margin-bottom: 1.25rem;
-  h3 { /* Same style as detailsSection h3 */
-    font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
-    color: #343a40; margin: 0 0 0.6rem 0; padding-bottom: 0.25rem;
-    border-bottom: 1px solid #e9ecef; letter-spacing: 0.5px;
+  margin-bottom: 20px;
+  h3 { /* Same as .detailsSection h3 */
+    font-size: 1rem;
+    font-weight: 600;
+    color: #007bff;
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 }
 
 .itemsTable {
-  width: 100%; border-collapse: collapse; font-size: 0.85rem;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
 
-  th, td { border: 1px solid #dee2e6; padding: 0.5rem 0.75rem; text-align: left; vertical-align: top;}
-  th { background-color: #f8f9fa; font-weight: 700; color: #212529; } // Lighter header
-  tbody tr:nth-child(even) { background-color: #fdfdff; } // Very subtle striping
-
-  th:first-child, td:first-child { width: 35px; text-align: center; } // Serial number column
-  .amountCol { text-align: right; width: 110px; font-weight: 500; color: #000; } // Wider amount
-
-  .calcRow td { border-left: none; border-right: none; border-bottom: none; padding: 0.25rem 0.75rem; font-weight: 600; text-align: right;}
-  .calcRow td:first-child { border: none; }
-  .calcRow td:nth-child(2) { text-align: right; padding-right: 1.5rem; }
-
-  .subtotal td { border-top: 1px dashed #adb5bd; }
-  .grandTotal td {
-      border-top: 2px solid #343a40;
-      border-bottom: 2px solid #343a40;
-      font-size: 0.9rem;
-      padding-top: 0.4rem; padding-bottom: 0.4rem;
-      color: #000; background-color: #f8f9fa;
+  thead tr {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
   }
-}
 
-.paidAmount { // Amount Paid value in details
-    font-weight: 700; font-size: 1rem; color: #198754; // Green
-}
+  th {
+    padding: 10px 8px;
+    text-align: left;
+    font-weight: 600;
+  }
 
-/* Balance Section */
-.balanceSection {
-    display: flex; justify-content: space-between; align-items: center;
-    background-color: #e9ecef; // Match header
-    padding: 0.75rem 1.25rem; margin-top: 1.25rem;
-    border: 1px solid #ced4da; border-radius: 4px;
+  tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+  }
 
-    p { margin: 0; font-weight: 700; font-size: 1rem; color: #000;}
-}
+  td {
+    padding: 10px 8px;
+    vertical-align: top;
+  }
 
-.balanceAmount { // Balance Due value
-    font-weight: 700; font-size: 1.1rem; color: #dc3545; // Red
-}
+  .amountCol {
+    text-align: right;
+    font-weight: 500;
+  }
 
-/* PAID Stamp */
-.paidStamp {
-  border: 4px double #198754; // Double green border
-  color: #198754; font-size: 1.6rem; font-weight: 700;
-  padding: 0.2rem 1rem; border-radius: 5px;
-  transform: rotate(-7deg); opacity: 0.9; text-transform: uppercase;
-}
-
-/* Status Badges */
-.statusBadge {
-  padding: 0.25rem 0.6rem; border-radius: 12px;
-  font-weight: 700; font-size: 0.7rem; text-transform: uppercase;
-  border: 1px solid transparent;
-
-  &.partial { background-color: #fff3cd; color: #664d03; border-color: #ffecb5; }
-  &.pending { background-color: #f8d7da; color: #842029; border-color: #f5c2c7; }
-  &.failed { background-color: #e2e3e5; color: #41464b; border-color: #d3d6d8; }
-  // Add other statuses if needed
-}
-
-
-/* Footer */
-.footer {
-  margin-top: 2rem; padding-top: 1rem;
-  border-top: 1px solid #adb5bd; font-size: 0.75rem; 
+  .calcRow td {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-weight: 600;
+    border: none;
+  }
   
-  // ✅ FIX: Overriding any global styles that might be making the footer black
-  background-color: #ffffff !important; // Force white background
-  color: #333333 !important; // Force dark text color
-}
-
-.collectedBy { 
-  margin-bottom: 1.5rem; font-style: italic; 
-  color: #333333 !important; // ✅ FIX: Ensure text is visible
-}
-
-.signatureArea {
-  display: flex; justify-content: space-between; align-items: flex-end;
-  margin-top: 2.5rem; gap: 4rem; min-height: 40px; // Shorter height
-}
-
-.signatureBox {
-  flex: 1; border-bottom: 1px solid #495057; // Line for signature
-}
-
-.signatureLabels {
-    display: flex; justify-content: space-between; align-items: flex-start;
-    gap: 4rem; margin-top: 0.3rem;
-    p { 
-      flex: 1; text-align: center; margin: 0; font-weight: 500; font-size: 0.7rem; 
-      color: #333333 !important; // ✅ FIX: Ensure text is visible
-    }
-}
-
-.footerNote {
-  margin-top: 1.5rem; text-align: center;
-  font-size: 0.7rem; font-style: italic; 
-  color: #555555 !important; // ✅ FIX: Ensure text is visible
-}
-
-/* Print specific adjustments */
-@media print {
-  /* REMOVED body selector */
-  .receiptContainer, .receiptContent { border: none; margin: 0; padding: 0; box-shadow: none; background-color: #fff !important; }
-  .actions { display: none !important; }
-  .header { border-bottom-color: #000 !important; }
-  .titleMeta { border-bottom-color: #aaa !important; }
-  .itemsTable th, .itemsTable td { border-color: #ccc !important; } // Use important cautiously
-  .itemsTable th { background-color: #f2f2f2 !important; } // Force background
-  .itemsTable .grandTotal td { border-top-color: #333 !important; border-bottom-color: #333 !important; background-color: #f8f9fa !important;}
-  .balanceSection { background-color: #e9ecef !important; border-color: #ced4da !important;}
-  .paidStamp { border-color: #198754 !important; color: #198754 !important; }
-  .statusBadge { border: 1px solid #aaa !important; } // Ensure border prints
-  .footer { 
-    border-top-color: #adb5bd !important;
-    background-color: #fff !important; // Ensure footer is white in print
-    color: #000 !important; // Ensure text is black in print
+  .subtotal {
+    border-top: 2px dashed #e0e0e0;
   }
-  .signatureBox { border-bottom-color: #495057 !important; }
-  .collectedBy, .signatureLabels p, .footerNote {
-    color: #000 !important; // Ensure all footer text is black in print
+  
+  .grandTotal {
+    background-color: #f8f9fa;
+    font-size: 1.05rem;
+    color: #000;
+  }
+}
+
+/* Balance and Status Section */
+.balanceSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+
+  p {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .balanceAmount {
+    color: #dc3545; /* Red */
+  }
+
+  .paidStamp {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #28a745; /* Green */
+    border: 3px solid #28a745;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transform: rotate(-10deg);
+  }
+
+  .statusBadge {
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 15px;
+    text-transform: uppercase;
+  }
+
+  .partial {
+    background-color: #fff3cd; /* Yellow */
+    color: #856404;
+  }
+  .pending {
+    background-color: #d6d8db; /* Gray */
+    color: #383d41;
+  }
+}
+
+/* Footer (Signatures) */
+.footer {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.85rem;
+  color: #555;
+
+  .collectedBy {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 30px;
+  }
+
+  .signatureArea {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+  }
+
+  .signatureBox {
+    border-top: 1px solid #777;
+    width: 40%;
+  }
+  
+  .signatureLabels {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 5%; // Thoda andar
+    p { 
+      margin: 6px 0 0 0; 
+      font-weight: 600;
+    }
+  }
+
+  .footerNote {
+    text-align: center;
+    margin-top: 25px;
+    font-style: italic;
   }
 }
