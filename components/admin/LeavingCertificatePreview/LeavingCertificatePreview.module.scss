@@ -3,46 +3,49 @@
 /* --- Main Paper Style --- */
 .certificatePaper {
   width: 210mm; /* A4 width */
-  min-height: 290mm; /* A4 height */
+  /* FIX 1 (PRINT BREAK): min-height ko 290mm se 'auto' kiya */
+  /* taaki yeh content ke hisaab se fit ho, na ki page se bada ho */
+  min-height: auto; 
   padding: 10mm;
   margin: 20px auto;
-  font-family: 'Times New Roman', Times, serif; /* Formal font */
-  font-size: 13pt; /* Thoda bada font size */
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 13pt;
   color: #000;
-  background: #fff;
+  background: #fff; /* Poora background white rakha */
   border: 1px solid #ccc;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
 }
 
 .outerBorder {
-  border: 2px solid #000; /* Blueprint jaisa outer border */
+  border: 2px solid #000;
   padding: 12mm 10mm;
-  min-height: 265mm;
+  /* FIX 1 (PRINT BREAK): min-height ko 265mm se 245mm kiya */
+  /* 245mm (content) + 24mm (padding) + 20mm (padding) = 289mm < 297mm (A4 Page) */
+  min-height: 245mm; 
   display: flex;
   flex-direction: column;
 }
 
 /* --- Data Fill-in Styles --- */
-/* Yeh bhare hue data (e.g., "POONAM") ke liye hai */
 .fill {
   font-weight: bold;
   padding: 0 4px;
-  border-bottom: 1px dotted #333; /* Data ke neeche dotted line */
+  border-bottom: 1px dotted #333;
 }
 
-/* Yeh khaali jagah (e.g., Conduct) ke liye hai */
 .fillBlank {
-  display: inline-block; /* min-width kaam karne ke liye */
+  display: inline-block;
   border-bottom: 1px dotted #333;
   vertical-align: bottom;
   padding: 0 4px;
 }
 
-/* --- Header Section --- */
+/* --- FIX 2 (HEADER LAYOUT) --- */
+/* Header ko 3 column layout (Logo, Center, Right) mein set kiya */
 .certHeader {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Columns ko faila diya */
   align-items: flex-start;
   gap: 10px;
   border-bottom: 1.5px solid #000;
@@ -53,18 +56,19 @@
     max-width: 90px;
     max-height: 90px;
     object-fit: contain;
+    flex-shrink: 0; /* Taaki logo shrink na ho */
   }
 
   .schoolInfoBlock {
-    flex-grow: 1;
-    text-align: center;
+    flex-grow: 1; /* Beech ka poora space lega */
+    text-align: center; /* <<< YEH SABSE ZAROORI THA */
     
-    .schoolName1 { /* Mandal Name */
+    .schoolName1 {
       font-size: 13pt;
       font-weight: bold;
       margin: 0;
     }
-    .schoolName2 { /* Main School Name */
+    .schoolName2 {
       font-size: 20pt;
       font-weight: bold;
       margin: 2px 0;
@@ -78,9 +82,10 @@
   
   .titleBlock {
     min-width: 180px;
-    text-align: right;
+    text-align: right; /* Title ko right align kiya */
+    flex-shrink: 0; /* Taaki yeh shrink na ho */
     
-    h2 { /* "LEAVING CERTIFICATE" */
+    h2 {
       font-size: 14pt;
       font-weight: bold;
       margin: 0;
@@ -93,8 +98,10 @@
     }
   }
 }
+/* --- END FIX 2 --- */
 
-/* --- Student Info Table --- */
+
+/* --- Student Info Table (No Change) --- */
 .studentInfoTable {
   width: 100%;
   border-collapse: collapse;
@@ -102,43 +109,27 @@
   font-size: 13pt;
 
   tbody tr td {
-    padding: 10px 5px; /* Thodi zyada spacing */
+    padding: 10px 5px;
     vertical-align: top;
     line-height: 1.5;
-    border-bottom: 1px solid #eee; /* Faint line between rows */
+    border-bottom: 1px solid #eee;
   }
-
-  /* Sr. No column */
-  tbody tr td:nth-child(1) {
-    width: 35px;
-    text-align: center;
-    font-weight: normal;
-  }
-  /* Label column */
-  tbody tr td:nth-child(2) {
-    width: 35%;
-    font-weight: normal;
-  }
-  /* Value column */
-  tbody tr td:nth-child(3) {
-    width: 60%;
-    font-weight: bold; /* Values ko bold rakhein */
-  }
+  tbody tr td:nth-child(1) { width: 35px; text-align: center; font-weight: normal; }
+  tbody tr td:nth-child(2) { width: 35%; font-weight: normal; }
+  tbody tr td:nth-child(3) { width: 60%; font-weight: bold; }
 }
 
-/* Yeh Point 5, 7, 11, 12, 14 ke liye hai */
 .subField {
   display: inline-block;
-  margin-right: 20px; /* Fields ke beech mein space */
-  margin-bottom: 5px; /* Agar line wrap ho toh */
-  font-weight: normal; /* "Nationality: " ko normal rakhega */
+  margin-right: 20px;
+  margin-bottom: 5px;
+  font-weight: normal;
   
   .fill, .fillBlank {
-    font-weight: bold; /* Value ko bold rakhega */
+    font-weight: bold;
   }
 }
 
-/* --- Footer Section --- */
 .certText {
   font-size: 12pt;
   text-align: left;
@@ -146,14 +137,18 @@
   line-height: 1.6;
 }
 
+/* --- FIX 3 (BLACK FOOTER) --- */
+/* Footer se kaala background hataya aur blueprint jaisa banaya */
 .certFooter {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   margin-top: auto; /* Footer ko hamesha neeche rakhega */
-  padding-top: 40px; /* Signature se pehle space */
+  padding-top: 40px;
   font-size: 13pt;
   font-weight: bold;
+  background-color: transparent !important; /* Force transparent background */
+  color: #000 !important; /* Force black text */
 
   .datePlace {
     text-align: left;
@@ -162,7 +157,7 @@
   .sigBox {
     text-align: center;
     width: 180px;
-    padding-top: 40px; /* Space for signature */
+    padding-top: 40px;
     border-top: 1px solid #000; /* Signature line */
   }
   
@@ -170,6 +165,26 @@
       font-size: 11pt;
       color: #777;
       text-align: center;
-      margin-bottom: 20px; /* Seal ko lines ke beech align karega */
+      margin-bottom: 20px;
   }
+}
+/* --- END FIX 3 --- */
+
+
+/* --- FIX 1 (PRINT BREAK) - EXTRA SAFETY --- */
+/* Yeh print karte waqt faltu shadow aur borders hata dega */
+@media print {
+  .certificatePaper {
+    box-shadow: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+  .outerBorder {
+    /* Print ke liye border ka size kam kar rahe hain taaki fit ho */
+    border: 1px solid #000;
+    padding: 10mm 8mm;
+    min-height: 0; /* min-height hata diya */
+  }
+  /* Baki print styles page.tsx waali file se aa jayenge */
 }
