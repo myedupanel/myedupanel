@@ -41,7 +41,7 @@ const TimetablePage = () => {
     const [isLoading, setIsLoading] = useState(true);
     // --- End New States ---
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false); // <--- Correct state setter name
     const [currentSlot, setCurrentSlot] = useState<{ day: string, slotName: string } | null>(null);
 
     // --- 1. Fetching Assignments (No Change) ---

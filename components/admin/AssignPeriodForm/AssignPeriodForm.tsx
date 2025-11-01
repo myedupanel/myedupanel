@@ -1,10 +1,9 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react'; // <-- useMemo add kiya hai
 import styles from './AssignPeriodForm.module.scss';
 import Select from 'react-select';
 
-// Comprehensive subject list from Nursery to 12th
-// 12th tak ke sabhi common subjects ki poori, India-specific list
+// Comprehensive subject list (No Change)
 const subjectOptions = [
   // Primary & Middle School
   { value: 'English', label: 'English' },
@@ -50,20 +49,38 @@ const subjectOptions = [
   { value: 'Moral Science', label: 'Moral Science' },
 ];
 
-const teacherOptions = [
-  { value: 'Priya Sharma', label: 'Priya Sharma' },
-  { value: 'Rahul Verma', label: 'Rahul Verma' },
-  { value: 'Anjali Mehta', label: 'Anjali Mehta' },
-];
+// --- YEH NICHE WALA BLOCK DELETE KAR DIYA HAI ---
+// const teacherOptions = [
+//   { value: 'Priya Sharma', label: 'Priya Sharma' },
+//   { value: 'Rahul Verma', label: 'Rahul Verma' },
+//   { value: 'Anjali Mehta', label: 'Anjali Mehta' },
+// ];
+// --- END DELETE ---
 
+// --- FIX 1: Interface ko update kiya ---
 interface AssignPeriodFormProps {
   onClose: () => void;
   onSave: (data: { subject: string, teacher: string }) => void;
+  classOptions: string[];    // <-- Yeh line add ki
+  teacherOptions: string[];  // <-- Yeh line add ki
 }
 
-const AssignPeriodForm = ({ onClose, onSave }: AssignPeriodFormProps) => {
+// --- FIX 2: Props ko yahan receive kiya ---
+const AssignPeriodForm = ({ onClose, onSave, classOptions, teacherOptions }: AssignPeriodFormProps) => {
+
+  // --- FIX 3: teacherOptions (jo prop se aa rahe hain) ko 'react-select' format mein convert kiya ---
+  const teacherSelectOptions = useMemo(() => {
+    return teacherOptions.map(teacher => ({
+      value: teacher,
+      label: teacher,
+    }));
+  }, [teacherOptions]);
+  // --- END FIX 3 ---
+
   const [selectedSubject, setSelectedSubject] = useState(subjectOptions[0]);
-  const [selectedTeacher, setSelectedTeacher] = useState(teacherOptions[0]);
+  
+  // --- FIX 4: Initial state ko prop wale options se set kiya ---
+  const [selectedTeacher, setSelectedTeacher] = useState(teacherSelectOptions[0]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +105,8 @@ const AssignPeriodForm = ({ onClose, onSave }: AssignPeriodFormProps) => {
         <Select
           id="teacher-select"
           instanceId="teacher-select"
-          options={teacherOptions}
+          // --- FIX 5: Hardcoded options ki jagah prop wale options use kiye ---
+          options={teacherSelectOptions} 
           value={selectedTeacher}
           onChange={(option) => setSelectedTeacher(option as any)}
           classNamePrefix="react-select"
