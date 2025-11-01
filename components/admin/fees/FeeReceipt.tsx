@@ -2,15 +2,14 @@ import React, { useRef } from 'react';
 import styles from './FeeReceipt.module.scss';
 import { FiPrinter, FiDownload } from 'react-icons/fi';
 import { useReactToPrint } from 'react-to-print'; // Ensure this is installed
-// import { Transaction as FeeTransaction } from '@/components/types/fees'; // Iski zaroorat nahi
 
-// --- Interface Definitions for Populated Data ---
+// --- Interface Definitions (No Change) ---
 interface SchoolInfo {
     name?: string; address?: string; logo?: string;
     session?: string; phone?: string; email?: string;
 }
 interface StudentInfo {
-    id: string; name: string; studentId?: string; // Custom ID
+    id: string; name: string; studentId?: string;
     class?: string; rollNo?: string;
 }
 interface TemplateInfo {
@@ -25,8 +24,7 @@ interface CollectorInfo {
     name: string;
 }
 
-// --- FIX 1: Main Transaction Interface ko update kiya ---
-// Ismein humne backend se aane waale naye fields add kiye hain
+// --- Transaction Interface (Pehle se updated hai) ---
 interface Transaction {
     id: string;
     receiptId: string;
@@ -35,21 +33,16 @@ interface Transaction {
     feeRecordId?: FeeRecordInfo | string;
     collectedBy?: CollectorInfo;
     schoolInfo?: SchoolInfo;
-
     amountPaid: number;
     paymentMode: string;
-    paymentDate: string; // ISO String or Date
+    paymentDate: string;
     notes?: string;
     status: 'Success' | 'Pending' | 'Failed';
-
-    // Conditional Payment Details
     transactionId?: string;
     chequeNumber?: string;
     bankName?: string;
     walletName?: string;
     gatewayMethod?: string;
-
-    // Fallbacks
     studentName?: string;
     className?: string;
     studentRegId?: string;
@@ -58,13 +51,9 @@ interface Transaction {
     totalFeeAmount?: number;
     discountGiven?: number;
     lateFineApplied?: number;
-
-    // --- YEH DO FIELDS BUG FIX KE LIYE ZAROORI HAIN ---
-    // Yeh backend (feeController) ke getTransactionById se aa rahe hain
     currentBalanceDue?: number; 
     feeRecordStatus?: string;
 }
-// --- END FIX 1 ---
 
 interface FeeReceiptProps {
     transaction: Transaction | null;
@@ -90,64 +79,61 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
 
- const handleBeforePrint = async () => {
-        // Sabhi common modal backdrop selectors ko try karte hain
-        const selectors = [
-            '[data-modal-backdrop="true"]', // Aapka original selector
-            '[data-radix-overlay="true"]',   // shadcn/ui ya Radix UI ke liye
-            '.modal-backdrop',               // Bootstrap ke liye
-            '.MuiBackdrop-root',             // Material-UI (MUI) ke liye
-            '.mantine-Modal-overlay',        // Mantine UI ke liye
-            '[role="dialog"][aria-modal="true"]', // Generic dialog overlay
-            'body > div:last-child[style*="z-index"]', // Agar backdrop body ke last mein hai
-            '.rc-dialog-mask',               // rc-dialog (Ant Design etc.)
-            '.ant-modal-mask',               // Ant Design specific
-        ];
-        
-        let backdrop: HTMLElement | null = null;
-        for (const selector of selectors) {
-            backdrop = document.querySelector(selector);
-            if (backdrop) {
-                console.log(`Found backdrop with selector: ${selector}`);
-                break; // Jaise hi mil jaaye, loop rok do
+    // --- FIX: PRINT BUTTON LOGIC UPDATE KIYA ---
+    const handleBeforePrint = async () => {
+        try {
+            const selectors = [
+                '[data-modal-backdrop="true"]', '[data-radix-overlay="true"]',
+                '.modal-backdrop', '.MuiBackdrop-root', '.mantine-Modal-overlay',
+                '[role="dialog"][aria-modal="true"]', 'body > div:last-child[style*="z-index"]',
+                '.rc-dialog-mask', '.ant-modal-mask',
+            ];
+            
+            let backdrop: HTMLElement | null = null;
+            for (const selector of selectors) {
+                backdrop = document.querySelector(selector);
+                if (backdrop) {
+                    console.log(`Found backdrop with selector: ${selector}`);
+                    break;
+                }
             }
-        }
 
-        if (backdrop) {
-            // z-index ko temporarily hata do ya display: none kar do
-            // display: none zyadatar cases mein safe hota hai
-            backdrop.style.display = 'none'; 
-            console.log("Backdrop hidden for printing.");
-            // Wait for a small moment to ensure DOM update takes effect before print dialog
-            await new Promise(resolve => setTimeout(resolve, 50)); 
-        } else {
-            console.warn("Could not find modal backdrop to hide for printing. Print dialog might be obscured.");
+            if (backdrop) {
+                // 'display: none' ke bajaaye 'visibility: hidden' use kar rahe hain
+                backdrop.style.visibility = 'hidden'; 
+                console.log("Backdrop hidden for printing.");
+                await new Promise(resolve => setTimeout(resolve, 50)); 
+            } else {
+                console.warn("Could not find modal backdrop to hide for printing.");
+            }
+        } catch (e) {
+            console.error("Error in handleBeforePrint:", e);
+            // Error ke baad bhi print try karne do
         }
     };
 
-    // Yeh function print ke baad modal backdrop ko waapas laayega
     const handleAfterPrint = async () => {
-        const selectors = [
-            '[data-modal-backdrop="true"]', 
-            '[data-radix-overlay="true"]',   
-            '.modal-backdrop',               
-            '.MuiBackdrop-root',             
-            '.mantine-Modal-overlay',        
-            '[role="dialog"][aria-modal="true"]',
-            'body > div:last-child[style*="z-index"]',
-            '.rc-dialog-mask',
-            '.ant-modal-mask',
-        ];
-        let backdrop: HTMLElement | null = null;
-        for (const selector of selectors) {
-            backdrop = document.querySelector(selector);
-            if (backdrop) break;
-        }
-        if (backdrop) {
-            backdrop.style.display = ''; // Display ko default pe reset karo
-            console.log("Backdrop restored after printing.");
+        try {
+            const selectors = [
+                '[data-modal-backdrop="true"]', '[data-radix-overlay="true"]',
+                '.modal-backdrop', '.MuiBackdrop-root', '.mantine-Modal-overlay',
+                '[role="dialog"][aria-modal="true"]', 'body > div:last-child[style*="z-index"]',
+                '.rc-dialog-mask', '.ant-modal-mask',
+            ];
+            let backdrop: HTMLElement | null = null;
+            for (const selector of selectors) {
+                backdrop = document.querySelector(selector);
+                if (backdrop) break;
+            }
+            if (backdrop) {
+                backdrop.style.visibility = 'visible'; // Waapas visible karein
+                console.log("Backdrop restored after printing.");
+            }
+        } catch (e) {
+            console.error("Error in handleAfterPrint:", e);
         }
     };
+    // --- END FIX ---
 
     const handlePrint = useReactToPrint({
         content: () => componentRef.current, 
@@ -157,14 +143,13 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         onAfterPrint: handleAfterPrint,
     } as any);
     
-    // handleDownload abhi bhi handlePrint ko hi call karega, jo "Print to PDF" dialog kholegal
     const handleDownload = handlePrint; 
 
     if (!transaction) {
         return <div className={styles.noData}>No transaction details available.</div>;
     }
 
-    // --- Extract Data Safely (No Change) ---
+    // --- Data Extraction (Pehle se updated hai) ---
     const schoolInfo = transaction.schoolInfo || {};
     const studentInfo = transaction.studentId;
     const templateInfo = transaction.templateId;
@@ -181,33 +166,27 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const feeItems = templateInfo?.items || [];
     const templateNameDisplay = templateInfo?.name || transaction.templateName || 'Fee Payment';
 
-    // --- FIX 1: Calculate Amounts (Bug Fix) ---
+    // --- Amount Calculation (Pehle se bug-fixed hai) ---
     const totalDemand = templateInfo?.totalAmount || transaction.totalFeeAmount || 0;
     const discount = feeRecordInfo?.discount || transaction.discountGiven || 0;
     const lateFine = feeRecordInfo?.lateFine || transaction.lateFineApplied || 0;
     const netDemand = totalDemand - discount + lateFine;
     const amountPaid = transaction.amountPaid || 0;
-
-    // YEH DO LINES BUG FIX KARTI HAIN
-    // Yeh backend se aa raha hai (e.g., ₹0.00)
     const balanceDue = transaction.currentBalanceDue ?? Math.max(0, netDemand - amountPaid);
-    // Yeh backend se aa raha hai (e.g., "Paid")
     const paymentStatus = (transaction.feeRecordStatus 
         ? transaction.feeRecordStatus.toUpperCase()
         : (transaction.status !== 'Success' ? transaction.status.toUpperCase() : (balanceDue < 0.01 ? 'PAID' : 'PARTIAL'))
     );
-    // --- END FIX 1 ---
 
     return (
         <div className={styles.receiptContainer}>
-            {/* Action Buttons */}
+            {/* Action Buttons (No Change) */}
             <div className={`${styles.actions} no-print`}>
                 <button onClick={handleDownload} className={styles.downloadButton}><FiDownload /> Download PDF</button>
                 <button onClick={handlePrint} className={styles.printButton}><FiPrinter /> Print Receipt</button>
             </div>
 
-            {/* --- Receipt Content --- */}
-            {/* Baaki ka JSX structure waisa hi rakha hai jaisa aapne diya tha */}
+            {/* --- Receipt Content (No Change in JSX) --- */}
             <div id="printable-receipt" className={styles.receiptContent} ref={componentRef}>
                 {/* Header */}
                 <header className={styles.header}>
@@ -285,17 +264,15 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                         <p><strong>Amount Paid:</strong> <strong className={styles.paidAmount}>{formatCurrency(amountPaid)}</strong></p>
                         <p><strong>Payment Mode:</strong> {transaction.paymentMode || 'N/A'}</p>
                         {transaction.paymentMode === 'UPI' && transaction.transactionId && <p><strong>UPI Transaction ID:</strong> {transaction.transactionId}</p>}
-                        {/* ... baaki conditional details ... */}
                         {(transaction.paymentMode === 'Cheque' || transaction.paymentMode === 'Draft') && transaction.chequeNumber && <p><strong>{transaction.paymentMode} No:</strong> {transaction.chequeNumber}</p>}
                         {(transaction.paymentMode === 'Cheque' || transaction.paymentMode === 'Draft') && transaction.bankName && <p><strong>Bank Name:</strong> {transaction.bankName}</p>}
                     </div>
                     {transaction.notes && <p className={styles.notes}><strong>Remarks:</strong> {transaction.notes}</p>}
                 </section>
 
-                 {/* Balance Summary (Ab yeh sahi data dikhayega) */}
+                 {/* Balance Summary (Bug-fixed) */}
                  <section className={styles.balanceSection}>
                      <p><strong>Balance Due:</strong> <span className={styles.balanceAmount}>{formatCurrency(balanceDue)}</span></p>
-                     {/* Ab yeh 'PAID' dikhayega jab balance 0 hoga */}
                      {paymentStatus === 'PAID' ? ( <div className={styles.paidStamp}>PAID</div> ) :
                        (<div className={`${styles.statusBadge} ${styles[paymentStatus.toLowerCase()]}`}>{paymentStatus}</div>)
                      }

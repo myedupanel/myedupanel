@@ -1,22 +1,29 @@
 /* src/components/admin/fees/FeeReceipt.module.scss */
+/* --- "SUPER PREMIUM" LAYOUT FIX --- */
 
-/* Main container for the modal content */
+/* Modal ke andar ka main container */
 .receiptContainer {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   color: #333;
-  background-color: #f9f9f9;
+  background-color: #f4f7f6; /* Thoda off-white background */
+  max-height: 85vh; /* Modal ko scrollable banayega */
+  overflow-y: auto;
 }
 
 /* Action buttons (Download/Print) */
 .actions {
   display: flex;
   gap: 12px;
-  padding: 16px 24px;
+  padding: 12px 16px; /* Gaps kam kiye */
   background-color: #ffffff;
   border-bottom: 1px solid #e0e0e0;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
-
+  position: sticky; /* Buttons ko upar fix rakha */
+  top: 0;
+  z-index: 10;
+  
+  /* ... (button styles same hain) ... */
   .downloadButton,
   .printButton {
     display: inline-flex;
@@ -29,18 +36,13 @@
     border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.2s ease;
-
-    svg {
-      font-size: 1.1em;
-    }
+    svg { font-size: 1.1em; }
   }
-
   .downloadButton {
     background-color: #007bff;
     color: #ffffff;
     &:hover { background-color: #0056b3; }
   }
-
   .printButton {
     background-color: #6c757d;
     color: #ffffff;
@@ -48,12 +50,12 @@
   }
 }
 
-/* The actual white paper receipt */
+/* Asli receipt paper */
 .receiptContent {
-  padding: 24px;
+  padding: 20px; /* Padding kam ki */
   background-color: #ffffff;
   border-radius: 8px;
-  margin: 16px; /* Space inside the modal */
+  margin: 16px; 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
@@ -61,28 +63,28 @@
 .header {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px; /* Gap kam kiya */
   border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 16px;
+  padding-bottom: 12px; /* Padding kam ki */
 
   .logo {
-    max-width: 70px;
-    max-height: 70px;
+    max-width: 60px; /* Logo thoda chhota */
+    max-height: 60px;
     object-fit: contain;
   }
 
   .schoolDetails {
     h1 {
-      font-size: 1.75rem;
+      font-size: 1.5rem; /* Font size adjust kiya */
       font-weight: 700;
       color: #000;
-      margin: 0 0 4px 0;
+      margin: 0 0 2px 0; /* Gap kam kiya */
     }
     p {
       margin: 0;
-      font-size: 0.9rem;
+      font-size: 0.85rem; /* Font size adjust kiya */
       color: #555;
-      line-height: 1.5;
+      line-height: 1.4;
     }
   }
 }
@@ -92,10 +94,10 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin: 20px 0;
+  margin: 16px 0; /* Gap kam kiya */
 
   h2 {
-    font-size: 1.25rem;
+    font-size: 1.15rem; /* Font size adjust kiya */
     font-weight: 600;
     margin: 0;
     text-transform: uppercase;
@@ -104,7 +106,7 @@
 
   .metaInfo {
     text-align: right;
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Font size adjust kiya */
     color: #444;
     p { margin: 0 0 4px 0; }
   }
@@ -112,98 +114,94 @@
 
 /* Student Info / Payment Details */
 .detailsSection {
-  margin-bottom: 20px;
+  margin-bottom: 16px; /* Gap kam kiya */
   border-bottom: 1px solid #f0f0f0;
-  padding-bottom: 16px;
+  padding-bottom: 12px; /* Gap kam kiya */
 
   h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #007bff; /* Blue heading */
-    margin: 0 0 12px 0;
+    font-size: 0.9rem; /* Font size adjust kiya */
+    font-weight: 700;
+    color: #333; /* Color ko professional dark kiya */
+    margin: 0 0 10px 0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
   }
 
   .grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px 16px;
-    font-size: 0.95rem;
-
+    gap: 6px 16px; /* Gap kam kiya */
+    font-size: 0.9rem; /* Font size adjust kiya */
     p { margin: 0; }
     strong { color: #000; }
   }
 
   .paidAmount {
-    font-size: 1.1rem;
-    color: #28a745; /* Green */
+    font-size: 1rem; /* Font size adjust kiya */
+    color: #28a745;
   }
 
   .notes {
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Font size adjust kiya */
     color: #555;
-    margin-top: 12px;
+    margin-top: 10px;
   }
 }
 
 /* Fee Particulars Table */
 .itemsSection {
-  margin-bottom: 20px;
-  h3 { /* Same as .detailsSection h3 */
-    font-size: 1rem;
-    font-weight: 600;
-    color: #007bff;
-    margin: 0 0 12px 0;
+  margin-bottom: 16px; /* Gap kam kiya */
+  h3 { /* Style ko .detailsSection h3 jaisa rakha */
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 10px 0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
   }
 }
 
 .itemsTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.95rem;
+  font-size: 0.9rem; /* Font size adjust kiya */
 
   thead tr {
     background-color: #f8f9fa;
     border-bottom: 2px solid #dee2e6;
   }
-
   th {
-    padding: 10px 8px;
+    padding: 8px; /* Padding kam ki */
     text-align: left;
     font-weight: 600;
   }
-
   tbody tr {
     border-bottom: 1px solid #f0f0f0;
   }
-
   td {
-    padding: 10px 8px;
+    padding: 8px; /* Padding kam ki */
     vertical-align: top;
   }
-
   .amountCol {
     text-align: right;
     font-weight: 500;
   }
-
   .calcRow td {
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding-top: 6px; /* Padding kam ki */
+    padding-bottom: 6px;
     font-weight: 600;
     border: none;
   }
-  
   .subtotal {
     border-top: 2px dashed #e0e0e0;
   }
-  
   .grandTotal {
     background-color: #f8f9fa;
-    font-size: 1.05rem;
+    font-size: 1rem; /* Font size adjust kiya */
     color: #000;
   }
 }
@@ -215,67 +213,76 @@
   align-items: center;
   background-color: #f8f9fa;
   border: 1px solid #e0e0e0;
-  padding: 16px 20px;
+  padding: 12px 16px; /* Padding kam ki */
   border-radius: 8px;
-  margin-top: 20px;
+  margin-top: 16px; /* Gap kam kiya */
 
   p {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1rem; /* Font size adjust kiya */
     font-weight: 600;
   }
 
+  /* Balance 0 hone par use green kiya */
   .balanceAmount {
-    color: #dc3545; /* Red */
+    color: #28a745; 
+  }
+  
+  /* Agar balance 0 se zyada hai, tab red karo */
+  .balanceAmount:not([data-balance-zero="true"]) {
+     color: #dc3545;
   }
 
+
+  /* PAID Stamp ko professional banaya */
   .paidStamp {
-    font-size: 1.5rem;
+    font-size: 1.1rem; /* Font size adjust kiya */
     font-weight: 700;
-    color: #28a745; /* Green */
-    border: 3px solid #28a745;
-    padding: 6px 12px;
-    border-radius: 8px;
-    transform: rotate(-10deg);
+    color: #28a745;
+    border: 2px solid #28a745; /* Border thoda patla */
+    padding: 4px 10px; /* Padding kam ki */
+    border-radius: 6px;
+    text-transform: uppercase;
+    // transform: rotate(-10deg); // Rotation hata diya
   }
 
   .statusBadge {
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Font size adjust kiya */
     font-weight: 700;
-    padding: 6px 12px;
+    padding: 5px 10px; /* Padding kam ki */
     border-radius: 15px;
     text-transform: uppercase;
   }
-
   .partial {
-    background-color: #fff3cd; /* Yellow */
+    background-color: #fff3cd;
     color: #856404;
   }
   .pending {
-    background-color: #d6d8db; /* Gray */
+    background-color: #d6d8db;
     color: #383d41;
   }
 }
 
+/* Footer (Signatures) */
 .footer {
-  margin-top: 30px;
-  padding-top: 20px;
+  margin-top: 20px; /* Gap kam kiya */
+  padding-top: 16px; /* Gap kam kiya */
   border-top: 1px solid #e0e0e0;
-  font-size: 0.85rem;
+  font-size: 0.8rem; /* Font size adjust kiya */
   color: #555;
-  background-color: #ffffff;
+  background-color: #ffffff !important; /* DARK FOOTER FIX */
   
   .collectedBy {
-    font-size: 0.95rem;
+    font-size: 0.9rem; /* Font size adjust kiya */
     font-weight: 500;
     color: #333;
-    margin-bottom: 30px;
+    margin-bottom: 25px; /* Gap kam kiya */
   }
 
   .signatureArea {
     display: flex;
     justify-content: space-between;
-    margin-top: 40px;
+    margin-top: 30px; /* Gap kam kiya */
   }
 
   .signatureBox {
@@ -286,16 +293,16 @@
   .signatureLabels {
     display: flex;
     justify-content: space-between;
-    padding: 0 5%; // Thoda andar
+    padding: 0 5%; 
     p { 
-      margin: 6px 0 0 0; 
+      margin: 4px 0 0 0; /* Gap kam kiya */
       font-weight: 600;
     }
   }
 
   .footerNote {
     text-align: center;
-    margin-top: 25px;
+    margin-top: 20px; /* Gap kam kiya */
     font-style: italic;
   }
 }
