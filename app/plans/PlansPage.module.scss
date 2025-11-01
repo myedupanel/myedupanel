@@ -1,0 +1,153 @@
+/* app/plans/PlansPage.module.scss */
+
+/* Page ka main container */
+.plansPageContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background-color: #f9faff; /* Halka blue background */
+  min-height: 100vh;
+}
+
+/* Page ka header (Title) */
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+  }
+  p {
+    font-size: 1.1rem;
+    color: #555;
+    margin-top: 8px;
+  }
+}
+
+/* Teeno plans ko grid mein rakhega */
+.plansGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 column layout */
+  gap: 30px;
+  align-items: stretch; /* Taaki sabhi cards ki height barabar ho */
+}
+
+/* Har ek plan card ki style */
+.planCard {
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  position: relative; /* Popular badge ke liye */
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  }
+
+  .planName {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 15px 0;
+  }
+
+  .planPrice {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    
+    span {
+      font-size: 1rem;
+      font-weight: 400;
+      color: #777;
+      margin-left: 5px;
+    }
+  }
+}
+
+/* Plan ke features ki list */
+.perksList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 30px 0;
+  flex-grow: 1; /* List ko poori jagah dega, taaki button neeche rahe */
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    color: #444;
+    margin-bottom: 12px;
+    
+    .perkIcon {
+      color: #28a745; /* Green checkmark */
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+  }
+}
+
+/* Call-to-Action button */
+.ctaButton {
+  width: 100%;
+  padding: 15px 20px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #007bff; /* Blue button */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+}
+
+/* --- Popular Plan ki Styling --- */
+.popular {
+  border: 2px solid #007bff; /* Blue border */
+  transform: scale(1.03); /* Thoda bada dikhega */
+  box-shadow: 0 10px 30px rgba(0, 123, 255, 0.15);
+  
+  .popularBadge {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #007bff;
+    color: #ffffff;
+    padding: 6px 15px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Popular plan ka button Green hoga */
+  .ctaButton {
+    background-color: #28a745;
+    &:hover {
+      background-color: #218838;
+    }
+  }
+}
+
+/* --- Responsive (Mobile View) --- */
+@media (max-width: 900px) {
+  .plansGrid {
+    grid-template-columns: 1fr; /* Mobile par 1 column layout */
+  }
+  .popular {
+    transform: scale(1); /* Mobile par bada nahi dikhega */
+  }
+}
