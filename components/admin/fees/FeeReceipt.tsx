@@ -93,7 +93,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     // --- FIX 2: Print/Download Logic ko robust banaya ---
     
     // Yeh function print se pehle modal backdrop ko dhoondh kar hide karega
-    const handleBeforePrint = () => {
+    const handleBeforePrint = async () => { // <-- Bas 'async' add karein
         // Alag-alag modal libraries ke common selectors
         const selectors = [
             '[data-modal-backdrop="true"]', // Aapka original selector
@@ -116,7 +116,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     };
 
     // Yeh function print ke baad modal backdrop ko waapas laayega
-    const handleAfterPrint = () => {
+    const handleAfterPrint = async () => { // <-- Yahaan bhi 'async' add karein
         const selectors = ['[data-modal-backdrop="true"]', '[data-radix-overlay="true"]', '.modal-backdrop'];
         let backdrop: HTMLElement | null = null;
         for (const selector of selectors) {
@@ -129,12 +129,12 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     };
 
     const handlePrint = useReactToPrint({
-        content: () => componentRef.current, // 'body' ko 'content' se update kiya (latest standard)
+        content: () => componentRef.current, // <-- 'content' is correct
         documentTitle: `FeeReceipt_${transaction?.receiptId || transaction?.id || 'details'}`,
         pageStyle: `@page { size: A4; margin: 15mm; } @media print { body { -webkit-print-color-adjust: exact; color-adjust: exact; } .no-print { display: none !important; } }`,
         onBeforePrint: handleBeforePrint,
         onAfterPrint: handleAfterPrint,
-    });
+    }as any);
     // --- END FIX 2 ---
     
     // handleDownload abhi bhi handlePrint ko hi call karega, jo "Print to PDF" dialog kholegal
