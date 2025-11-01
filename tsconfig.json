@@ -2,6 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@/backend/*": ["backend/*"],
       "@/*": ["./*"]
     },
     "target": "ES2017",
