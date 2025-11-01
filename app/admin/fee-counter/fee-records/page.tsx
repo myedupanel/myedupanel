@@ -1,24 +1,54 @@
 "use client";
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './FeeRecordsPage.module.scss';
 import { FiSearch, FiPrinter, FiDownload, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Link from 'next/link';
 // --- API Import ---
 import api from '@/backend/utils/api'; 
+// --- Modal and Receipt Component Imports ---
+import Modal from '@/components/common/Modal/Modal'; // Assuming a generic Modal component exists
 
-// --- 1. Interface Definitions (Updated for API response) ---
+// WARNING: Check this path! If FeeReceipt is directly in the parent folder, the path might be wrong.
+import FeeReceipt from '@/components/admin/fees/FeeReceipt'; 
+// --- End Imports ---
+
+// --- Helper Hook: Debounce ---
+const useDebounce = (value: string, delay: number) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+
+    return debouncedValue;
+};
+// --- End Helper Hook ---
+
+
+// --- Interface Definitions ---
 interface Transaction {
-  id: number; // Backend से ID number में आ रही है
+  id: number;
   receiptId: string;
   studentName: string;
   className: string;
   amountPaid: number;
-  paymentMode: string; // 'Cash' | 'UPI' | 'Card' | 'Online' | 'Cheque'
-  paymentDate: string; // YYYY-MM-DD format
-  status: 'Success' | 'Pending' | 'Failed'; // Backend Transaction Status
+  paymentMode: string;
+  paymentDate: string;
+  status: 'Success' | 'Pending' | 'Failed';
 }
 
-// --- 2. DUMMY DATA REMOVED ---
+// Interface for the detailed data required by FeeReceipt component
+interface DetailedTransaction extends Transaction {
+    notes?: string; 
+    currentBalanceDue?: number;
+    feeRecordStatus?: string;
+}
 
 const FeeRecordsPage: React.FC = () => {
   // --- States for Data and Pagination ---
@@ -29,73 +59,96 @@ const FeeRecordsPage: React.FC = () => {
   
   // --- States for Filters ---
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500); // Debounce applied
   const [filterMode, setFilterMode] = useState<'All' | string>('All');
-  // Status filter values को backend status से align किया
   const [filterStatus, setFilterStatus] = useState<'All' | Transaction['status']>('All'); 
 
-  // --- 3. API Fetch Function (useEffect hook) ---
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      setIsLoading(true);
-      
-      // Query parameters तैयार करें
-      const params = new URLSearchParams();
-      params.append('page', currentPage.toString());
-      params.append('limit', '15'); // Per page items
-      
-      if (searchQuery) params.append('search', searchQuery);
-      if (filterMode !== 'All') params.append('paymentMode', filterMode);
-      // Backend status values: Success, Pending, Failed
-      if (filterStatus !== 'All') params.append('status', filterStatus); 
+  // --- States for Modal ---
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null);
+  const [detailedReceiptData, setDetailedReceiptData] = useState<DetailedTransaction | null>(null);
+  const [isReceiptLoading, setIsReceiptLoading] = useState(false);
+  // --- End Modal States ---
 
-      try {
-        const res = await api.get(`/fees/transactions?${params.toString()}`);
-        
-        // Backend से data, totalPages, totalRecords आ रहे हैं
-        setTransactions(res.data.data); 
-        setTotalPages(res.data.totalPages);
-        
-      } catch (err) {
-        console.error("Failed to fetch transactions", err);
-        setTransactions([]);
-        setTotalPages(1);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+
+  // --- API Fetch Function ---
+  const fetchTransactions = useCallback(async () => {
+    setIsLoading(true);
     
-    // Fetch only when filters/page change
-    fetchTransactions();
-  }, [currentPage, searchQuery, filterMode, filterStatus]);
-  
-  // Debounce logic (Optional but recommended for search)
-  // Humne simple approach rakhi hai: har change par fetch karna
+    // Query parameters तैयार करें
+    const params = new URLSearchParams();
+    params.append('page', currentPage.toString());
+    params.append('limit', '15'); 
+    
+    // Use Debounced search query
+    if (debouncedSearchQuery) params.append('search', debouncedSearchQuery);
+    if (filterMode !== 'All') params.append('paymentMode', filterMode);
+    if (filterStatus !== 'All') params.append('status', filterStatus); 
 
-  // --- Memoized data for Table (Used mainly for visual filtering if API wasn't comprehensive) ---
-  // Since all filtering is done on the backend, this memo is simplified but kept for structure
-  const displayedTransactions = useMemo(() => {
-    // API filtering hone ke baad, yahaan sirf data display hoga
-    return transactions;
-  }, [transactions]);
+    try {
+      const res = await api.get(`/fees/transactions?${params.toString()}`);
+      
+      setTransactions(res.data.data); 
+      setTotalPages(res.data.totalPages);
+      
+    } catch (err) {
+      console.error("Failed to fetch transactions", err);
+      setTransactions([]);
+      setTotalPages(1);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, debouncedSearchQuery, filterMode, filterStatus]);
   
-  // --- Helper Function for Status Badge Colors ---
+  // --- Run Fetch Effect ---
+  useEffect(() => {
+    // Fetch when pagination, filters, or DEBOUNCED search query changes
+    fetchTransactions();
+  }, [fetchTransactions]);
+  
+  
+  // --- Fetch Detailed Receipt Data ---
+  const fetchReceiptDetails = useCallback(async (transactionId: number) => {
+      setIsReceiptLoading(true);
+      setDetailedReceiptData(null);
+      try {
+          // This endpoint uses getTransactionById from your controller
+          const res = await api.get(`/fees/transaction/${transactionId}`);
+          setDetailedReceiptData(res.data);
+          setIsReceiptModalOpen(true); // Open modal only on success
+      } catch (error) {
+          console.error("Error fetching receipt details:", error);
+          alert("Failed to load receipt details.");
+      } finally {
+          setIsReceiptLoading(false);
+      }
+  }, []);
+
+  // --- Handle View Receipt (Button Click) ---
+  const handleViewReceipt = (transactionId: number) => {
+    setSelectedTransactionId(transactionId);
+    fetchReceiptDetails(transactionId);
+  };
+  
+  // --- Close Modal Handler ---
+  const handleCloseReceiptModal = () => {
+      setIsReceiptModalOpen(false);
+      setSelectedTransactionId(null);
+      setDetailedReceiptData(null);
+  }
+
+  // --- Helpers and Pagination (No change) ---
+  const displayedTransactions = useMemo(() => transactions, [transactions]);
+  
   const getStatusDisplay = (status: Transaction['status']) => {
-    // Backend status को Frontend display values और SCSS classes से map करते हैं
     switch (status) {
       case 'Success': return { label: 'Paid', className: styles.paid };
-      case 'Pending': return { label: 'Partial', className: styles.partial }; // e.g. Cheque Pending
-      case 'Failed': return { label: 'Void', className: styles.void }; // Failed online txn, etc.
+      case 'Pending': return { label: 'Partial', className: styles.partial }; 
+      case 'Failed': return { label: 'Void', className: styles.void };
       default: return { label: status, className: styles.void };
     }
   };
 
-  const handleViewReceipt = (id: string) => {
-    // Navigating to the detailed receipt view
-    alert(`Viewing Receipt ID: ${id}. Yahaan receipt modal khulega.`);
-    console.log(`Navigating to receipt: /admin/fee-counter/receipt/${id}`);
-  };
-
-  // --- Pagination Handlers ---
   const handlePreviousPage = () => {
     setCurrentPage(prev => Math.max(prev - 1, 1));
   };
@@ -109,7 +162,6 @@ const FeeRecordsPage: React.FC = () => {
     <div className={styles.pageContainer}>
       <header className={styles.header}>
         <h1 className={styles.title}>Fee Records & Transaction History 💰</h1>
-        {/* Download/Export Button (Now fully functional with backend route 16) */}
         <div className={styles.actions}>
           <button className={styles.exportButton} onClick={() => alert('Exporting data via backend API route 16...')}>
             <FiDownload /> Export Data
@@ -125,16 +177,16 @@ const FeeRecordsPage: React.FC = () => {
             type="text"
             placeholder="Search by Student Name or Receipt ID..."
             value={searchQuery}
-            // Debounce logic apply nahi kiya, so har keystroke par fetch hoga (performance ke liye debounce best hai)
+            // Update local state immediately
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        {/* Filters */}
+        {/* Filters (No Change) */}
         <div className={styles.filters}>
           <select 
             value={filterMode} 
-            onChange={(e) => setFilterMode(e.target.value)}
+            onChange={(e) => {setFilterMode(e.target.value); setCurrentPage(1);}}
           >
             <option value="All">All Modes</option>
             <option value="Cash">Cash</option>
@@ -145,7 +197,7 @@ const FeeRecordsPage: React.FC = () => {
           </select>
           <select 
             value={filterStatus} 
-            onChange={(e) => setFilterStatus(e.target.value as 'All' | Transaction['status'])}
+            onChange={(e) => {setFilterStatus(e.target.value as 'All' | Transaction['status']); setCurrentPage(1);}}
           >
             <option value="All">All Statuses</option>
             <option value="Success">Paid</option>
@@ -179,7 +231,10 @@ const FeeRecordsPage: React.FC = () => {
                 return (
                   <tr key={t.id} className={styles.transactionRow}>
                     <td className={styles.receiptIdCol}>
-                      <Link href={`/admin/fee-counter/receipt/${t.id}`}>{t.receiptId}</Link>
+                      {/* Link to open the modal via ID */}
+                      <a href="#" onClick={(e) => {e.preventDefault(); handleViewReceipt(t.id); }}>
+                          {t.receiptId}
+                      </a>
                     </td>
                     <td>{t.studentName}</td>
                     <td>{t.className}</td>
@@ -194,9 +249,10 @@ const FeeRecordsPage: React.FC = () => {
                     <td className={styles.actionCol}>
                       <button 
                         className={styles.viewButton}
-                        onClick={() => handleViewReceipt(t.receiptId)}
+                        onClick={() => handleViewReceipt(t.id)}
+                        disabled={isReceiptLoading && selectedTransactionId === t.id}
                       >
-                        <FiPrinter /> View Receipt
+                        {isReceiptLoading && selectedTransactionId === t.id ? 'Loading...' : (<><FiPrinter /> View Receipt</>)}
                       </button>
                     </td>
                   </tr>
@@ -233,6 +289,24 @@ const FeeRecordsPage: React.FC = () => {
           </button>
         </div>
       )}
+      
+      {/* --- MODAL FOR RECEIPT (The main goal) --- */}
+      <Modal 
+        isOpen={isReceiptModalOpen} 
+        onClose={handleCloseReceiptModal} 
+        title={`Receipt: ${detailedReceiptData?.receiptId || 'Loading...'}`}
+        // size="lg" Removed this prop
+      >
+        {isReceiptLoading ? (
+            <div style={{ padding: '2rem', textAlign: 'center' }}>Loading receipt data...</div>
+        ) : detailedReceiptData ? (
+            // FeeReceipt component will have the Download/Print buttons inside
+            <FeeReceipt transaction={detailedReceiptData} />
+        ) : (
+             <div style={{ padding: '2rem', textAlign: 'center' }}>Receipt data could not be loaded.</div>
+        )}
+      </Modal>
+
     </div>
   );
 };

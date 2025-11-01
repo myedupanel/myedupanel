@@ -26,7 +26,7 @@ interface CollectorInfo {
 
 // --- Transaction Interface (Pehle se updated hai) ---
 interface Transaction {
-    id: string;
+    id: number;
     receiptId: string;
     studentId?: StudentInfo;
     templateId?: TemplateInfo;
