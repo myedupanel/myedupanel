@@ -1255,13 +1255,7 @@ body {
   --light-black: #2c2c2c;
   --sky-blue: #f0f5ff;
 }
-@media print {
-  body {
-    -webkit-print-color-adjust: exact; /* Chrome/Safari ke liye */
-    print-color-adjust: exact;         /* Linter ko shaant karne ke liye */
-    color-adjust: exact;               /* Naye browsers ke liye */
-  }
-}
+
 
 @media (max-width: 768px) {
   

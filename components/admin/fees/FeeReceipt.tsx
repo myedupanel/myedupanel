@@ -80,27 +80,52 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
 
     // --- NAYA PRINT BUTTON FIX YAHAN HAI ---
-    // Yeh function print se pehle body tag par ek class add karega
-    const handleBeforePrint = async () => {
-        document.body.classList.add('printing-receipt-active');
-        // CSS ko apply hone ke liye thoda wait karein
-        await new Promise(resolve => setTimeout(resolve, 50)); 
-    };
+    
+    // 1. handleBeforePrint aur handleAfterPrint ko poori tarah hata diya hai.
 
-    // Yeh function print ke baad body tag se class hata dega
-    const handleAfterPrint = async () => {
-        document.body.classList.remove('printing-receipt-active');
+    // 2. Naya pageStyle jo print ke dauraan sabkuch handle karega
+    const getPageStyle = () => {
+        return `
+            @page { 
+                size: A4; 
+                margin: 15mm; 
+            } 
+            
+            @media print { 
+                body { 
+                    -webkit-print-color-adjust: exact; 
+                    color-adjust: exact; 
+                }
+                
+                /* Sabkuch hide karo... */
+                body > * {
+                    display: none;
+                }
+                
+                /* ...SIRF receipt content ko chhodkar */
+                #printable-receipt {
+                    display: block !important;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                }
+                
+                /* Receipt ke andar ke .no-print elements ko hide karo */
+                .no-print { 
+                    display: none !important; 
+                }
+            }
+        `;
     };
-    // --- END NAYA FIX ---
-
 
     const handlePrint = useReactToPrint({
         content: () => componentRef.current, 
         documentTitle: `FeeReceipt_${transaction?.receiptId || transaction?.id || 'details'}`,
-        pageStyle: `@page { size: A4; margin: 15mm; } @media print { body { -webkit-print-color-adjust: exact; color-adjust: exact; } .no-print { display: none !important; } }`,
-        onBeforePrint: handleBeforePrint,
-        onAfterPrint: handleAfterPrint,
+        pageStyle: getPageStyle(), // <-- Naya function yahaan call kiya
+        // onBeforePrint aur onAfterPrint hata diye gaye
     } as any);
+    // --- END NAYA FIX ---
     
     const handleDownload = handlePrint; 
 
@@ -146,6 +171,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             </div>
 
             {/* --- Receipt Content (No Change in JSX) --- */}
+            {/* ID "printable-receipt" hona zaroori hai */}
             <div id="printable-receipt" className={styles.receiptContent} ref={componentRef}>
                 {/* Header */}
                 <header className={styles.header}>
@@ -231,7 +257,6 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
                  {/* Balance Summary (Bug-fixed) */}
                  <section className={styles.balanceSection}>
-                     {/* Balance 0 hone par span mein ek naya attribute add kiya */}
                      <p><strong>Balance Due:</strong> 
                         <span 
                             className={styles.balanceAmount} 
