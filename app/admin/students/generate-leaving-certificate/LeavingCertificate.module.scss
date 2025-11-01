@@ -1,204 +1,242 @@
-/* components/admin/certificates/LeavingCertificate.module.scss */
+/* app/admin/students/generate-leaving-certificate/LeavingCertificate.module.scss */
+/* Yeh file poore page layout ko control karti hai */
 
-/* --- Page Layout (Used by the page.tsx) --- */
-.pageContainer { padding: 2rem; background-color: #f4f7fa; }
-.header { margin-bottom: 2rem; h1 { font-size: 2rem; font-weight: 700; color: #2c3e50; } p { font-size: 1rem; color: #555; } }
-.builderLayout { display: grid; grid-template-columns: 350px 1fr; gap: 2rem; align-items: flex-start; }
-.controlsColumn { background: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); overflow: hidden; position: sticky; top: 20px; }
-.controlSection { padding: 1.5rem; border-bottom: 1px solid #e0e0e0; &:last-child { border-bottom: none; } h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #34495e; } }
-.previewColumn { h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; } }
-.previewWrapper { background: #e0e0e0; padding: 2rem; border-radius: 8px; overflow-x: auto; text-align: center;
-  & > div { display: inline-block; text-align: left; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
+.pageContainer {
+  padding: 24px;
+  max-width: 1800px; /* Badi screens ke liye extra space */
+  margin: 0 auto;
 }
-.actionsWrapper { padding: 1.5rem; background: #f9f9f9; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.actionButton { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; &.download { background-color: #27ae60; color: white; &:hover { background-color: #229954; } } &.print { background-color: #2980b9; color: white; &:hover { background-color: #2471a3; } } }
-.dashboardLinkButton { display: inline-flex; align-items: center; gap: 8px; margin-top: 2rem; padding: 12px 20px; background-color: #34495e; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: background-color 0.2s ease; &:hover { background-color: #2c3e50; } }
-.note { font-size: 0.85rem; color: #7f8c8d; background-color: #fdfaf3; border: 1px solid #f3e5ab; padding: 10px; border-radius: 4px; margin-top: 1rem; }
 
-/* --- Form Styles (Used by LeavingCertificateForm.tsx) --- */
-.form { display: flex; flex-direction: column; gap: 1rem; }
-.formGroup { display: flex; flex-direction: column; label { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: #555; } input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.95rem; font-family: inherit; box-sizing: border-box; &:focus { border-color: #2980b9; outline: none; box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.2); } } textarea { resize: vertical; min-height: 60px; } }
-.formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; @media (max-width: 768px) { grid-template-columns: 1fr; } } // Basic grid
+.header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  p {
+    font-size: 1rem;
+    color: #666;
+    margin-top: 4px;
+  }
+}
 
-// --- FIX: ADDED .formGrid3 and .formGrid4 ---
-.formGrid3 {
+/* --- Main 2-Column Layout --- */
+.builderLayout {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); // 3 equal columns
-  gap: 1rem;
-
-  @media (max-width: 992px) { // Tablet par
-    grid-template-columns: 1fr 1fr; // 2 column
-  }
-  @media (max-width: 768px) { // Mobile par
-    grid-template-columns: 1fr; // 1 column
-  }
+  /* Left column form ke liye, right column preview ke liye */
+  grid-template-columns: 480px 1fr; /* Form column ko thoda bada kiya */
+  gap: 32px;
 }
 
-.formGrid4 {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr); // 4 equal columns
-  gap: 1rem;
-
-  @media (max-width: 1200px) { // Chhote desktop par
-    grid-template-columns: 1fr 1fr; // 2 column
-  }
-  @media (max-width: 768px) { // Mobile par
-    grid-template-columns: 1fr; // 1 column
-  }
-}
-// --- END FIX ---
-
-
-/* --- Leaving Certificate Preview Styles (No Change) --- */
-.certificatePaper {
-  width: 210mm;
-  min-height: 297mm;
-  padding: 10mm 15mm 10mm 15mm;
-  box-sizing: border-box;
-  background: #fff;
-  color: #000;
-  font-family: Arial, sans-serif; // Or Times New Roman if preferred
-  font-size: 10pt; // Base size for LC seems smaller
-  line-height: 1.5;
-  border: 1px solid #999;
-  position: relative;
+.controlsColumn {
   display: flex;
   flex-direction: column;
-}
-// ... (baaki sabhi styles .certHeader se .certFooter tak same rahenge) ...
-.certHeader {
-  display: flex;
-  justify-content: space-between; // Push affiliation info right
-  align-items: flex-start;
-  padding-bottom: 5px;
-  margin-bottom: 5px;
-  border-bottom: 1px solid #000;
-
-  .logo {
-    width: 50px; // Slightly smaller logo for LC?
-    height: auto;
-    max-height: 50px;
-    margin-right: 10px;
-    object-fit: contain;
-    flex-shrink: 0;
-  }
-
-  .schoolInfoBlock {
-    flex-grow: 1;
-    text-align: center;
-    margin-right: 10px; // Space before affiliation info
-  }
-
-  .schoolName1 { font-size: 8pt; font-weight: bold; margin: 0; }
-  .schoolName2 { font-size: 13pt; font-weight: bold; margin: 1px 0; color: #000; } // Black color for LC
-  .schoolAddress { font-size: 8pt; margin: 0; line-height: 1.2; }
-  .schoolContact { font-size: 8pt; margin: 2px 0 0 0; }
-  .schoolReg { // Combined Reg/UDISE line
-    font-size: 8pt;
-    margin: 3px auto 0 auto;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between; // Space out Reg/UDISE
-    max-width: 90%;
-  }
-
-  .affiliationInfo {
-    font-size: 8pt;
-    font-weight: bold;
-    text-align: right;
-    white-space: nowrap; // Prevent wrapping
-    flex-shrink: 0;
-    p { margin: 0; line-height: 1.3; }
-  }
+  gap: 24px;
 }
 
-.certTitle {
-  text-align: center;
-  margin: 5px 0 10px 0;
+/* Yeh "1. Select Student" aur "2. Fill Leaving Details" wale cards hain */
+.controlSection {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e0e0;
+    
+    h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        padding: 20px 24px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    /* StudentSearch aur Form ko padding dene ke liye */
+    & > :global(div), & > form {
+       padding: 24px;
+    }
+}
+
+.note {
+    font-size: 0.85rem;
+    color: #555;
+    background-color: #f4f4f4;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 12px;
+    /* Section padding ke andar adjust karein */
+    margin: 0 24px 12px 24px; 
+}
+
+
+/* --- Right Preview Column --- */
+.previewColumn {
+  /* Preview ko scroll karte waqt screen par rakhega */
+  position: sticky;
+  top: 20px;
+  /* Max-height taaki viewport se bada na ho */
+  height: calc(100vh - 40px);
+  overflow-y: auto; /* Agar preview bada hai toh scrollbar dega */
+  
   h2 {
-    font-size: 12pt;
-    font-weight: bold;
-    margin: 0;
-    padding-bottom: 2px;
-    border-bottom: 2px solid #000; // Underline title
-    display: inline-block;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 16px;
   }
 }
 
-// Table Styles
-.studentInfoTable {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-  font-size: 10pt;
-
-  td {
-    border: 1px solid #000;
-    padding: 4px 6px; // Adjust padding
-    vertical-align: top; // Align text top
-    line-height: 1.4;
+.previewWrapper {
+  background-color: #f0f2f5; /* Paper ke peeche ka grey backdrop */
+  padding: 24px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  /* A4 paper ko center karega */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  
+  /* Yeh <div ref={certificateRef}> ko target karta hai */
+  /* Yeh preview ko chhota dikhayega taaki poora fit ho */
+  & > div {
+    transform-origin: top center;
+    transform: scale(0.85); /* Preview scale */
+    
+    /* Original A4 paper ka style (Preview.module.scss se) */
+    /* Isse preview wrapper mein bhi shadow dikhegi */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
+    background: #fff;
   }
-
-  // Column widths (approximate)
-  td:nth-child(1) { width: 5%; text-align: center; } // S.No.
-  td:nth-child(2) { width: 35%; } // Item
-  td:nth-child(3) { width: 60%; font-weight: bold; } // Details (Bold)
 }
 
-// Fill-in style for table details
-.fillIn, .fillInBlank {
-  font-weight: bold;
-  padding: 0 0.1em;
-  margin: 0 0.2em;
-  border-bottom: 1px dotted #555; // Use dotted line for table? Or none? Adjust as needed
-  display: inline-block; // Allow min-width
-  min-width: 20px;
-  white-space: nowrap;
-}
-.fillInBlank { // Empty spans need content for height
-  color: transparent;
-  user-select: none;
-  &::after { content: '_'; visibility: hidden; }
+/* --- Action Buttons (Download/Print) --- */
+.actionsWrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    background-color: #ffffff;
+    border-top: 1px solid #eee;
+    /* Card ke neeche chipka rahega */
+    padding: 20px 24px;
+    margin: 0 -24px -24px -24px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
-
-.certText { // Certification text below table
-  font-size: 10pt;
-  text-align: center;
-  margin-bottom: 1.5rem; // Space before footer
-}
-
-.certFooter {
-  margin-top: auto;
-  font-size: 10pt;
-  font-weight: bold;
-
-  .datePlace {
+.actionButton {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 2.5rem; // More space for signatures/seal
-    p { margin: 0; }
-  }
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    svg { font-size: 1.1rem; }
+}
 
-  .signatures {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end; // Align text to bottom
-    padding: 0 5%;
-  }
+.download {
+    background-color: #007bff;
+    color: white;
+    &:hover { background-color: #0056b3; }
+}
 
-  .sigBox {
-    width: 30%; // Allocate space for signatures
-    text-align: center;
-    padding-top: 20px; // Space above text (no line needed)
-    font-weight: bold;
-  }
+.print {
+    background-color: #6c757d;
+    color: white;
+    &:hover { background-color: #5a6268; }
+}
 
-  .sealArea { // Placeholder for seal
-    width: 30%;
-    text-align: center;
-    font-size: 9pt;
-    color: #888;
-    align-self: center; // Vertically center the text
+/* Bottom Dashboard Link */
+.dashboardLinkButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 32px;
+    padding: 10px 16px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    color: #212529;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    
+    &:hover { 
+        background-color: #e9ecef; 
+    }
+}
+
+
+/* --- Responsive (Mobile View) --- */
+@media (max-width: 1200px) {
+  .builderLayout {
+    /* Columns ko ek ke neeche ek stack karein */
+    grid-template-columns: 1fr; 
   }
+  .previewColumn {
+    /* Sticky position hatayein */
+    position: relative;
+    top: 0;
+    height: auto;
+    overflow-y: visible;
+  }
+  .previewWrapper {
+    padding: 16px;
+    /* Mobile par preview ko 100% scale par dikhayein */
+    & > div {
+      transform: scale(1);
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .pageContainer { padding: 16px; }
+  .controlSection {
+     h2 { padding: 16px; }
+     & > :global(div), & > form { padding: 16px; }
+  }
+  .actionsWrapper { padding: 16px; }
+  .note { margin: 0 16px 12px 16px; }
+}
+
+/* --- Print Styles --- */
+/* Print karte waqt UI ko hide karega */
+@media print {
+    body, .pageContainer {
+        padding: 0;
+        margin: 0;
+        background: #fff;
+    }
+    
+    /* Print karte waqt sabkuch hide karein... */
+    .controlsColumn, .header, .previewColumn h2, .actionsWrapper, .dashboardLinkButton {
+        display: none;
+    }
+    
+    /* ...sirf preview ko chhodkar */
+    .builderLayout, .previewColumn, .previewWrapper {
+        display: block;
+        padding: 0;
+        margin: 0;
+        grid-template-columns: 1fr;
+        border: none;
+        background: #fff;
+        height: auto;
+        overflow: visible;
+    }
+    
+    .previewWrapper > div {
+        transform: scale(1); /* Full scale par print karein */
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+    }
 }

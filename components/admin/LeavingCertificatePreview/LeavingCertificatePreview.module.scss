@@ -1,79 +1,175 @@
-.certificateWrapper {
-  font-family: 'Times New Roman', Times, serif;
+/* src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss */
+
+/* --- Main Paper Style --- */
+.certificatePaper {
+  width: 210mm; /* A4 width */
+  min-height: 290mm; /* A4 height */
+  padding: 10mm;
+  margin: 20px auto;
+  font-family: 'Times New Roman', Times, serif; /* Formal font */
+  font-size: 13pt; /* Thoda bada font size */
   color: #000;
-  padding: 1in;
-  background: white;
+  background: #fff;
   border: 1px solid #ccc;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
 }
 
-.placeholder {
+.outerBorder {
+  border: 2px solid #000; /* Blueprint jaisa outer border */
+  padding: 12mm 10mm;
+  min-height: 265mm;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-family: sans-serif;
-  color: #95a5a6;
-  text-align: center;
-  font-style: italic;
+  flex-direction: column;
 }
 
-.letterhead {
-  text-align: center;
-  margin-bottom: 0.5in;
-  h1 {
-    font-size: 16pt;
-    font-weight: bold;
-    margin: 0;
-  }
-  p {
-    font-size: 10pt;
-    margin: 0;
-  }
-}
-
-.title {
-  text-align: center;
+/* --- Data Fill-in Styles --- */
+/* Yeh bhare hue data (e.g., "POONAM") ke liye hai */
+.fill {
   font-weight: bold;
-  font-size: 14pt;
-  text-decoration: underline;
-  margin-bottom: 0.3in;
+  padding: 0 4px;
+  border-bottom: 1px dotted #333; /* Data ke neeche dotted line */
 }
 
-.detailsGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
-  font-size: 11pt;
-  line-height: 1.5;
-  margin-bottom: 0.3in;
+/* Yeh khaali jagah (e.g., Conduct) ke liye hai */
+.fillBlank {
+  display: inline-block; /* min-width kaam karne ke liye */
+  border-bottom: 1px dotted #333;
+  vertical-align: bottom;
+  padding: 0 4px;
 }
 
-.detailItem {
-  display: grid;
-  grid-template-columns: 200px 1fr; /* Label aur value ke liye columns */
+/* --- Header Section --- */
+.certHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  border-bottom: 1.5px solid #000;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+
+  .logo {
+    max-width: 90px;
+    max-height: 90px;
+    object-fit: contain;
+  }
+
+  .schoolInfoBlock {
+    flex-grow: 1;
+    text-align: center;
+    
+    .schoolName1 { /* Mandal Name */
+      font-size: 13pt;
+      font-weight: bold;
+      margin: 0;
+    }
+    .schoolName2 { /* Main School Name */
+      font-size: 20pt;
+      font-weight: bold;
+      margin: 2px 0;
+    }
+    .schoolAddressCode {
+      font-size: 11pt;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
   
-  .label {
-    font-weight: 500;
+  .titleBlock {
+    min-width: 180px;
+    text-align: right;
+    
+    h2 { /* "LEAVING CERTIFICATE" */
+      font-size: 14pt;
+      font-weight: bold;
+      margin: 0;
+      padding-top: 10px;
+    }
+    .regNo {
+      font-size: 12pt;
+      font-weight: bold;
+      margin-top: 5px;
+    }
   }
 }
 
-.remarks {
-  margin-bottom: 0.5in;
-  font-size: 11pt;
+/* --- Student Info Table --- */
+.studentInfoTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 13pt;
+
+  tbody tr td {
+    padding: 10px 5px; /* Thodi zyada spacing */
+    vertical-align: top;
+    line-height: 1.5;
+    border-bottom: 1px solid #eee; /* Faint line between rows */
+  }
+
+  /* Sr. No column */
+  tbody tr td:nth-child(1) {
+    width: 35px;
+    text-align: center;
+    font-weight: normal;
+  }
+  /* Label column */
+  tbody tr td:nth-child(2) {
+    width: 35%;
+    font-weight: normal;
+  }
+  /* Value column */
+  tbody tr td:nth-child(3) {
+    width: 60%;
+    font-weight: bold; /* Values ko bold rakhein */
+  }
 }
 
-.footer {
+/* Yeh Point 5, 7, 11, 12, 14 ke liye hai */
+.subField {
+  display: inline-block;
+  margin-right: 20px; /* Fields ke beech mein space */
+  margin-bottom: 5px; /* Agar line wrap ho toh */
+  font-weight: normal; /* "Nationality: " ko normal rakhega */
+  
+  .fill, .fillBlank {
+    font-weight: bold; /* Value ko bold rakhega */
+  }
+}
+
+/* --- Footer Section --- */
+.certText {
+  font-size: 12pt;
+  text-align: left;
+  margin-top: 20px;
+  line-height: 1.6;
+}
+
+.certFooter {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-top: 1in;
-  font-size: 11pt;
-}
+  margin-top: auto; /* Footer ko hamesha neeche rakhega */
+  padding-top: 40px; /* Signature se pehle space */
+  font-size: 13pt;
+  font-weight: bold;
 
-.signature {
-  text-align: center;
-  p {
-    margin: 0;
-    padding-top: 5px;
+  .datePlace {
+    text-align: left;
+  }
+  
+  .sigBox {
+    text-align: center;
+    width: 180px;
+    padding-top: 40px; /* Space for signature */
+    border-top: 1px solid #000; /* Signature line */
+  }
+  
+  .sealArea {
+      font-size: 11pt;
+      color: #777;
+      text-align: center;
+      margin-bottom: 20px; /* Seal ko lines ke beech align karega */
   }
 }

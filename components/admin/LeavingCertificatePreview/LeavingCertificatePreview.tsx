@@ -1,60 +1,127 @@
-// src/components/admin/certificates/LeavingCertificatePreview.tsx
 import React from 'react';
 import styles from './LeavingCertificatePreview.module.scss'; // Import the SCSS file
 
-// Define interfaces locally or import them
-// Make sure these match the ones in your page.tsx
+// --- FIX 1: Interfaces ko Form se match karne ke liye update kiya ---
+
 interface Student {
-  id: string; name: string; class?: string; dob?: string; address?: string;
-  studentId?: string; aadhaarNo?: string; motherName?: string;
-  nationality?: string; caste?: string; birthPlace?: string; dobInWords?: string;
+  id: string; 
+  name: string; // Point 3
+  dob?: string; // Point 8 (Figures)
+  studentId?: string; // Point 1 (Sr. No)
+  aadhaarNo?: string; // Point 2 (UID)
+  motherName?: string; // Point 4
 }
+
 interface SchoolDetails {
-  name: string; name2?: string; address: string; mobNo?: string; email?: string;
-  govtReg?: string; udiseNo?: string; logoUrl?: string; place?: string;
-  affiliationIndex?: string; affiliationDetails?: string;
+  name: string; // Mandal Name
+  name2?: string; // School Name
+  address: string; // Address
+  govtReg?: string; // Code No. (Aapke School Details se)
+  logoUrl?: string; // Logo
+  place?: string; // Footer
 }
-interface LeavingFormData {
-  previousSchool?: string; dateOfAdmission?: string; standardAdmitted?: string;
-  progress?: string; conduct?: string; dateOfLeaving?: string;
-  standardLeaving?: string; standardLeavingWords?: string; sinceWhenLeaving?: string;
-  reasonForLeaving?: string; remarks?: string; issueDate?: string;
+
+// Yeh interface ab LeavingCertificateForm.tsx ke interface se match karta hai
+export interface LeavingFormData {
+  regNo?: string; // Header
+  
+  // Point 5
+  nationality?: string;
+  motherTongue?: string;
+  religion?: string;
+  // Point 6
+  caste?: string;
+  // Point 7
+  birthPlace?: string;
+  birthTaluka?: string;
+  birthDistrict?: string;
+  birthState?: string;
+  // Point 9
+  dobWords?: string;
+  // Point 10
+  previousSchool?: string;
+  // Point 11
+  dateOfAdmission?: string;
+  standardAdmitted?: string;
+  // Point 12
+  progress?: string;
+  conduct?: string;
+  // Point 13
+  dateOfLeaving?: string;
+  // Point 14
+  standardLeaving?: string;
+  standardLeavingWords?: string; // Iski zaroorat nahi, blueprint mein simple "8th" likha hai
+  sinceWhenLeaving?: string;
+  // Point 15
+  reasonForLeaving?: string;
+  // Point 16
+  remarks?: string;
+  
+  // Footer
+  issueDate?: string;
   signatoryRole?: string;
+  genRegNo?: string; // Footer certification text ke liye
 }
+// --- END FIX 1 ---
 
-// Helper function
+
 const formatDate = (dateString: string | undefined): string => {
+
   if (!dateString) return '';
+
   try {
-    // Attempt to format assuming YYYY-MM-DD input
-    const [year, month, day] = dateString.split('-');
-    if (year && month && day && year.length === 4) {
-        return `${day}/${month}/${year}`; // Format to DD/MM/YYYY
+
+    const date = new Date(dateString);
+
+
+
+    // --- FIX YAHAN HAI ---
+
+    // Pehle check karein ki date valid hai ya nahi
+
+    // Agar dateString galat hai (jaise "abc"), toh date.getTime() NaN hoga
+
+    if (isNaN(date.getTime())) {
+
+      console.warn("Invalid date object created from:", dateString);
+
+      return dateString; // Agar invalid hai, toh original string waapas karein
+
     }
-    // Fallback for potentially different date formats or already formatted dates
-    const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-GB', options);
+
+    // --- END FIX ---
+
+
+
+    // Force DD/MM/YYYY format
+
+    const day = String(date.getDate()).padStart(2, '0');
+
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+
+    const year = date.getFullYear();
+
+    
+
+    // Ab is line (purani line 77) ki zaroorat nahi hai, kyonki humne upar check kar liya
+
+    // if (isNaN(day) || isNaN(month) || isNaN(year)) return dateString; 
+
+    
+
+    return `${day}/${month}/${year}`;
+
+    
+
   } catch (e) {
+
       console.warn("Invalid date format for formatDate:", dateString);
-      return dateString; // Return original string if formatting fails
+
+      return dateString; // Fallback
+
    }
+
 };
-
-// Function to convert number to words (simple implementation)
-// You might need a more robust library for complex cases (e.g., large numbers, locales)
-const numberToWords = (numStr: string | undefined): string => {
-    if (!numStr) return '';
-    // Basic conversion logic (example)
-    const num = parseInt(numStr.replace(/[^0-9]/g,''), 10); // Extract number
-    if (isNaN(num)) return numStr; // Return original if not a simple number
-
-    const words = ['Zero', 'First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth', 'Ninth', 'Tenth', 'Eleventh', 'Twelfth'];
-    if (num >= 0 && num < words.length) {
-        return words[num];
-    }
-    // Add more logic for higher numbers if needed
-    return numStr; // Fallback
-}
 
 interface LeavingCertificatePreviewProps {
   student: Student | null;
@@ -67,84 +134,179 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
   formData,
   schoolDetails
 }) => {
-  // Use blank span placeholders for missing data
-  const fill = (value: string | undefined | null, minWidth = '50px') =>
-    value ? <span className={styles.fillIn}>{value}</span> : <span className={styles.fillInBlank} style={{ minWidth }}>&nbsp;</span>;
+  // Yeh helper function data ko fill karega
+  // Hum ise thoda modify karenge taaki 'fill' class hamesha rahe
+  const fill = (value: string | undefined | null, minWidth = '50px') => {
+    // Agar value hai, toh use dikhayein
+    if (value) {
+      return <span className={styles.fill}>{value}</span>;
+    }
+    // Agar value nahi hai, toh ek blank placeholder (line) dikhayein
+    return <span className={styles.fillBlank} style={{ minWidth }}>&nbsp;</span>;
+  }
 
-  const dateOfAdmission = formData.dateOfAdmission ? formatDate(formData.dateOfAdmission) : '';
-  const dateOfLeaving = formData.dateOfLeaving ? formatDate(formData.dateOfLeaving) : '';
-  const issueDate = formData.issueDate ? formatDate(formData.issueDate) : '';
-  const studentDobFormatted = student?.dob ? formatDate(student.dob) : '';
-  // Attempt to generate dobInWords if not provided
-  const studentDobInWords = student?.dobInWords || (studentDobFormatted ? `( ${studentDobFormatted} )` : ''); // Simple fallback
-  const standardLeavingWords = formData.standardLeavingWords || numberToWords(formData.standardLeaving); // Try auto-conversion
+  // Helper function ek line mein multiple items ke liye
+  const SubField = ({ label, value, minWidth = '50px' }: { label: string, value: string | undefined | null, minWidth?: string }) => (
+    <span className={styles.subField}>
+      {label}: {fill(value, minWidth)}
+    </span>
+  );
+
+  // Dates ko format karein
+  const dateOfAdmission = formatDate(formData.dateOfAdmission);
+  const dateOfLeaving = formatDate(formData.dateOfLeaving);
+  const issueDate = formatDate(formData.issueDate);
+  const studentDobFormatted = formatDate(student?.dob);
 
   return (
+    // --- FIX 2: poora JSX blueprint se match karne ke liye badla ---
     <div className={styles.certificatePaper}>
-      {/* Header */}
-      <header className={styles.certHeader}>
-        {schoolDetails.logoUrl && (
-          <img src={schoolDetails.logoUrl} alt="School Logo" className={styles.logo} />
-        )}
-        <div className={styles.schoolInfoBlock}>
-          <h3 className={styles.schoolName1}>{schoolDetails.name}</h3>
-          <h2 className={styles.schoolName2}>{schoolDetails.name2 || schoolDetails.name}</h2>
-          <p className={styles.schoolAddress}>{schoolDetails.address}</p>
-          <p className={styles.schoolContact}>
-            {schoolDetails.mobNo && `Mob. No.: ${schoolDetails.mobNo} `}
-            {schoolDetails.email && `Email: ${schoolDetails.email}`}
-          </p>
-          <p className={styles.schoolReg}>
-             {schoolDetails.govtReg && `Govt Reg. No.: ${schoolDetails.govtReg}`}
-             {/* Added space for alignment if one is missing */}
-             {schoolDetails.udiseNo && ` ${'\u00A0'.repeat(5)} UDISE No.: ${schoolDetails.udiseNo}`}
-          </p>
-        </div>
-        <div className={styles.affiliationInfo}>
-            {schoolDetails.affiliationIndex && <p>INDEX No.: {schoolDetails.affiliationIndex}</p>}
-            {schoolDetails.affiliationDetails && <p>{schoolDetails.affiliationDetails}</p>}
-        </div>
-      </header>
+      <div className={styles.outerBorder}> {/* Blueprint jaisa outer border */}
+        
+        {/* Header */}
+        <header className={styles.certHeader}>
+          {schoolDetails.logoUrl && (
+            <img src={schoolDetails.logoUrl} alt="School Logo" className={styles.logo} />
+          )}
+          
+          <div className={styles.schoolInfoBlock}>
+            <div className={styles.schoolName1}>{schoolDetails.name}</div>
+            <div className={styles.schoolName2}>{schoolDetails.name2 || schoolDetails.name}</div>
+            <div className={styles.schoolAddressCode}>
+              {schoolDetails.address}
+              <br/>
+              Code No.: {schoolDetails.govtReg}
+            </div>
+          </div>
+          
+          <div className={styles.titleBlock}>
+            <h2>LEAVING CERTIFICATE</h2>
+            <div className={styles.regNo}>
+              Reg. No: {fill(formData.regNo, '80px')}
+            </div>
+          </div>
+        </header>
 
-       {/* Title */}
-      <div className={styles.certTitle}>
-        <h2>LEAVING CERTIFICATE</h2>
-      </div>
+        {/* Student Info Table */}
+        <table className={styles.studentInfoTable}>
+          <tbody>
+            {/* Har row ko blueprint se milaya gaya hai */}
+            <tr>
+              <td>1</td>
+              <td>Sr. No.</td>
+              <td>{fill(student?.studentId, '100px')}</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>UID No (Aadhar card No.)</td>
+              <td>{fill(student?.aadhaarNo, '200px')}</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Student's Full Name</td>
+              <td>{fill(student?.name, '300px')}</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Mother's Name</td>
+              <td>{fill(student?.motherName, '300px')}</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Nationality</td>
+              <td>
+                <SubField label="Nationality" value={formData.nationality || 'Indian'} minWidth="80px" />
+                <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
+                <SubField label="Religion" value={formData.religion} minWidth="80px" />
+              </td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Caste</td>
+              <td>{fill(formData.caste, '150px')}</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>Birth place(State/City)</td>
+              <td>
+                <SubField label="Place" value={formData.birthPlace} minWidth="80px" />
+                <SubField label="Taluka" value={formData.birthTaluka} minWidth="80px" />
+                <br/> {/* Nayi line par Dist/State */}
+                <SubField label="Dist" value={formData.birthDistrict} minWidth="80px" />
+                <SubField label="State" value={formData.birthState} minWidth="80px" />
+              </td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>Date of Birth (Words)</td>
+              {/* Blueprint mein Pt 8 par figures (DD/MM/YYYY) hain */}
+              <td>{fill(studentDobFormatted, '150px')}</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>Date of Birth (in Words)</td>
+              {/* Blueprint mein Pt 9 par words hain */}
+              <td>{fill(formData.dobWords, '300px')}</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>Previous School Name</td>
+              <td>{fill(formData.previousSchool, '200px')}</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td>Date of Admission</td>
+              <td>
+                <SubField label="Date" value={dateOfAdmission} minWidth="100px" />
+                <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
+              </td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td>Progress of Study</td>
+              <td>
+                <SubField label="Progress" value={formData.progress} minWidth="80px" />
+                <SubField label="Conduct" value={formData.conduct} minWidth="80px" />
+              </td>
+            </tr>
+            <tr>
+              <td>13</td>
+              <td>Date of School Leaving</td>
+              <td>{fill(dateOfLeaving, '150px')}</td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td>Standard in which studying and since when (in Words)</td>
+              {/* Blueprint mein yeh "8th / 31st June 2023" jaisa hai */}
+              <td>
+                <SubField label="Std" value={formData.standardLeaving} minWidth="50px" />
+                <SubField label="Since" value={formData.sinceWhenLeaving} minWidth="100px" />
+              </td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>Reason for leaving school</td>
+              <td>{fill(formData.reasonForLeaving, '200px')}</td>
+            </tr>
+            <tr>
+              <td>16</td>
+              <td>Remarks</td>
+              <td>{fill(formData.remarks, '200px')}</td>
+            </tr>
+          </tbody>
+        </table>
 
-       {/* Student Info Table */}
-      <table className={styles.studentInfoTable}>
-        <tbody>
-          <tr><td>1</td><td>S.No.</td><td>{fill(student?.studentId)}</td></tr>
-          <tr><td>2</td><td>U.I.D No (Aadhar Card)</td><td>{fill(student?.aadhaarNo, '150px')}</td></tr>
-          <tr><td>3</td><td>Student's Full Name</td><td>{fill(student?.name, '200px')}</td></tr>
-          <tr><td>4</td><td>Mother's Name</td><td>{fill(student?.motherName, '150px')}</td></tr>
-          <tr><td>5</td><td>Nationality</td><td>{fill(student?.nationality || 'Indian')}</td></tr>
-          <tr><td>6</td><td>Caste</td><td>{fill(student?.caste)}</td></tr>
-          <tr><td>7</td><td>Birth place(Village/City)</td><td>{fill(student?.birthPlace, '200px')}</td></tr>
-          <tr><td>8</td><td>Date of Birth</td><td>{fill(studentDobFormatted)}</td></tr>
-          <tr><td>9</td><td>Date of Birth(In Words)</td><td>{fill(studentDobInWords, '250px')}</td></tr>
-          <tr><td>10</td><td>Previous School Name</td><td>{fill(formData.previousSchool, '150px')}</td></tr>
-          <tr><td>11</td><td>Date of Admission</td><td>{fill(dateOfAdmission)} std {fill(formData.standardAdmitted)}</td></tr>
-          <tr><td>12</td><td>Progress of Study</td><td>{fill(formData.progress)} Conduct : {fill(formData.conduct)}</td></tr>
-          <tr><td>13</td><td>Date of School Leaving</td><td>{fill(dateOfLeaving)}</td></tr>
-          <tr><td>14</td><td>Standard in which studying and since when(In Words)</td><td>{fill(formData.standardLeaving)} {fill(standardLeavingWords)} {fill(formData.sinceWhenLeaving)}</td></tr>
-          <tr><td>15</td><td>Reason for leaving School</td><td>{fill(formData.reasonForLeaving, '200px')}</td></tr>
-          <tr><td>16</td><td>Remarks</td><td>{fill(formData.remarks, '200px')}</td></tr>
-        </tbody>
-      </table>
+        {/* Certification Text */}
+        <p className={styles.certText}>
+          This is to certify that, Above mentioned information is as per 
+          School General Register No. {fill(formData.genRegNo, '80px')}
+        </p>
 
-      {/* Certification Text */}
-      <p className={styles.certText}>
-        This is certify that, Above mentioned information is as per School General Register.
-      </p>
-
-      {/* Footer */}
-      <footer className={styles.certFooter}>
-        <div className={styles.datePlace}>
-          <p>Date : {fill(issueDate, '100px')}</p>
-          <p>Place : {fill(schoolDetails.place, '100px')}</p>
-        </div>
-        <div className={styles.signatures}>
+        {/* Footer */}
+        <footer className={styles.certFooter}>
+          <div className={styles.datePlace}>
+            Date : {fill(issueDate, '100px')}
+          </div>
           <div className={styles.sigBox}>
             <span>Class Teacher</span>
           </div>
@@ -154,10 +316,11 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           <div className={styles.sigBox}>
             <span>{formData.signatoryRole || 'Head Master'}</span>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </div> {/* End outerBorder */}
     </div>
   );
+  // --- END FIX 2 ---
 };
 
 export default LeavingCertificatePreview;
