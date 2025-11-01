@@ -208,23 +208,21 @@
 
 @media print {
 
-    /* --- FIX YAHAN HAI --- */
-    /* Humne body aur .pageContainer ko alag-alag likha hai */
+    /* FIX 1: :global(body) को बिल्कुल अकेला रखें। यह Webpack को संतुष्ट करता है। */
     :global(body) {
         padding: 0;
         margin: 0;
         background: #fff;
     }
 
+    /* FIX 2: स्थानीय (.pageContainer) सेलेक्टर को अलग से हैंडल करें। */
     .pageContainer {
         padding: 0;
         margin: 0;
         background: #fff;
     }
-    /* --- END FIX --- */
     
-    
-    /* Print karte waqt sabkuch hide karein... */
+    /* Print करते waqt sabkuch hide karein... */
     .controlsColumn, .header, .previewColumn h2, .actionsWrapper, .dashboardLinkButton {
         display: none;
     }
