@@ -53,7 +53,7 @@
 /* Asli receipt paper */
 .receiptContent {
   padding: 20px; /* Padding kam ki */
-  background-color: #ffffff;
+  background-color: #ffffff; /* --- DARK FOOTER FIX --- */
   border-radius: 8px;
   margin: 16px; 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -228,11 +228,10 @@
     color: #28a745; 
   }
   
-  /* Agar balance 0 se zyada hai, tab red karo */
+  /* Agar balance 0 se zyada hai (yaani true nahi hai), tab red karo */
   .balanceAmount:not([data-balance-zero="true"]) {
      color: #dc3545;
   }
-
 
   /* PAID Stamp ko professional banaya */
   .paidStamp {
@@ -243,7 +242,6 @@
     padding: 4px 10px; /* Padding kam ki */
     border-radius: 6px;
     text-transform: uppercase;
-    // transform: rotate(-10deg); // Rotation hata diya
   }
 
   .statusBadge {
@@ -270,7 +268,7 @@
   border-top: 1px solid #e0e0e0;
   font-size: 0.8rem; /* Font size adjust kiya */
   color: #555;
-  background-color: #ffffff !important; /* DARK FOOTER FIX */
+  background-color: #ffffff !important; /* --- DARK FOOTER FIX --- */
   
   .collectedBy {
     font-size: 0.9rem; /* Font size adjust kiya */

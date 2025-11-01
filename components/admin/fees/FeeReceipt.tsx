@@ -79,61 +79,20 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
 
-    // --- FIX: PRINT BUTTON LOGIC UPDATE KIYA ---
+    // --- NAYA PRINT BUTTON FIX YAHAN HAI ---
+    // Yeh function print se pehle body tag par ek class add karega
     const handleBeforePrint = async () => {
-        try {
-            const selectors = [
-                '[data-modal-backdrop="true"]', '[data-radix-overlay="true"]',
-                '.modal-backdrop', '.MuiBackdrop-root', '.mantine-Modal-overlay',
-                '[role="dialog"][aria-modal="true"]', 'body > div:last-child[style*="z-index"]',
-                '.rc-dialog-mask', '.ant-modal-mask',
-            ];
-            
-            let backdrop: HTMLElement | null = null;
-            for (const selector of selectors) {
-                backdrop = document.querySelector(selector);
-                if (backdrop) {
-                    console.log(`Found backdrop with selector: ${selector}`);
-                    break;
-                }
-            }
-
-            if (backdrop) {
-                // 'display: none' ke bajaaye 'visibility: hidden' use kar rahe hain
-                backdrop.style.visibility = 'hidden'; 
-                console.log("Backdrop hidden for printing.");
-                await new Promise(resolve => setTimeout(resolve, 50)); 
-            } else {
-                console.warn("Could not find modal backdrop to hide for printing.");
-            }
-        } catch (e) {
-            console.error("Error in handleBeforePrint:", e);
-            // Error ke baad bhi print try karne do
-        }
+        document.body.classList.add('printing-receipt-active');
+        // CSS ko apply hone ke liye thoda wait karein
+        await new Promise(resolve => setTimeout(resolve, 50)); 
     };
 
+    // Yeh function print ke baad body tag se class hata dega
     const handleAfterPrint = async () => {
-        try {
-            const selectors = [
-                '[data-modal-backdrop="true"]', '[data-radix-overlay="true"]',
-                '.modal-backdrop', '.MuiBackdrop-root', '.mantine-Modal-overlay',
-                '[role="dialog"][aria-modal="true"]', 'body > div:last-child[style*="z-index"]',
-                '.rc-dialog-mask', '.ant-modal-mask',
-            ];
-            let backdrop: HTMLElement | null = null;
-            for (const selector of selectors) {
-                backdrop = document.querySelector(selector);
-                if (backdrop) break;
-            }
-            if (backdrop) {
-                backdrop.style.visibility = 'visible'; // Waapas visible karein
-                console.log("Backdrop restored after printing.");
-            }
-        } catch (e) {
-            console.error("Error in handleAfterPrint:", e);
-        }
+        document.body.classList.remove('printing-receipt-active');
     };
-    // --- END FIX ---
+    // --- END NAYA FIX ---
+
 
     const handlePrint = useReactToPrint({
         content: () => componentRef.current, 
@@ -272,7 +231,15 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
                  {/* Balance Summary (Bug-fixed) */}
                  <section className={styles.balanceSection}>
-                     <p><strong>Balance Due:</strong> <span className={styles.balanceAmount}>{formatCurrency(balanceDue)}</span></p>
+                     {/* Balance 0 hone par span mein ek naya attribute add kiya */}
+                     <p><strong>Balance Due:</strong> 
+                        <span 
+                            className={styles.balanceAmount} 
+                            data-balance-zero={balanceDue < 0.01}
+                        >
+                            {formatCurrency(balanceDue)}
+                        </span>
+                    </p>
                      {paymentStatus === 'PAID' ? ( <div className={styles.paidStamp}>PAID</div> ) :
                        (<div className={`${styles.statusBadge} ${styles[paymentStatus.toLowerCase()]}`}>{paymentStatus}</div>)
                      }
