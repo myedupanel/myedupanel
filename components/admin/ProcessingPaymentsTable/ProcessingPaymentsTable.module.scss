@@ -1,64 +1,128 @@
+/* --- Variables (Consistent with StudentFeeRecords.module.scss) --- */
+$primary-color: #4F46E5; // Indigo
+$success-color: #10B981; // Green
+$warning-color: #F59E0B; // Orange (Pending)
+$danger-color: #EF4444; // Red (Failed)
+$text-dark: #1F2937;
+$text-medium: #6B7280;
+$border-color: #E5E7EB;
+$background-light: #F9FAFB;
+$white: #FFFFFF;
+$radius: 8px;
+
 .container {
-    padding: 1.5rem;
+    padding: 0;
 }
 
+/* --- Info Box --- */
 .infoBox {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.75rem;
-    background-color: #fff3cd;
-    color: #664d03;
+    // Warning theme
+    background-color: #fff3e0; // Light orange background
+    color: #9A6200; // Darker orange text
     padding: 1rem;
-    border-radius: 8px;
+    border-radius: $radius;
     margin-bottom: 1.5rem;
-    border: 1px solid #ffecb5;
+    border: 1px solid #ffe0b2;
+
+    svg { 
+        color: $warning-color; // Icon color
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+    span {
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+}
+
+/* --- Table Styles --- */
+.tableWrapper {
+    overflow-x: auto;
+    background-color: $white;
+    border-radius: $radius;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.05);
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 800px;
+
+    th, td {
+        padding: 1rem 1.25rem;
+        text-align: left;
+        border-bottom: 1px solid $border-color;
+        font-size: 0.95rem;
+    }
+
+    th {
+        background-color: $background-light;
+        font-weight: 600;
+        color: $text-dark;
+    }
+    
+    tbody tr:hover {
+        background-color: lighten($background-light, 1%);
+    }
+
+    .classInfo {
+        font-size: 0.85rem;
+        color: $text-medium;
+        margin-left: 0.4rem;
+    }
+
+    .amountCol {
+        font-weight: 600;
+        color: $text-dark;
+    }
+
+    /* --- Status Badges --- */
+    .statusPending, .statusFailed {
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: inline-block;
+        
+        // Failed Status (Red)
+        &.statusFailed {
+            background-color: lighten($danger-color, 35%);
+            color: darken($danger-color, 10%);
+        }
+
+        // Pending Status (Orange/Yellow)
+        &.statusPending {
+            background-color: lighten($warning-color, 30%);
+            color: darken($warning-color, 10%);
+        }
+    }
+
+    .actionButton {
+        background-color: $primary-color;
+        color: $white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: $radius;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover {
+            background-color: darken($primary-color, 10%);
+        }
+    }
 }
 
-.table th, .table td {
-    padding: 0.9rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid #f1f3f5;
-}
-
-.table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #495057;
-}
-
-.failedStatus {
-    background-color: #f8d7da;
-    color: #842029;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-weight: 500;
-    font-size: 0.8rem;
-}
-
-.actionButton {
-    background-color: #e9ecef;
-    color: #495057;
-    border: 1px solid #ced4da;
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.message, .messageError, .noData {
+.noData {
     text-align: center;
     padding: 2rem;
-    color: #6c757d;
+    color: $text-medium;
 }
 
-.messageError {
-    color: #dc3545;
-}
-
+/* --- Pagination Styles --- */
 .pagination {
     display: flex;
     justify-content: flex-end;
@@ -66,4 +130,40 @@
     gap: 1rem;
     padding: 1rem 0;
     margin-top: 1rem;
+
+    button {
+        background: $primary-color;
+        color: $white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: $radius;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+
+        &:disabled {
+            background: $border-color;
+            color: $text-medium;
+            cursor: not-allowed;
+        }
+    }
+    .pageInfo {
+        font-weight: 500;
+        color: $text-dark;
+    }
+}
+
+.message, .messageError {
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.1rem;
+    color: $text-medium;
+    background: $white;
+    border-radius: $radius;
+}
+.messageError {
+    color: $danger-color;
+    border: 1px solid lighten($danger-color, 40%);
 }

@@ -14,7 +14,7 @@ import {
   MdPayment,
   MdArrowBack,
   MdListAlt,
-  // MdClass // <-- 1. 'MdClass' icon import HATA diya
+  MdHistory, // <-- Naya icon import kiya
 } from 'react-icons/md';
 
 const feeMenuItems = [
@@ -34,13 +34,13 @@ const feeMenuItems = [
     icon: <MdListAlt />,
   },
   
-  // --- 2. "Manage Classes" waala block yahaan se HATA diya gaya hai ---
-  // {
-  //   title: 'Manage Classes',
-  //   path: '/admin/fee-counter/classes',
-  //   icon: <MdClass />,
-  // },
-  // --- END ---
+  // --- NAYA BUTTON YAHAN ADD KIYA GAYA HAI ---
+  {
+    title: 'Fee Records',
+    path: '/admin/fee-counter/fee-records',
+    icon: <MdHistory />,
+  },
+  // --- END NAYA BUTTON ---
 
   {
     title: 'Import/Export',

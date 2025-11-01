@@ -1,68 +1,162 @@
-    .container {
-        padding: 1.5rem;
+// src/components/admin/PdcRecordsTable/PdcRecordsTable.module.scss
+
+/* --- 1. Variables and Design System --- */
+$primary-color: #4F46E5; // Indigo
+$success-color: #10B981; // Green
+$danger-color: #EF4444; // Red
+$text-dark: #1F2937;
+$text-medium: #6B7280;
+$border-color: #E5E7EB;
+$background-light: #F9FAFB;
+$white: #FFFFFF;
+$radius: 8px;
+
+.container {
+    padding: 0; /* Padding FeeTabs component se aayega */
+}
+
+.tableWrapper {
+    overflow-x: auto;
+    background-color: $white;
+    border-radius: $radius;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    thead {
+        th {
+            background-color: $background-light; /* Thoda light background */
+            font-weight: 600;
+            color: $text-medium;
+            text-align: left;
+            padding: 0.9rem 1rem;
+            border-bottom: 2px solid $border-color;
+            font-size: 0.9rem;
+        }
     }
     
-    .table {
-        width: 100%;
-        border-collapse: collapse;
+    tbody {
+        tr {
+            transition: background-color 0.15s ease;
+            &:last-child td { border-bottom: none; }
+            &:hover { background-color: $background-light; }
+        }
     }
     
-    .table th, .table td {
+    .table td {
         padding: 0.9rem 1rem;
         text-align: left;
-        border-bottom: 1px solid #f1f3f5;
+        border-bottom: 1px solid $border-color;
         vertical-align: middle;
+        color: $text-dark;
     }
     
-    .table th {
-        background-color: #f8f9fa;
-        font-weight: 600;
-        color: #495057;
-    }
-
     .date {
         font-weight: 600;
-        color: #343a40;
+        color: $primary-color;
+    }
+
+    .amountCol {
+        font-weight: 700;
+        color: $text-dark;
     }
 
     .actions {
         display: flex;
         gap: 0.5rem;
+        white-space: nowrap;
     }
     
     .actionButton {
         display: flex;
         align-items: center;
         gap: 0.4rem;
-        border: none;
+        border: 1px solid transparent;
         padding: 0.4rem 0.8rem;
         border-radius: 6px;
         cursor: pointer;
-        font-weight: 500;
-        font-size: 0.8rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
 
         &.cleared {
-            background-color: #d1e7dd;
-            color: #0f5132;
+            background-color: lighten($success-color, 35%);
+            color: darken($success-color, 10%);
+            border-color: lighten($success-color, 20%);
+            &:hover { background-color: $success-color; color: $white; }
         }
 
         &.bounced {
-            background-color: #f8d7da;
-            color: #842029;
+            background-color: lighten($danger-color, 40%);
+            color: darken($danger-color, 10%);
+            border-color: lighten($danger-color, 20%);
+            &:hover { background-color: $danger-color; color: $white; }
         }
     }
     
-    .message, .messageError, .noData {
+    .noData {
         text-align: center;
         padding: 2rem;
-        color: #6c757d;
+        color: $text-medium;
+        font-style: italic;
     }
-    
-    .messageError {
-        color: #dc3545;
-    }
+}
 
-    .pagination {
-        /* ... same as before ... */
-    }
+/* --- Pagination Styles --- */
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    margin-top: 1rem;
     
+    button {
+        background: $primary-color;
+        color: $white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: $radius;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+
+        &:disabled {
+            background: $border-color;
+            color: $text-medium;
+            cursor: not-allowed;
+        }
+    }
+    .pageInfo {
+        font-weight: 500;
+        color: $text-dark;
+    }
+}
+.message {
+    padding: 2rem;
+    text-align: center;
+}
+.messageError {
+    color: $danger-color;
+    padding: 2rem;
+    text-align: center;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+    .table {
+        min-width: 800px; /* Table ko scrollable banane ke liye */
+    }
+    .tableWrapper {
+        overflow-x: scroll;
+    }
+    .pagination {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}

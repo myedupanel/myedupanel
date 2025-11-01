@@ -1,147 +1,231 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import styles from './ReportsPage.module.scss';
-import Papa from 'papaparse';
+import Papa from 'papaparse'; // CSV ke liye
+import * as XLSX from 'xlsx'; // Excel ke liye
+import jsPDF from 'jspdf'; // PDF ke liye
+import 'jspdf-autotable'; // PDF Table ke liye
 import { MdDownload } from 'react-icons/md';
 import AttendancePieChart from '@/components/admin/AttendancePieChart/AttendancePieChart';
+import api from '@/backend/utils/api'; // <-- 1. API IMPORT KIYA
 
-// Sample Data
-const classOptions = ["Nursery", "LKG", "UKG", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5"];
+// --- 2. SAMPLE DATA HATA DIYA ---
+// const classOptions = [...]
+// const staffRoles = [...]
+// const allStudents = [...]
+// const allStaffMembers = [...]
+
+// --- 3. NAYE INTERFACES ADD KIYE ---
+interface SchoolClass {
+  classid: number;
+  class_name: string;
+}
+// Staff roles ko abhi bhi hardcoded rakhenge (jaisa pichhli file mein tha)
 const staffRoles = ["Teacher", "Accountant", "Office Admin", "Librarian", "Security", "Transport Staff", "Other"];
-const allStudents = [
-  { id: 'S001', name: 'Aarav Sharma', class: 'Grade 4' }, { id: 'S006', name: 'Anjali Verma', class: 'Nursery' },
-  { id: 'S007', name: 'Kunal Shah', class: 'Nursery' },
-];
-const allStaffMembers = [
-    { id: 'T001', name: 'Priya Sharma', role: 'Teacher' }, { id: 'E001', name: 'Ramesh Kumar', role: 'Accountant' },
-];
+
+// API se aane waale report data ka type
+interface ReportRow {
+  name: string;
+  present: number;
+  absent: number;
+  leave: number;
+  total: number;
+}
 
 const ReportsPage = () => {
   const [reportFor, setReportFor] = useState<'student' | 'staff'>('student');
   const [timeRange, setTimeRange] = useState('monthly');
-  const [selectedGroup, setSelectedGroup] = useState(classOptions[0]);
+  
+  // --- 4. STATE UPDATE KIYE ---
+  const [fetchedClasses, setFetchedClasses] = useState<SchoolClass[]>([]); // Classes API se aayengi
+  const [selectedGroup, setSelectedGroup] = useState(''); // Ab yeh Class ID ya Role Name store karega
+  const [isFilterLoading, setIsFilterLoading] = useState(true); // Dropdowns ke liye loading
+  
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   
-  const [reportData, setReportData] = useState<any[] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [reportData, setReportData] = useState<ReportRow[] | null>(null); // Type update kiya
+  const [isLoading, setIsLoading] = useState(false); // Report generation ke liye
   const [pieChartData, setPieChartData] = useState<{ name: string, value: number }[]>([]);
 
+  // --- 5. NAYA USEEFFECT (FILTERS LOAD KARNE KE LIYE) ---
   useEffect(() => {
-    const todayStr = new Date().toISOString().slice(0, 10);
-    let totalPresent = 0, totalAbsent = 0, totalLeave = 0;
+    const loadFilters = async () => {
+      setIsFilterLoading(true);
+      try {
+        // Classes fetch karo
+        const res = await api.get('/api/classes'); 
+        const classesData: SchoolClass[] = res.data || [];
+        setFetchedClasses(classesData);
+        
+        // Default selection set karo
+        if (reportFor === 'student' && classesData.length > 0) {
+          setSelectedGroup(classesData[0].classid.toString()); // Class ID ko string mein save karo
+        } else if (reportFor === 'staff' && staffRoles.length > 0) {
+          setSelectedGroup(staffRoles[0]);
+        }
+      } catch (err) {
+        console.error("Failed to load classes", err);
+      } finally {
+        setIsFilterLoading(false);
+      }
+    };
+    loadFilters();
+  }, [reportFor]); // Jab bhi 'reportFor' (student/staff) badlega, yeh chalega
 
-    allStudents.forEach(student => {
-        const key = `attendance_${student.class}_${todayStr}`;
-        const rec = localStorage.getItem(key);
-        if (rec) {
-            const status = JSON.parse(rec)[student.id];
-            if (status === 'Present') totalPresent++;
-            else if (status === 'Absent') totalAbsent++;
-            else if (status === 'Leave') totalLeave++;
-        }
-    });
-    allStaffMembers.forEach(staff => {
-        const key = `staff_attendance_${staff.role}_${todayStr}`;
-        const rec = localStorage.getItem(key);
-        if (rec) {
-            const status = JSON.parse(rec)[staff.id];
-            if (status === 'Present') totalPresent++;
-            else if (status === 'Absent') totalAbsent++;
-            else if (status === 'Leave') totalLeave++;
-        }
-    });
-    setPieChartData([
-        { name: 'Present', value: totalPresent }, { name: 'Absent', value: totalAbsent }, { name: 'Leave', value: totalLeave },
-    ]);
+  // --- 6. PIE CHART KA USEEFFECT UPDATE KIYA (LocalStorage hataya) ---
+  useEffect(() => {
+    // TODO: Is pie chart ke liye ek alag API route (e.g., GET /api/attendance/today-overview) banana behtar hoga.
+    // Abhi ke liye, hum report generate hone ke baad ise update karenge.
+    setPieChartData([]); // Default empty rakha
   }, []);
 
-  const groupOptions = reportFor === 'student' ? classOptions : staffRoles;
+  // Dropdown options ko dynamically badlo
+  const groupOptions = reportFor === 'student' ? fetchedClasses : staffRoles;
 
-  useEffect(() => {
-    setSelectedGroup(groupOptions[0]);
-  }, [reportFor]);
-
-  const handleGenerateReport = () => {
+  // --- 7. HANDLEGENERATEREPORT KO API SE CONNECT KIYA ---
+  const handleGenerateReport = async () => {
     setIsLoading(true);
     setReportData(null);
+    setPieChartData([]); // Pie chart reset karo
 
     const today = new Date();
-    let startDate = new Date();
-    let endDate = new Date();
+    let startDateStr = '';
+    let endDateStr = '';
 
+    // Date range logic (No Change, bas string format mein save kiya)
     switch (timeRange) {
         case 'daily':
-            startDate = new Date(selectedDate);
-            endDate = new Date(selectedDate);
+            startDateStr = selectedDate;
+            endDateStr = selectedDate;
             break;
         case 'monthly':
             const [year, month] = selectedMonth.split('-').map(Number);
-            startDate = new Date(year, month - 1, 1);
-            endDate = new Date(year, month, 0);
+            startDateStr = new Date(year, month - 1, 1).toISOString().slice(0, 10);
+            endDateStr = new Date(year, month, 0).toISOString().slice(0, 10);
             break;
         case '3months':
-            startDate = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate());
-            endDate = today;
+            startDateStr = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()).toISOString().slice(0, 10);
+            endDateStr = today.toISOString().slice(0, 10);
             break;
         case '6months':
-            startDate = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate());
-            endDate = today;
+            startDateStr = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate()).toISOString().slice(0, 10);
+            endDateStr = today.toISOString().slice(0, 10);
             break;
         case 'annually':
-            startDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
-            endDate = today;
+            startDateStr = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate()).toISOString().slice(0, 10);
+            endDateStr = today.toISOString().slice(0, 10);
             break;
     }
 
-    const membersToList = reportFor === 'student'
-        ? allStudents.filter(s => s.class === selectedGroup)
-        : allStaffMembers.filter(s => s.role === selectedGroup);
-    
-    const keyPrefix = reportFor === 'student' ? `attendance_${selectedGroup}_` : `staff_attendance_${selectedGroup}_`;
+    // API ke liye parameters banayein
+    const apiParams = {
+      reportFor: reportFor,
+      startDate: startDateStr,
+      endDate: endDateStr,
+      // groupId ya role bhejein
+      ...(reportFor === 'student' ? { groupId: selectedGroup } : { role: selectedGroup })
+    };
 
-    const compiledReport = membersToList.map(member => {
-        let present = 0, absent = 0, leave = 0;
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-            const dateStr = d.toISOString().slice(0, 10);
-            const key = keyPrefix + dateStr;
-            const attendanceRecord = localStorage.getItem(key);
-            
-            if (attendanceRecord) {
-                const parsedRecord = JSON.parse(attendanceRecord);
-                const status = parsedRecord[member.id];
-                if (status === 'Present') present++;
-                else if (status === 'Absent') absent++;
-                else if (status === 'Leave') leave++;
-            }
-        }
-        return { name: member.name, present, absent, leave, total: present + absent + leave };
-    });
+    try {
+      // Naye API route ko call karein
+      const res = await api.get('/api/attendance/report', { params: apiParams });
+      const data: ReportRow[] = res.data;
+      setReportData(data);
 
-    setTimeout(() => {
-        setReportData(compiledReport);
-        setIsLoading(false);
-    }, 500);
+      // Report data se Pie Chart ko update karein
+      if (data.length > 0) {
+        let totalPresent = 0, totalAbsent = 0, totalLeave = 0;
+        data.forEach(item => {
+          totalPresent += item.present;
+          totalAbsent += item.absent;
+          totalLeave += item.leave;
+        });
+        setPieChartData([
+          { name: 'Present', value: totalPresent },
+          { name: 'Absent', value: totalAbsent },
+          { name: 'Leave', value: totalLeave },
+        ]);
+      }
+
+    } catch (err) {
+      console.error("Failed to generate report", err);
+      alert("Error generating report. Please check console.");
+    } finally {
+      setIsLoading(false);
+    }
   };
+  // --- END FIX 7 ---
 
-  const handleDownloadReport = () => {
+  // --- 8. DOWNLOAD FUNCTIONS ADD KIYE ---
+  const handleDownloadCSV = () => {
     if (!reportData) return;
     const csv = Papa.unparse(reportData);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    downloadFile(csv, 'text/csv;charset=utf-8;', 'csv');
+  };
+
+  const handleDownloadExcel = () => {
+    if (!reportData) return;
+    const ws = XLSX.utils.json_to_sheet(reportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Attendance Report");
+    XLSX.writeFile(wb, getFileName('xlsx'));
+  };
+
+  const handleDownloadPDF = () => {
+    if (!reportData) return;
+    const doc = new jsPDF();
+    
+    // Title
+    doc.text("Attendance Report", 14, 15);
+    doc.text(`For: ${reportFor === 'student' ? 'Class' : 'Role'} - ${getSelectedGroupName()}`, 14, 22);
+    
+    // Table
+    (doc as any).autoTable({
+      startY: 30,
+      head: [['Name', 'Present', 'Absent', 'Leave', 'Total Tracked']],
+      body: reportData.map(item => [
+        item.name, 
+        item.present, 
+        item.absent, 
+        item.leave, 
+        item.total
+      ]),
+    });
+    
+    doc.save(getFileName('pdf'));
+  };
+
+  // Helper function (download ke liye)
+  const getFileName = (extension: string) => {
+    return `attendance_report_${selectedGroup}_${new Date().toISOString().slice(0,10)}.${extension}`;
+  };
+  const getSelectedGroupName = () => {
+    if (reportFor === 'student') {
+      return fetchedClasses.find(c => c.classid.toString() === selectedGroup)?.class_name || 'N/A';
+    }
+    return selectedGroup;
+  }
+  const downloadFile = (data: string, fileType: string, extension: string) => {
+    const blob = new Blob([data], { type: fileType });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.setAttribute('download', `attendance_report_${selectedGroup}_${new Date().toISOString().slice(0,10)}.csv`);
+    link.setAttribute('download', getFileName(extension));
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
+  // --- END FIX 8 ---
+
 
   return (
     <div className={styles.pageContainer}>
       <h1 className={styles.pageTitle}>Attendance Dashboard</h1>
       
+      {/* Pie Chart (Ab yeh report generate hone ke baad update hoga) */}
       <AttendancePieChart data={pieChartData} />
 
+      {/* --- 9. JSX (DROPDOWNS) UPDATE KIYA --- */}
       <div className={styles.controlsCard}>
         <div className={styles.formGroup}>
             <label>Report For</label>
@@ -162,8 +246,21 @@ const ReportsPage = () => {
         </div>
          <div className={styles.formGroup}>
             <label>{reportFor === 'student' ? 'Class' : 'Role'}</label>
-            <select value={selectedGroup} onChange={e => setSelectedGroup(e.target.value)}>
-                {groupOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            <select 
+              value={selectedGroup} 
+              onChange={e => setSelectedGroup(e.target.value)} 
+              disabled={isFilterLoading}
+            >
+              {isFilterLoading ? (
+                <option>Loading...</option>
+              ) : (
+                groupOptions.map(opt => (
+                  // 'opt' ab ya toh SchoolClass object hai ya string
+                  typeof opt === 'object' 
+                    ? <option key={opt.classid} value={opt.classid}>{opt.class_name}</option>
+                    : <option key={opt} value={opt}>{opt}</option>
+                ))
+              )}
             </select>
         </div>
         
@@ -180,18 +277,27 @@ const ReportsPage = () => {
             </div>
         )}
 
-        <button className={styles.generateButton} onClick={handleGenerateReport} disabled={isLoading}>
+        <button className={styles.generateButton} onClick={handleGenerateReport} disabled={isLoading || isFilterLoading}>
             {isLoading ? 'Generating...' : 'Generate Report'}
         </button>
       </div>
 
+      {/* --- 10. JSX (DOWNLOAD BUTTONS) UPDATE KIYA --- */}
       <div className={styles.reportDisplay}>
         <div className={styles.reportHeader}>
-            <h3>Generated Report</h3>
+            <h3>Generated Report for: {getSelectedGroupName()}</h3>
             {reportData && reportData.length > 0 && (
-                 <button className={styles.downloadButton} onClick={handleDownloadReport}>
-                    <MdDownload /> Download CSV
-                 </button>
+                 <div className={styles.downloadButtons}>
+                    <button className={styles.downloadButton} onClick={handleDownloadCSV}>
+                        <MdDownload /> CSV
+                    </button>
+                    <button className={styles.downloadButton} onClick={handleDownloadExcel}>
+                        <MdDownload /> Excel
+                    </button>
+                    <button className={styles.downloadButton} onClick={handleDownloadPDF}>
+                        <MdDownload /> PDF
+                    </button>
+                 </div>
             )}
         </div>
         <div className={styles.reportContent}>

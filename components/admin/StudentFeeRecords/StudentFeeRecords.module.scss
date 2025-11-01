@@ -1,49 +1,237 @@
+/* --- 1. Variables and Design System (Professional Look) --- */
+$primary-color: #4F46E5; // Indigo/Violet
+$secondary-color: #10B981; // Green for success
+$warning-color: #F59E0B; // Orange for pending/partial
+$danger-color: #EF4444; // Red for late/failed
+$text-dark: #1F2937;
+$text-medium: #6B7280;
+$border-color: #E5E7EB;
+$background-light: #F9FAFB;
+$white: #FFFFFF;
+$radius: 8px;
+
 .container {
     padding: 1.5rem;
 }
 
+/* --- 2. Filter Bar (No major change, just integrated) --- */
 .filterBar {
     display: flex;
     gap: 1rem;
     margin-bottom: 1.5rem;
-}
+    background: $white;
+    padding: 1rem;
+    border-radius: $radius;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 
-.searchBar {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    padding: 0 0.75rem;
+    .searchBar {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 1px solid $border-color;
+        border-radius: $radius;
+        padding: 0 0.75rem;
+        transition: border-color 0.3s;
 
-    svg { color: #6c757d; }
+        svg { color: $text-medium; }
+        
+        input {
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 0.7rem 0.25rem;
+            background: transparent;
+            font-size: 1rem;
+            color: $text-dark;
+        }
 
-    input {
-        width: 100%;
-        border: none;
-        outline: none;
-        padding: 0.7rem 0.25rem;
-        background: transparent;
+        &:focus-within {
+            border-color: $primary-color;
+            box-shadow: 0 0 0 1px $primary-color;
+        }
+    }
+
+    .statusSelect {
+        padding: 0.7rem 1rem;
+        border: 1px solid $border-color;
+        border-radius: $radius;
+        background-color: $white;
         font-size: 1rem;
+        color: $text-dark;
     }
 }
 
-.statusSelect {
-    padding: 0.7rem 1rem;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    background-color: #fff;
-    font-size: 1rem;
+/* --- 3. Table & Wrapper Styles --- */
+.tableWrapper {
+    overflow-x: auto;
+    background-color: $white;
+    border-radius: $radius;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
 }
 
-/* Baaki table, pagination, message styles LatePaymentsTable.module.scss se copy kar sakte hain */
 .table {
-    /* ... same as before ... */
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+        background-color: $background-light;
+        th {
+            padding: 1rem 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: $text-dark;
+            border-bottom: 2px solid $border-color;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+    }
+
+    tbody {
+        tr {
+            border-bottom: 1px solid $border-color;
+            transition: background-color 0.15s ease;
+            &:last-child { border-bottom: none; }
+            &:hover { background-color: $background-light; }
+        }
+        td {
+            padding: 1rem 0.75rem;
+            color: $text-dark;
+            font-size: 0.95rem;
+        }
+    }
+
+    /* --- Data Styles --- */
+    .nameLink {
+        color: $primary-color;
+        text-decoration: none;
+        font-weight: 600;
+        &:hover { text-decoration: underline; }
+    }
+    .rollNo {
+        font-size: 0.85rem;
+        color: $text-medium;
+        margin-left: 0.4rem;
+    }
+    .paidAmount, .balanceAmount {
+        font-weight: 600;
+        text-align: right;
+        padding-right: 1.5rem;
+    }
+    .paidAmount { color: $secondary-color; }
+    .balanceAmount { color: $danger-color; }
+    
+    /* --- Status Badges --- */
+    .statusBadge {
+        padding: 0.3rem 0.7rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: inline-block;
+        
+        &.statusPaid { background-color: lighten($secondary-color, 35%); color: darken($secondary-color, 10%); }
+        &.statusPending { background-color: lighten($warning-color, 30%); color: darken($warning-color, 10%); }
+        &.statusLate { background-color: lighten($danger-color, 40%); color: darken($danger-color, 10%); animation: flashRed 1.5s infinite; }
+        &.statusPartial { background-color: lighten($warning-color, 30%); color: darken($warning-color, 10%); }
+    }
+    @keyframes flashRed { 0% { box-shadow: 0 0 0 0 rgba($danger-color, 0.4); } 70% { box-shadow: 0 0 0 10px rgba($danger-color, 0); } 100% { box-shadow: 0 0 0 0 rgba($danger-color, 0); } }
+
+    /* --- Action Buttons --- */
+    .actionCell {
+        white-space: nowrap;
+        button {
+            border: 1px solid $primary-color;
+            background: $white;
+            color: $primary-color;
+            padding: 0.4rem 0.75rem;
+            border-radius: $radius;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-right: 0.5rem;
+
+            &:hover {
+                background-color: $primary-color;
+                color: $white;
+            }
+        }
+        .collectButton {
+            background-color: $secondary-color;
+            color: $white;
+            border-color: $secondary-color;
+            &:hover { background-color: darken($secondary-color, 10%); }
+        }
+        .historyButton {
+            border-color: $text-medium;
+            color: $text-medium;
+            &:hover { background-color: $text-medium; color: $white; border-color: $text-medium; }
+        }
+    }
 }
+
+/* --- 4. Pagination & Message Styles --- */
 .pagination {
-    /* ... same as before ... */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    margin-top: 1rem;
+    
+    button {
+        background: $primary-color;
+        color: $white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: $radius;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+
+        &:disabled {
+            background: $border-color;
+            color: $text-medium;
+            cursor: not-allowed;
+        }
+    }
+    .pageInfo {
+        font-weight: 500;
+        color: $text-dark;
+    }
 }
-.message, .messageError, .noData {
-    /* ... same as before ... */
+.message, .messageError {
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.1rem;
+    color: $text-medium;
+    background: $white;
+    border-radius: $radius;
+}
+.messageError {
+    color: $danger-color;
+    border: 1px solid lighten($danger-color, 40%);
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+    .filterBar {
+        flex-direction: column;
+        
+        .searchBar, .statusSelect {
+            width: 100%;
+        }
+    }
+    .tableWrapper {
+        overflow-x: scroll;
+    }
+    .table {
+        min-width: 900px; /* Table ko scrollable banane ke liye */
+    }
+    .pagination {
+        flex-direction: column;
+        gap: 1rem;
+    }
 }

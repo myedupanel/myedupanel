@@ -1,21 +1,27 @@
 "use client";
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 import styles from './SettingsPage.module.scss';
-import { MdEdit, MdDelete } from 'react-icons/md';
-
-// --- YEH ADD KAREIN ---
+import { MdEdit, MdDelete, MdGridView } from 'react-icons/md';
 import Link from 'next/link';
-import { MdGridView } from 'react-icons/md';
-// --- END ---
+// --- API Import ---
+import api from '@/backend/utils/api'; 
+// --- End API Import ---
 
 // Interface for TimeSlot
 interface TimeSlot {
-    id: string;
+    id: number; // API ID is number now
     name: string;
     startTime: string;
     endTime: string;
     isBreak: boolean;
 }
+// Interface for WorkingDay
+interface WorkingDay {
+    id: number; // API ID
+    name: string;
+    dayIndex: number;
+}
+
 
 const allDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -26,35 +32,71 @@ const SettingsPage = () => {
     const [endTime, setEndTime] = useState('');
     const [isBreak, setIsBreak] = useState(false);
     const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-    const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
+    const [editingSlotId, setEditingSlotId] = useState<number | null>(null); // Changed to number
     
     // State for Working days
     const [workingDays, setWorkingDays] = useState<string[]>([]);
+    
+    const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const savedSlots = localStorage.getItem('schoolTimeSlots');
-        if (savedSlots) {
-            setTimeSlots(JSON.parse(savedSlots));
-        }
-        const savedDays = localStorage.getItem('schoolWorkingDays');
-        if (savedDays) {
-            setWorkingDays(JSON.parse(savedDays));
+    // --- 1. Fetch Data Function ---
+    const fetchSettings = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            // Assuming BE returns: { timeSlots: TimeSlot[], workingDays: string[] } (or { timeSlots: TimeSlot[], workingDays: WorkingDay[] })
+            const res = await api.get('/timetable/settings'); 
+            const fetchedDays = res.data.workingDays.map((d: any) => d.name || d); // Handle both string[] and WorkingDay[]
+            
+            setTimeSlots(res.data.timeSlots);
+            setWorkingDays(fetchedDays);
+
+        } catch (error) {
+            console.error("Failed to fetch settings:", error);
+            alert("Failed to load settings. Check backend connection.");
+        } finally {
+            setIsLoading(false);
         }
     }, []);
 
-    const handleWorkingDaysChange = (day: string) => {
-        const updatedDays = workingDays.includes(day)
+    useEffect(() => {
+        // Replace localStorage load with API call
+        fetchSettings();
+    }, [fetchSettings]);
+
+    // --- 2. Handle Working Days Change (POST to API) ---
+    const handleWorkingDaysChange = async (day: string) => {
+        const isCurrentlySelected = workingDays.includes(day);
+        const updatedDays = isCurrentlySelected
             ? workingDays.filter(d => d !== day)
             : [...workingDays, day];
-        setWorkingDays(updatedDays);
-        localStorage.setItem('schoolWorkingDays', JSON.stringify(updatedDays));
+        
+        setWorkingDays(updatedDays); // Optimistic UI update
+
+        try {
+            // Assuming BE endpoint handles the full list or single day toggle
+            // We send the full list to be safe
+            await api.post('/timetable/settings/days', { workingDays: updatedDays }); 
+            // If successful, data is already updated in state
+        } catch (error) {
+            console.error("Failed to update working days:", error);
+            // Revert optimistic update if API fails
+            setWorkingDays(workingDays);
+            alert("Failed to save working days.");
+        }
     };
     
-    const handleDeleteSlot = (idToDelete: string) => {
-        if (window.confirm('Are you sure you want to delete this time slot?')) {
-            const updatedSlots = timeSlots.filter(slot => slot.id !== idToDelete);
-            setTimeSlots(updatedSlots);
-            localStorage.setItem('schoolTimeSlots', JSON.stringify(updatedSlots));
+    // --- 3. Handle Delete Slot (DELETE to API) ---
+    const handleDeleteSlot = async (idToDelete: number) => {
+        if (window.confirm('Are you sure you want to delete this time slot? This will affect existing timetables!')) {
+            try {
+                // Assuming DELETE endpoint: /api/timetable/settings/slot/123
+                await api.delete(`/timetable/settings/slot/${idToDelete}`); 
+                alert('Time Slot deleted successfully!');
+                fetchSettings(); // Refresh the list
+            } catch (error) {
+                console.error("Failed to delete slot:", error);
+                alert("Failed to delete time slot. It might be in use.");
+            }
         }
     };
     
@@ -74,36 +116,43 @@ const SettingsPage = () => {
         setIsBreak(false);
     };
 
-    const handleFormSubmit = (e: FormEvent) => {
+    // --- 4. Handle Form Submit (POST to API for Add/Edit) ---
+    const handleFormSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!slotName || !startTime || !endTime) {
             alert('Please fill all the fields.');
             return;
         }
+        
+        const payload = {
+            name: slotName,
+            startTime: startTime,
+            endTime: endTime,
+            isBreak: isBreak,
+            id: editingSlotId // null for create, ID for update
+        };
 
-        let updatedSlots;
-
-        if (editingSlotId) {
-            updatedSlots = timeSlots.map(slot =>
-                slot.id === editingSlotId
-                    ? { ...slot, name: slotName, startTime, endTime, isBreak }
-                    : slot
-            );
-        } else {
-            const newSlot: TimeSlot = {
-                id: Date.now().toString(),
-                name: slotName,
-                startTime: startTime,
-                endTime: endTime,
-                isBreak: isBreak,
-            };
-            updatedSlots = [...timeSlots, newSlot];
+        try {
+            if (editingSlotId) {
+                // PUT/POST to update existing slot
+                await api.put(`/timetable/settings/slot/${editingSlotId}`, payload); 
+                alert('Time Slot updated successfully!');
+            } else {
+                // POST to create new slot
+                await api.post('/timetable/settings/slot', payload);
+                alert('Time Slot added successfully!');
+            }
+            
+            fetchSettings(); // Refresh the list to show the new data
+            cancelEdit();
+        } catch (error: any) {
+            console.error("Failed to save slot:", error);
+            alert(`Failed to save time slot: ${error.response?.data?.message || 'Server Error'}`);
         }
-
-        setTimeSlots(updatedSlots);
-        localStorage.setItem('schoolTimeSlots', JSON.stringify(updatedSlots));
-        cancelEdit();
     };
+    
+    if (isLoading) return <div className={styles.loadingState}>Loading Timetable Settings...</div>;
+
 
     return (
         <div className={styles.pageContainer}>
@@ -193,13 +242,10 @@ const SettingsPage = () => {
                 )}
             </div>
 
-            {/* --- YEH BUTTON ADD KIYA GAYA HAI --- */}
-            {/* Yeh button page ke aakhir mein dikhega */}
             <Link href="/admin/school" className={styles.dashboardLinkButton}>
                 <MdGridView />
                 Go to Dashboard
             </Link>
-            {/* --- END --- */}
         </div>
     );
 };

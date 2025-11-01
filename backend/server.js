@@ -39,6 +39,8 @@ const staffRoutes = require('./routes/staff');
 const quizRoutes = require('./routes/quiz');
 const analyticsRoutes = require('./routes/analytics');
 const classRoutes = require('./routes/classes');
+const attendanceRoutes = require('./routes/attendance'); 
+const timetableRoutes = require('./routes/timetable');// <-- NAYA ADD KIYA
 // const dashboardRoutes = require('./routes/dashboard'); 
 
 // --- Express App Setup (No Change) ---
@@ -46,13 +48,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // --- 2. MONGOOSE MODEL IMPORTS HATA DIYE ---
-// require('./models/School'); // <-- Removed
-// require('./models/User'); // <-- Removed
-// require('./models/Student'); // <-- Removed
-// require('./models/Teacher'); // <-- Removed
-// require('./models/Parent'); // <-- Removed
-// require('./models/FeeRecord'); // <-- Removed
-// --- END FIX ---
+// ... (jaisa pehle tha) ...
 
 // Standard Middlewares
 app.use(cors({
@@ -105,6 +101,8 @@ app.use('/api/study-material', studyMaterialRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/classes', classRoutes);
+app.use('/api/attendance', attendanceRoutes); // <-- NAYA ADD KIYA
+app.use('/api/timetable', timetableRoutes);
 // app.use('/api/dashboard', dashboardRoutes);
 
 // --- Socket.IO Connection Handler (No Change) ---

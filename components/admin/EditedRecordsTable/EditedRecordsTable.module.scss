@@ -1,39 +1,130 @@
+/* --- 1. Variables and Design System (Matching StudentFeeRecords) --- */
+$primary-color: #4F46E5; // Indigo/Violet
+$secondary-color: #10B981; // Green for success
+$danger-color: #EF4444; // Red
+$text-dark: #1F2937;
+$text-medium: #6B7280;
+$border-color: #E5E7EB;
+$background-light: #F9FAFB;
+$white: #FFFFFF;
+$radius: 8px;
+
 .container {
-    padding: 1.5rem;
+    padding: 0; 
+    margin-top: 1rem;
+}
+
+/* --- 2. Table & Wrapper Styles --- */
+.tableWrapper {
+    overflow-x: auto;
+    background-color: $white;
+    border-radius: $radius;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
+
+    thead {
+        background-color: $background-light;
+        th {
+            padding: 1rem 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: $text-dark;
+            border-bottom: 2px solid $border-color;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+    }
+
+    tbody {
+        tr {
+            border-bottom: 1px solid $border-color;
+            transition: background-color 0.15s ease;
+            &:last-child { border-bottom: none; }
+            &:hover { background-color: $background-light; }
+        }
+        td {
+            padding: 1rem 0.75rem;
+            color: $text-dark;
+            font-size: 0.95rem;
+        }
+    }
+
+    /* --- Data Styles --- */
+    .nameLink {
+        color: $primary-color;
+        text-decoration: none;
+        font-weight: 600;
+        &:hover { text-decoration: underline; }
+    }
+    .amountCol, .netAmount {
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .discount {
+        color: $danger-color; /* Discount ko red highlight kiya */
+        font-weight: 700;
+    }
 }
 
-.table th, .table td {
-    padding: 0.9rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid #f1f3f5;
-}
-
-.table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #495057;
-}
-
-.discount {
-    color: #198754;
-    font-weight: 700;
-}
-
-.message, .messageError, .noData {
-    text-align: center;
-    padding: 2rem;
-    color: #6c757d;
-}
-
-.messageError {
-    color: #dc3545;
-}
-
+/* --- 3. Pagination & Message Styles --- */
 .pagination {
-    /* ... same as before ... */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    margin-top: 1rem;
+    
+    button {
+        background: $primary-color;
+        color: $white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: $radius;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+
+        &:disabled {
+            background: $border-color;
+            color: $text-medium;
+            cursor: not-allowed;
+        }
+    }
+    .pageInfo {
+        font-weight: 500;
+        color: $text-dark;
+    }
+}
+.message, .messageError, .noData {
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.1rem;
+    color: $text-medium;
+    background: $white;
+    border-radius: $radius;
+}
+.messageError {
+    color: $danger-color;
+    border: 1px solid lighten($danger-color, 40%);
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+    .tableWrapper {
+        overflow-x: scroll;
+    }
+    .table {
+        min-width: 800px; 
+    }
+    .pagination {
+        flex-direction: column;
+        gap: 1rem;
+    }
 }

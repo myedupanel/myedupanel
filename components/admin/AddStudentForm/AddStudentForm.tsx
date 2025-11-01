@@ -245,15 +245,15 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
 
       {/* --- Optional Fields (No Changes) --- */}
       <div className={styles.inputGroup}>
-        <label htmlFor="mother_name">Mother's Name (Optional)</label>
+        <label htmlFor="mother_name">Mother's Name</label>
         <input type="text" id="mother_name" name="mother_name" value={formData.mother_name || ''} onChange={handleChange} disabled={isLoading} />
       </div>
       <div className={styles.inputGroup}>
-        <label htmlFor="dob">Date of Birth (Optional)</label>
+        <label htmlFor="dob">Date of Birth</label>
         <input type="date" id="dob" name="dob" value={formData.dob || ''} onChange={handleChange} disabled={isLoading} className={styles.dateInput} />
       </div>
       <div className={styles.inputGroup}>
-        <label htmlFor="admission_date">Admission Date (Optional)</label>
+        <label htmlFor="admission_date">Admission Date</label>
         <input type="date" id="admission_date" name="admission_date" value={formData.admission_date || ''} onChange={handleChange} disabled={isLoading} className={styles.dateInput} />
       </div>
       <div className={styles.inputGroup}>
@@ -262,19 +262,19 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
         <small>If provided, login details will be sent here.</small>
       </div>
       <div className={styles.inputGroup}>
-        <label htmlFor="uid_number">Aadhar / UID Number (Optional)</label>
+        <label htmlFor="uid_number">Aadhar / UID Number</label>
         <input type="text" id="uid_number" name="uid_number" value={formData.uid_number || ''} onChange={handleChange} disabled={isLoading} />
       </div>
       <div className={styles.inputGroup}>
-        <label htmlFor="nationality">Nationality (Optional)</label>
+        <label htmlFor="nationality">Nationality</label>
         <input type="text" id="nationality" name="nationality" value={formData.nationality || ''} onChange={handleChange} disabled={isLoading} />
       </div>
       <div className={styles.inputGroup}>
-        <label htmlFor="caste">Caste (Optional)</label>
+        <label htmlFor="caste">Caste</label>
         <input type="text" id="caste" name="caste" value={formData.caste || ''} onChange={handleChange} disabled={isLoading} />
       </div>
       <div className={styles.inputGroup}>
-        <label htmlFor="birth_place">Birth Place (Optional)</label>
+        <label htmlFor="birth_place">Birth Place</label>
         <input type="text" id="birth_place" name="birth_place" value={formData.birth_place || ''} onChange={handleChange} disabled={isLoading} />
       </div>
       <div className={styles.inputGroup}>
@@ -282,7 +282,7 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
         <input type="text" id="previous_school" name="previous_school" value={formData.previous_school || ''} onChange={handleChange} disabled={isLoading} />
       </div>
       <div className={styles.inputGroup}>
-        <label htmlFor="address">Address (Optional)</label>
+        <label htmlFor="address">Address</label>
         <textarea id="address" name="address" value={formData.address || ''} onChange={handleChange} rows={3} disabled={isLoading} className={styles.textAreaInput} />
       </div>
       {/* --- End Optional Fields --- */}

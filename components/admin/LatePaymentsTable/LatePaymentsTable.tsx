@@ -4,7 +4,31 @@ import api from '@/backend/utils/api';
 import styles from './LatePaymentsTable.module.scss';
 import { FiChevronLeft, FiChevronRight, FiRefreshCw, FiSend, FiPlusCircle, FiSearch } from 'react-icons/fi';
 
-// Debounce hook: Yeh search ko smart banata hai
+// --- Interface Definitions ---
+interface LateRecord {
+    id: number;
+    amount: number;
+    lateFine: number;
+    dueDate: string;
+    status: 'Late';
+    // Populated fields
+    studentId: {
+        name: string;
+        class: string;
+    };
+    templateId: { name: string };
+}
+// --- Helper Functions ---
+const formatCurrency = (amount: number | null | undefined): string => {
+    if (isNaN(amount as number) || amount === null || amount === undefined) return '₹ 0';
+    return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0,
+    }).format(amount);
+};
+
+// Debounce hook (No Change)
 function useDebounce(value: string, delay: number) {
     const [debouncedValue, setDebouncedValue] = useState(value);
     useEffect(() => {
@@ -17,17 +41,10 @@ function useDebounce(value: string, delay: number) {
     }, [value, delay]);
     return debouncedValue;
 }
-
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-};
+// --- End Helper Functions ---
 
 const LatePaymentsTable = () => {
-    const [records, setRecords] = useState<any[]>([]);
+    const [records, setRecords] = useState<LateRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -38,6 +55,7 @@ const LatePaymentsTable = () => {
     const fetchLatePayments = useCallback(async () => {
         try {
             setLoading(true);
+            // Backend route: /fees/late-payments
             const res = await api.get(`/fees/late-payments?page=${currentPage}&limit=10&search=${debouncedSearchTerm}`);
             setRecords(res.data.data);
             setTotalPages(res.data.totalPages);
@@ -59,10 +77,12 @@ const LatePaymentsTable = () => {
         try {
             const res = await api.post('/fees/calculate-late-fees');
             alert(res.data.message);
+            // Refresh logic: Agar current page 1 nahi hai toh 1st page par jaayein, warna data refresh karein
             if (currentPage !== 1) setCurrentPage(1);
             else fetchLatePayments();
         } catch (error) {
             alert('An error occurred while calculating fees.');
+            console.error(error);
         }
     };
 
@@ -74,6 +94,7 @@ const LatePaymentsTable = () => {
             alert(res.data.message);
         } catch (error) {
             alert('An error occurred while sending reminders.');
+            console.error(error);
         }
     };
 
@@ -83,13 +104,13 @@ const LatePaymentsTable = () => {
         <div className={styles.tableContainer}>
             <div className={styles.actionsHeader}>
                 <div className={styles.actionButtons}>
-                    <button className={styles.headerButton} onClick={handleCalculateFees}>
+                    <button className={`${styles.headerButton} ${styles.calculateButton}`} onClick={handleCalculateFees}>
                         <FiPlusCircle /> Calculate Late Fee
                     </button>
-                    <button className={styles.headerButton} onClick={() => fetchLatePayments()} disabled={loading}>
+                    <button className={`${styles.headerButton} ${styles.refreshButton}`} onClick={() => fetchLatePayments()} disabled={loading}>
                         <FiRefreshCw className={loading ? styles.loadingIcon : ''} /> Refresh
                     </button>
-                    <button className={styles.headerButton} onClick={handleSendReminders}>
+                    <button className={`${styles.headerButton} ${styles.sendButton}`} onClick={handleSendReminders}>
                         <FiSend /> Send Notification
                     </button>
                 </div>
@@ -108,40 +129,44 @@ const LatePaymentsTable = () => {
                 <div className={styles.message}>Loading records...</div>
             ) : (
                 <>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Student Name</th>
-                                <th>Class</th>
-                                <th>Amount</th>
-                                <th>Late Charge</th>
-                                <th>Due Date</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {records.length > 0 ? (
-                                records.map((record, index) => (
-                                    <tr key={record.id}>
-                                        <td>{(currentPage - 1) * 10 + index + 1}</td>
-                                        <td>{record.studentId?.name || 'N/A'}</td>
-                                        <td>{record.studentId?.class || 'N/A'}</td>
-                                        <td>{formatCurrency(record.amount)}</td>
-                                        <td>{formatCurrency(record.lateFine)}</td>
-                                        <td>{new Date(record.dueDate).toLocaleDateString('en-GB')}</td>
-                                        <td>
-                                            <button className={styles.actionButton}>View</button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
+                    <div className={styles.tableWrapper}>
+                        <table className={styles.table}>
+                            <thead>
                                 <tr>
-                                    <td colSpan={7} className={styles.noData}>No late payment records found.</td>
+                                    <th>#</th>
+                                    <th>Student Name</th>
+                                    <th>Class</th>
+                                    <th>Fee Template</th>
+                                    <th>Due Date</th>
+                                    <th>Amount Due</th>
+                                    <th>Late Charge</th>
+                                    <th>Action</th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {records.length > 0 ? (
+                                    records.map((record, index) => (
+                                        <tr key={record.id}>
+                                            <td>{(currentPage - 1) * 10 + index + 1}</td>
+                                            <td className={styles.studentNameCol}>{record.studentId?.name || 'N/A'}</td>
+                                            <td>{record.studentId?.class || 'N/A'}</td>
+                                            <td>{record.templateId?.name || 'N/A'}</td>
+                                            <td>{new Date(record.dueDate).toLocaleDateString('en-GB')}</td>
+                                            <td className={styles.amountCol}>{formatCurrency(record.amount)}</td>
+                                            <td className={styles.lateFineCol}>{formatCurrency(record.lateFine)}</td>
+                                            <td>
+                                                <button className={styles.actionButton}>View Record</button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={8} className={styles.noData}>No late payment records found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                     
                     {totalPages > 1 && (
                         <div className={styles.pagination}>

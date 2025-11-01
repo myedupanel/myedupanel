@@ -1,8 +1,22 @@
+// src/components/admin/ProcessingPaymentsTable/ProcessingPaymentsTable.tsx
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '@/backend/utils/api';
 import styles from './ProcessingPaymentsTable.module.scss';
 import { FiChevronLeft, FiChevronRight, FiAlertCircle } from 'react-icons/fi';
+
+// --- Interface Definition (Backend Transaction API ke hisaab se) ---
+interface ProcessingTransaction {
+    id: number;
+    amountPaid: number;
+    paymentMode: string;
+    status: 'Pending' | 'Failed';
+    createdAt: string; // ISO Date String
+    // Populated fields (as per feeController.js getProcessingPayments)
+    studentId: { name: string; class: string }; // Student ID object
+    templateName: string; // Template name directly aa raha hai
+    chequeNumber?: string; // Cheque ke liye
+}
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -13,7 +27,7 @@ const formatCurrency = (amount: number) => {
 };
 
 const ProcessingPaymentsTable = () => {
-    const [records, setRecords] = useState<any[]>([]);
+    const [records, setRecords] = useState<ProcessingTransaction[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -22,6 +36,7 @@ const ProcessingPaymentsTable = () => {
     const fetchRecords = useCallback(async () => {
         try {
             setLoading(true);
+            // Route: /fees/processing-payments
             const res = await api.get(`/fees/processing-payments?page=${currentPage}&limit=10`);
             setRecords(res.data.data);
             setTotalPages(res.data.totalPages);
@@ -36,55 +51,93 @@ const ProcessingPaymentsTable = () => {
         fetchRecords();
     }, [fetchRecords]);
 
+    const handlePreviousPage = () => {
+        setCurrentPage(prev => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage(prev => Math.min(prev + 1, totalPages));
+    };
+
     if (error) return <div className={styles.messageError}>{error}</div>;
 
     return (
         <div className={styles.container}>
             <div className={styles.infoBox}>
                 <FiAlertCircle />
-                <span>This section lists transactions that were unsuccessful or are still processing.</span>
+                <span>This section lists transactions that are **Pending** (e.g., Cheques) or have **Failed** (e.g., Online payments).</span>
             </div>
 
-            {loading ? <div className={styles.message}>Loading...</div> : (
+            {loading ? <div className={styles.message}>Loading Processing Payments...</div> : (
                 <>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Student Name</th>
-                                <th>Template Name</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {records.length > 0 ? (
-                                records.map((record, index) => (
-                                    <tr key={record.id}>
-                                        <td>{(currentPage - 1) * 10 + index + 1}</td>
-                                        <td>{record.studentId?.name || 'N/A'}</td>
-                                        <td>{record.templateId?.name || 'N/A'}</td>
-                                        <td>{formatCurrency(record.amount)}</td>
-                                        <td><span className={styles.failedStatus}>{record.status}</span></td>
-                                        <td>{new Date(record.createdAt).toLocaleDateString('en-GB')}</td>
-                                        <td>
-                                            <button className={styles.actionButton}>Check Status</button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
+                    <div className={styles.tableWrapper}>
+                        <table className={styles.table}>
+                            <thead>
                                 <tr>
-                                    <td colSpan={7} className={styles.noData}>No processing or failed payments found.</td>
+                                    <th>#</th>
+                                    <th>Student Name (Class)</th>
+                                    <th>Fee Template</th>
+                                    <th>Amount Paid</th>
+                                    <th>Payment Mode</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {records.length > 0 ? (
+                                    records.map((record, index) => (
+                                        <tr key={record.id}>
+                                            <td>{(currentPage - 1) * 10 + index + 1}</td>
+                                            <td>
+                                                {record.studentId?.name || 'N/A'}
+                                                <span className={styles.classInfo}> ({record.studentId?.class || 'N/A'})</span>
+                                            </td>
+                                            <td>{record.templateName || 'N/A'}</td>
+                                            <td className={styles.amountCol}>{formatCurrency(record.amountPaid)}</td>
+                                            <td>{record.paymentMode}</td>
+                                            <td>
+                                                <span className={styles[`status${record.status}`]}>
+                                                    {record.status}
+                                                </span>
+                                            </td>
+                                            <td>{new Date(record.createdAt).toLocaleDateString('en-GB')}</td>
+                                            <td>
+                                                <button 
+                                                    className={styles.actionButton}
+                                                    onClick={() => alert(`Checking status for ${record.id}`)}
+                                                >
+                                                    Check Status
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={8} className={styles.noData}>No processing or failed payments found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
 
                     {totalPages > 1 && (
                         <div className={styles.pagination}>
-                            {/* Pagination buttons */}
+                            <button
+                                onClick={handlePreviousPage}
+                                disabled={currentPage === 1}
+                            >
+                                <FiChevronLeft /> Previous
+                            </button>
+                            <span className={styles.pageInfo}>
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button
+                                onClick={handleNextPage}
+                                disabled={currentPage === totalPages}
+                            >
+                                Next <FiChevronRight />
+                            </button>
                         </div>
                     )}
                 </>

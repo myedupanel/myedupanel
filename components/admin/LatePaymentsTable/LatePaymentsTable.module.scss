@@ -1,76 +1,32 @@
+/* --- Variables (Consistency ke liye) --- */
+$primary-color: #4F46E5; // Indigo
+$secondary-color: #10B981; // Green
+$warning-color: #F59E0B; // Orange
+$danger-color: #EF4444; // Red (Late Fees ke liye)
+$text-dark: #1F2937;
+$text-medium: #6B7280;
+$border-color: #E5E7EB;
+$background-light: #F9FAFB;
+$white: #FFFFFF;
+$radius: 8px;
+
 .tableContainer {
-    padding: 1rem;
+    padding: 0; /* Padding ko inner elements handle karenge */
+    background: $white;
+    border-radius: $radius;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.05);
 }
 
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-}
-
-.table th, .table td {
-    padding: 0.9rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid #f1f3f5;
-}
-
-.table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #495057;
-}
-
-.actionButton {
-    background-color: #e7f5ff;
-    color: #0d6efd;
-    border: none;
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-.noData, .message, .messageError {
-    text-align: center;
-    padding: 2rem;
-    color: #6c757d;
-}
-
-.messageError {
-    color: #dc3545;
-}
-
-.pagination {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    margin-top: 1rem;
-    border-top: 1px solid #e9ecef;
-
-    button {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        background: #fff;
-        border: 1px solid #ced4da;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        cursor: pointer;
-
-        &:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-    }
-}
+/* --- Action Header --- */
 .actionsHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem;
-    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid $border-color;
+    background: $background-light;
+    border-top-left-radius: $radius;
+    border-top-right-radius: $radius;
 }
 
 .actionButtons {
@@ -83,20 +39,30 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.6rem 1rem;
-    border: 1px solid #ced4da;
-    background-color: #f8f9fa;
-    color: #495057;
-    border-radius: 6px;
+    border: 1px solid $border-color;
+    background-color: $white;
+    color: $text-dark;
+    border-radius: $radius;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
 
     &:hover {
-        background-color: #e9ecef;
+        background-color: $border-color;
     }
-
-    svg {
-        font-size: 1rem;
+    
+    /* Specific Button Styles */
+    &.calculateButton {
+        background-color: $secondary-color;
+        color: $white;
+        border-color: $secondary-color;
+        &:hover { background-color: darken($secondary-color, 10%); }
+    }
+    &.sendButton {
+        background-color: $primary-color;
+        color: $white;
+        border-color: $primary-color;
+        &:hover { background-color: darken($primary-color, 10%); }
     }
 }
 
@@ -104,18 +70,128 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
+    border: 1px solid $border-color;
+    border-radius: $radius;
     padding: 0 0.75rem;
     
-    svg {
-        color: #6c757d;
-    }
+    svg { color: $text-medium; }
 
     input {
         border: none;
         outline: none;
         padding: 0.6rem 0.25rem;
         background: transparent;
+        color: $text-dark;
+    }
+
+    &:focus-within { border-color: $primary-color; }
+}
+
+/* --- Table Styles --- */
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    
+    th, td {
+        padding: 0.9rem 1.5rem;
+        text-align: left;
+        border-bottom: 1px solid $border-color;
+    }
+
+    th {
+        background-color: $background-light;
+        font-weight: 600;
+        color: $text-medium;
+        font-size: 0.9rem;
+    }
+
+    td {
+        color: $text-dark;
+        &:hover { background-color: $background-light; }
+    }
+    
+    /* Specific Column Styles */
+    .amountCol { font-weight: 600; }
+    .lateFineCol { 
+        font-weight: 700; 
+        color: $danger-color; /* Red color for Late Fine */
+        animation: pulseRed 2s infinite;
+    }
+    @keyframes pulseRed { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+
+    .actionButton {
+        background-color: $primary-color;
+        color: $white;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: $radius;
+        cursor: pointer;
+        font-weight: 500;
+        &:hover { background-color: darken($primary-color, 10%); }
+    }
+}
+
+.noData, .message, .messageError {
+    text-align: center;
+    padding: 2rem;
+    color: $text-medium;
+    background: $white;
+}
+
+.messageError {
+    color: $danger-color;
+    font-weight: 600;
+}
+
+/* --- Pagination --- */
+.pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-top: 1px solid $border-color;
+
+    button {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        background: $white;
+        border: 1px solid $border-color;
+        padding: 0.5rem 1rem;
+        border-radius: $radius;
+        cursor: pointer;
+        color: $text-dark;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: $background-light;
+            border-color: $primary-color;
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 992px) {
+    .actionsHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .actionButtons {
+        flex-wrap: wrap;
+    }
+    .searchBar {
+        width: 100%;
     }
 }

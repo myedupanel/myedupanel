@@ -1,0 +1,206 @@
+/* --- Variables (Assuming Aapke Global SCSS se aayi hain) --- */
+$primary-color: #4F46E5;
+$success-color: #10B981;
+$warning-color: #F59E0B;
+$danger-color: #EF4444;
+$text-dark: #1F2937;
+$text-medium: #6B7280;
+$border-color: #E5E7EB;
+$background-light: #F9FAFB;
+$white: #FFFFFF;
+$radius: 8px;
+
+.pageContainer {
+    padding: 2.5rem 2rem;
+    background-color: $background-light;
+    min-height: 100vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    .title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: $text-dark;
+    }
+    .exportButton {
+        background-color: $primary-color;
+        color: $white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: $radius;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        &:hover {
+            background-color: darken($primary-color, 10%);
+            box-shadow: 0 4px 10px rgba($primary-color, 0.3);
+        }
+    }
+}
+
+.controls {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: $white;
+    border: 1px solid $border-color;
+    border-radius: $radius;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+    .searchBar {
+        position: relative;
+        flex-grow: 1;
+
+        .searchIcon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: $text-medium;
+        }
+        input {
+            width: 100%;
+            padding: 0.75rem 0.75rem 0.75rem 3rem;
+            border: 1px solid $border-color;
+            border-radius: $radius;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+
+            &:focus {
+                outline: none;
+                border-color: $primary-color;
+            }
+        }
+    }
+    
+    .filters {
+        display: flex;
+        gap: 0.75rem;
+
+        select {
+            padding: 0.75rem 1rem;
+            border: 1px solid $border-color;
+            border-radius: $radius;
+            font-size: 1rem;
+            color: $text-dark;
+            cursor: pointer;
+            background-color: $white;
+            transition: border-color 0.3s;
+
+            &:focus {
+                outline: none;
+                border-color: $primary-color;
+            }
+        }
+    }
+}
+
+.tableContainer {
+    overflow-x: auto;
+    background-color: $white;
+    border-radius: $radius;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+}
+
+.transactionsTable {
+    width: 100%;
+    border-collapse: separate; // Taaki border-radius table-container se inherit ho
+    border-spacing: 0;
+
+    thead {
+        background-color: $text-dark;
+        th {
+            color: $white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+            &:first-child { border-top-left-radius: $radius; }
+            &:last-child { border-top-right-radius: $radius; }
+        }
+    }
+
+    tbody {
+        tr {
+            border-bottom: 1px solid $border-color;
+            &:last-child { border-bottom: none; }
+            &:hover { background-color: $background-light; }
+        }
+        td {
+            padding: 1rem;
+            color: $text-dark;
+            font-size: 0.95rem;
+        }
+    }
+    
+    .amountCol { font-weight: 600; color: $success-color; }
+    .receiptIdCol a {
+        color: $primary-color;
+        text-decoration: none;
+        font-weight: 600;
+        &:hover { text-decoration: underline; }
+    }
+
+    .statusBadge {
+        padding: 0.3rem 0.7rem;
+        border-radius: 9999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        
+        &.paid { background-color: lighten($success-color, 35%); color: darken($success-color, 10%); }
+        &.partial { background-color: lighten($warning-color, 30%); color: darken($warning-color, 10%); }
+        &.void { background-color: lighten($danger-color, 40%); color: darken($danger-color, 10%); }
+    }
+
+    .viewButton {
+        background-color: transparent;
+        color: $primary-color;
+        border: 1px solid $primary-color;
+        padding: 0.5rem 1rem;
+        border-radius: $radius;
+        cursor: pointer;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background-color: $primary-color;
+            color: $white;
+        }
+    }
+    .noData {
+        text-align: center;
+        padding: 2rem;
+        color: $text-medium;
+        font-style: italic;
+    }
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+    .controls {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .controls .filters {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .controls .searchBar {
+        width: 100%;
+    }
+}

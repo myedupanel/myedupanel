@@ -1,7 +1,7 @@
 // app/admin/parents/page.tsx
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import styles from '../students/StudentsPage.module.scss'; // Student page ke styles use kar rahe hain
+import styles from '../parents/ParentsPage.module.scss'; // Student page ke styles use kar rahe hain
 import ParentsTable from '@/components/admin/ParentsTable/ParentsTable';
 import Modal from '@/components/common/Modal/Modal';
 import AddParentForm from '@/components/admin/AddParentForm/AddParentForm';

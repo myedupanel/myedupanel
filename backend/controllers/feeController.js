@@ -991,7 +991,6 @@ const verifyPaymentWebhook = async (req, res) => {
     }
 };
 
-// 26. Get Transactions (for History Tab)
 const getTransactions = async (req, res) => { 
     try {
         const schoolId = req.user.schoolId;
@@ -1005,6 +1004,7 @@ const getTransactions = async (req, res) => {
 
         let queryConditions = { schoolId: schoolId };
         
+        // --- 1. Filter Conditions (No Change) ---
         const studentIdInt = parseInt(studentId);
         if (studentIdInt) {
             queryConditions.studentId = studentIdInt;
@@ -1036,13 +1036,24 @@ const getTransactions = async (req, res) => {
         } else if (search && studentIdInt) {
             queryConditions.receiptId = { contains: search, mode: 'insensitive' };
         }
-
+        // --- End Filter Conditions ---
+        
         const totalDocuments = await prisma.transaction.count({ where: queryConditions });
 
+        // --- 2. CRITICAL FIX: Include Class Name ---
         const transactions = await prisma.transaction.findMany({
             where: queryConditions,
             include: {
-                student: { select: { first_name: true, father_name: true, last_name: true, roll_number: true } },
+                student: { 
+                    select: { 
+                        first_name: true, 
+                        father_name: true, 
+                        last_name: true, 
+                        roll_number: true,
+                        // Class ko include kiya
+                        class: { select: { class_name: true } }
+                    } 
+                },
                 template: { select: { name: true } },
                 collectedBy: { select: { name: true } }
             },
@@ -1050,15 +1061,26 @@ const getTransactions = async (req, res) => {
             take: parseInt(limit, 10),
             skip: skip
         });
+        // --- End Fix 2 ---
 
+        // --- 3. Frontend Format Fix: Data ko Flat kiya ---
         const formattedTransactions = transactions.map(tx => ({
-            ...tx,
-            studentId: {
-                name: getFullName(tx.student),
-                studentId: tx.student?.roll_number
-            },
-            templateName: tx.template?.name || 'N/A'
+            id: tx.id,
+            receiptId: tx.receiptId,
+            amountPaid: tx.amountPaid,
+            paymentMode: tx.paymentMode,
+            paymentDate: tx.paymentDate ? tx.paymentDate.toISOString().split('T')[0] : 'N/A', // Date format fix
+            status: tx.status,
+            
+            // Frontend table fields
+            studentName: getFullName(tx.student) || 'N/A',
+            className: tx.student?.class?.class_name || 'N/A',
+            templateName: tx.template?.name || 'N/A',
+            
+            // Backend data jo frontend ko nahi chahiye use hata diya
+            // collectedByName: tx.collectedBy?.name || 'N/A' 
         }));
+        // --- End Fix 3 ---
 
         res.status(200).json({
             data: formattedTransactions,
@@ -1072,8 +1094,6 @@ const getTransactions = async (req, res) => {
         res.status(500).send("Server Error fetching transactions");
     }
 };
-
-// --- 3. EXPORTS (Same as before) ---
 module.exports = {
   getDashboardOverview,
   getFeeTemplates,

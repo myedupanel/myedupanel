@@ -1,0 +1,141 @@
+/* Page ka main layout */
+.studentPageLayout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #f4f7fa; /* Light background for the whole page */
+}
+
+/* Sidebar ke alawa baaki ka content area */
+.mainContent {
+  flex-grow: 1;
+  padding: 2rem;
+  overflow-y: auto; /* Content lamba hone par scrollable banayein */
+}
+
+/* Page ka header "Student Management" */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a2a44;
+}
+
+/* Export/Print modal ke andar ke buttons */
+.exportOptionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+.exportOptionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none; /* For CSVLink */
+
+  &.csv {
+    background-color: #f0fdf4;
+    color: #166534;
+    &:hover {
+      background-color: #dcfce7;
+      border-color: #86efac;
+    }
+  }
+  
+  &.xlsx {
+    background-color: #f1f5f9;
+    color: #334155;
+    &:hover {
+      background-color: #e2e8f0;
+      border-color: #cbd5e1;
+    }
+  }
+
+  &.print {
+    background-color: #eff6ff;
+    color: #1e40af;
+    &:hover {
+      background-color: #dbeafe;
+      border-color: #93c5fd;
+    }
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  }
+}
+/* Yeh code StudentsPage.module.scss ke aakhir mein add karein */
+.dashboardLinkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  margin: 2rem auto 1rem auto; /* Page ke end mein center karega */
+  background-color: #374151; // Dark color
+  color: #ffffff;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  svg {
+    font-size: 1.25rem;
+  }
+
+  &:hover {
+    background-color: #4b5563; // Thoda light hover
+  }
+}
+.addButton {
+  display: inline-flex; /* Icon aur text ko ek line mein laata hai */
+  align-items: center;
+  gap: 8px; /* Icon aur text ke beech space */
+  
+  background-color: var(--color-primary); /* Aapka main blue color */
+  color: var(--color-white); /* White text */
+  
+  padding: 12px 20px; /* Thodi padding */
+  font-size: 1rem;
+  font-weight: 600;
+  
+  border: none;
+  border-radius: var(--border-radius); /* Aapke global styles se */
+  box-shadow: var(--box-shadow-md);   /* Aapke global styles se */
+  
+  cursor: pointer;
+  transition: var(--transition); /* Aapke global styles se */
+
+  /* Icon ka size adjust karein */
+  svg {
+    font-size: 1.2rem;
+  }
+
+  /* Hover (mouse le jaane par) effect */
+  &:hover {
+    background-color: #0c84b8; /* Thoda dark blue */
+    transform: translateY(-2px); /* Halki si lift */
+    box-shadow: var(--box-shadow-lg); /* Bada shadow */
+  }
+}

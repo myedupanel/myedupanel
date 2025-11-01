@@ -1,88 +1,177 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styles from './TimetablePage.module.scss';
-import { MdAdd, MdEdit } from 'react-icons/md';
+import { MdAdd, MdEdit, MdGridView } from 'react-icons/md';
 import Modal from '@/components/common/Modal/Modal';
 import AssignPeriodForm from '@/components/admin/AssignPeriodForm/AssignPeriodForm';
 import Link from 'next/link';
+// --- API Import ---
+import api from '@/backend/utils/api'; 
+// --- End API Import ---
 
-// --- YEH ADD KAREIN ---
-import { MdGridView } from 'react-icons/md';
-// --- END ---
-
+// --- NEW INTERFACES (No Change) ---
 interface TimeSlot {
-    id: string;
+    id: number;
     name: string;
     startTime: string;
     endTime: string;
     isBreak: boolean; 
 }
 
-interface PeriodData {
+interface PeriodAssignment { 
+    id: number; 
+    day: string;
+    timeSlotName: string;
+    className: string;
+    teacherName: string;
     subject: string;
-    teacher: string;
 }
-
-const classOptions = ["Nursery", "LKG", "UKG", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12"];
-const teacherOptions = ["Priya Sharma", "Rahul Verma", "Anjali Mehta", "Suresh Kumar", "Deepika Singh"];
+// --- END NEW INTERFACES ---
 
 const TimetablePage = () => {
     const [viewBy, setViewBy] = useState<'class' | 'teacher'>('class');
-    const [selectedGroup, setSelectedGroup] = useState(classOptions[0]);
+    const [selectedGroup, setSelectedGroup] = useState('');
+    
+    // --- New States for Live Data (No Change) ---
+    const [classOptions, setClassOptions] = useState<string[]>([]);
+    const [teacherOptions, setTeacherOptions] = useState<string[]>([]);
     const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
     const [workingDays, setWorkingDays] = useState<string[]>([]);
-    const [timetableData, setTimetableData] = useState<any>({});
+    const [allAssignments, setAllAssignments] = useState<PeriodAssignment[]>([]); 
+    const [isLoading, setIsLoading] = useState(true);
+    // --- End New States ---
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentSlot, setCurrentSlot] = useState<{ day: string, slotName: string } | null>(null);
 
-    useEffect(() => {
-        const savedTimetable = localStorage.getItem('schoolTimetableData');
-        if (savedTimetable) { setTimetableData(JSON.parse(savedTimetable)); }
-
-        const savedSlots = localStorage.getItem('schoolTimeSlots');
-        if (savedSlots) { setTimeSlots(JSON.parse(savedSlots)); }
-
-        const savedDays = localStorage.getItem('schoolWorkingDays');
-        if (savedDays) {
-            setWorkingDays(JSON.parse(savedDays));
-        } else {
-            setWorkingDays(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
+    // --- 1. Fetching Assignments (No Change) ---
+    const fetchAssignments = useCallback(async () => {
+        try {
+            const assignmentsRes = await api.get('/timetable/assignments'); 
+            setAllAssignments(assignmentsRes.data);
+        } catch(error) {
+             console.error("Error fetching assignments:", error);
         }
     }, []);
+
+    // --- 2. Fetching Settings (No Change) ---
+    const fetchSettings = useCallback(async () => {
+        try {
+            const [classesRes, teachersRes] = await Promise.all([
+                api.get('/classes'),
+                api.get('/teachers') 
+            ]);
+            const fetchedClasses = classesRes.data.map((c: any) => c.class_name);
+            const fetchedTeachers = teachersRes.data.data.map((t: any) => t.name);
+            
+            setClassOptions(fetchedClasses);
+            setTeacherOptions(fetchedTeachers);
+
+            const configRes = await api.get<{ timeSlots: TimeSlot[], workingDays: string[] }>('/timetable/settings'); 
+
+            setTimeSlots(configRes.data.timeSlots);
+            setWorkingDays(configRes.data.workingDays);
+
+            if (fetchedClasses.length > 0 && !selectedGroup) {
+                 setSelectedGroup(fetchedClasses[0]);
+            }
+
+        } catch (error) {
+            console.error("Error fetching settings:", error);
+        }
+    }, [selectedGroup]);
+
+    // --- 3. Initial Load Effect (No Change) ---
+    useEffect(() => {
+        const loadData = async () => {
+            setIsLoading(true);
+            await fetchSettings();
+            await fetchAssignments();
+            setIsLoading(false);
+        };
+        loadData();
+    }, [fetchSettings, fetchAssignments]);
+
+    // --- 4. ASYNC Save Logic (Argument Type 'any' किया) ---
+    const handleSavePeriod = async (data: any) => {
+        if (!currentSlot) return;
+
+        const className = viewBy === 'class' ? selectedGroup : data.class; 
+        const teacherName = viewBy === 'teacher' ? selectedGroup : data.teacher;
+        const subject = data.subject;
+
+        if (!className || !teacherName || !subject) {
+             alert('Error: Data is incomplete. Please check your form fields.');
+             return;
+        }
+
+        const payload = {
+            day: currentSlot.day,
+            slotName: currentSlot.slotName,
+            className: className, 
+            teacherName: teacherName, 
+            subject: subject,
+        };
+        
+        try {
+             await api.post('/timetable/assign', payload);
+             alert('Period assigned successfully! Refreshing data...');
+             await fetchAssignments(); 
+        } catch (error: any) {
+             console.error("Error saving period:", error);
+             alert(`Failed to save period: ${error.response?.data?.message || 'Server Error'}`);
+        }
+
+        setIsModalOpen(false);
+        setCurrentSlot(null);
+    };
+
+    // --- 5. SYNCHRONOUS Wrapper (No Change) ---
+    const handleSavePeriodSync = (data: any) => {
+        handleSavePeriod(data);
+    };
+    // --- END FIX ---
+    
+    // --- 6. Process Display Data (No Change) ---
+    const currentDisplayData = useMemo(() => {
+        const filteredData: any = {};
+        
+        if (viewBy === 'class') {
+             allAssignments
+                .filter(a => a.className === selectedGroup)
+                .forEach(a => {
+                    const key = `${a.day}-${a.timeSlotName}`;
+                    filteredData[key] = { subject: a.subject, teacher: a.teacherName };
+                });
+            
+        } else {
+            allAssignments
+                .filter(a => a.teacherName === selectedGroup)
+                .forEach(a => {
+                    const key = `${a.day}-${a.timeSlotName}`;
+                    filteredData[key] = { subject: a.subject, class: a.className };
+                });
+        }
+        
+        return filteredData;
+
+    }, [allAssignments, selectedGroup, viewBy]);
 
     const handleOpenModal = (day: string, slotName: string) => {
         if (viewBy === 'teacher') { return; }
         setCurrentSlot({ day, slotName });
         setIsModalOpen(true);
     };
-    
-    const handleSavePeriod = (data: PeriodData) => {
-        if (!currentSlot) return;
-        const key = `${currentSlot.day}-${currentSlot.slotName}`;
-        const newTimetableData = {
-            ...timetableData,
-            [selectedGroup]: { ...timetableData[selectedGroup], [key]: data }
-        };
-        setTimetableData(newTimetableData);
-        localStorage.setItem('schoolTimetableData', JSON.stringify(newTimetableData));
-        setIsModalOpen(false);
-        setCurrentSlot(null);
-    };
 
-    const getTeacherTimetable = () => {
-        const teacherSchedule: any = {};
-        Object.keys(timetableData).forEach(className => {
-            Object.keys(timetableData[className]).forEach(slotKey => {
-                const period = timetableData[className][slotKey];
-                if (period.teacher === selectedGroup) {
-                    teacherSchedule[slotKey] = { ...period, class: className };
-                }
-            });
-        });
-        return teacherSchedule;
-    };
+    if (isLoading) return <div className={styles.loadingState}>Loading Timetable Configuration...</div>;
     
-    const currentDisplayData = viewBy === 'class' ? timetableData[selectedGroup] : getTeacherTimetable();
+    const availableOptions = viewBy === 'class' ? classOptions : teacherOptions;
+    
+    if (!availableOptions.includes(selectedGroup) && availableOptions.length > 0) {
+        setSelectedGroup(availableOptions[0]);
+        return <div className={styles.loadingState}>Switching view...</div>;
+    }
+
 
     return (
         <div className={styles.pageContainer}>
@@ -90,17 +179,17 @@ const TimetablePage = () => {
                 <h1 className={styles.pageTitle}>Timetable Management</h1>
                 <div className={styles.controls}>
                     <div className={styles.viewToggle}>
-                        <button onClick={() => { setViewBy('class'); setSelectedGroup(classOptions[0]); }} className={viewBy === 'class' ? styles.active : ''}>Class View</button>
-                        <button onClick={() => { setViewBy('teacher'); setSelectedGroup(teacherOptions[0]); }} className={viewBy === 'teacher' ? styles.active : ''}>Teacher View</button>
+                        <button onClick={() => { setViewBy('class'); setSelectedGroup(classOptions[0]); }} className={viewBy === 'class' ? styles.active : ''} disabled={classOptions.length === 0}>Class View</button>
+                        <button onClick={() => { setViewBy('teacher'); setSelectedGroup(teacherOptions[0]); }} className={viewBy === 'teacher' ? styles.active : ''} disabled={teacherOptions.length === 0}>Teacher View</button>
                     </div>
-                    <select value={selectedGroup} onChange={(e) => setSelectedGroup(e.target.value)}>
-                        {(viewBy === 'class' ? classOptions : teacherOptions).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    <select value={selectedGroup} onChange={(e) => setSelectedGroup(e.target.value)} disabled={availableOptions.length === 0}>
+                        {availableOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     </select>
                 </div>
             </div>
 
             <div className={styles.timetableWrapper}>
-                {timeSlots.length > 0 ? (
+                {timeSlots.length > 0 && workingDays.length > 0 ? (
                     <table className={styles.timetableTable}>
                         <thead>
                             <tr>
@@ -150,29 +239,26 @@ const TimetablePage = () => {
                     </table>
                 ) : (
                     <div className={styles.emptyState}>
-                        <h2>No Time Slots Found</h2>
-                        <p>Please go to the settings page to create time slots for the timetable.</p>
+                        <h2>Timetable Configuration Missing</h2>
+                        <p>Please ensure you have created time slots and working days in the settings page.</p>
                         <Link href="/admin/settings" className={styles.settingsButton}> Go to Settings </Link>
                     </div>
                 )}
             </div>
 
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={`Assign Period for ${selectedGroup}`}>
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={`Assign Period for ${selectedGroup} - ${currentSlot?.day}`}>
                 <AssignPeriodForm
                     onClose={() => setIsModalOpen(false)}
-                    onSave={handleSavePeriod}
-                    // FIX: Removed the invalid teacherOptions prop below
-                    // teacherOptions={teacherOptions} 
+                    onSave={handleSavePeriodSync} 
+                    classOptions={classOptions}
+                    teacherOptions={teacherOptions} 
                 />
             </Modal>
 
-            {/* --- YEH BUTTON ADD KIYA GAYA HAI --- */}
-            {/* Yeh button page ke aakhir mein dikhega */}
             <Link href="/admin/school" className={styles.dashboardLinkButton}>
                 <MdGridView />
                 Go to Dashboard
             </Link>
-            {/* --- END --- */}
         </div>
     );
 };
