@@ -2,26 +2,29 @@
 
 import React, { useState } from 'react';
 import styles from './PlansPage.module.scss';
-import { FiCheck } from 'react-icons/fi';
+// --- FIX: Naya Icon import kiya (Red 'X' ke liye) ---
+import { FiCheck, FiXCircle } from 'react-icons/fi';
 import Link from 'next/link'; 
-import Navbar from '@/components/Navbar'; // Aapke components folder se
-import Footer from '@/components/Footer'; // Aapke components folder se
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
-// --- FIX 1: Interface ko naye blueprint ke hisaab se update kiya ---
+// --- FIX 1: Interface ko update kiya (Discount ke liye) ---
 interface Plan {
   name: string;
   price: number;
-  description: string; // Har plan ke liye ek chhota description
-  features: string[]; // Core features
-  plusFeatures?: string[]; // Extra features jo agle plan mein hain
+  originalPrice?: number; // <-- Discount ke liye
+  description: string;
+  features: string[];
+  plusFeatures?: string[];
   isPopular?: boolean;
 }
 
-// --- FIX 2: Naya 'Tiered Module' Blueprint Data ---
+// --- FIX 2: Naya 'Tiered Module' Blueprint Data (Discount ke saath) ---
 const plansData: Plan[] = [
   {
     name: 'Starter (The Core)',
     price: 4999,
+    // (Is par discount nahi hai)
     description: 'Basic digitalization aur record-keeping ke liye perfect.',
     features: [
       'Admin Dashboard (Basic)',
@@ -30,7 +33,7 @@ const plansData: Plan[] = [
       'Basic Attendance Tracking',
       'School Settings',
     ],
-    plusFeatures: [ // Yeh features is plan mein nahi hain
+    plusFeatures: [ 
       'Fee Counter & Online Payment',
       'Parent & Student Login Portals',
       'Advanced Exams & Certificates',
@@ -41,6 +44,7 @@ const plansData: Plan[] = [
   {
     name: 'Plus (The Standard)',
     price: 9999,
+    originalPrice: 12999, // <-- Discount
     description: 'Best for schools needing fee management and parent communication.',
     features: [
       'Everything in Starter',
@@ -49,7 +53,7 @@ const plansData: Plan[] = [
       'Digital Noticeboard',
       'Basic SMS/Email Alerts',
     ],
-    plusFeatures: [ // Yeh features is plan mein nahi hain
+    plusFeatures: [ 
       'Advanced Exams & Certificates',
       'Transport & Library Modules',
       'Premium Support'
@@ -59,6 +63,7 @@ const plansData: Plan[] = [
   {
     name: 'Pro (The All-in-One)',
     price: 19999,
+    originalPrice: 24999, // <-- Discount
     description: 'The complete all-in-one solution for large schools.',
     features: [
       'Everything in Plus',
@@ -78,39 +83,13 @@ const PlansPage = () => {
   const [isSignupModalVisible, setIsSignupModalVisible] = useState(false);
   const [isFeaturesModalVisible, setIsFeaturesModalVisible] = useState(false);
   const [isForgotModalVisible, setIsForgotModalVisible] = useState(false);
-  
-  const hideModals = () => {
-    setIsLoginModalVisible(false);
-    setIsSignupModalVisible(false);
-    setIsFeaturesModalVisible(false);
-    setIsForgotModalVisible(false);
-  };
-  const hideOnOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
-      hideModals();
-    }
-  };
-  const switchToSignup = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsLoginModalVisible(false);
-    setIsSignupModalVisible(true);
-  };
-  const switchToLogin = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsSignupModalVisible(false);
-    setIsLoginModalVisible(true);
-  };
-  const switchToForgot = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsLoginModalVisible(false);
-    setIsForgotModalVisible(true);
-  };
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
-     e.preventDefault();
-     console.log("Login submitted");
-  };
+  const hideModals = () => { setIsLoginModalVisible(false); setIsSignupModalVisible(false); setIsFeaturesModalVisible(false); setIsForgotModalVisible(false); };
+  const hideOnOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => { if ((event.target as HTMLElement).classList.contains('modal-overlay')) { hideModals(); } };
+  const switchToSignup = (e: React.MouseEvent) => { e.preventDefault(); setIsLoginModalVisible(false); setIsSignupModalVisible(true); };
+  const switchToLogin = (e: React.MouseEvent) => { e.preventDefault(); setIsSignupModalVisible(false); setIsLoginModalVisible(true); };
+  const switchToForgot = (e: React.MouseEvent) => { e.preventDefault(); setIsLoginModalVisible(false); setIsForgotModalVisible(true); };
+  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => { e.preventDefault(); console.log("Login submitted"); };
   // --- END MODAL LOGIC ---
-
 
   return (
     <> 
@@ -128,7 +107,7 @@ const PlansPage = () => {
           <p>Choose the plan that's right for your school's needs.</p>
         </header>
 
-        {/* --- FIX 3: Naya Card Layout --- */}
+        {/* --- FIX 3: Naya Card Layout (Discount aur 'X' icon ke saath) --- */}
         <main className={styles.plansGrid}>
           {plansData.map((plan) => (
             <div 
@@ -140,11 +119,15 @@ const PlansPage = () => {
               )}
               
               <h3 className={styles.planName}>{plan.name}</h3>
-              
-              {/* Plan ka naya description */}
               <p className={styles.planDescription}>{plan.description}</p>
 
               <div className={styles.planPrice}>
+                {/* Discounted Price dikhane ke liye logic */}
+                {plan.originalPrice && (
+                  <span className={styles.originalPrice}>
+                    ₹{plan.originalPrice.toLocaleString('en-IN')}
+                  </span>
+                )}
                 {plan.price === 0 ? (
                   'Free'
                 ) : (
@@ -153,7 +136,7 @@ const PlansPage = () => {
                 <span>{plan.price > 0 ? '/ per year' : ''}</span>
               </div>
               
-              {/* "Included Features" list */}
+              {/* Included Features */}
               <ul className={styles.featuresList}>
                 {plan.features.map((feature, index) => (
                   <li key={index} className={styles.included}>
@@ -163,22 +146,22 @@ const PlansPage = () => {
                 ))}
               </ul>
 
-              {/* "Plus Features" (jo agle plan mein milenge) */}
-              {/* Yeh un features ko dikhayega jo is plan mein nahi hain */}
+              {/* Excluded Features (Red 'X' icon ke saath) */}
               {plan.plusFeatures && plan.plusFeatures.length > 0 && (
                 <ul className={styles.featuresList}>
                   {plan.plusFeatures.map((feature, index) => (
                     <li key={index} className={styles.excluded}>
-                      <span className={styles.perkIcon}>&times;</span> {/* Cross icon */}
+                      {/* &times; ko FiXCircle se badal diya */}
+                      <FiXCircle className={styles.perkIcon} />
                       <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
               )}
               
-              {/* Button */}
+              {/* Button (Text "Buy Now" kar diya) */}
               <Link href="/signup" className={`${styles.ctaButton} ${styles[plan.name.split(' ')[0].toLowerCase()]}`}>
-                {plan.price === 0 ? 'Get Started' : 'Grab Now Deal'}
+                {plan.price === 0 ? 'Get Started' : 'Buy Now'}
               </Link>
             </div>
           ))}
