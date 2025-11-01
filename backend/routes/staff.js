@@ -59,12 +59,18 @@ router.post('/', [authMiddleware, authorize('Admin')], async (req, res) => { // 
                 role: staffRole,
                 // schoolName store karne ki zaroorat nahi, relation se mil jayega
                 isVerified: true, // Assuming admin created are verified
+                
+                // --- YEH HAI AAPKA FIX (POST) ---
+                // 'details' field ko comment out kar diya kyonki yeh schema mein nahi hai
+                /*
                 details: { // Save staff details here (Prisma handles JSON)
                     staffId: staffId,
                     contactNumber: contactNumber,
                     joiningDate: joiningDate ? new Date(joiningDate) : null,
                     leavingDate: leavingDate ? new Date(leavingDate) : null
                 }
+                */
+                // --- END FIX ---
             }
         });
         console.log(`[POST /staff] User saved. ID: ${savedUser.id}`);
@@ -195,6 +201,9 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { /
             emailUpdateData.email = newEmail; // Email ko update data mein add karein
         }
 
+        // --- YEH HAI AAPKA FIX (PUT) ---
+        // 'details' ko update karne wale poore logic ko comment out kar diya
+        /*
         // --- Update details object ---
         // Prisma mein JSON update karne ke liye naya object banana padta hai
         const currentDetails = (userToUpdate.details || {}); // Type assertion hata diya
@@ -204,6 +213,7 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { /
             joiningDate: joiningDate !== undefined ? (joiningDate ? new Date(joiningDate) : null) : currentDetails.joiningDate,
             leavingDate: leavingDate !== undefined ? (leavingDate ? new Date(leavingDate) : null) : currentDetails.leavingDate
         };
+        */
         // .markModified ki zaroorat nahi hai
 
         // Mongoose save() ko Prisma update se badla
@@ -213,9 +223,11 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { /
                 name: name,
                 role: staffRole,
                 ...emailUpdateData, // Email update karein agar change hua hai
-                details: newDetails // Poora naya details object save karein
+                // details: newDetails // Poora naya details object save karein // <-- YEH LINE BHI COMMENT OUT KARDI
             }
         });
+        // --- END FIX ---
+        
         console.log(`[PUT /staff/${id}] User updated.`);
 
         // --- Emit socket event AFTER save ---
