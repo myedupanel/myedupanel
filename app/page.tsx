@@ -121,7 +121,6 @@ export default function Home() {
         activeSection={activeSection}
       />
 
-      {/* --- HERO SECTION UPDATE --- */}
       <main id="hero" className="hero" style={{ position: 'relative' }}>
         <div className="miss-minutes-container">
           <NextImage
@@ -132,26 +131,16 @@ export default function Home() {
             unoptimized={true}
           />
         </div>
-        
-        {/* Subtitle ko comment out kar diya hai eSkooly jaisa look dene ke liye, aap chahein toh ise waapas la sakte hain */}
-        {/* <p className="hero-subtitle">✨ Welcome to My EduPanel</p> */}
-        
-        {/* Title ko eSkooly jaisa update kiya */}
-        <h1>Free Online School<br />Management Software.</h1>
-        
-        {/* Description ko eSkooly jaisa update kiya */}
-        <p className="hero-description">Now you can manage your school, college, or any educational center with My EduPanel. It's 100% free for a lifetime with no limitations.</p>
-        
-        {/* Buttons ko eSkooly jaisa update kiya */}
+        <p className="hero-subtitle">✨ Welcome to My EduPanel</p>
+        <h1>Your Complete School<br />Management Solution</h1>
+        <p className="hero-description">From admissions to academics, simplify every aspect of school administration with our comprehensive and user-friendly platform.</p>
         <div className="hero-buttons">
-          <Link href="/signup" className="get-started-btn">Sign Up Now, It's Free</Link>
-          <a href="#features-section" className="all-features-btn">Learn More</a>
+          <Link href="/signup" className="get-started-btn">Get Started</Link>
+          <a href="#features-section" className="all-features-btn">See All features</a>
         </div>
-        {/* --- END HERO UPDATE --- */}
       </main>
 
       <section className="trusted-by">
-        {/* ... (baaki ka poora content waisa hi rahega) ... */}
         <div className="container">
           <div className="trusted-by-header">
             <h3>Trusted by 9+ Leading Educational Institutions</h3>
@@ -167,7 +156,6 @@ export default function Home() {
       </section>
 
       <section id="impact-section" className="impact-numbers">
-        {/* ... (baaki ka poora content waisa hi rahega) ... */}
         <div className="container">
           <div className="impact-header">
             <h2>Our Impact in Numbers</h2>
@@ -182,7 +170,6 @@ export default function Home() {
       </section>
       
       <div id="features-section" className="main-features-container">
-        {/* ... (baaki ka poora content waisa hi rahega) ... */}
         <div className="features-header"><span className="features-tag">✨ Additional Features</span><h2>All-in-One School Management Platform</h2><p>Streamline your entire school operations with our comprehensive suite of integrated modules designed specifically for modern educational institutions.</p></div>
         <nav className="feature-tabs">
           <button className={`tab-button ${activeTab === 'students' ? 'active' : ''}`} onClick={() => setActiveTab('students')}><i className="bi bi-people-fill"></i> Students</button>
@@ -193,7 +180,6 @@ export default function Home() {
       </div>
 
       <section className="feature-content-container">
-        {/* ... (baaki ka poora content waisa hi rahega) ... */}
         <div className="feature-content-card" style={{ '--glow-color': featuresData[activeTab as keyof typeof featuresData].glowColor } as React.CSSProperties}>
           <h3>{featuresData[activeTab as keyof typeof featuresData].title}</h3>
           <p className="description">{featuresData[activeTab as keyof typeof featuresData].description}</p>
@@ -205,8 +191,8 @@ export default function Home() {
         </div>
       </section>
       
+      {/* --- PRICING HERO SECTION (No Change) --- */}
       <section className="pricing-hero">
-        {/* ... (baaki ka poora content waisa hi rahega) ... */}
         <div className="container">
           <p className="pricing-tag">✨ Pricing</p>
           <h2>Simple, Transparent Pricing</h2>
@@ -214,10 +200,12 @@ export default function Home() {
         </div>
       </section>
       
+      {/* --- PRICING CONTAINER SECTION --- */}
       <section className="pricing-container" id="pricing-section">
-        {/* ... (baaki ka poora content waisa hi rahega) ... */}
         <div className="container">
+          
           <div className="pricing-box">
+            {/* --- PRICING DETAILS (LEFT SIDE) (No Change) --- */}
             <div className="pricing-details">
               <h2>Complete School Plan</h2>
               <p>Get complete access to our comprehensive school management system. One price, all features, unlimited users.</p>
@@ -233,8 +221,12 @@ export default function Home() {
                 <li><span className="checkmark">✓</span> 24/7 Customer Support</li>
               </ul>
             </div>
+            
+            {/* === PRICING CARD (RIGHT SIDE) UPDATED === */}
             <div className="pricing-card">
               <h4>Include All Features</h4>
+              
+              {/* 1. Price layout fixed with inline styles */}
               <div 
                 className="price" 
                 style={{ 
@@ -243,7 +235,7 @@ export default function Home() {
                   justifyContent: 'center', 
                   gap: '8px', 
                   margin: '1.5rem 0',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap' /* Fix: Prevents line break */
                 }}
               >
                 <span style={{ fontSize: '2.8rem', fontWeight: '700', color: '#111' }}>
@@ -253,19 +245,63 @@ export default function Home() {
                   /&nbsp;per&nbsp;year
                 </span>
               </div>
+              
+              {/* 2. Button text is correct */}
               <Link href="/plans" className="cta-button">Grab Now Deal</Link>
+              
+              {/* 3. Trial info line is gone */}
             </div>
+            {/* === END OF PRICING CARD UPDATES === */}
+
           </div>
         </div>
       </section>
+      {/* --- END OF PRICING UPDATES --- */}
+      
       
       {/* --- MODALS SECTION (No Changes) --- */}
       {isLoginModalVisible && (
         <div className="modal-overlay" onClick={hideOnOverlayClick}>
-          {/* ... (modal content) ... */}
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <a href="#" onClick={(e) => { e.preventDefault(); hideModals(); }} className="close-btn">&times;</a>
+            <h2>Login to School Pro</h2>
+            <form onSubmit={handleLogin}>
+              <div className="form-group"><label htmlFor="email">Email</label><input type="email" id="email" name="email" required /></div>
+              <div className="form-group"><label htmlFor="password">Password</label><input type="password" id="password" name="password" required /></div>
+              <div style={{ textAlign: 'right', marginBottom: 'var(--space-4)' }}><a href="#" onClick={switchToForgot} style={{ fontSize: '0.9rem', color: 'var(--color-primary)' }}>Forgot Password?</a></div>
+              <button type="submit" className="submit-btn">Log In</button>
+            </form>
+            <p>New here? <a href="#" onClick={switchToSignup}>Create an account</a></p>
+          </div>
         </div>
       )}
-      {/* ... (baaki saare modals) ... */}
+
+      {isSignupModalVisible && ( <div className="modal-overlay" onClick={hideOnOverlayClick}><div className="modal-content" onClick={(e) => e.stopPropagation()}><a href="#" onClick={(e) => { e.preventDefault(); hideModals(); }} className="close-btn">&times;</a><h2>Sign Up for School Pro</h2><form><div className="form-group"><label htmlFor="school-name">School Name</label><input type="text" id="school-name" name="school-name" required /></div><div className="form-group"><label htmlFor="signup-email">Email</label><input type="email" id="signup-email" name="signup-email" required /></div><div className="form-group"><label htmlFor="signup-password">Password</label><input type="password" id="signup-password" name="signup-password" required /></div><button type="submit" className="submit-btn">Sign Up</button></form><p>Already have an account? <a href="#" onClick={switchToLogin}>Log in</a></p></div></div>)}
+      {isForgotModalVisible && ( <div className="modal-overlay" onClick={hideOnOverlayClick}><div className="modal-content" onClick={(e) => e.stopPropagation()}><a href="#" onClick={(e) => { e.preventDefault(); hideModals(); }} className="close-btn">&times;</a><h2>Reset Your Password</h2><p style={{ textAlign: 'center', marginTop: '-20px', marginBottom: '30px', fontSize: '0.95rem' }}>Enter your email address and we will send you a verification code.</p><form><div className="form-group"><label htmlFor="reset-email">Email</label><input type="email" id="reset-email" name="reset-email" placeholder="you@example.com" required /></div><button type="submit" className="submit-btn">Send Verification Code</button></form></div></div>)}
+      
+      {isFeaturesModalVisible && ( 
+        <div className="modal-overlay" onClick={hideOnOverlayClick}>
+          <div className="features-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Features</h2>
+              <a href="#" onClick={(e) => { e.preventDefault(); hideModals(); }} className="close-btn">&times;</a>
+            </div>
+            <div className="features-modal-grid">
+              <div className="feature-modal-card"><h4>Student Management</h4><p>Manage enrollments, profiles, and academic records with ease.</p></div>
+              <div className="feature-modal-card"><h4>Academic Management</h4><p>Streamline curriculum planning, examinations, and grading.</p></div>
+              <div className="feature-modal-card"><h4>Communication Hub</h4><p>Integrated messaging for seamless school-wide communication.</p></div>
+              <div className="feature-modal-card"><h4>Financial Management</h4><p>Complete fee management with online payments and invoicing.</p></div>
+              <div className="feature-modal-card"><h4>Staff Management</h4><p>Tools for managing staff records, attendance, and payroll.</p></div>
+              <div className="feature-modal-card"><h4>Transport Management</h4><p>Real-time transport tracking, route management, and notifications.</p></div>
+              <div className="feature-modal-card"><h4>Analytics & Reports</h4><p>Powerful analytics for data-driven decisions and insights.</p></div>
+              <div className="feature-modal-card"><h4>Resource Management</h4><p>Digital library, inventory tracking, and facility scheduling.</p></div>
+            </div>
+            <div className="features-modal-footer">
+              <Link href="/signup" className="btn-get-started-modal" onClick={hideModals}>Get Started</Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </>

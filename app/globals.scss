@@ -2,7 +2,7 @@
    FINAL & COMPLETE SCSS FOR SCHOOLPRO
    ============================================== */
 
-// --- 1. Naya Design System (No Change) ---
+// --- 1. Naya Design System ---
 :root {
   --color-primary: #0ea5e9;
   --color-primary-light: #f0f9ff;
@@ -28,7 +28,7 @@
   --transition: all 0.3s ease-in-out;
 }
 
-// --- 2. Global Styles & Resets (No Change) ---
+// --- 2. Global Styles & Resets ---
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0; padding: 0;
@@ -55,9 +55,8 @@ section {
   padding-right: var(--space-8);
 }
 
-/* === BACKGROUND GLOWING ANIMATION (No Change) === */
+/* === BACKGROUND GLOWING ANIMATION === */
 @keyframes glowing-background {
-  /* ... (animation code no change) ... */
   0%, 100% {
     box-shadow: 0 0 30px 10px var(--color-primary-light), 0 0 40px 15px var(--color-primary);
   }
@@ -73,14 +72,11 @@ section {
 }
 
 
-// --- 3. Header & Navigation (ESKOOLY BLUEPRINT UPDATE) ---
+// --- 3. Header & Navigation ---
 header {
-  /* --- FIX: Background ko transparent kiya --- */
-  background: transparent; 
-  /* --- FIX: Blur/White background hata diya --- */
-  /* backdrop-filter: blur(10px); */ 
-  /* --- FIX: Border ko halka white kiya dark background ke liye --- */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--color-border);
   position: sticky; top: 0; z-index: 1000;
   padding: var(--space-4) var(--space-8);
   
@@ -104,8 +100,7 @@ header {
     span {
       font-size: 1.75rem;
       font-weight: 700;
-      /* --- FIX: Text ko white kiya --- */
-      color: var(--color-white); 
+      color: var(--color-text-heading);
     }
   }
 
@@ -124,16 +119,10 @@ header {
     padding: 0;
     a {
       text-decoration: none;
-      /* --- FIX: Text ko white kiya --- */
-      color: var(--color-white); 
+      color: var(--color-text-body);
       font-weight: 500;
       transition: var(--transition);
-      opacity: 0.8;
-      &:hover { 
-        /* --- FIX: Hover par full white --- */
-        color: var(--color-white); 
-        opacity: 1;
-      }
+      &:hover { color: var(--color-primary); }
     }
   }
 
@@ -149,40 +138,26 @@ header {
       border: 2px solid transparent;
       transition: var(--transition);
     }
-
-    /* --- FIX: Login Button (Secondary "Ghost" style) --- */
     .login-btn {
-      color: var(--color-white);
+      color: var(--color-primary);
       background-color: transparent;
-      border-color: var(--color-white);
-      &:hover { 
-        background-color: rgba(255, 255, 255, 0.1); 
-      }
+      border-color: var(--color-border);
+      &:hover { background-color: var(--color-primary-light); }
     }
-
-    /* --- FIX: Demo Button (Primary "Solid" style) --- */
     .demo-btn {
       color: var(--color-white);
-      background-color: var(--color-primary); // Yeh pehle se blue tha, perfect
+      background-color: var(--color-primary);
       box-shadow: var(--box-shadow-md);
-      &:hover { 
-        transform: translateY(-3px); 
-        box-shadow: var(--box-shadow-lg);
-        background-color: #0b98d6; // Thoda halka hover
-      }
+      &:hover { transform: translateY(-3px); box-shadow: var(--box-shadow-lg); }
     }
   }
 }
-// --- END HEADER UPDATE ---
 
 
-// --- 4. Hero Section (ESKOOLY BLUEPRINT UPDATE) ---
+// --- 4. Hero Section ---
 main.hero {
-  /* --- FIX: Background ko dark navy blue kiya --- */
-  background: var(--color-text-heading); 
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-background));
   padding: var(--space-16) var(--space-8);
-  /* --- FIX: Padding upar zyada di taaki Navbar se overlap na ho --- */
-  padding-top: var(--space-24); 
   text-align: center;
   
   .hero-subtitle {
@@ -190,13 +165,11 @@ main.hero {
     position: relative;
     font-weight: 600;
     font-size: 1.25rem;
-    /* --- FIX: Text ko white kiya --- */
-    color: var(--color-white); 
+    color: var(--color-text-heading);
     margin-bottom: var(--space-6);
     z-index: 1;
     
     &::before {
-      /* ... (glowing animation no change) ... */
       content: '';
       position: absolute;
       left: 50%;
@@ -215,8 +188,7 @@ main.hero {
     font-size: clamp(2.8rem, 6vw, 4.8rem);
     font-weight: 800;
     margin-bottom: var(--space-6);
-    /* --- FIX: Text ko white kiya --- */
-    color: var(--color-white); 
+    color: var(--color-text-heading);
     line-height: 1.15;
   }
 
@@ -225,8 +197,7 @@ main.hero {
     margin: 0 auto var(--space-10);
     font-size: 1.1rem; 
     line-height: 1.7;
-    /* --- FIX: Text ko halka white kiya --- */
-    color: #cbd5e1; 
+    color: var(--color-text-body);
   }
   
   .hero-buttons {
@@ -242,36 +213,31 @@ main.hero {
     font-weight: 600;
     border: 2px solid transparent;
     transition: var(--transition);
+    color: var(--color-white);
     
     &:hover {
        transform: translateY(-3px);
     }
   }
 
-  /* --- FIX: Get Started Button (Primary) --- */
   .get-started-btn {
-    background-color: var(--color-primary); // Blue
-    color: var(--color-white);
+    background-color: var(--color-primary);
     box-shadow: var(--box-shadow-md);
     &:hover {
         box-shadow: var(--box-shadow-lg);
     }
   }
   
-  /* --- FIX: All Features Button (Secondary "White" style) --- */
   .all-features-btn {
-    background-color: var(--color-white); // White button
-    color: var(--color-primary); // Blue text
-    box-shadow: var(--box-shadow-sm);
+    background-color: var(--color-secondary);
+    box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.2);
     &:hover {
-        box-shadow: 0 10px 15px -3px rgba(255,255,255,0.2);
+        box-shadow: 0 20px 25px -5px rgba(34, 197, 94, 0.25);
     }
   }
 }
-// --- END HERO UPDATE ---
 
-
-// --- 5. Trusted By Section (No Change) ---
+// --- 5. Trusted By Section ---
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -320,7 +286,7 @@ main.hero {
   }
 }
 
-// --- 6. Impact Numbers Section (No Change) ---
+// --- 6. Impact Numbers Section ---
 .impact-numbers {
   background: var(--color-white); 
   text-align: center;
@@ -358,7 +324,7 @@ main.hero {
   }
 }
 
-// --- 7. Main Features Section (No Change) ---
+// --- 7. Main Features Section (Updated) ---
 .main-features-container {
   padding: var(--space-16) var(--space-8);
   background: var(--color-white);
@@ -393,7 +359,8 @@ main.hero {
     transition: var(--transition);
     i { margin-right: var(--space-2); }
 
-    // ... (Individual Glow Effects no change) ...
+    // Individual Glow Effects for each button
+    // Students Button (Blue Glow)
     &:nth-child(1) {
       box-shadow: 0 0 12px -2px var(--color-primary);
       &:hover, &.active {
@@ -406,6 +373,7 @@ main.hero {
         border-color: var(--color-primary);
       }
     }
+    // Academics Button (Green Glow)
     &:nth-child(2) {
       box-shadow: 0 0 12px -2px var(--color-secondary);
       &:hover, &.active {
@@ -418,6 +386,7 @@ main.hero {
         border-color: var(--color-secondary);
       }
     }
+    // Finance Button (Red Glow)
     &:nth-child(3) {
       box-shadow: 0 0 12px -2px var(--color-accent-red);
       &:hover, &.active {
@@ -430,6 +399,7 @@ main.hero {
         border-color: var(--color-accent-red);
       }
     }
+    // Analytics Button (Yellow Glow)
     &:nth-child(4) {
       box-shadow: 0 0 12px -2px var(--color-accent-yellow);
       &:hover, &.active {
@@ -438,14 +408,14 @@ main.hero {
       }
       &.active {
         background-color: var(--color-accent-yellow);
-        color: var(--color-text-heading); 
+        color: var(--color-text-heading); // Dark text for yellow background
         border-color: var(--color-accent-yellow);
       }
     }
   }
 }
 
-// --- 8. Pricing Section (No Change) ---
+// --- 8. Pricing Section ---
 .pricing-hero, .pricing-container {
   text-align: center;
 }
@@ -534,7 +504,7 @@ main.hero {
   }
 }
 
-// --- 9. Footer (No Change) ---
+// --- 9. Footer ---
 footer {
   background: var(--color-text-heading);
   color: #cbd5e1;
@@ -572,7 +542,7 @@ footer {
   }
 }
 
-// --- 10. Modal Styles (No Change) ---
+// --- 10. Modal Styles ---
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -700,7 +670,7 @@ footer {
   &:hover { background-color: #0c84b8; transform: translateY(-2px); }
 }
 
-// --- MISS MINUTES ANIMATION (No Change) ---
+/* --- MISS MINUTES ANIMATION --- */
 @keyframes slideAndSettle {
   0% { transform: translateX(-250px) translateY(20px) rotate(-15deg); opacity: 0; }
   60% { transform: translateX(20px) translateY(-140px) rotate(10deg); opacity: 1; }
@@ -731,7 +701,7 @@ footer {
   .miss-minutes-container { display: none; }
 }
 
-// --- CONTACT US PAGE STYLES (No Change) ---
+/* --- CONTACT US PAGE STYLES --- */
 .contact-page-wrapper {
   background-color: #f7f7f7;
   padding: var(--space-16) var(--space-8);
@@ -842,13 +812,14 @@ footer {
   }
 }
 
-// --- FEATURES MODAL GET STARTED BUTTON (No Change) ---
+/* --- FEATURES MODAL GET STARTED BUTTON --- */
 .features-modal-footer {
   text-align: center;
   margin-top: var(--space-8);
   padding-top: var(--space-6);
   border-top: 1px solid var(--color-border);
 }
+
 .btn-get-started-modal {
   display: inline-block;
   background: var(--color-primary);
@@ -858,16 +829,18 @@ footer {
   text-decoration: none;
   font-weight: 600;
   transition: var(--transition);
+
   &:hover {
     transform: translateY(-3px);
     box-shadow: var(--box-shadow-lg);
   }
 }
-
-// --- Feature Content Card (No Change) ---
+// --- Is poore block ko copy karke replace karein ---
 .feature-content-card {
+  /* CHANGE: Isse card zyada nahi failega aur compact dikhega */
   max-width: 1000px;
-  margin: 0 auto; 
+  margin: 0 auto; /* Yeh card ko center mein rakhega */
+
   background-color: #1a1a1a;
   border-radius: var(--border-radius);
   padding: var(--space-10);
@@ -884,6 +857,7 @@ footer {
     margin-top: 0;
     margin-bottom: var(--space-2);
   }
+
   .description {
     font-size: 1.1rem;
     color: #b0b0b0;
@@ -891,11 +865,13 @@ footer {
     max-width: 80ch;
     line-height: 1.7;
   }
+
   .feature-points-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: var(--space-6);
   }
+
   .feature-point {
     display: flex;
     align-items: center;
@@ -912,11 +888,13 @@ footer {
       font-size: 1.2rem;
       flex-shrink: 0;
     }
+
     p {
       color: #dcdcdc;
       margin: 0;
       line-height: 1.6;
     }
+
     &:hover {
       transform: translateY(-5px);
       background: rgba(255, 255, 255, 0.1);
@@ -924,114 +902,179 @@ footer {
     }
   }
 }
+/* ==============================================
+   RESPONSIVE STYLES (TABLET & MOBILE)
+   Aap is block ko apni main SCSS file ke end mein add karein
+   ============================================== */
 
-// --- RESPONSIVE STYLES (No Change) ---
+/* --- Breakpoint for Tablets and Smaller Desktops --- */
 @media (max-width: 992px) {
+
+  // General adjustments
   section {
+    // Sections ke beech mein thodi kam jagah
     padding-top: var(--space-12);
     padding-bottom: var(--space-12);
   }
+
   .container {
+    // Container mein side se thoda kam padding
     padding-left: var(--space-6);
     padding-right: var(--space-6);
   }
+
+  // Header ko aasan banate hain
   header {
     .nav-menu ul {
+      // Menu items ke beech ka gap kam karte hain
       gap: var(--space-5);
     }
   }
+
+  // Pricing section ko stack karte hain
   .pricing-box {
+    // Details aur card ko ek ke neeche ek laate hain
     flex-direction: column;
     text-align: center;
     align-items: center;
+
     .pricing-details {
       text-align: left;
     }
+
     .pricing-card {
-      width: 100%;
-      max-width: 400px;
+      width: 100%; // Card poori width lega
+      max-width: 400px; // Par bahut zyada chauda nahi hoga
     }
   }
+  
+  // Feature card ke points ko stack karte hain
   .feature-content-card .feature-points-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr; // Mobile par ek column mein dikhega
   }
+
+  // Contact page ke liye
   .form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; // Form fields ek column mein
   }
 }
 
+
+/* --- Breakpoint for Mobile Phones --- */
 @media (max-width: 768px) {
+
+  // General font size and spacing adjustments for mobile
   html {
-    font-size: 15px;
+    font-size: 15px; // Thoda chhota base font size
   }
+
   section {
     padding-top: var(--space-10);
     padding-bottom: var(--space-10);
   }
+
   .container {
     padding-left: var(--space-4);
     padding-right: var(--space-4);
   }
+
+  // Mobile Navigation (Hamburger Menu ke liye setup)
   header {
     padding: var(--space-4);
+
     .nav-menu, .buttons {
+      // Menu links aur buttons ko hide kar dete hain
+      // Yahan aapko JavaScript se control hone wala hamburger menu banana hoga
       display: none;
     }
+    
+    /* NOTE: Aapko ek hamburger menu icon alag se add karna hoga 
+      aur use 'display: block;' karna hoga is media query mein.
+    */
   }
+
+  // Hero section ko mobile ke liye fit karte hain
   main.hero {
     h1 {
+      // Heading ka size mobile ke hisab se
       font-size: clamp(2.2rem, 10vw, 2.8rem);
     }
+
     .hero-buttons {
+      // Buttons ko ek ke neeche ek laate hain
       flex-direction: column;
       align-items: center;
       gap: var(--space-4);
+      
       .get-started-btn, .all-features-btn {
         width: 100%;
-        max-width: 300px;
+        max-width: 300px; // Button bahut zyada na faile
         text-align: center;
       }
     }
   }
+
+  // Impact Cards
   .impact-numbers .impact-header h2 {
-    font-size: 2.2rem;
+    font-size: 2.2rem; // Heading thodi chhoti
   }
+
   .impact-cards {
     gap: var(--space-6);
   }
+
+  // Feature Tabs
   .main-features-container .feature-tabs {
     gap: var(--space-3);
     .tab-button {
+      // Buttons ka size chhota karte hain
       padding: var(--space-2) var(--space-4);
       font-size: 0.9rem;
     }
   }
+
+  // Pricing Section ko mobile ke liye final touch
   .pricing-hero h2 {
     font-size: 2.2rem;
   }
+  
   .pricing-box .features-list {
+    // Features list ko ek column mein dikhate hain
     grid-template-columns: 1fr;
   }
+
   .pricing-toggle {
+    // Monthly/Annually buttons ko stack kar sakte hain agar jagah kam ho
     flex-direction: column;
     gap: var(--space-2);
   }
+
+  // Footer ko simple banate hain
   footer .footer-container {
+    // Sabhi columns ek ke neeche ek aayenge
     text-align: center;
   }
+
+  // Modals ko screen par fit karte hain
   .modal-content {
     padding: var(--space-6);
   }
+
   .features-modal-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; // Features bhi ek column mein
   }
 }
+/* ==============================================
+   HAMBURGER MENU & MOBILE NAVIGATION STYLES
+   ============================================== */
 
-// --- HAMBURGER MENU (No Change) ---
+// Pehle, desktop menu ko ek container mein daalein
 header nav .nav-desktop {
   display: flex;
   align-items: center;
-  gap: var(--space-8);
+  gap: var(--space-8); // Gap wahi rakhein jo pehle tha
+  
+  // Iske andar ke ul aur buttons se extra styles hata dein agar zaroori ho
   ul {
     display: flex;
     align-items: center;
@@ -1042,8 +1085,10 @@ header nav .nav-desktop {
     gap: var(--space-4);
   }
 }
+
+// Hamburger Menu Icon ki styling
 .hamburger-menu {
-  display: none;
+  display: none; // Desktop par hide rahega
   flex-direction: column;
   justify-content: space-around;
   width: 2.5rem;
@@ -1052,7 +1097,8 @@ header nav .nav-desktop {
   border: none;
   cursor: pointer;
   padding: 0;
-  z-index: 101;
+  z-index: 101; // Menu se upar rahega
+
   .line {
     width: 2.5rem;
     height: 0.25rem;
@@ -1063,6 +1109,8 @@ header nav .nav-desktop {
     transform-origin: 1px;
   }
 }
+
+// Mobile Menu Container ki styling (default mein chupa hua)
 .nav-mobile-menu {
   display: flex;
   flex-direction: column;
@@ -1075,59 +1123,66 @@ header nav .nav-desktop {
   width: 280px;
   padding: var(--space-24) var(--space-8) var(--space-8);
   box-shadow: -10px 0px 30px -15px rgba(0, 0, 0, 0.2);
-  transform: translateX(100%);
+  transform: translateX(100%); // Screen se bahar
   transition: transform 0.3s ease-in-out;
   z-index: 100;
 
   &.active {
-    transform: translateX(0);
+    transform: translateX(0); // Screen ke andar
   }
+
+  // Mobile menu ke andar ke links
   a {
     font-size: 1.2rem;
     font-weight: 600;
     color: var(--color-text-heading);
     text-decoration: none;
+    
     &.login-btn, &.demo-btn {
       text-align: center;
       padding: var(--space-3) var(--space-6);
       border-radius: var(--border-radius);
     }
+    
     &.login-btn {
         border: 2px solid var(--color-border);
     }
+
     &.demo-btn {
         background-color: var(--color-primary);
         color: var(--color-white);
     }
   }
+
   hr {
     border: none;
     border-top: 1px solid var(--color-border);
     margin: var(--space-4) 0;
   }
 }
-@media (max-width: 992px) { 
+
+
+// Ab Media Query ka istemal karke sab control karenge
+@media (max-width: 992px) { // Tablet aur usse neeche ke liye
   header nav {
     .nav-desktop {
-      display: none;
+      display: none; // Desktop wala menu hide kar do
     }
+    
     .hamburger-menu {
-      display: flex;
-      /* --- FIX: Hamburger lines ko white kiya --- */
-      .line {
-        background: var(--color-white); 
-      }
+      display: flex; // Hamburger icon dikha do
     }
   }
 }
+// file: app/globals.scss (add at the end)
 
-// --- ADMIN & PRINT STYLES (Cleaned up duplicates) ---
 .admin-layout {
   display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
 }
+
 .main-section {
   flex-grow: 1;
   display: flex;
@@ -1139,19 +1194,42 @@ html, body, #__next {
   margin: 0;
   padding: 0;
 }
+
 body {
-  overflow-x: hidden; 
+  overflow-x: hidden; /* Horizontal scroll ko rokne ke liye */
 }
+/* --- Variables --- */
+:root {
+  --primary-blue: #4F46E5;
+  --primary-blue-hover: #4338CA;
+  --text-dark: #111827;
+  --text-medium: #374151;
+  --text-light: #6B7280;
+  --border-color: #D1D5DB;
+  --background-light: #FFFFFF;
+  --page-bg: #F9FAFB;
+  --fb-blue: #1877F2;
+  --light-black: #333333;
+  --sky-blue: #f0f5ff;
+}
+/* Global Print Styles */
 @media print {
+  /* Print ke waqt is class waale elements ko hide karein */
   .no-print {
     display: none !important;
   }
+
+  /* Baaki sab kuch hide karein */
   body * {
     visibility: hidden;
   }
+  
+  /* Sirf printable area aur uske andar ke content ko dikhayein */
   .printable-area, .printable-area * {
     visibility: visible;
   }
+  
+  /* Printable area ko poore page par set karein */
   .printable-area {
     position: absolute;
     left: 0;
@@ -1163,10 +1241,64 @@ body {
     margin: 0;
     padding: 0;
   }
-  /* --- Receipt Print Fix --- */
+}
+/* --- Variables --- */
+:root {
+  --primary-color: #4F46E5;
+  --primary-hover: #4338CA;
+  --background-color: #FFFFFF;
+  --page-background: #F3F4F6;
+  --text-dark: #1F2937;
+  --text-medium: #6B7280;
+  --border-color: #D1D5DB;
+  --fb-blue: #1877F2;
+  --light-black: #2c2c2c;
+  --sky-blue: #f0f5ff;
+}
+
+
+@media (max-width: 768px) {
+  
+  h1 {
+    font-size: 2rem; 
+  }
+  h2 {
+    font-size: 1.75rem; 
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .main-content {
+    width: 100%;
+    margin-left: 0; 
+  }
+
+  .flex-container {
+    flex-direction: column;
+  }
+  
+}
+
+@media (max-width: 480px) {
+
+  .container, .main-content {
+    padding: 1rem;
+  }
+  .cta-button {
+    width: 100%;
+  }
+
+}
+@media print {
+  /* Jab print dialog khula ho... */
   body.printing-receipt-active {
+    /* ...toh sabkuch hide kar do... */
     visibility: hidden !important;
   }
+  
+  /* ...SIRF us receipt ko chhodkar jise hum print karna chahte hain */
   body.printing-receipt-active #printable-receipt {
     visibility: visible !important;
     position: absolute !important;
@@ -1174,6 +1306,8 @@ body {
     top: 0 !important;
     width: 100% !important;
   }
+  
+  /* Modal ke wrapper aur backdrop ko bhi hide karein */
   body.printing-receipt-active > div[role="dialog"],
   body.printing-receipt-active > div[data-radix-overlay],
   body.printing-receipt-active > div[data-modal-backdrop] {
