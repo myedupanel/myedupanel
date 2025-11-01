@@ -1,8 +1,7 @@
 import React from 'react';
 import styles from './LeavingCertificatePreview.module.scss'; // Import the SCSS file
 
-// --- FIX 1: Interfaces ko Form se match karne ke liye update kiya ---
-
+// --- Interfaces (No Change) ---
 interface Student {
   id: string; 
   name: string; // Point 3
@@ -21,106 +20,50 @@ interface SchoolDetails {
   place?: string; // Footer
 }
 
-// Yeh interface ab LeavingCertificateForm.tsx ke interface se match karta hai
 export interface LeavingFormData {
   regNo?: string; // Header
-  
-  // Point 5
   nationality?: string;
   motherTongue?: string;
   religion?: string;
-  // Point 6
   caste?: string;
-  // Point 7
   birthPlace?: string;
   birthTaluka?: string;
   birthDistrict?: string;
   birthState?: string;
-  // Point 9
   dobWords?: string;
-  // Point 10
   previousSchool?: string;
-  // Point 11
   dateOfAdmission?: string;
   standardAdmitted?: string;
-  // Point 12
   progress?: string;
   conduct?: string;
-  // Point 13
   dateOfLeaving?: string;
-  // Point 14
   standardLeaving?: string;
-  standardLeavingWords?: string; // Iski zaroorat nahi, blueprint mein simple "8th" likha hai
+  standardLeavingWords?: string;
   sinceWhenLeaving?: string;
-  // Point 15
   reasonForLeaving?: string;
-  // Point 16
   remarks?: string;
-  
-  // Footer
   issueDate?: string;
   signatoryRole?: string;
-  genRegNo?: string; // Footer certification text ke liye
+  genRegNo?: string;
 }
-// --- END FIX 1 ---
 
-
+// --- formatDate Function (No Change) ---
 const formatDate = (dateString: string | undefined): string => {
-
   if (!dateString) return '';
-
   try {
-
     const date = new Date(dateString);
-
-
-
-    // --- FIX YAHAN HAI ---
-
-    // Pehle check karein ki date valid hai ya nahi
-
-    // Agar dateString galat hai (jaise "abc"), toh date.getTime() NaN hoga
-
     if (isNaN(date.getTime())) {
-
       console.warn("Invalid date object created from:", dateString);
-
-      return dateString; // Agar invalid hai, toh original string waapas karein
-
+      return dateString;
     }
-
-    // --- END FIX ---
-
-
-
-    // Force DD/MM/YYYY format
-
     const day = String(date.getDate()).padStart(2, '0');
-
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-
+    const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-
-    
-
-    // Ab is line (purani line 77) ki zaroorat nahi hai, kyonki humne upar check kar liya
-
-    // if (isNaN(day) || isNaN(month) || isNaN(year)) return dateString; 
-
-    
-
     return `${day}/${month}/${year}`;
-
-    
-
   } catch (e) {
-
       console.warn("Invalid date format for formatDate:", dateString);
-
-      return dateString; // Fallback
-
+      return dateString;
    }
-
 };
 
 interface LeavingCertificatePreviewProps {
@@ -134,41 +77,33 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
   formData,
   schoolDetails
 }) => {
-  // Yeh helper function data ko fill karega
-  // Hum ise thoda modify karenge taaki 'fill' class hamesha rahe
   const fill = (value: string | undefined | null, minWidth = '50px') => {
-    // Agar value hai, toh use dikhayein
     if (value) {
       return <span className={styles.fill}>{value}</span>;
     }
-    // Agar value nahi hai, toh ek blank placeholder (line) dikhayein
     return <span className={styles.fillBlank} style={{ minWidth }}>&nbsp;</span>;
   }
 
-  // Helper function ek line mein multiple items ke liye
   const SubField = ({ label, value, minWidth = '50px' }: { label: string, value: string | undefined | null, minWidth?: string }) => (
     <span className={styles.subField}>
       {label}: {fill(value, minWidth)}
     </span>
   );
 
-  // Dates ko format karein
   const dateOfAdmission = formatDate(formData.dateOfAdmission);
   const dateOfLeaving = formatDate(formData.dateOfLeaving);
-  const issueDate = formatDate(formData.issueDate);
+  // const issueDate = formatDate(formData.issueDate); // <-- Ab hum ise use nahi kar rahe
   const studentDobFormatted = formatDate(student?.dob);
 
   return (
-    // --- FIX 2: poora JSX blueprint se match karne ke liye badla ---
     <div className={styles.certificatePaper}>
-      <div className={styles.outerBorder}> {/* Blueprint jaisa outer border */}
+      <div className={styles.outerBorder}>
         
-        {/* Header */}
+        {/* Header (No Change) */}
         <header className={styles.certHeader}>
           {schoolDetails.logoUrl && (
             <img src={schoolDetails.logoUrl} alt="School Logo" className={styles.logo} />
           )}
-          
           <div className={styles.schoolInfoBlock}>
             <div className={styles.schoolName1}>{schoolDetails.name}</div>
             <div className={styles.schoolName2}>{schoolDetails.name2 || schoolDetails.name}</div>
@@ -178,7 +113,6 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               Code No.: {schoolDetails.govtReg}
             </div>
           </div>
-          
           <div className={styles.titleBlock}>
             <h2>LEAVING CERTIFICATE</h2>
             <div className={styles.regNo}>
@@ -187,10 +121,10 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           </div>
         </header>
 
-        {/* Student Info Table */}
+        {/* Student Info Table (No Change) */}
         <table className={styles.studentInfoTable}>
           <tbody>
-            {/* Har row ko blueprint se milaya gaya hai */}
+            {/* ... (saari rows 1 se 16 tak same rahengi) ... */}
             <tr>
               <td>1</td>
               <td>Sr. No.</td>
@@ -214,6 +148,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             <tr>
               <td>5</td>
               <td>Nationality</td>
+              {/* Point 5 ka JSX same hai, iska fix SCSS mein hai */}
               <td>
                 <SubField label="Nationality" value={formData.nationality || 'Indian'} minWidth="80px" />
                 <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
@@ -231,7 +166,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>
                 <SubField label="Place" value={formData.birthPlace} minWidth="80px" />
                 <SubField label="Taluka" value={formData.birthTaluka} minWidth="80px" />
-                <br/> {/* Nayi line par Dist/State */}
+                <br/> {/* Blueprint jaisa Dist/State neeche */}
                 <SubField label="Dist" value={formData.birthDistrict} minWidth="80px" />
                 <SubField label="State" value={formData.birthState} minWidth="80px" />
               </td>
@@ -239,13 +174,11 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             <tr>
               <td>8</td>
               <td>Date of Birth (Words)</td>
-              {/* Blueprint mein Pt 8 par figures (DD/MM/YYYY) hain */}
               <td>{fill(studentDobFormatted, '150px')}</td>
             </tr>
             <tr>
               <td>9</td>
               <td>Date of Birth (in Words)</td>
-              {/* Blueprint mein Pt 9 par words hain */}
               <td>{fill(formData.dobWords, '300px')}</td>
             </tr>
             <tr>
@@ -277,7 +210,6 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             <tr>
               <td>14</td>
               <td>Standard in which studying and since when (in Words)</td>
-              {/* Blueprint mein yeh "8th / 31st June 2023" jaisa hai */}
               <td>
                 <SubField label="Std" value={formData.standardLeaving} minWidth="50px" />
                 <SubField label="Since" value={formData.sinceWhenLeaving} minWidth="100px" />
@@ -296,31 +228,38 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           </tbody>
         </table>
 
-        {/* Certification Text */}
+        {/* Certification Text (No Change) */}
         <p className={styles.certText}>
           This is to certify that, Above mentioned information is as per 
           School General Register No. {fill(formData.genRegNo, '80px')}
         </p>
 
-        {/* Footer */}
-        <footer className={styles.certFooter}>
+        {/* --- FIX 2: Naya Footer Layout --- */}
+        {/* Poore footer ko naye layout se replace kar diya hai */}
+        <footer className={styles.certFooterWrapper}>
+          {/* Date (Day/Month/Year) blanks - Left Aligned */}
           <div className={styles.datePlace}>
-            Date : {fill(issueDate, '100px')}
+            <span>Date: {fill(null, '50px')} / {fill(null, '50px')} / {fill(null, '70px')}</span>
           </div>
-          <div className={styles.sigBox}>
-            <span>Class Teacher</span>
-          </div>
-          <div className={styles.sealArea}>
-            ( School Seal )
-          </div>
-          <div className={styles.sigBox}>
-            <span>{formData.signatoryRole || 'Head Master'}</span>
+          
+          {/* 3 Signature boxes */}
+          <div className={styles.signatures}>
+            <div className={styles.sigBox}>
+              <span>Class Teacher</span>
+            </div>
+            <div className={styles.sigBox}>
+              <span>Clerk</span>
+            </div>
+            <div className={styles.sigBox}>
+              <span>{formData.signatoryRole || 'Head Master'}</span>
+            </div>
           </div>
         </footer>
+        {/* --- END FIX 2 --- */}
+
       </div> {/* End outerBorder */}
     </div>
   );
-  // --- END FIX 2 ---
 };
 
 export default LeavingCertificatePreview;

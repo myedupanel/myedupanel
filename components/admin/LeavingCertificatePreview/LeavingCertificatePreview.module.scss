@@ -3,28 +3,32 @@
 /* --- Main Paper Style --- */
 .certificatePaper {
   width: 210mm; /* A4 width */
-  /* FIX 1 (PRINT BREAK): min-height ko 290mm se 'auto' kiya */
-  /* taaki yeh content ke hisaab se fit ho, na ki page se bada ho */
-  min-height: auto; 
   padding: 10mm;
   margin: 20px auto;
   font-family: 'Times New Roman', Times, serif;
   font-size: 13pt;
   color: #000;
-  background: #fff; /* Poora background white rakha */
+  background: #fff;
   border: 1px solid #ccc;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
+
+  /* --- FIX 1 (PRINT BREAK) --- */
+  /* min-height hataya aur display:flex add kiya */
+  display: flex;
 }
 
 .outerBorder {
   border: 2px solid #000;
   padding: 12mm 10mm;
-  /* FIX 1 (PRINT BREAK): min-height ko 265mm se 245mm kiya */
-  /* 245mm (content) + 24mm (padding) + 20mm (padding) = 289mm < 297mm (A4 Page) */
-  min-height: 245mm; 
   display: flex;
   flex-direction: column;
+  width: 100%;
+  
+  /* --- FIX 1 (PRINT BREAK) --- */
+  /* min-height hataya aur flex-grow: 1 add kiya */
+  /* Yeh border ko paper ke andar poori jagah lene dega */
+  flex-grow: 1; 
 }
 
 /* --- Data Fill-in Styles --- */
@@ -33,7 +37,6 @@
   padding: 0 4px;
   border-bottom: 1px dotted #333;
 }
-
 .fillBlank {
   display: inline-block;
   border-bottom: 1px dotted #333;
@@ -41,11 +44,10 @@
   padding: 0 4px;
 }
 
-/* --- FIX 2 (HEADER LAYOUT) --- */
-/* Header ko 3 column layout (Logo, Center, Right) mein set kiya */
+/* --- Header Section (Khandeshwar Blueprint jaisa) --- */
 .certHeader {
   display: flex;
-  justify-content: space-between; /* Columns ko faila diya */
+  justify-content: space-between;
   align-items: flex-start;
   gap: 10px;
   border-bottom: 1.5px solid #000;
@@ -56,52 +58,28 @@
     max-width: 90px;
     max-height: 90px;
     object-fit: contain;
-    flex-shrink: 0; /* Taaki logo shrink na ho */
+    flex-shrink: 0;
   }
-
   .schoolInfoBlock {
-    flex-grow: 1; /* Beech ka poora space lega */
-    text-align: center; /* <<< YEH SABSE ZAROORI THA */
+    flex-grow: 1;
+    text-align: center; /* School info ko center kiya */
+    padding: 0 10px;
     
-    .schoolName1 {
-      font-size: 13pt;
-      font-weight: bold;
-      margin: 0;
-    }
-    .schoolName2 {
-      font-size: 20pt;
-      font-weight: bold;
-      margin: 2px 0;
-    }
-    .schoolAddressCode {
-      font-size: 11pt;
-      margin: 0;
-      line-height: 1.4;
-    }
+    .schoolName1 { font-size: 13pt; font-weight: bold; margin: 0; }
+    .schoolName2 { font-size: 20pt; font-weight: bold; margin: 2px 0; }
+    .schoolAddressCode { font-size: 11pt; margin: 0; line-height: 1.4; }
   }
-  
   .titleBlock {
     min-width: 180px;
-    text-align: right; /* Title ko right align kiya */
-    flex-shrink: 0; /* Taaki yeh shrink na ho */
+    text-align: right;
+    flex-shrink: 0;
     
-    h2 {
-      font-size: 14pt;
-      font-weight: bold;
-      margin: 0;
-      padding-top: 10px;
-    }
-    .regNo {
-      font-size: 12pt;
-      font-weight: bold;
-      margin-top: 5px;
-    }
+    h2 { font-size: 14pt; font-weight: bold; margin: 0; padding-top: 10px; }
+    .regNo { font-size: 12pt; font-weight: bold; margin-top: 5px; }
   }
 }
-/* --- END FIX 2 --- */
 
-
-/* --- Student Info Table (No Change) --- */
+/* --- Student Info Table --- */
 .studentInfoTable {
   width: 100%;
   border-collapse: collapse;
@@ -116,20 +94,37 @@
   }
   tbody tr td:nth-child(1) { width: 35px; text-align: center; font-weight: normal; }
   tbody tr td:nth-child(2) { width: 35%; font-weight: normal; }
-  tbody tr td:nth-child(3) { width: 60%; font-weight: bold; }
+  
+  /* --- FIX 2 (NATIONALITY LAYOUT) --- */
+  /* Value waale column ko Flexbox banaya */
+  tbody tr td:nth-child(3) {
+    width: 60%;
+    font-weight: bold;
+    display: flex;
+    flex-wrap: wrap; /* Agar zaroorat pade toh wrap karega */
+    align-items: center;
+    gap: 5px 20px; /* Vertical aur Horizontal gap */
+  }
+  
+  /* Point 7 (Birthplace) ko block par waapas set kiya taaki <br> kaam kare */
+  tbody tr:nth-child(7) td:nth-child(3),
+  tbody tr:nth-child(15) td:nth-child(3), // Reason
+  tbody tr:nth-child(16) td:nth-child(3)  // Remarks
+  {
+     display: block;
+  }
 }
 
+/* SubField ko ab flex item ki tarah style kiya */
 .subField {
-  display: inline-block;
-  margin-right: 20px;
-  margin-bottom: 5px;
   font-weight: normal;
-  
+  white-space: nowrap; /* Label ko break hone se rokega */
   .fill, .fillBlank {
     font-weight: bold;
   }
 }
 
+/* --- Certification Text --- */
 .certText {
   font-size: 12pt;
   text-align: left;
@@ -137,54 +132,56 @@
   line-height: 1.6;
 }
 
-/* --- FIX 3 (BLACK FOOTER) --- */
-/* Footer se kaala background hataya aur blueprint jaisa banaya */
-.certFooter {
+/* --- FIX 3 (FOOTER LAYOUT) --- */
+/* Footer ko naye layout ke liye poora rewrite kiya */
+.certFooterWrapper {
+  margin-top: auto; /* Footer ko hamesha neeche rakhega */
+  padding-top: 30px;
+  font-size: 13pt;
+  font-weight: bold;
+  background: #fff !important; /* Force white background */
+  color: #000 !important;
+}
+
+.datePlace {
+  text-align: left;
+  margin-bottom: 40px; /* Date aur signature line ke beech space */
+}
+
+.signatures {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-top: auto; /* Footer ko hamesha neeche rakhega */
-  padding-top: 40px;
-  font-size: 13pt;
-  font-weight: bold;
-  background-color: transparent !important; /* Force transparent background */
-  color: #000 !important; /* Force black text */
+}
 
-  .datePlace {
-    text-align: left;
-  }
-  
-  .sigBox {
-    text-align: center;
-    width: 180px;
-    padding-top: 40px;
-    border-top: 1px solid #000; /* Signature line */
-  }
-  
-  .sealArea {
-      font-size: 11pt;
-      color: #777;
-      text-align: center;
-      margin-bottom: 20px;
-  }
+.sigBox {
+  text-align: center;
+  width: 30%; /* 3-column layout */
+  padding-top: 40px;
+  border-top: 1px solid #000; /* Signature line */
 }
 /* --- END FIX 3 --- */
 
 
-/* --- FIX 1 (PRINT BREAK) - EXTRA SAFETY --- */
-/* Yeh print karte waqt faltu shadow aur borders hata dega */
+/* --- FIX 1 (PRINT BREAK) - FINAL FIX --- */
+/* Print karte waqt faltu styles hata dega */
 @media print {
   .certificatePaper {
     box-shadow: none;
     border: none;
     margin: 0;
     padding: 0;
+    height: 100%; // Page height tak stretch karega
   }
   .outerBorder {
-    /* Print ke liye border ka size kam kar rahe hain taaki fit ho */
     border: 1px solid #000;
     padding: 10mm 8mm;
-    min-height: 0; /* min-height hata diya */
+    min-height: 0;
+    height: 100%; // Poore printable area ko cover karega
   }
-  /* Baki print styles page.tsx waali file se aa jayenge */
+  
+  /* Print ke waqt Table ki lines hide karein (optional, clean look) */
+  .studentInfoTable tbody tr td {
+    border-bottom: none;
+  }
 }
