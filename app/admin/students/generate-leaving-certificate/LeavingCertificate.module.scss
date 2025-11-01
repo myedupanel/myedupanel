@@ -198,16 +198,12 @@
 
 @media print {
 
-    /* --- YEH RAHA NAYA FIX --- */
-    /* :global(body) ko :global { ... } block ke andar daal diya hai */
-    :global {
-        body {
-            padding: 0 !important;
-            margin: 0 !important;
-            background: #fff !important;
-        }
+    .pageContainer :global(body) {
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #fff !important;
     }
-    /* --- END NAYA FIX --- */
+    /* --- END FIX --- */
 
     .pageContainer {
         padding: 0;
