@@ -94,26 +94,22 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
+        {/* Header (Pehle se updated hai) */}
         <header className={styles.certHeader}>
-          
           <div className={styles.schoolInfoBlock}>
             <div className={styles.schoolName1}>{schoolDetails.name}</div>
             <div className={styles.schoolName2}>{schoolDetails.name2 || schoolDetails.name}</div>
             <div className={styles.schoolAddressCode}>
               {schoolDetails.address}
               <br/>
-              {/* --- FIX 4 (Header Text): "Code No." ko "UDISE NO" kiya --- */}
               UDISE NO: {schoolDetails.govtReg}
             </div>
           </div>
-          
           <div className={styles.titleRow}>
             <div className={styles.headerSrNo}>
               Sr. No: {fill(student?.studentId, '100px')}
             </div>
-            
             <h2>LEAVING CERTIFICATE</h2>
-            
             <div className={styles.headerRegNo}>
               Reg. No: {fill(formData.regNo, '100px')}
             </div>
@@ -143,11 +139,11 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>Mother's Name</td>
               <td>{fill(student?.motherName, '300px')}</td>
             </tr>
+            {/* Point 5 (Pehle se updated hai) */}
             <tr>
               <td>5</td>
               <td>Nationality</td>
               <td>
-                {/* --- FIX 2 (Nationality Field): "|| 'Indian'" ko hataya --- */}
                 <SubField label="Nationality" value={formData.nationality} minWidth="80px" />
                 <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
                 <SubField label="Religion" value={formData.religion} minWidth="80px" />
@@ -158,6 +154,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>Caste</td>
               <td>{fill(formData.caste, '150px')}</td>
             </tr>
+            {/* Point 7 (Pehle se updated hai) */}
             <tr>
               <td>7</td>
               <td>Birth place(State/City)</td>
@@ -169,7 +166,6 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                 <SubField label="State" value={formData.birthState} minWidth="80px" />
               </td>
             </tr>
-            {/* ... baaki rows 8 se 16 tak koi badlaav nahi ... */}
             <tr>
               <td>8</td>
               <td>Date of Birth (Words)</td>
@@ -193,27 +189,36 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                 <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
               </td>
             </tr>
+            
+            {/* --- FIX 1 (Point 12 Layout) --- */}
             <tr>
               <td>12</td>
               <td>Progress of Study</td>
               <td>
-                <SubField label="Progress" value={formData.progress} minWidth="80px" />
+                {/* Blueprint jaisa: "Good" aur "Conduct: ___" */}
+                {fill(formData.progress, '100px')} 
                 <SubField label="Conduct" value={formData.conduct} minWidth="80px" />
               </td>
             </tr>
+            {/* --- END FIX 1 --- */}
+
             <tr>
               <td>13</td>
               <td>Date of School Leaving</td>
               <td>{fill(dateOfLeaving, '150px')}</td>
             </tr>
+
+            {/* --- FIX 2 (Point 14 Layout) --- */}
             <tr>
               <td>14</td>
               <td>Standard in which studying and since when (in Words)</td>
               <td>
-                <SubField label="Std" value={formData.standardLeaving} minWidth="50px" />
-                <SubField label="Since" value={formData.sinceWhenLeaving} minWidth="100px" />
+                {/* Blueprint jaisa: "8th / 31st June 2023" */}
+                {fill(formData.standardLeaving, '80px')} / {fill(formData.sinceWhenLeaving, '100px')}
               </td>
             </tr>
+            {/* --- END FIX 2 --- */}
+
             <tr>
               <td>15</td>
               <td>Reason for leaving school</td>
@@ -233,7 +238,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           School General Register No. {fill(formData.genRegNo, '80px')}
         </p>
 
-        {/* Footer (No Change) */}
+        {/* Footer (Pehle se updated hai) */}
         <footer className={styles.certFooterWrapper}>
           <div className={styles.datePlace}>
             <span>Date: {fill(null, '50px')} / {fill(null, '50px')} / {fill(null, '70px')}</span>
