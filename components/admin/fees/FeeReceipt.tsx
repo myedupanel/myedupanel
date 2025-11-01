@@ -90,52 +90,72 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
 
-    // --- FIX 2: Print/Download Logic ko robust banaya ---
-    
-    // Yeh function print se pehle modal backdrop ko dhoondh kar hide karega
-    const handleBeforePrint = async () => { // <-- Bas 'async' add karein
-        // Alag-alag modal libraries ke common selectors
+ const handleBeforePrint = async () => {
+        // Sabhi common modal backdrop selectors ko try karte hain
         const selectors = [
             '[data-modal-backdrop="true"]', // Aapka original selector
-            '[data-radix-overlay="true"]',   // shadcn/ui ya Radix
-            '.modal-backdrop'                // Bootstrap
+            '[data-radix-overlay="true"]',   // shadcn/ui ya Radix UI ke liye
+            '.modal-backdrop',               // Bootstrap ke liye
+            '.MuiBackdrop-root',             // Material-UI (MUI) ke liye
+            '.mantine-Modal-overlay',        // Mantine UI ke liye
+            '[role="dialog"][aria-modal="true"]', // Generic dialog overlay
+            'body > div:last-child[style*="z-index"]', // Agar backdrop body ke last mein hai
+            '.rc-dialog-mask',               // rc-dialog (Ant Design etc.)
+            '.ant-modal-mask',               // Ant Design specific
         ];
         
         let backdrop: HTMLElement | null = null;
         for (const selector of selectors) {
             backdrop = document.querySelector(selector);
-            if (backdrop) break; // Jaise hi mil jaaye, loop rok do
+            if (backdrop) {
+                console.log(`Found backdrop with selector: ${selector}`);
+                break; // Jaise hi mil jaaye, loop rok do
+            }
         }
 
         if (backdrop) {
-            backdrop.style.zIndex = 'auto'; // z-index ko temporarily hata do
-            console.log("Backdrop found and hidden for printing.");
+            // z-index ko temporarily hata do ya display: none kar do
+            // display: none zyadatar cases mein safe hota hai
+            backdrop.style.display = 'none'; 
+            console.log("Backdrop hidden for printing.");
+            // Wait for a small moment to ensure DOM update takes effect before print dialog
+            await new Promise(resolve => setTimeout(resolve, 50)); 
         } else {
-            console.warn("Could not find modal backdrop to hide for printing.");
+            console.warn("Could not find modal backdrop to hide for printing. Print dialog might be obscured.");
         }
     };
 
     // Yeh function print ke baad modal backdrop ko waapas laayega
-    const handleAfterPrint = async () => { // <-- Yahaan bhi 'async' add karein
-        const selectors = ['[data-modal-backdrop="true"]', '[data-radix-overlay="true"]', '.modal-backdrop'];
+    const handleAfterPrint = async () => {
+        const selectors = [
+            '[data-modal-backdrop="true"]', 
+            '[data-radix-overlay="true"]',   
+            '.modal-backdrop',               
+            '.MuiBackdrop-root',             
+            '.mantine-Modal-overlay',        
+            '[role="dialog"][aria-modal="true"]',
+            'body > div:last-child[style*="z-index"]',
+            '.rc-dialog-mask',
+            '.ant-modal-mask',
+        ];
         let backdrop: HTMLElement | null = null;
         for (const selector of selectors) {
             backdrop = document.querySelector(selector);
             if (backdrop) break;
         }
         if (backdrop) {
-            backdrop.style.zIndex = '1000'; // Default z-index (ya jo bhi aapka modal use karta hai)
+            backdrop.style.display = ''; // Display ko default pe reset karo
+            console.log("Backdrop restored after printing.");
         }
     };
 
     const handlePrint = useReactToPrint({
-        content: () => componentRef.current, // <-- 'content' is correct
+        content: () => componentRef.current, 
         documentTitle: `FeeReceipt_${transaction?.receiptId || transaction?.id || 'details'}`,
         pageStyle: `@page { size: A4; margin: 15mm; } @media print { body { -webkit-print-color-adjust: exact; color-adjust: exact; } .no-print { display: none !important; } }`,
         onBeforePrint: handleBeforePrint,
         onAfterPrint: handleAfterPrint,
-    }as any);
-    // --- END FIX 2 ---
+    } as any);
     
     // handleDownload abhi bhi handlePrint ko hi call karega, jo "Print to PDF" dialog kholegal
     const handleDownload = handlePrint; 
