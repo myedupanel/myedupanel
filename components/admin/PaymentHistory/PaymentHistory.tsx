@@ -9,8 +9,9 @@ import { FiSearch, FiCalendar, FiFilter, FiPrinter, FiChevronLeft, FiChevronRigh
 // --- Step 1: REMOVE LOCAL INTERFACE DEFINITIONS ---
 // DELETE the old Transaction and ReceiptData interfaces that were here.
 
-// --- Step 2: ADD IMPORT FOR CENTRALIZED TYPES ---
-import { Transaction, ReceiptData } from '@/components/types/fees'; // Adjust path if needed ('@/types/fees' or maybe '../types/fees'?)
+// --- Step 2: ADD IMPORT FOR CENTRALIZED TYPES (No change here) ---
+// Note: Assuming FeeReceipt.tsx now exports all necessary types (Transaction, ReceiptData)
+import { Transaction, ReceiptData } from '@/components/types/fees'; 
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number): string => {
@@ -118,7 +119,7 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ studentId }) => {
         }
     };
 
-    const handleViewReceipt = async (transactionId: string) => {
+    const handleViewReceipt = async (transactionId: number) => {
         setLoadingReceipt(true);
         setReceiptDataForModal(null);
         setReceiptError(null); // Clear previous receipt error
@@ -218,7 +219,7 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ studentId }) => {
                                 {records.length > 0 ? (
                                     records.map(record => (
                                         <tr key={record.id}>
-                                            <td>{record.receiptId || `...${record.id.slice(-6).toUpperCase()}`}</td>
+                                            <td>{record.receiptId || `...${String(record.id).slice(-6).toUpperCase()}`}</td> {/* FIX: String(record.id) added */}
                                             {!studentId && <td>{record.studentId?.name || record.studentName || 'N/A'}</td>} {/* Use populated name */}
                                             <td>{record.templateId?.name || record.templateName || 'N/A'}</td> {/* Use populated name */}
                                             <td>{formatDate(record.paymentDate)}</td>

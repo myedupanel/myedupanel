@@ -1,32 +1,35 @@
 import React, { useRef } from 'react';
 import styles from './FeeReceipt.module.scss';
 import { FiPrinter, FiDownload } from 'react-icons/fi';
-import { useReactToPrint } from 'react-to-print'; // Ensure this is installed
+import { useReactToPrint } from 'react-to-print';
 
-// --- Interface Definitions (No Change) ---
-interface SchoolInfo {
+// --- Interface Definitions (FIXED IDs and Exported) ---
+export interface SchoolInfo {
     name?: string; address?: string; logo?: string;
     session?: string; phone?: string; email?: string;
 }
-interface StudentInfo {
-    id: string; name: string; studentId?: string;
+export interface StudentInfo {
+    id: number; // FIX: Aligned with Prisma ID (number)
+    name: string; studentId?: string;
     class?: string; rollNo?: string;
 }
-interface TemplateInfo {
-    id: string; name: string;
+export interface TemplateInfo {
+    id: number; // FIX: Aligned with Prisma ID (number)
+    name: string;
     items: { name: string; amount: number }[];
     totalAmount: number;
 }
-interface FeeRecordInfo {
-    id: string; discount?: number; lateFine?: number;
+export interface FeeRecordInfo {
+    id: number; // FIX: Aligned with Prisma ID (number)
+    discount?: number; lateFine?: number;
 }
-interface CollectorInfo {
+export interface CollectorInfo {
     name: string;
 }
 
-// --- Transaction Interface (Pehle se updated hai) ---
-interface Transaction {
-    id: number;
+// --- Transaction Interface (Exported) ---
+export interface Transaction {
+    id: number; // FIX: Transaction ID (Prisma ID) is NUMBER
     receiptId: string;
     studentId?: StudentInfo;
     templateId?: TemplateInfo;
@@ -55,6 +58,10 @@ interface Transaction {
     feeRecordStatus?: string;
 }
 
+// Export the ReceiptData type alias
+export type ReceiptData = Transaction;
+
+
 interface FeeReceiptProps {
     transaction: Transaction | null;
 }
@@ -79,30 +86,21 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
 
-    // --- NAYA PRINT BUTTON FIX YAHAN HAI ---
-    
-    // 1. handleBeforePrint aur handleAfterPrint ko poori tarah hata diya hai.
-
-    // 2. Naya pageStyle jo print ke dauraan sabkuch handle karega
+    // --- PRINT LOGIC (No Change) ---
     const getPageStyle = () => {
         return `
             @page { 
                 size: A4; 
                 margin: 15mm; 
             } 
-            
             @media print { 
                 body { 
                     -webkit-print-color-adjust: exact; 
                     color-adjust: exact; 
                 }
-                
-                /* Sabkuch hide karo... */
                 body > * {
                     display: none;
                 }
-                
-                /* ...SIRF receipt content ko chhodkar */
                 #printable-receipt {
                     display: block !important;
                     position: absolute;
@@ -110,8 +108,6 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     left: 0;
                     width: 100%;
                 }
-                
-                /* Receipt ke andar ke .no-print elements ko hide karo */
                 .no-print { 
                     display: none !important; 
                 }
@@ -122,18 +118,17 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const handlePrint = useReactToPrint({
         content: () => componentRef.current, 
         documentTitle: `FeeReceipt_${transaction?.receiptId || transaction?.id || 'details'}`,
-        pageStyle: getPageStyle(), // <-- Naya function yahaan call kiya
-        // onBeforePrint aur onAfterPrint hata diye gaye
+        pageStyle: getPageStyle(),
     } as any);
-    // --- END NAYA FIX ---
     
     const handleDownload = handlePrint; 
+    // --- END PRINT LOGIC ---
 
     if (!transaction) {
         return <div className={styles.noData}>No transaction details available.</div>;
     }
 
-    // --- Data Extraction (Pehle se updated hai) ---
+    // --- Data Extraction (No Change) ---
     const schoolInfo = transaction.schoolInfo || {};
     const studentInfo = transaction.studentId;
     const templateInfo = transaction.templateId;
@@ -150,7 +145,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const feeItems = templateInfo?.items || [];
     const templateNameDisplay = templateInfo?.name || transaction.templateName || 'Fee Payment';
 
-    // --- Amount Calculation (Pehle se bug-fixed hai) ---
+    // --- Amount Calculation (No Change) ---
     const totalDemand = templateInfo?.totalAmount || transaction.totalFeeAmount || 0;
     const discount = feeRecordInfo?.discount || transaction.discountGiven || 0;
     const lateFine = feeRecordInfo?.lateFine || transaction.lateFineApplied || 0;
@@ -171,7 +166,6 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             </div>
 
             {/* --- Receipt Content (No Change in JSX) --- */}
-            {/* ID "printable-receipt" hona zaroori hai */}
             <div id="printable-receipt" className={styles.receiptContent} ref={componentRef}>
                 {/* Header */}
                 <header className={styles.header}>

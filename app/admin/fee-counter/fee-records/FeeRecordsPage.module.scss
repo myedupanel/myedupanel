@@ -1,4 +1,4 @@
-/* --- Variables (Assuming Aapke Global SCSS se aayi hain) --- */
+/* --- FeeRecordsPage.module.scss (Layout and Scale Optimized) --- */
 $primary-color: #4F46E5;
 $success-color: #10B981;
 $warning-color: #F59E0B;
@@ -11,7 +11,8 @@ $white: #FFFFFF;
 $radius: 8px;
 
 .pageContainer {
-    padding: 2.5rem 2rem;
+    /* SCALE INCREASE: Base padding badhaya */
+    padding: 2.5rem 3rem; 
     background-color: $background-light;
     min-height: 100vh;
 }
@@ -23,7 +24,8 @@ $radius: 8px;
     margin-bottom: 2rem;
 
     .title {
-        font-size: 2rem;
+        /* SCALE INCREASE: Title size optimize kiya */
+        font-size: 2.2rem; 
         font-weight: 700;
         color: $text-dark;
     }
@@ -48,8 +50,9 @@ $radius: 8px;
 }
 
 .controls {
+    /* Filters ke liye flex-wrap enable kiya */
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem; 
     align-items: center;
     margin-bottom: 2rem;
     padding: 1rem;
@@ -57,10 +60,12 @@ $radius: 8px;
     border: 1px solid $border-color;
     border-radius: $radius;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    flex-wrap: wrap; 
+
 
     .searchBar {
         position: relative;
-        flex-grow: 1;
+        flex: 1 1 300px; 
 
         .searchIcon {
             position: absolute;
@@ -97,6 +102,7 @@ $radius: 8px;
             cursor: pointer;
             background-color: $white;
             transition: border-color 0.3s;
+            flex-shrink: 0;
 
             &:focus {
                 outline: none;
@@ -107,16 +113,19 @@ $radius: 8px;
 }
 
 .tableContainer {
-    overflow-x: auto;
+    /* Horizontal scroll ko dabaya */
+    overflow-x: hidden; 
+    width: 100%;
     background-color: $white;
     border-radius: $radius;
-    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
 }
 
 .transactionsTable {
     width: 100%;
-    border-collapse: separate; // Taaki border-radius table-container se inherit ho
-    border-spacing: 0;
+    border-collapse: collapse; 
+    /* CRITICAL FIX: Columns ko fittingly display karne ke liye */
+    table-layout: fixed; 
 
     thead {
         background-color: $text-dark;
@@ -126,9 +135,18 @@ $radius: 8px;
             text-align: left;
             font-weight: 600;
             white-space: nowrap;
-            &:first-child { border-top-left-radius: $radius; }
-            &:last-child { border-top-right-radius: $radius; }
+            font-size: 0.9rem; 
         }
+        
+        /* COLUMN WIDTHS OPTIMIZATION: Ensure 100% total */
+        th:nth-child(1) { width: 15%; } /* Receipt ID */
+        th:nth-child(2) { width: 17%; } /* Student Name */
+        th:nth-child(3) { width: 8%; }  /* Class */
+        th:nth-child(4) { width: 12%; } /* Amount Paid */
+        th:nth-child(5) { width: 12%; } /* Payment Mode */
+        th:nth-child(6) { width: 10%; } /* Date */
+        th:nth-child(7) { width: 10%; } /* Status */
+        th:nth-child(8) { width: 16%; } /* Actions */
     }
 
     tbody {
@@ -141,6 +159,10 @@ $radius: 8px;
             padding: 1rem;
             color: $text-dark;
             font-size: 0.95rem;
+            /* CRITICAL: Text ko wrap hone se roka aur overflow hidden kiya */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap; 
         }
     }
     
@@ -190,17 +212,67 @@ $radius: 8px;
     }
 }
 
+/* --- Pagination Controls --- */
+.paginationControls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    margin-top: 1rem;
+    
+    .paginationButton {
+        background: $primary-color;
+        color: $white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: $radius;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+
+        &:disabled {
+            background: $border-color;
+            color: $text-medium;
+            cursor: not-allowed;
+        }
+    }
+    .pageInfo {
+        font-weight: 500;
+        color: $text-dark;
+    }
+}
+
+
 /* --- Responsive Adjustments --- */
+@media (max-width: 1200px) {
+     /* 1200px se neeche, padding ko thoda kam kiya */
+    .pageContainer {
+        padding: 2rem;
+    }
+}
+
 @media (max-width: 768px) {
     .controls {
         flex-direction: column;
         gap: 1rem;
     }
+    /* Filters ko full width diya */
     .controls .filters {
         width: 100%;
         justify-content: space-between;
     }
     .controls .searchBar {
         width: 100%;
+    }
+    /* Mobile par scroll enable kiya */
+    .tableContainer {
+        overflow-x: auto;
+    }
+    .transactionsTable {
+        /* Mobile par minimum width set kiya takki scroll ho sake */
+        min-width: 900px; 
+        table-layout: auto; 
     }
 }

@@ -6,32 +6,11 @@ import Link from 'next/link';
 // --- API Import ---
 import api from '@/backend/utils/api'; 
 // --- Modal and Receipt Component Imports ---
-import Modal from '@/components/common/Modal/Modal'; // Assuming a generic Modal component exists
-
-// WARNING: Check this path! If FeeReceipt is directly in the parent folder, the path might be wrong.
+import Modal from '@/components/common/Modal/Modal'; 
 import FeeReceipt from '@/components/admin/fees/FeeReceipt'; 
-// --- End Imports ---
 
-// --- Helper Hook: Debounce ---
-const useDebounce = (value: string, delay: number) => {
-    const [debouncedValue, setDebouncedValue] = useState(value);
-
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedValue(value);
-        }, delay);
-
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [value, delay]);
-
-    return debouncedValue;
-};
-// --- End Helper Hook ---
-
-
-// --- Interface Definitions ---
+// --- Interface Definitions (Assuming centralized types are fixed and imported) ---
+// Note: These interfaces are kept local for clarity, but should ideally be imported.
 interface Transaction {
   id: number;
   receiptId: string;
@@ -43,12 +22,29 @@ interface Transaction {
   status: 'Success' | 'Pending' | 'Failed';
 }
 
-// Interface for the detailed data required by FeeReceipt component
 interface DetailedTransaction extends Transaction {
     notes?: string; 
     currentBalanceDue?: number;
     feeRecordStatus?: string;
 }
+
+// New interface for class options
+interface ClassOption {
+    id: number;
+    name: string;
+}
+
+// --- Helper Hook: Debounce ---
+const useDebounce = (value: string, delay: number) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(() => {
+        const handler = setTimeout(() => { setDebouncedValue(value); }, delay);
+        return () => { clearTimeout(handler); };
+    }, [value, delay]);
+    return debouncedValue;
+};
+// --- End Helper Hook ---
+
 
 const FeeRecordsPage: React.FC = () => {
   // --- States for Data and Pagination ---
@@ -59,9 +55,13 @@ const FeeRecordsPage: React.FC = () => {
   
   // --- States for Filters ---
   const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 500); // Debounce applied
+  const debouncedSearchQuery = useDebounce(searchQuery, 500); 
   const [filterMode, setFilterMode] = useState<'All' | string>('All');
   const [filterStatus, setFilterStatus] = useState<'All' | Transaction['status']>('All'); 
+  
+  // NEW CLASS STATES
+  const [classOptions, setClassOptions] = useState<ClassOption[]>([]);
+  const [filterClassId, setFilterClassId] = useState<'All' | number>('All');
 
   // --- States for Modal ---
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
@@ -69,21 +69,34 @@ const FeeRecordsPage: React.FC = () => {
   const [detailedReceiptData, setDetailedReceiptData] = useState<DetailedTransaction | null>(null);
   const [isReceiptLoading, setIsReceiptLoading] = useState(false);
   // --- End Modal States ---
+  
+  // NEW: Fetch Classes from /api/classes
+  const fetchClasses = useCallback(async () => {
+      try {
+          // Assuming API returns an array like [{ classid: 1, class_name: '7th' }, ...]
+          const res = await api.get('/api/classes');
+          const options = res.data.map((c: any) => ({ id: c.classid, name: c.class_name }));
+          setClassOptions(options);
+      } catch (err) {
+          console.error("Failed to fetch classes", err);
+      }
+  }, []);
 
 
-  // --- API Fetch Function ---
+  // --- API Fetch Function (Updated) ---
   const fetchTransactions = useCallback(async () => {
     setIsLoading(true);
     
-    // Query parameters तैयार करें
     const params = new URLSearchParams();
     params.append('page', currentPage.toString());
     params.append('limit', '15'); 
     
-    // Use Debounced search query
     if (debouncedSearchQuery) params.append('search', debouncedSearchQuery);
     if (filterMode !== 'All') params.append('paymentMode', filterMode);
     if (filterStatus !== 'All') params.append('status', filterStatus); 
+    
+    // ADD CLASS FILTER
+    if (filterClassId !== 'All') params.append('classId', filterClassId.toString());
 
     try {
       const res = await api.get(`/fees/transactions?${params.toString()}`);
@@ -98,24 +111,27 @@ const FeeRecordsPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, debouncedSearchQuery, filterMode, filterStatus]);
+  }, [currentPage, debouncedSearchQuery, filterMode, filterStatus, filterClassId]);
   
-  // --- Run Fetch Effect ---
+  // --- Run Initial Fetch Effect ---
   useEffect(() => {
-    // Fetch when pagination, filters, or DEBOUNCED search query changes
+    fetchClasses(); // Fetch classes on initial load
+  }, [fetchClasses]);
+  
+  // --- Run Transaction Fetch Effect ---
+  useEffect(() => {
     fetchTransactions();
   }, [fetchTransactions]);
   
   
-  // --- Fetch Detailed Receipt Data ---
+  // --- Fetch Detailed Receipt Data (No Change) ---
   const fetchReceiptDetails = useCallback(async (transactionId: number) => {
       setIsReceiptLoading(true);
       setDetailedReceiptData(null);
       try {
-          // This endpoint uses getTransactionById from your controller
           const res = await api.get(`/fees/transaction/${transactionId}`);
           setDetailedReceiptData(res.data);
-          setIsReceiptModalOpen(true); // Open modal only on success
+          setIsReceiptModalOpen(true);
       } catch (error) {
           console.error("Error fetching receipt details:", error);
           alert("Failed to load receipt details.");
@@ -130,7 +146,7 @@ const FeeRecordsPage: React.FC = () => {
     fetchReceiptDetails(transactionId);
   };
   
-  // --- Close Modal Handler ---
+  // --- Close Modal Handler (No Change) ---
   const handleCloseReceiptModal = () => {
       setIsReceiptModalOpen(false);
       setSelectedTransactionId(null);
@@ -177,12 +193,24 @@ const FeeRecordsPage: React.FC = () => {
             type="text"
             placeholder="Search by Student Name or Receipt ID..."
             value={searchQuery}
-            // Update local state immediately
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        {/* Filters (No Change) */}
+        {/* NEW: Class Filter */}
+        <div className={styles.filters}>
+          <select 
+            value={filterClassId} 
+            onChange={(e) => {setFilterClassId(Number(e.target.value) || 'All'); setCurrentPage(1);}}
+          >
+            <option value="All">All Classes</option>
+            {classOptions.map(cls => (
+                <option key={cls.id} value={cls.id}>{cls.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Existing Filters */}
         <div className={styles.filters}>
           <select 
             value={filterMode} 
@@ -231,7 +259,6 @@ const FeeRecordsPage: React.FC = () => {
                 return (
                   <tr key={t.id} className={styles.transactionRow}>
                     <td className={styles.receiptIdCol}>
-                      {/* Link to open the modal via ID */}
                       <a href="#" onClick={(e) => {e.preventDefault(); handleViewReceipt(t.id); }}>
                           {t.receiptId}
                       </a>
@@ -295,12 +322,10 @@ const FeeRecordsPage: React.FC = () => {
         isOpen={isReceiptModalOpen} 
         onClose={handleCloseReceiptModal} 
         title={`Receipt: ${detailedReceiptData?.receiptId || 'Loading...'}`}
-        // size="lg" Removed this prop
       >
         {isReceiptLoading ? (
             <div style={{ padding: '2rem', textAlign: 'center' }}>Loading receipt data...</div>
         ) : detailedReceiptData ? (
-            // FeeReceipt component will have the Download/Print buttons inside
             <FeeReceipt transaction={detailedReceiptData} />
         ) : (
              <div style={{ padding: '2rem', textAlign: 'center' }}>Receipt data could not be loaded.</div>

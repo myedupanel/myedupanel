@@ -3,9 +3,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '@/backend/utils/api';
 import styles from './StudentFeeRecords.module.scss';
 import { FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import Link from 'next/link'; // Receipt link ke liye
+import Link from 'next/link'; 
+// --- NEW IMPORT ---
+import { useRouter } from 'next/navigation';
+// --- END NEW IMPORT ---
 
-// --- Helper Functions (Kadam 1) ---
+// --- Helper Functions (No Change) ---
 const formatCurrency = (amount: number | null | undefined): string => {
     if (isNaN(amount as number) || amount === null || amount === undefined) return '₹ 0';
     return new Intl.NumberFormat('en-IN', {
@@ -15,7 +18,6 @@ const formatCurrency = (amount: number | null | undefined): string => {
         maximumFractionDigits: 0,
     }).format(amount);
 };
-// Debounce hook (No Change)
 function useDebounce(value: string, delay: number) {
     const [debouncedValue, setDebouncedValue] = useState(value);
     useEffect(() => {
@@ -26,7 +28,7 @@ function useDebounce(value: string, delay: number) {
 }
 // --- End Helper Functions ---
 
-// --- Data Interface (Backend response ke hisaab se) ---
+// --- Data Interface (No Change) ---
 interface FeeRecord {
     id: number;
     amount: number;
@@ -37,9 +39,9 @@ interface FeeRecord {
     discount: number;
     lateFine: number;
     // Populated fields
-    studentId: { // Yeh object aapke feeController se aa raha hai
+    studentId: { 
         name: string;
-        studentId: string; // Roll number ya custom ID
+        studentId: string; // Roll number or custom ID
         class: string;
     };
     templateId: { name: string };
@@ -47,6 +49,8 @@ interface FeeRecord {
 // --- End Interface ---
 
 const StudentFeeRecords = () => {
+    const router = useRouter(); // Initialize router
+
     const [records, setRecords] = useState<FeeRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -60,16 +64,12 @@ const StudentFeeRecords = () => {
     const fetchRecords = useCallback(async () => {
         try {
             setLoading(true);
-            // API call mein filters ko query parameters olarak bhejein
             const params = new URLSearchParams({
                 page: String(currentPage),
                 limit: '10',
-                // Backend controller studentName ko support karta hai
                 studentName: debouncedStudentName, 
-                // Backend controller status ko support karta hai
                 status: filters.status, 
             });
-            // Aapke feeController mein yeh route 'getStudentFeeRecords' function ko call karta hai
             const res = await api.get(`/fees/student-records?${params.toString()}`);
             setRecords(res.data.data);
             setTotalPages(res.data.totalPages);
@@ -83,16 +83,15 @@ const StudentFeeRecords = () => {
 
     useEffect(() => {
         fetchRecords();
-        // Socket.IO event listener yahan lagaya jaa sakta hai (jaise 'fee_record_updated')
     }, [fetchRecords]);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
-        setCurrentPage(1); // Filter badalne par hamesha pehle page par jaayein
+        setCurrentPage(1); 
     };
     
-    // Status ke liye CSS class
+    // Status ke liye CSS class (No Change)
     const getStatusClass = (status: string) => {
         switch (status.toLowerCase()) {
             case 'paid': return styles.statusPaid;
@@ -102,6 +101,13 @@ const StudentFeeRecords = () => {
             default: return styles.statusDefault;
         }
     };
+
+    // --- NEW REDIRECT HANDLER ---
+    const handleViewHistory = (studentRegId: string) => {
+        // Redirect to Fee Records page and pass the student ID as a query parameter
+        router.push(`/admin/fee-counter/fee-records?search=${studentRegId}`);
+    };
+    // --- END NEW HANDLER ---
 
     if (error) return <div className={styles.messageError}>{error}</div>;
 
@@ -135,7 +141,7 @@ const StudentFeeRecords = () => {
 
             {loading ? <div className={styles.message}>Loading Fee Records...</div> : (
                 <>
-                    {/* ===== TABLE CONTENT (Kadam 2) ===== */}
+                    {/* ===== TABLE CONTENT ===== */}
                     <div className={styles.tableWrapper}>
                         <table className={styles.table}>
                             <thead>
@@ -182,10 +188,10 @@ const StudentFeeRecords = () => {
                                                         Collect Fee
                                                     </button>
                                                 )}
-                                                {/* View History Button (Optional) */}
+                                                {/* View History Button (UPDATED) */}
                                                 <button 
                                                     className={styles.historyButton}
-                                                    onClick={() => alert(`Viewing history for Record ID: ${record.id}`)}
+                                                    onClick={() => handleViewHistory(record.studentId.studentId)}
                                                 >
                                                     History
                                                 </button>
@@ -200,7 +206,7 @@ const StudentFeeRecords = () => {
                             </tbody>
                         </table>
                     </div>
-                    {/* ===== PAGINATION (Kadam 2) ===== */}
+                    {/* ===== PAGINATION ===== */}
                     {totalPages > 1 && (
                         <div className={styles.pagination}>
                             <button

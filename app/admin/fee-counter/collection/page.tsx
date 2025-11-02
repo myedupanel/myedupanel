@@ -517,7 +517,7 @@ const FeeCollectionPage: React.FC = () => {
                   // FIX 2: 'templateId' ko manually banaya taaki types match karein
                   templateId: {
                     // Pichla error chahta tha ki 'id' string ho
-                    id: String(receiptDataForModal.templateId?.id || '0'), 
+                    id: Number(receiptDataForModal.templateId?.id || '0'), 
                     name: receiptDataForModal.templateId?.name || 'N/A',
                     // Naya error chahta tha ki 'items' ek valid array ho
                     items: receiptDataForModal.templateId?.items || [], 
