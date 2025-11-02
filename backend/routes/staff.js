@@ -141,7 +141,7 @@ router.get('/', [authMiddleware, authorize('Admin')], async (req, res) => {
             },
             // --- FIX 2: details field ko HATA DIYA ---
             include: {
-                staffProfile: true, // <-- Bas yahi chahiye
+                staffProfile: false, // <-- Bas yahi chahiye
             },
             orderBy: {
                 name: 'asc'
