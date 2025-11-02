@@ -10,10 +10,9 @@ import RecentPayments from '@/components/admin/RecentPayments/RecentPayments';
 import { MdPeople, MdSchool, MdAttachMoney, MdFamilyRestroom, MdBadge, MdClass } from 'react-icons/md';
 import styles from './AdminDashboard.module.scss';
 import { useAuth, User } from '../../context/AuthContext'; 
-// --- FIX 1: 'Link' component ko import karein ---
 import Link from 'next/link';
 
-// --- TYPE DEFINITIONS (No Change) ---
+// --- TYPE DEFINITIONS ---
 interface MonthlyAdmissionData {
   name: string;
   admissions: number;
@@ -24,6 +23,7 @@ interface ClassCountData {
     count: number;
     color: string;
 }
+// --- FIX 1: Backend Interface Update ---
 interface BackendDashboardData {
   admissionsData: { name: string; admissions: number }[]; 
   classCounts: { name: string; count: number }[];       
@@ -37,6 +37,10 @@ interface BackendDashboardData {
   totalParents?: number;
   totalClasses?: number; 
   totalStaff?: number;
+  // --- NEW FIELDS ---
+  currentMonthRevenue?: number;
+  currentMonthName?: string;
+  // --- END NEW FIELDS ---
 }
 interface FormattedDashboardData {
   stats: { title: string; value: string }[];
@@ -65,17 +69,16 @@ const cardDetails = {
   "Total Classes": { icon: <MdClass />, theme: "sky" }
 } as const;
 
-// --- FIX 2: Links ke liye ek helper object banayein ---
+// --- Card Links (No Change) ---
 const cardLinks: { [key: string]: string } = {
   "Total Students": "/admin/students",
   "Total Teachers": "/admin/teachers",
   "Total Staff": "/admin/staff",
   "Monthly Revenue": "/admin/fee-counter",
-  "Total Parents": "/admin/parents", // Bonus: Yeh bhi add kar diya
-  "Total Classes": "/admin/school/classes"  // Bonus: Yeh bhi add kar diya
+  "Total Parents": "/admin/parents", 
+  "Total Classes": "/admin/school/classes"  
 };
-// --- END FIX ---
-
+// --- END ---
 
 // --- Helper Function (No Change) ---
 const getAdmissionColor = (value: number, min: number, max: number): string => {
@@ -94,7 +97,7 @@ const AdminDashboardPage = () => {
   const [dashboardData, setDashboardData] = useState<FormattedDashboardData | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
 
-  // --- fetchDashboardData (No Change) ---
+  // --- FIX 2: fetchDashboardData Update ---
   const fetchDashboardData = useCallback(async () => {
     if (!token) {
         console.log("fetchDashboardData: No token found, skipping fetch.");
@@ -139,11 +142,21 @@ const AdminDashboardPage = () => {
       }
       console.log("fetchDashboardData: Processed Class Counts:", coloredClassData);
 
+      // --- NEW REVENUE LOGIC ---
+      const revenueAmount = data.currentMonthRevenue || 0;
+      const revenueMonth = data.currentMonthName || 'Monthly';
+      const formattedRevenue = `₹${revenueAmount.toLocaleString('en-IN')}`;
+      const revenueDisplay = revenueAmount > 0 
+          ? `${formattedRevenue} (${revenueMonth})`
+          : `${formattedRevenue} (No Revenue)`;
+      // --- END NEW REVENUE LOGIC ---
+
+
       // Format Stats
       const formattedStats = [
         { title: "Total Students", value: (data.totalStudents || 0).toString() },
         { title: "Total Teachers", value: (data.totalTeachers || 0).toString() },
-        { title: "Monthly Revenue", value: "₹0" }, 
+        { title: "Monthly Revenue", value: revenueDisplay }, // <--- UPDATED STAT VALUE
         { title: "Total Parents", value: (data.totalParents || 0).toString() },
         { title: "Total Staff", value: (data.totalStaff || 0).toString() },
         { title: "Total Classes", value: (classDataFromApi.length || 0).toString() }
@@ -165,7 +178,7 @@ const AdminDashboardPage = () => {
       setDashboardData({ stats: [], monthlyAdmissions: [], classCounts: [], recentPayments: [] });
     }
   }, [token]); 
-  // --- END fetchDashboardData ---
+  // --- END fetchDashboardData Update ---
 
   // --- loadProfileData (No Change) ---
   const loadProfileData = useCallback(() => {
@@ -227,12 +240,11 @@ const AdminDashboardPage = () => {
     return <div className={styles.loading}>Loading Dashboard...</div>;
   }
 
-  // --- JSX Return (FIXED) ---
+  // --- JSX Return (No Change) ---
   return (
     <div className={styles.dashboardContainer}>
       <Header admin={adminProfile} />
       
-      {/* --- FIX 3: Stats Grid ko update kiya --- */}
       <div className={styles.statsGrid}>
         {dashboardData.stats.map((stat) => {
           // 1. Link ka path check karein
@@ -265,7 +277,6 @@ const AdminDashboardPage = () => {
           );
         })}
       </div>
-      {/* --- END FIX --- */}
       
       <div className={styles.chartsRow}>
           <div className={styles.chartContainer}>

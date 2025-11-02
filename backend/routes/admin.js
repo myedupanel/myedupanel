@@ -1,4 +1,5 @@
 // backend/routes/admin.js
+
 const express = require('express');
 const router = express.Router();
 const prisma = require('../config/prisma'); // Prisma client
@@ -9,19 +10,19 @@ const sendEmail = require('../utils/sendEmail');
 const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware'); 
 const userController = require('../controllers/userController'); 
 
-// Helper: Get Full Name (Student ke liye)
+// Helper: Get Full Name (Student ke liye) (No Change)
 const getFullName = (student) => {
   return [student?.first_name, student?.father_name, student?.last_name].filter(Boolean).join(' ');
 }
 
-// Helper Function: JWT Token Generate karna
+// Helper Function: JWT Token Generate karna (No Change)
 const generateToken = (userId, schoolId) => {
   return jwt.sign({ id: userId, schoolId: schoolId }, process.env.JWT_SECRET, {
     expiresIn: '30d', 
   });
 };
 
-// @route POST /api/admin/create-user
+// @route POST /api/admin/create-user (No Change)
 router.post('/create-user', [authMiddleware, adminMiddleware], userController.createUserByAdmin);
 
 
@@ -35,10 +36,20 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             return res.status(400).json({ msg: 'Admin school information missing.' });
         }
         console.log(`[GET /dashboard-data] Fetching data for schoolId: ${schoolId}`);
+        
+        // --- FIX 1: Monthly Revenue Time Range Taiyaar Karna ---
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        endOfMonth.setHours(23, 59, 59, 999);
+        const currentMonthName = now.toLocaleString('en-US', { month: 'long' }); // For frontend display
+        // --- END FIX 1 ---
+
 
         const staffRoles = ['Accountant', 'Office Admin', 'Librarian', 'Security', 'Transport Staff', 'Other', 'Staff']; 
 
         const [
+            revenueStats, // <-- NEW 1st item: Revenue
             studentCount,
             teacherCount,
             parentCount,
@@ -51,16 +62,27 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             admissionsDataRaw,
             classCountsRaw
         ] = await Promise.all([
-            // --- YEH HAI AAPKA FIX ---
-            // FIX: 'User' table ke bajaye 'Students' table ko count kiya
-            prisma.students.count({ where: { schoolId: schoolId } }), 
-            // --- FIX ENDS HERE ---
+            // --- FIX 2: Monthly Revenue Query Add Kiya ---
+            prisma.transaction.aggregate({
+                where: {
+                    schoolId: schoolId,
+                    status: 'Success',
+                    paymentDate: {
+                        gte: startOfMonth,
+                        lte: endOfMonth
+                    }
+                },
+                _sum: {
+                    amountPaid: true
+                }
+            }),
+            // --- END FIX 2 ---
 
+            // Existing Promises (Adjusted for 1st index)
+            prisma.students.count({ where: { schoolId: schoolId } }), 
             prisma.user.count({ where: { role: 'Teacher', schoolId: schoolId } }), 
             prisma.user.count({ where: { role: 'Parent', schoolId: schoolId } }),   
             prisma.user.count({ where: { role: { in: staffRoles }, schoolId: schoolId } }),
-
-            // Recent lists
             prisma.students.findMany({ where: { schoolId }, orderBy: { studentid: 'desc' }, take: 5, select: { first_name: true, father_name: true, last_name: true, class: { select: { class_name: true } }, admission_date: true } }), 
             
             prisma.teachers.findMany({ 
@@ -113,7 +135,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
 
         console.log(`[GET /dashboard-data] Counted Staff: ${staffCount}`);
 
-        // --- Process Admissions Data ---
+        // --- Process Admissions Data (No Change) ---
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const admissionsMap = new Map(monthNames.map((name, index) => [index + 1, { name, admissions: 0 }]));
         
@@ -129,7 +151,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
         console.log("[GET /dashboard-data] Formatted Admissions (Month):", admissionsData);
 
 
-        // --- Process Class Counts Data ---
+        // --- Process Class Counts Data (No Change) ---
          const classIds = classCountsRaw.map(item => item.classid);
          const classesInfo = await prisma.classes.findMany({
              where: { classid: { in: classIds } },
@@ -144,7 +166,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
          }).sort((a, b) => a.name.localeCompare(b.name)); 
         console.log("[GET /dashboard-data] Formatted Class Counts:", classCounts);
 
-        // --- Format Recent Payments ---
+        // --- Format Recent Payments (No Change) ---
         const recentFees = recentPaidFeeRecords.map(record => ({
             id: record.id, 
             student: getFullName(record.student) || 'Unknown Student',
@@ -152,7 +174,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             date: `ID: ${record.id}` 
         }));
 
-        // --- Format Recent Lists ---
+        // --- Format Recent Lists (No Change) ---
          const formattedRecentStudents = recentStudents.map(s => ({ ...s, name: getFullName(s), class: s.class?.class_name }));
          
          const formattedRecentTeachers = recentTeachers.map(t => ({
@@ -161,9 +183,11 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
          }));
 
 
-        // --- Final Data Object ---
+        // --- FIX 3: Final Data Object Update ---
+        const monthlyRevenue = revenueStats._sum.amountPaid || 0;
+
         const dashboardData = {
-            totalStudents: studentCount || 0, // <-- Yeh ab 'Students' table se aa raha hai
+            totalStudents: studentCount || 0, 
             totalTeachers: teacherCount || 0,
             totalParents: parentCount || 0,
             totalStaff: staffCount || 0,
@@ -173,7 +197,11 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             recentTeachers: formattedRecentTeachers || [], 
             recentParents: recentParents || [],
             recentStaff: recentStaff || [],
-            recentFees
+            recentFees,
+            // --- NEW FIELDS ADDED ---
+            currentMonthRevenue: monthlyRevenue,
+            currentMonthName: currentMonthName
+            // --- END NEW FIELDS ---
         };
         console.log(`[GET /dashboard-data] Sending final data. Staff: ${dashboardData.totalStaff}`);
         res.json(dashboardData);
@@ -184,7 +212,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
     }
 });
 
-// @route PUT /api/admin/profile
+// @route PUT /api/admin/profile (No Change)
 router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => { 
     const { adminName, schoolName } = req.body;
     const userId = req.user.id; 
@@ -286,7 +314,7 @@ router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => {
 });
 
 
-// @route POST /api/admin/seed-standard-classes
+// @route POST /api/admin/seed-standard-classes (No Change)
 const seedStandardClasses = async (req, res) => {
     console.log("[POST /seed-standard-classes] Request received.");
     try {
