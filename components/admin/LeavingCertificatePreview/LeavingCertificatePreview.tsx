@@ -114,8 +114,8 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           </div>
           <div className={styles.titleRow}>
             <div className={styles.headerSrNo}>
-              {/* Yeh STUDENT ka Sr. No / Roll No. hai */}
-              Sr. No: {fill(student?.studentId, '100px')}
+              {/* FIX 1: Sr. No. ko School Profile के General Register No. से अपडेट किया */}
+              Sr. No: {fill(schoolDetails.genRegNo, '100px')}
             </div>
             <h2>LEAVING CERTIFICATE</h2>
             <div className={styles.headerRegNo}>
@@ -145,17 +145,16 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>{fill(formData.motherName, '300px')}</td>
             </tr>
 
-            {/* --- FIX (Item 4): Label column ko blank kiya --- */}
+            {/* FIX 2: Item 4 को एक ही लाइन में align किया */}
             <tr>
               <td>4</td>
               <td></td> 
-              <td>
+              <td style={{ display: 'flex', gap: '20px' }}>
                 <SubField label="Nationality" value={formData.nationality} minWidth="80px" />
                 <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
                 <SubField label="Religion" value={formData.religion} minWidth="80px" />
               </td>
             </tr>
-            {/* --- END FIX --- */}
 
             <tr>
               <td>5</td>
@@ -163,7 +162,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>{fill(formData.caste, '150px')}</td>
             </tr>
 
-            {/* --- FIX (Item 6): 2x2 Grid ke liye inline styles add kiye --- */}
+            {/* FIX 3: Item 6 को 2x2 Grid में align किया */}
             <tr>
               <td>6</td>
               <td>Birth place(State/City)</td>
@@ -180,7 +179,6 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                 </div>
               </td>
             </tr>
-            {/* --- END FIX --- */}
 
             <tr>
               <td>7</td>
@@ -198,17 +196,15 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>{fill(formData.previousSchool, '200px')}</td>
             </tr>
             
-            {/* --- FIX (Item 10): Yeh code pehle se hi sahi tha --- */}
-            {/* SCSS is 'td' ko 'display: flex' banata hai, isliye yeh ek line mein aayega */}
+            {/* FIX 4: Item 10 को एक ही लाइन में align किया */}
             <tr>
               <td>10</td>
               <td>Date of Admission</td>
-              <td>
+              <td style={{ display: 'flex', gap: '20px' }}>
                 <SubField label="Date" value={dateOfAdmission} minWidth="100px" />
                 <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
               </td>
             </tr>
-            {/* --- END FIX --- */}
 
             <tr>
               <td>11</td>
