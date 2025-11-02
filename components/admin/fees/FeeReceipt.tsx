@@ -3,33 +3,30 @@ import styles from './FeeReceipt.module.scss';
 import { FiPrinter, FiDownload } from 'react-icons/fi';
 import { useReactToPrint } from 'react-to-print';
 
-// --- Interface Definitions (FIXED IDs and Exported) ---
+// --- Interface Definitions (No Change - Keeping your exported types) ---
 export interface SchoolInfo {
     name?: string; address?: string; logo?: string;
     session?: string; phone?: string; email?: string;
 }
 export interface StudentInfo {
-    id: number; // FIX: Aligned with Prisma ID (number)
-    name: string; studentId?: string;
+    id: number; name: string; studentId?: string;
     class?: string; rollNo?: string;
 }
 export interface TemplateInfo {
-    id: number; // FIX: Aligned with Prisma ID (number)
-    name: string;
+    id: number; name: string;
     items: { name: string; amount: number }[];
     totalAmount: number;
 }
 export interface FeeRecordInfo {
-    id: number; // FIX: Aligned with Prisma ID (number)
-    discount?: number; lateFine?: number;
+    id: number; discount?: number; lateFine?: number;
 }
 export interface CollectorInfo {
     name: string;
 }
 
-// --- Transaction Interface (Exported) ---
+// --- Transaction Interface (No Change - Keeping your exported types) ---
 export interface Transaction {
-    id: number; // FIX: Transaction ID (Prisma ID) is NUMBER
+    id: number;
     receiptId: string;
     studentId?: StudentInfo;
     templateId?: TemplateInfo;
@@ -86,28 +83,80 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
 
-    // --- PRINT LOGIC (No Change) ---
-    const getPageStyle = () => {
-        return `
+    // --- FIX: Print Hiding Logic ---
+
+    const getBackdropElement = (): HTMLElement | null => {
+        // Most common selectors for modal backdrops (overlay)
+        const selectors = [
+            '[role="dialog"][aria-modal="true"]', // Generic modal wrapper (often contains backdrop)
+            '.modal-backdrop', // Bootstrap/Generic CSS class
+            '.MuiBackdrop-root', // Material UI
+            '[data-modal-backdrop="true"]', // Custom attribute
+            '.ant-modal-mask', // Ant Design
+            'body > div:last-child[style*="z-index"]', // Fallback for overlays
+        ];
+        
+        let backdrop: HTMLElement | null = null;
+        for (const selector of selectors) {
+            backdrop = document.querySelector(selector);
+            if (backdrop) {
+                // If the element is found, check if it's visible (optional safety check)
+                if (window.getComputedStyle(backdrop).display !== 'none') {
+                    return backdrop;
+                }
+            }
+        }
+        return null;
+    };
+
+    const handleBeforePrint = () => {
+        const backdrop = getBackdropElement();
+        if (backdrop) {
+            // Temporarily hide the backdrop before the native print dialog opens
+            backdrop.style.display = 'none';
+        }
+        // Small delay to ensure DOM update takes effect (if needed)
+        return Promise.resolve();
+    };
+
+    const handleAfterPrint = () => {
+        // Restore the backdrop after the print dialog is closed
+        const backdrop = getBackdropElement();
+        if (backdrop) {
+            backdrop.style.display = ''; // Revert to default display style
+        }
+    };
+    
+    const getPrintPageStyle = () => {
+         return `
             @page { 
                 size: A4; 
                 margin: 15mm; 
             } 
+            
             @media print { 
                 body { 
                     -webkit-print-color-adjust: exact; 
                     color-adjust: exact; 
                 }
+                
+                /* CRITICAL: Hides everything except the receipt content */
                 body > * {
-                    display: none;
+                    visibility: hidden;
+                    display: none !important;
                 }
+                
+                /* ...SIRF receipt content ko chhodkar */
                 #printable-receipt {
+                    visibility: visible !important;
                     display: block !important;
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100%;
                 }
+                
+                /* Receipt ke andar ke .no-print elements ko hide karo */
                 .no-print { 
                     display: none !important; 
                 }
@@ -115,14 +164,17 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         `;
     };
 
+
     const handlePrint = useReactToPrint({
         content: () => componentRef.current, 
         documentTitle: `FeeReceipt_${transaction?.receiptId || transaction?.id || 'details'}`,
-        pageStyle: getPageStyle(),
+        pageStyle: getPrintPageStyle(),
+        onBeforePrint: handleBeforePrint, // <-- Backdrop hiding function
+        onAfterPrint: handleAfterPrint,   // <-- Backdrop restoring function
     } as any);
+    // --- END FIX ---
     
     const handleDownload = handlePrint; 
-    // --- END PRINT LOGIC ---
 
     if (!transaction) {
         return <div className={styles.noData}>No transaction details available.</div>;

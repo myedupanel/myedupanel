@@ -11,7 +11,7 @@ $white: #FFFFFF;
 $radius: 8px;
 
 .pageContainer {
-    /* SCALE INCREASE: Base padding badhaya */
+    /* SCALE INCREASE: Base padding badhaya, GAPS HATAANE KE LIYE SIDE PADDING RAKHA */
     padding: 2.5rem 3rem; 
     background-color: $background-light;
     min-height: 100vh;
@@ -24,7 +24,6 @@ $radius: 8px;
     margin-bottom: 2rem;
 
     .title {
-        /* SCALE INCREASE: Title size optimize kiya */
         font-size: 2.2rem; 
         font-weight: 700;
         color: $text-dark;
@@ -50,7 +49,6 @@ $radius: 8px;
 }
 
 .controls {
-    /* Filters ke liye flex-wrap enable kiya */
     display: flex;
     gap: 1rem; 
     align-items: center;
@@ -138,15 +136,15 @@ $radius: 8px;
             font-size: 0.9rem; 
         }
         
-        /* COLUMN WIDTHS OPTIMIZATION: Ensure 100% total */
-        th:nth-child(1) { width: 15%; } /* Receipt ID */
-        th:nth-child(2) { width: 17%; } /* Student Name */
-        th:nth-child(3) { width: 8%; }  /* Class */
-        th:nth-child(4) { width: 12%; } /* Amount Paid */
-        th:nth-child(5) { width: 12%; } /* Payment Mode */
-        th:nth-child(6) { width: 10%; } /* Date */
-        th:nth-child(7) { width: 10%; } /* Status */
-        th:nth-child(8) { width: 16%; } /* Actions */
+        /* COLUMN WIDTHS OPTIMIZATION: Date space badhaya, Total must be 100% */
+        th:nth-child(1) { width: 15%; }  /* Receipt ID */
+        th:nth-child(2) { width: 17%; }  /* Student Name */
+        th:nth-child(3) { width: 8%; }   /* Class */
+        th:nth-child(4) { width: 12%; }  /* Amount Paid */
+        th:nth-child(5) { width: 12%; }  /* Payment Mode */
+        th:nth-child(6) { width: 12%; }  /* Date (Space badhaya) */
+        th:nth-child(7) { width: 8%; }   /* Status (Space kam kiya) */
+        th:nth-child(8) { width: 16%; }  /* Actions */
     }
 
     tbody {
@@ -159,7 +157,6 @@ $radius: 8px;
             padding: 1rem;
             color: $text-dark;
             font-size: 0.95rem;
-            /* CRITICAL: Text ko wrap hone se roka aur overflow hidden kiya */
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap; 

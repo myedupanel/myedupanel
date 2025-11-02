@@ -91,11 +91,13 @@ const FeeRecordsPage: React.FC = () => {
     params.append('page', currentPage.toString());
     params.append('limit', '15'); 
     
+    // Student Name Search (Uses Debounced query)
     if (debouncedSearchQuery) params.append('search', debouncedSearchQuery);
     if (filterMode !== 'All') params.append('paymentMode', filterMode);
     if (filterStatus !== 'All') params.append('status', filterStatus); 
     
     // ADD CLASS FILTER
+    // Note: Backend Controller handles the classId filtering (FeeController.getTransactions)
     if (filterClassId !== 'All') params.append('classId', filterClassId.toString());
 
     try {
@@ -120,6 +122,7 @@ const FeeRecordsPage: React.FC = () => {
   
   // --- Run Transaction Fetch Effect ---
   useEffect(() => {
+    // This effect runs on page change, filter change, and DEBOUNCED search change
     fetchTransactions();
   }, [fetchTransactions]);
   
@@ -201,6 +204,7 @@ const FeeRecordsPage: React.FC = () => {
         <div className={styles.filters}>
           <select 
             value={filterClassId} 
+            // Send 0 or actual ID to backend
             onChange={(e) => {setFilterClassId(Number(e.target.value) || 'All'); setCurrentPage(1);}}
           >
             <option value="All">All Classes</option>
