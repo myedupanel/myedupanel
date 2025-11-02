@@ -134,14 +134,21 @@
     gap: 5px 20px;
   }
   
-  tbody tr:nth-child(7) td:nth-child(3),
-  tbody tr:nth-child(9) td:nth-child(3),
-  tbody tr:nth-child(15) td:nth-child(3),
-  tbody tr:nth-child(16) td:nth-child(3)
+  /* --- YEH HAI AAPKA FIX --- */
+  /* Row numbers ko update kiya (kyunki row 1 delete ho gayi thi) */
+  /* Yeh un fields ke liye hai jo wrap hone chahiye (e.g., long text) */
+  tbody tr:nth-child(8) td:nth-child(3),  /* 8. DOB (Words) */
+  tbody tr:nth-child(9) td:nth-child(3),  /* 9. Previous School */
+  tbody tr:nth-child(14) td:nth-child(3), /* 14. Reason */
+  tbody tr:nth-child(15) td:nth-child(3)  /* 15. Remarks */
   {
      display: block;
   }
+  /* Row 6 (Birth place) ko yahan se hata diya hai, 
+     taaki woh aapke TSX file ke inline styles (2x2 grid) ko use kar sake. */
 }
+/* --- FIX ENDS HERE --- */
+
 
 .subField {
   font-weight: normal;
