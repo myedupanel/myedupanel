@@ -38,7 +38,8 @@ const quizRoutes = require('./routes/quiz');
 const analyticsRoutes = require('./routes/analytics');
 const classRoutes = require('./routes/classes');
 const attendanceRoutes = require('./routes/attendance'); 
-const timetableRoutes = require('./routes/timetable');// <-- NAYA ADD KIYA
+const timetableRoutes = require('./routes/timetable');
+const academicYearRoutes = require('./routes/academicYear');// <-- NAYA ADD KIYA
 // const dashboardRoutes = require('./routes/dashboard'); 
 
 // --- Express App Setup (No Change) ---
@@ -104,6 +105,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/attendance', attendanceRoutes); // <-- NAYA ADD KIYA
 app.use('/api/timetable', timetableRoutes);
+app.use('/api/school', academicYearRoutes);
 // app.use('/api/dashboard', dashboardRoutes);
 
 // --- Socket.IO Connection Handler (No Change) ---
