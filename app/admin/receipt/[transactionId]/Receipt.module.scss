@@ -243,17 +243,17 @@ $border-color: #ccc;
     pointer-events: none;
 }
 
-/* --- Print Media Query (FIXES BLANK PAGE) --- */
 @media print {
-    /* Hide everything except the receipt wrapper */
-    body > * {
+    /* FIX: Global body selector ko Vercel-safe banaya */
+    :global(body) > :global(*) {
         visibility: hidden !important;
         display: none !important;
     }
 
-    /* Make the specific receipt content visible */
+    /* FIX: Receipt container ko zabardasti visible aur top-left par set kiya */
     .receiptPageWrapper, .receiptContainer {
         visibility: visible !important;
+        display: block !important;
         position: absolute;
         top: 0;
         left: 0;
