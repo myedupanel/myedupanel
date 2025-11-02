@@ -1,9 +1,9 @@
 // File: app/api/school/academic-year/route.ts
 
 import { NextResponse } from "next/server";
-// --- FIX 1: Import 'Classes' type ---
-import { Prisma, PrismaClient, Classes } from "@prisma/client";
-// ------------------------------------
+// --- FIX 1: Apne saare model types ko seedha import karein ---
+import { Prisma, PrismaClient, Classes, FeeTemplate } from "@prisma/client";
+// -----------------------------------------------------------
 
 // Aapka session/auth helper yahaan import karein (e.g., getAuthSession)
 // import { getAuthSession } from "@/lib/auth"; 
@@ -16,7 +16,7 @@ const prisma = new PrismaClient();
 export async function POST(req: Request) {
   try {
     // TODO 1: Session se user aur schoolId nikaalein
-    // ... (session logic)
+    // ... (session logic yahaan)
     
     // !! IMPORTANT: Isse apne actual logic se replace karein !!
     const schoolId = "clerk_id_ya_aapki_school_id"; 
@@ -80,9 +80,10 @@ export async function POST(req: Request) {
         });
 
         if (oldClasses.length > 0) {
-          // --- FIX 2: 'c' parameter ko type dein ---
+          
+          // --- FIX 2: 'c' ko 'Classes' type dein ---
           const classesToCreate = oldClasses.map((c: Classes) => ({
-          // ------------------------------------------
+          // ---------------------------------------
             class_name: c.class_name,
             schoolId: schoolId,
             academicYearId: year.id 
@@ -100,11 +101,13 @@ export async function POST(req: Request) {
         });
 
         if (oldFeeTemplates.length > 0) {
-          // Naye templates ka data taiyaar karna
-          const templatesToCreate = oldFeeTemplates.map(t => ({
+          
+          // --- FIX 3: 't' ko 'FeeTemplate' type dein ---
+          const templatesToCreate = oldFeeTemplates.map((t: FeeTemplate) => ({
+          // --------------------------------------------
             name: t.name,
             description: t.description,
-            items: t.items as any, // 'as any' cast is still needed here
+            items: t.items as any, // 'as any' JSON ke liye zaroori hai
             totalAmount: t.totalAmount,
             schoolId: schoolId,
             academicYearId: year.id 
@@ -144,7 +147,7 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   try {
     // TODO: Session se user aur schoolId nikaalein
-    // ... (session logic)
+    // ... (session logic yahaan)
 
     // !! IMPORTANT: Isse apne actual logic se replace karein !!
     const schoolId = "clerk_id_ya_aapki_school_id";
