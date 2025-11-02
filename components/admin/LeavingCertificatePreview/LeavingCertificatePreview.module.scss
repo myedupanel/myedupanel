@@ -1,19 +1,19 @@
 /* src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss */
 
 /* --- FIX (PRINT BREAK) --- */
-/* Paper aur Border ko flexbox banaya taaki woh A4 page mein fit ho sakein */
 .certificatePaper {
   width: 210mm;
   padding: 10mm;
   margin: 20px auto;
   font-family: 'Times New Roman', Times, serif;
-  font-size: 13pt;
+  /* --- FIX 1: Base font size kam kiya --- */
+  font-size: 12pt;
   color: #000;
   background: #fff;
   border: 1px solid #ccc;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
-  display: flex; /* <-- ZAROORI HAI */
+  display: flex;
 }
 
 .outerBorder {
@@ -22,7 +22,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  flex-grow: 1; /* <-- ZAROORI HAI (min-height hataya) */
+  flex-grow: 1;
 }
 /* --- END FIX --- */
 
@@ -40,15 +40,16 @@
   padding: 0 4px;
 }
 
-/* --- Header Style (Aapke naye plan ke mutabik) --- */
+/* --- Header Style (Font size adjust kiya) --- */
 .certHeader {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  /* --- FIX 2: Gaps kam kiye --- */
+  gap: 8px;
   border-bottom: 1.5px solid #000;
-  padding-bottom: 10px;
-  margin-bottom: 15px;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
 
   .logo { display: none; }
   
@@ -56,84 +57,87 @@
     flex-grow: 0;
     text-align: center;
     padding: 0;
-    .schoolName1 { font-size: 13pt; font-weight: bold; margin: 0; }
-    .schoolName2 { font-size: 20pt; font-weight: bold; margin: 2px 0; }
-    .schoolAddressCode { font-size: 11pt; margin: 0; line-height: 1.4; }
+    .schoolName1 { font-size: 12pt; font-weight: bold; margin: 0; }
+    /* --- FIX 1: Font size kam kiya --- */
+    .schoolName2 { font-size: 18pt; font-weight: bold; margin: 2px 0; }
+    .schoolAddressCode { font-size: 10pt; margin: 0; line-height: 1.4; }
   }
   
   .titleBlock { display: none; }
 }
 
-/* Naya Header Alignment Fix (Sr.No aur Reg.No ko corners mein push kiya) */
 .titleRow {
   display: flex;
-  justify-content: space-between; /* <-- YEH HAI FIX */
+  justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-top: 10px;
+  /* --- FIX 2: Gap kam kiya --- */
+  margin-top: 8px;
 
   h2 { /* Title */
-    font-size: 16pt;
+    /* --- FIX 1: Font size kam kiya --- */
+    font-size: 15pt;
     font-weight: bold;
     margin: 0;
     padding: 0 10px; 
     text-align: center;
     flex-grow: 1;
-    flex-shrink: 1; /* Title shrink ho sakta hai agar zaroorat padi */
+    flex-shrink: 1;
   }
 
   .headerSrNo, .headerRegNo {
-    font-size: 12pt;
+    /* --- FIX 1: Font size kam kiya --- */
+    font-size: 11pt;
     font-weight: bold;
     white-space: nowrap;
-    flex-basis: auto; /* Width auto rakhi */
-    flex-shrink: 0; /* Yeh shrink nahi honge */
+    flex-basis: auto;
+    flex-shrink: 0;
   }
 
   .headerSrNo {
     text-align: left;
-    margin-right: 15px; /* Title se doori */
+    margin-right: 15px;
   }
   
   .headerRegNo {
     text-align: right;
-    margin-left: 15px; /* Title se doori */
+    margin-left: 15px;
   }
 }
 /* --- END HEADER FIX --- */
 
 
-/* --- Student Info Table (Fixes for Nationality/Progress) --- */
+/* --- Student Info Table (Main Fixes) --- */
 .studentInfoTable {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
-  font-size: 13pt;
-
+  /* Font size ab base (12pt) se inherit karega */
+  
   tbody tr td {
-    padding: 10px 5px;
+    /* --- FIX 3: SABSE IMPORTANT (Vertical Padding kam ki) --- */
+    padding: 7px 5px;
     vertical-align: top;
-    line-height: 1.5;
+    /* --- FIX 4: Line height thoda kam kiya --- */
+    line-height: 1.4;
     border-bottom: 1px solid #eee;
   }
   tbody tr td:nth-child(1) { width: 35px; text-align: center; font-weight: normal; }
   tbody tr td:nth-child(2) { width: 35%; font-weight: normal; }
   
-  /* Value column ko Flexbox banaya */
   tbody tr td:nth-child(3) {
     width: 60%;
     font-weight: bold;
     display: flex;
     flex-wrap: wrap; 
     align-items: center;
-    gap: 5px 20px; /* Fields ke beech horizontal gap */
+    gap: 5px 20px;
   }
   
-  /* Kuch rows ko 'block' par waapas set kiya taaki <br> aur textareas kaam karein */
-  tbody tr:nth-child(7) td:nth-child(3),  // Birthplace
-  tbody tr:nth-child(9) td:nth-child(3),  // DOB in words
-  tbody tr:nth-child(15) td:nth-child(3), // Reason
-  tbody tr:nth-child(16) td:nth-child(3)  // Remarks
+  tbody tr:nth-child(7) td:nth-child(3),
+  tbody tr:nth-child(9) td:nth-child(3),
+  tbody tr:nth-child(15) td:nth-child(3),
+  tbody tr:nth-child(16) td:nth-child(3)
   {
      display: block;
   }
@@ -149,17 +153,19 @@
 
 /* --- Certification Text --- */
 .certText {
-  font-size: 12pt;
+  /* --- FIX 1 & 2: Font size aur margin kam kiya --- */
+  font-size: 11pt;
   text-align: left;
-  margin-top: 20px;
+  margin-top: 15px;
   line-height: 1.6;
 }
 
-/* --- Footer Layout (3-Signature) --- */
+/* --- Footer Layout (Spacing kam ki) --- */
 .certFooterWrapper {
   margin-top: auto; /* Hamesha neeche */
-  padding-top: 30px;
-  font-size: 13pt;
+  /* --- FIX 2: Gap kam kiya --- */
+  padding-top: 20px;
+  font-size: 12pt;
   font-weight: bold;
   background: #fff !important;
   color: #000 !important;
@@ -167,7 +173,8 @@
 
 .datePlace {
   text-align: left;
-  margin-bottom: 40px;
+  /* --- FIX 2: Gap kam kiya --- */
+  margin-bottom: 30px;
 }
 
 .signatures {
@@ -178,8 +185,9 @@
 
 .sigBox {
   text-align: center;
-  width: 30%; /* 3-column layout */
-  padding-top: 40px;
+  width: 30%;
+  /* --- FIX 2: Gap kam kiya --- */
+  padding-top: 30px;
   border-top: 1px solid #000; /* Signature line */
 }
 /* --- END FOOTER --- */
