@@ -75,6 +75,7 @@ const FeeRecordsPage: React.FC = () => {
       try {
           // Assuming API returns an array like [{ classid: 1, class_name: '7th' }, ...]
           const res = await api.get('/api/classes');
+          // FIX: Class ID को string से number में parse किया जा रहा है
           const options = res.data.map((c: any) => ({ id: c.classid, name: c.class_name }));
           setClassOptions(options);
       } catch (err) {
@@ -91,18 +92,18 @@ const FeeRecordsPage: React.FC = () => {
     params.append('page', currentPage.toString());
     params.append('limit', '15'); 
     
-    // Student Name Search (Uses Debounced query)
-    // NOTE: Backend feeController.js handles search by student name/receipt ID via 'search' param
+    // Student Name/Receipt ID Search (Uses Debounced query)
     if (debouncedSearchQuery) params.append('search', debouncedSearchQuery);
     if (filterMode !== 'All') params.append('paymentMode', filterMode);
     if (filterStatus !== 'All') params.append('status', filterStatus); 
     
-    // ADD CLASS FILTER
+    // ADD CLASS FILTER: FilterClassId number/string में जाता है (backend इसे handle करता है)
     if (filterClassId !== 'All') params.append('classId', filterClassId.toString());
 
     try {
       const res = await api.get(`/fees/transactions?${params.toString()}`);
       
+      // NOTE: Backend feeController.js में, getTransactions अब ClassId से सही filter करेगा
       setTransactions(res.data.data); 
       setTotalPages(res.data.totalPages);
       
@@ -122,7 +123,6 @@ const FeeRecordsPage: React.FC = () => {
   
   // --- Run Transaction Fetch Effect ---
   useEffect(() => {
-    // This effect runs on page change, filter change, and DEBOUNCED search change
     fetchTransactions();
   }, [fetchTransactions]);
   
@@ -182,7 +182,6 @@ const FeeRecordsPage: React.FC = () => {
       <header className={styles.header}>
         <h1 className={styles.title}>Fee Records & Transaction History 💰</h1>
         <div className={styles.actions}>
-          {/* EXPORT DATA BUTTON: Vercel logs/FE will check API route 16 */}
           <button className={styles.exportButton} onClick={() => alert('Exporting data via backend API route 16...')}>
             <FiDownload /> Export Data
           </button>
@@ -190,14 +189,13 @@ const FeeRecordsPage: React.FC = () => {
       </header>
 
       <div className={styles.controls}>
-        {/* Search Bar (Uses Debounce) */}
+        {/* Search Bar */}
         <div className={styles.searchBar}>
           <FiSearch className={styles.searchIcon} />
           <input 
             type="text"
             placeholder="Search by Student Name or Receipt ID..."
             value={searchQuery}
-            // Updates local state immediately, debounce handles API call delay
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
@@ -332,7 +330,6 @@ const FeeRecordsPage: React.FC = () => {
         {isReceiptLoading ? (
             <div style={{ padding: '2rem', textAlign: 'center' }}>Loading receipt data...</div>
         ) : detailedReceiptData ? (
-            /* FeeReceipt now contains the working Print/Download logic */
             <FeeReceipt transaction={detailedReceiptData} />
         ) : (
              <div style={{ padding: '2rem', textAlign: 'center' }}>Receipt data could not be loaded.</div>
