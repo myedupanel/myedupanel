@@ -244,11 +244,14 @@ $border-color: #ccc;
 }
 
 @media print {
-    /* Hide everything except the receipt wrapper */
+    /* FIX: :global(body) { & > * } syntax Vercel par fail hota hai.
+       Hum ek aisi CSS trick istemaal karenge jo seedha Vercel build ko bypass karegi 
+       aur pure CSS ki tarah treat hogi.
+    */
+    
     :global(body) {
-        // Hamein body ke saare direct children ko hide karna hai.
-        // Yeh line Vercel-safe hai:
-        > * {
+        // Is selector ko ek saath wrap kiya gaya hai taaki Vercel ise accept kare
+        & > * { 
             visibility: hidden !important;
             display: none !important;
         }
@@ -265,7 +268,7 @@ $border-color: #ccc;
         box-shadow: none !important;
         margin: 0 !important;
         padding: 0 !important;
-        font-size: 11pt !important; /* Printing font size adjust kiya */
+        font-size: 11pt !important; 
     }
     
     .receiptContainer {
