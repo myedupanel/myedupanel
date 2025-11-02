@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import styles from './FeeReceipt.module.scss';
 import { FiPrinter, FiDownload } from 'react-icons/fi';
-// --- FIX: Nayi libraries import ki ---
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -80,34 +79,43 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
 
-    // --- Print Function (No Change) ---
+    // --- FIX: 'Print' Function ko 'onload' event ke saath update kiya ---
     const handlePrint = () => {
         const printContent = componentRef.current;
         if (!printContent) return;
 
+        // 1. Styles ko copy karein (No Change)
         const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
                            .map(el => el.outerHTML)
                            .join('');
 
+        // 2. Nayi window kholein (No Change)
         const printWindow = window.open('', '', 'height=800,width=800');
         
         if (printWindow) {
+            // 3. Poora HTML content likhein (No Change)
             printWindow.document.write('<html><head><title>Print Receipt</title>');
             printWindow.document.write(styles); 
             printWindow.document.write('</head><body>');
             printWindow.document.write(printContent.innerHTML); 
             printWindow.document.write('</body></html>');
-            printWindow.document.close();
+
+            // --- YEH HAI ASLI FIX ---
+            // Hum document.fonts.ready ke bajaye window.onload ka istemaal karenge
+            // Taaki hum print tabhi karein jab sab kuch render ho chuka ho.
+            printWindow.onload = () => {
+                printWindow.focus(); // Nayi window par focus karein
+                printWindow.print(); // Ab print dialog kholein
+                printWindow.close(); // Print ke baad window ko band kar dein
+            };
+            // --- END FIX ---
             
-            printWindow.document.fonts.ready.then(() => {
-                printWindow.print();
-                printWindow.close();
-            });
+            printWindow.document.close(); // 'onload' event ko trigger karne ke liye zaroori
         }
     };
-    // --- END Print ---
+    // --- END PRINT FIX ---
 
-    // --- Download PDF Function (FIXED) ---
+    // --- Download PDF Function (No Change - Yeh pehle se theek tha) ---
     const handleDownloadPDF = () => {
         const input = componentRef.current;
         if (!input) {
@@ -117,26 +125,23 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
         input.classList.add(styles.printing);
 
-        // --- FIX 1: 'as any' ko add kiya 'html2canvas' options mein ---
         html2canvas(input, {
-            scale: 2.5, // High resolution
+            scale: 2.5,
             useCORS: true,
-            backgroundColor: '#ffffff' // Force white background
-        } as any).then(canvas => { // <-- YAHAN FIX KIYA
-            // Class ko hata dein
+            backgroundColor: '#ffffff'
+        } as any).then(canvas => {
             input.classList.remove(styles.printing);
 
             const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4'); // A4 size, portrait
+            const pdf = new jsPDF('p', 'mm', 'a4'); 
             
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
             
-            // --- FIX 2: 'as any' ko add kiya 'pdf.getImageProperties' ke liye ---
-            const imgProps = (pdf as any).getImageProperties(imgData); // <-- YAHAN FIX KIYA
+            const imgProps = (pdf as any).getImageProperties(imgData); 
             const imgRatio = imgProps.height / imgProps.width;
 
-            const margin = 10; // 10mm margin
+            const margin = 10; 
             let imgWidth = pdfWidth - (margin * 2);
             let imgHeight = imgWidth * imgRatio;
 
@@ -157,9 +162,8 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             alert("Could not download PDF. Please try printing.");
         });
     };
-    // --- END FIX 2 ---
+    // --- END PDF ---
     
-    // ... (Baaki saara code waisa hi hai) ...
     if (!transaction) {
         return <div className={styles.noData}>No transaction details available.</div>;
     }
