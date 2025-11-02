@@ -70,9 +70,9 @@ const cardLinks: { [key: string]: string } = {
   "Total Students": "/admin/students",
   "Total Teachers": "/admin/teachers",
   "Total Staff": "/admin/staff",
-  "Monthly Revenue": "/admin/fee-counter/dashboard",
+  "Monthly Revenue": "/admin/fee-counter",
   "Total Parents": "/admin/parents", // Bonus: Yeh bhi add kar diya
-  "Total Classes": "/admin/classes"  // Bonus: Yeh bhi add kar diya
+  "Total Classes": "/admin/school/classes"  // Bonus: Yeh bhi add kar diya
 };
 // --- END FIX ---
 
