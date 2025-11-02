@@ -28,7 +28,7 @@ model School {
   recognitionNumber String?
   udiseNo           String? @unique
   logoUrl           String?
-  // --- END NAYE FIELDS ---
+  genRegNo          String? // Yeh naya field hai
   logo              String?
   session           String?
   lateFineAmount    Float?  @default(100)
