@@ -243,36 +243,38 @@ $border-color: #ccc;
     pointer-events: none;
 }
 
-:global {
-    @media print {
-        /* Hide everything except the receipt wrapper */
-        body > * {
+@media print {
+    /* Hide everything except the receipt wrapper */
+    :global(body) {
+        // Hamein body ke saare direct children ko hide karna hai.
+        // Yeh line Vercel-safe hai:
+        > * {
             visibility: hidden !important;
             display: none !important;
         }
+    }
 
-        /* Make the specific receipt content visible and styled for A4 */
-        .receiptPageWrapper, .receiptContainer {
-            visibility: visible !important;
-            display: block !important;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            box-shadow: none !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            font-size: 11pt !important; /* Printing font size adjust kiya */
-        }
-        
-        .receiptContainer {
-            border: none !important;
-            padding: 15mm !important; /* Proper A4 margins */
-        }
+    /* Make the specific receipt content visible and styled for A4 */
+    .receiptPageWrapper, .receiptContainer {
+        visibility: visible !important;
+        display: block !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 11pt !important; /* Printing font size adjust kiya */
+    }
+    
+    .receiptContainer {
+        border: none !important;
+        padding: 15mm !important; /* Proper A4 margins */
+    }
 
-        /* Hide the print/download buttons */
-        .noPrint {
-            display: none !important;
-        }
+    /* Hide the print/download buttons */
+    .noPrint {
+        display: none !important;
     }
 }
