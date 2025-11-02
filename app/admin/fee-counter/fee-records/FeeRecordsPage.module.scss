@@ -12,8 +12,9 @@ $radius: 8px;
 
 .pageContainer {
     /* FULL WIDTH FIT: Side padding adjust kiya */
-    /* हमने padding को कम किया ताकि यह sidebar के बगल में ज्यादा space ले सके */
-    padding: 2.5rem 2rem; 
+    /* Humne padding ko kam kiya takhi yeh sidebar ke bagal mein zyada space le sake */
+    /* Pehle: 2.5rem 2rem, Ab: 2.5rem 1.5rem */
+    padding: 2.5rem 1.5rem; 
     background-color: $background-light;
     min-height: 100vh;
 }
@@ -137,15 +138,16 @@ $radius: 8px;
             font-size: 0.9rem; 
         }
         
-        /* COLUMN WIDTHS OPTIMIZATION: Date space badhaya */
-        th:nth-child(1) { width: 14%; }  /* Receipt ID */
-        th:nth-child(2) { width: 17%; }  /* Student Name */
-        th:nth-child(3) { width: 8%; }   /* Class */
-        th:nth-child(4) { width: 12%; }  /* Amount Paid */
-        th:nth-child(5) { width: 12%; }  /* Payment Mode */
-        th:nth-child(6) { width: 12%; }  /* Date (Space badhaya) */
-        th:nth-child(7) { width: 8%; }   /* Status (Space kam kiya) */
-        th:nth-child(8) { width: 17%; }  /* Actions (Space for View Receipt) */
+        /* === COLUMN WIDTHS OPTIMIZATION (YAHAN CHANGES KIYE HAIN) === */
+        th:nth-child(1) { width: 12%; }  /* Receipt ID (Kam kiya) */
+        th:nth-child(2) { width: 20%; }  /* Student Name (Badhaya) */
+        th:nth-child(3) { width: 7%; }   /* Class (Kam kiya) */
+        th:nth-child(4) { width: 11%; }  /* Amount Paid (Kam kiya) */
+        th:nth-child(5) { width: 10%; }  /* Payment Mode (Kam kiya) */
+        th:nth-child(6) { width: 15%; }  /* Date (Badhaya) */
+        th:nth-child(7) { width: 10%; }  /* Status (Badhaya) */
+        th:nth-child(8) { width: 15%; }  /* Actions (Kam kiya) */
+        /* Total: 12+20+7+11+10+15+10+15 = 100% */
     }
 
     tbody {

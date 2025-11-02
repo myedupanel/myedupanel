@@ -1,3 +1,26 @@
+/* --- KEYFRAMES FOR ANIMATION (YEH NAYA ADD KAREIN) --- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95); /* Thoda chhota start hoga */
+  }
+  to {
+    opacity: 1;
+    transform: scale(1); /* Full size pe aayega */
+  }
+}
+/* --- END OF KEYFRAMES --- */
+
+
 .backdrop {
   position: fixed;
   top: 0;
@@ -10,6 +33,10 @@
   align-items: center;
   z-index: 1000;
   backdrop-filter: blur(2px);
+
+  /* --- ANIMATION ADD KIYA --- */
+  /* Backdrop ko 0.3s mein fade-in karega */
+  animation: fadeIn 0.3s ease-out forwards;
 }
 
 .modalContent {
@@ -22,9 +49,13 @@
   display: flex;
   flex-direction: column;
   max-height: 90vh;
+
+  /* --- ANIMATION ADD KIYA --- */
+  /* Modal ko 0.3s mein scale-up aur fade-in karega */
+  animation: scaleIn 0.3s ease-out forwards;
 }
 
-/* --- YAHAN BADLAV HUA HAI --- */
+/* --- YAHAN BADLAV HUA HAI (Aapka code same hai) --- */
 .header {
   display: flex;
   justify-content: space-between; /* This pushes items to opposite ends */

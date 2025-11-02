@@ -239,7 +239,7 @@ model Transaction {
   template   FeeTemplate @relation(fields: [templateId], references: [id])
 
   feeRecordId Int
-  feeRecord   FeeRecord @relation(fields: [feeRecordId], references: [id])
+  feeRecord   FeeRecord @relation(fields: [feeRecordId], references: [id], onDelete: Cascade) // <-- FIX HO GAYA
 
   collectedById Int?
   collectedBy   User? @relation(fields: [collectedById], references: [id])

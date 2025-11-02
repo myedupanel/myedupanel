@@ -992,107 +992,227 @@ const verifyPaymentWebhook = async (req, res) => {
 };
 
 const getTransactions = async (req, res) => { 
+
     try {
+
         const schoolId = req.user.schoolId;
+
+        
+
+        // --- FIX 1: 'classId' ko req.query se yahaan add kiya ---
+
         const {
+
             page = 1, limit = 15, search = "",
+
             startDate, endDate, status, paymentMode,
-            studentId
+
+            studentId, classId // <-- YAHAN ADD KIYA GAYA
+
         } = req.query;
+
+
 
         const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
 
+
+
         let queryConditions = { schoolId: schoolId };
+
         
-        // --- 1. Filter Conditions (No Change) ---
+
+        // --- Filter Conditions ---
+
         const studentIdInt = parseInt(studentId);
+
         if (studentIdInt) {
+
             queryConditions.studentId = studentIdInt;
+
         }
+
+
 
         if (startDate || endDate) {
+
             queryConditions.paymentDate = {};
+
             if (startDate) queryConditions.paymentDate.gte = new Date(startDate);
+
             if (endDate) {
+
                 const endOfDay = new Date(endDate);
+
                 endOfDay.setHours(23, 59, 59, 999);
+
                 queryConditions.paymentDate.lte = endOfDay;
+
             }
+
         }
+
         if (status) queryConditions.status = status;
+
         if (paymentMode) queryConditions.paymentMode = paymentMode;
 
-        if (search && !studentIdInt) {
-            queryConditions.OR = [
-                { student: { 
-                    OR: [
-                      { first_name: { contains: search, mode: 'insensitive' } },
-                      { father_name: { contains: search, mode: 'insensitive' } },
-                      { last_name: { contains: search, mode: 'insensitive' } },
-                    ]
-                }},
-                { receiptId: { contains: search, mode: 'insensitive' } }
-            ];
-        } else if (search && studentIdInt) {
-            queryConditions.receiptId = { contains: search, mode: 'insensitive' };
+
+
+        // --- FIX 2: classId ko queryConditions mein add kiya ---
+
+        if (classId) {
+
+            const classIdInt = parseInt(classId);
+
+            if (!isNaN(classIdInt)) {
+
+                queryConditions.classId = classIdInt;
+
+            }
+
         }
+
+        // --- END FIX 2 ---
+
+
+
+
+
+        if (search && !studentIdInt) {
+
+            queryConditions.OR = [
+
+                { student: { 
+
+                    OR: [
+
+                      { first_name: { contains: search, mode: 'insensitive' } },
+
+                      { father_name: { contains: search, mode: 'insensitive' } },
+
+                      { last_name: { contains: search, mode: 'insensitive' } },
+
+                    ]
+
+                }},
+
+                { receiptId: { contains: search, mode: 'insensitive' } }
+
+            ];
+
+        } else if (search && studentIdInt) {
+
+            queryConditions.receiptId = { contains: search, mode: 'insensitive' };
+
+        }
+
         // --- End Filter Conditions ---
+
         
+
         const totalDocuments = await prisma.transaction.count({ where: queryConditions });
 
-        // --- 2. CRITICAL FIX: Include Class Name ---
+
+
+        // --- CRITICAL FIX: Include Class Name (Yeh pehle se tha, aur sahi hai) ---
+
         const transactions = await prisma.transaction.findMany({
+
             where: queryConditions,
+
             include: {
+
                 student: { 
+
                     select: { 
+
                         first_name: true, 
+
                         father_name: true, 
+
                         last_name: true, 
+
                         roll_number: true,
+
                         // Class ko include kiya
+
                         class: { select: { class_name: true } }
+
                     } 
+
                 },
+
                 template: { select: { name: true } },
+
                 collectedBy: { select: { name: true } }
+
             },
+
             orderBy: { paymentDate: 'desc' },
+
             take: parseInt(limit, 10),
+
             skip: skip
+
         });
+
         // --- End Fix 2 ---
 
-        // --- 3. Frontend Format Fix: Data ko Flat kiya ---
+
+
+        // --- Frontend Format Fix: Data ko Flat kiya (Yeh bhi pehle se sahi tha) ---
+
         const formattedTransactions = transactions.map(tx => ({
+
             id: tx.id,
+
             receiptId: tx.receiptId,
+
             amountPaid: tx.amountPaid,
+
             paymentMode: tx.paymentMode,
+
             paymentDate: tx.paymentDate ? tx.paymentDate.toISOString().split('T')[0] : 'N/A', // Date format fix
+
             status: tx.status,
+
             
+
             // Frontend table fields
+
             studentName: getFullName(tx.student) || 'N/A',
+
             className: tx.student?.class?.class_name || 'N/A',
+
             templateName: tx.template?.name || 'N/A',
-            
-            // Backend data jo frontend ko nahi chahiye use hata diya
-            // collectedByName: tx.collectedBy?.name || 'N/A' 
+
         }));
+
         // --- End Fix 3 ---
 
+
+
         res.status(200).json({
+
             data: formattedTransactions,
+
             totalPages: Math.ceil(totalDocuments / parseInt(limit, 10)),
+
             currentPage: parseInt(page, 10),
+
             totalRecords: totalDocuments
+
         });
 
+
+
     } catch (error) {
+
         console.error("Error in getTransactions:", error);
+
         res.status(500).send("Server Error fetching transactions");
+
     }
+
 };
 module.exports = {
   getDashboardOverview,
