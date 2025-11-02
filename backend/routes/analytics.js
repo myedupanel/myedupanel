@@ -1,4 +1,3 @@
-// backend/routes/analytics.js
 const express = require('express');
 const router = express.Router();
 const prisma = require('../config/prisma'); // Prisma client
@@ -14,7 +13,8 @@ const getFullName = (student) => {
  * @desc    Get detailed analytics for a single student
  * @access  Private (Admin, Teacher)
  */
-router.get('/student/:studentId', [authMiddleware, authorize('Admin', 'Teacher')], async (req, res) => { // Role Check
+// --- Is function mein koi change nahi, yeh perfect tha ---
+router.get('/student/:studentId', [authMiddleware, authorize('Admin', 'Teacher')], async (req, res) => { 
     const studentIdInt = parseInt(req.params.studentId);
     const schoolId = req.user.schoolId;
 
@@ -27,18 +27,15 @@ router.get('/student/:studentId', [authMiddleware, authorize('Admin', 'Teacher')
 
     try {
         console.log(`[Analytics] Fetching data for student: ${studentIdInt}, school: ${schoolId}`);
-        // Check if student exists in this school
         const student = await prisma.students.findUnique({ 
             where: { studentid: studentIdInt, schoolId: schoolId } 
         });
         if (!student) { return res.status(404).json({ msg: 'Student not found.' }); }
 
         // --- Calculate student analytics ---
-
-        // Attendance
         const attendanceStats = await prisma.attendance.aggregate({
             where: { studentId: studentIdInt, schoolId: schoolId },
-            _count: { id: true }, // Total records
+            _count: { id: true }, 
         });
         const presentCount = await prisma.attendance.count({
             where: { studentId: studentIdInt, schoolId: schoolId, status: 'Present' }
@@ -46,36 +43,31 @@ router.get('/student/:studentId', [authMiddleware, authorize('Admin', 'Teacher')
         const totalAttendanceDays = attendanceStats._count.id || 0;
         const attendancePercentage = totalAttendanceDays > 0 ? Math.round((presentCount / totalAttendanceDays) * 100) : 0;
 
-        // Average Score
-        // Note: Assuming 'percentage' field exists and is calculated in Mark model
         const averageScoreStats = await prisma.mark.aggregate({
             where: { studentId: studentIdInt, schoolId: schoolId, percentage: { not: null } },
             _avg: { percentage: true }
         });
         const averageScorePercentage = Math.round(averageScoreStats._avg.percentage || 0);
 
-        // Assignments Count (Status check)
         const assignmentCount = await prisma.assignment.count({
             where: {
-                studentId: studentIdInt, // Assuming Assignment links to student
+                studentId: studentIdInt, 
                 schoolId: schoolId,
                 status: { in: ['Submitted', 'Graded'] }
             }
          });
 
-        // Score Trend (Recent 5 marks with assessment details)
         const recentMarks = await prisma.mark.findMany({ 
             where: { studentId: studentIdInt, schoolId: schoolId, percentage: { not: null } }, 
-            orderBy: { id: 'desc' }, // Use ID for latest
+            orderBy: { id: 'desc' }, 
             take: 5,
-            include: { assessment: { select: { name: true, date: true } } } // Populate assessment
+            include: { assessment: { select: { name: true, date: true } } } 
         });
         const scoreTrend = recentMarks.map(mark => ({ 
-            name: mark.assessment?.name || new Date(mark.id).toLocaleDateString(), // Use ID as fallback date marker
+            name: mark.assessment?.name || new Date(mark.id).toLocaleDateString(), 
             score: mark.percentage || 0 
-        })).reverse(); // Oldest first
+        })).reverse(); 
 
-        // Subject Mastery (Average score per subject)
         const subjectMasteryData = await prisma.mark.groupBy({
             by: ['subject'],
             where: { studentId: studentIdInt, schoolId: schoolId, percentage: { not: null }, subject: { not: null } },
@@ -104,29 +96,54 @@ router.get('/student/:studentId', [authMiddleware, authorize('Admin', 'Teacher')
 
 
 /**
- * @route   GET /api/analytics/class/:classId (Prisma ID)
+ * @route   GET /api/analytics/class/:className (URL Encoded String)
  * @desc    Get aggregated analytics for a specific class
  * @access  Private (Admin, Teacher)
  */
-router.get('/class/:classId', [authMiddleware, authorize('Admin', 'Teacher')], async (req, res) => { // Role Check
-    const classIdInt = parseInt(req.params.classId);
+// --- YAHAN FIX KIYA GAYA HAI ---
+router.get('/class/:className', [authMiddleware, authorize('Admin', 'Teacher')], async (req, res) => { 
+    
+    // Kadam 1: classId ke bajaye className (string) lein
+    const className = decodeURIComponent(req.params.className); // e.g., "7th" ya "10th A"
     const schoolId = req.user.schoolId;
 
-    if (isNaN(classIdInt)) { return res.status(400).json({ msg: 'Invalid Class ID format.' }); }
+    // Kadam 2: Validation check update kiya
+    if (!className) { return res.status(400).json({ msg: 'Class name is required.' }); }
     if (!schoolId) { return res.status(400).json({ msg: 'Invalid or missing school ID.' }); }
 
     try {
-        console.log(`[Analytics] Fetching data for class: ${classIdInt}, school: ${schoolId}`);
+        console.log(`[Analytics] Fetching data for class: ${className}, school: ${schoolId}`);
+        
+        // Kadam 3: Class ka naam (string) use karke uski ID dhoondhein
+        const classRecord = await prisma.classes.findUnique({
+            where: {
+                // Yeh (schoolId, class_name) unique combination par depend karta hai
+                schoolId_class_name: {
+                    schoolId: schoolId,
+                    class_name: className
+                }
+            },
+            select: { classid: true }
+        });
 
-        // Find students in the class
+        if (!classRecord) {
+            console.warn(`[Analytics] Class not found: ${className}`);
+            return res.status(404).json({ msg: `Class '${className}' not found.` });
+        }
+        
+        // Kadam 4: Ab humein Class ID mil gayi hai
+        const classIdInt = classRecord.classid;
+        // --- END FIX ---
+
+        // (Baaki ka poora logic waisa hi hai jaisa aapne likha tha, kyunki woh perfect tha)
+        
         const studentsInClass = await prisma.students.findMany({ 
             where: { classId: classIdInt, schoolId: schoolId },
-            select: { studentid: true, first_name: true, father_name: true, last_name: true } // Fetch names for performers list
+            select: { studentid: true, first_name: true, father_name: true, last_name: true } 
         });
         
         if (studentsInClass.length === 0) {
              console.log(`[Analytics] No students found for class ${classIdInt}.`);
-             // Return default zero values
              return res.json({ classAttendance: 0, classAverageScore: 0, totalAssignments: 0, topPerformers: [], bottomPerformers: [], classSubjectAverages: [] });
         }
         const studentIdsInClass = studentsInClass.map(s => s.studentid);
@@ -143,21 +160,19 @@ router.get('/class/:classId', [authMiddleware, authorize('Admin', 'Teacher')], a
         const classAttendancePercentage = classTotalAttendanceRecords > 0 ? Math.round((classPresentCount / classTotalAttendanceRecords) * 100) : 0;
 
         // Calculate Class Average Score & Get Top/Bottom Performers
-        // Fetch average percentage directly per student using groupBy
         const studentAverageScoresData = await prisma.mark.groupBy({
             by: ['studentId'],
             where: { studentId: { in: studentIdsInClass }, schoolId: schoolId, percentage: { not: null } },
             _avg: { percentage: true },
         });
 
-        // Map averages to student names
         const studentAverages = studentAverageScoresData.map(avgData => {
             const studentInfo = studentsInClass.find(s => s.studentid === avgData.studentId);
             return {
                 name: studentInfo ? getFullName(studentInfo) : `Student ${avgData.studentId}`,
                 averageScore: Math.round(avgData._avg.percentage || 0)
             }
-        }).sort((a, b) => b.averageScore - a.averageScore); // Sort descending
+        }).sort((a, b) => b.averageScore - a.averageScore); 
 
         const classAverageScore = studentAverages.length > 0
             ? Math.round(studentAverages.reduce((sum, s) => sum + s.averageScore, 0) / studentAverages.length)
@@ -166,8 +181,7 @@ router.get('/class/:classId', [authMiddleware, authorize('Admin', 'Teacher')], a
         const topPerformers = studentAverages.slice(0, 3);
         const bottomPerformers = studentAverages.slice(-3).reverse();
 
-        // Calculate Total Assignments for the class
-        // (Assuming Assignment links to classId OR studentId)
+        // Calculate Total Assignments
         const totalAssignments = await prisma.assignment.count({
              where: {
                  schoolId: schoolId,
@@ -201,7 +215,7 @@ router.get('/class/:classId', [authMiddleware, authorize('Admin', 'Teacher')], a
         res.json(analyticsData);
 
     } catch (err) {
-        console.error(`Error fetching class analytics for ${classIdInt}:`, err.message);
+        console.error(`Error fetching class analytics for ${req.params.className}:`, err.message);
         res.status(500).send('Server Error');
     }
 });
@@ -212,7 +226,8 @@ router.get('/class/:classId', [authMiddleware, authorize('Admin', 'Teacher')], a
  * @desc    Get aggregated analytics for the entire school
  * @access  Private (Admin)
  */
-router.get('/overall', [authMiddleware, authorize('Admin')], async (req, res) => { // Role check Admin
+// --- Is function mein koi change nahi, yeh perfect tha ---
+router.get('/overall', [authMiddleware, authorize('Admin')], async (req, res) => { 
     const schoolId = req.user.schoolId;
     if (!schoolId) { return res.status(400).json({ msg: 'Invalid or missing school ID.' }); }
 
@@ -240,21 +255,18 @@ router.get('/overall', [authMiddleware, authorize('Admin')], async (req, res) =>
         const overallAverageScore = Math.round(overallScoreStats._avg.percentage || 0);
 
         // Calculate Class Performance (Average score per class)
-        // Kadam 1: Har student ka average score calculate karein
          const studentAvgScores = await prisma.mark.groupBy({
              by: ['studentId'],
              where: { schoolId: schoolId, percentage: { not: null }},
              _avg: { percentage: true }
          });
 
-        // Kadam 2: Students ko unki class ke saath fetch karein
         const studentsWithClass = await prisma.students.findMany({
             where: { schoolId: schoolId, studentid: { in: studentAvgScores.map(s => s.studentId) } },
             select: { studentid: true, classId: true }
         });
         
-        // Kadam 3: Class ID se Class Name map fetch karein
-         const classIds = [...new Set(studentsWithClass.map(s => s.classId))]; // Unique class IDs
+         const classIds = [...new Set(studentsWithClass.map(s => s.classId))]; 
          const classMap = new Map();
          if (classIds.length > 0) {
              const classes = await prisma.classes.findMany({
@@ -264,7 +276,6 @@ router.get('/overall', [authMiddleware, authorize('Admin')], async (req, res) =>
              classes.forEach(c => classMap.set(c.classid, c.class_name));
          }
 
-        // Kadam 4: Class-wise average calculate karein
         const classPerformanceMap = new Map();
         studentAvgScores.forEach(avgScore => {
             const studentInfo = studentsWithClass.find(s => s.studentid === avgScore.studentId);

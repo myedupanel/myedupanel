@@ -4,26 +4,27 @@ import styles from './LeavingCertificatePreview.module.scss'; // Import the SCSS
 // --- Interfaces (No Change) ---
 interface Student {
   id: string; 
-  name: string; 
-  dob?: string; 
-  studentId?: string; 
-  aadhaarNo?: string; 
-  motherName?: string; 
+  name: string; // Point 3
+  dob?: string; // Point 8 (Figures)
+  studentId?: string; // Point 1 (Sr. No)
+  aadhaarNo?: string; // Point 2 (UID)
+  motherName?: string; // Point 4
 }
 interface SchoolDetails {
-  name: string; 
-  name2?: string; 
-  address: string; 
-  govtReg?: string; 
-  logoUrl?: string; 
-  place?: string; 
+  name: string; // Mandal Name
+  name2?: string; // School Name
+  address: string; // Address
+  govtReg?: string; // Code No. (Aapke School Details se)
+  logoUrl?: string; // Logo
+  place?: string; // Footer
+  // --- FIX: SchoolDetails ko 'page.tsx' se match kiya ---
   genRegNo?: string; 
   udiseNo?: string;
 }
 
-// --- LeavingFormData (No Change) ---
+// --- FIX: LeavingFormData ko 'page.tsx' se match kiya ---
 export interface LeavingFormData {
-  regNo?: string; 
+  regNo?: string; // Header
   nationality?: string;
   motherTongue?: string;
   religion?: string;
@@ -47,7 +48,7 @@ export interface LeavingFormData {
   issueDate?: string;
   signatoryRole?: string;
   genRegNo?: string;
-  motherName?: string; 
+  motherName?: string; // <-- Yahan add kiya
 }
 
 // --- formatDate Function (No Change) ---
@@ -69,7 +70,6 @@ const formatDate = (dateString: string | undefined): string => {
    }
 };
 
-// --- Props Interface (No Change) ---
 interface LeavingCertificatePreviewProps {
   student: Student | null;
   formData: LeavingFormData;
@@ -81,7 +81,6 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
   formData,
   schoolDetails
 }) => {
-  // --- Helper Functions (No Change) ---
   const fill = (value: string | undefined | null, minWidth = '50px') => {
     if (value) {
       return <span className={styles.fill}>{value}</span>;
@@ -101,7 +100,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* Header (No Change) */}
+        {/* Header (School details se update kiya) */}
         <header className={styles.certHeader}>
           <div className={styles.schoolInfoBlock}>
             <div className={styles.schoolName1}>{schoolDetails.name}</div>
@@ -109,15 +108,18 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             <div className={styles.schoolAddressCode}>
               {schoolDetails.address}
               <br/>
+              {/* --- FIX: 'govtReg' ko 'udiseNo' se replace kiya --- */}
               UDISE NO: {schoolDetails.udiseNo}
             </div>
           </div>
           <div className={styles.titleRow}>
             <div className={styles.headerSrNo}>
+              {/* Yeh STUDENT ka Sr. No / Roll No. hai */}
               Sr. No: {fill(student?.studentId, '100px')}
             </div>
             <h2>LEAVING CERTIFICATE</h2>
             <div className={styles.headerRegNo}>
+              {/* Yeh SCHOOL ka Reg. No. hai */}
               Reg. No: {fill(formData.regNo, '100px')}
             </div>
           </div>
@@ -126,6 +128,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
         {/* Student Info Table */}
         <table className={styles.studentInfoTable}>
           <tbody>
+            {/* Row 1 aur 2 (Layout pehle se sahi tha) */}
             <tr>
               <td>1</td>
               <td>Student's Full Name</td>
@@ -141,35 +144,36 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>Mother's Name</td>
               <td>{fill(formData.motherName, '300px')}</td>
             </tr>
+
+            {/* --- FIX (Item 4): Label column ko blank kiya --- */}
             <tr>
               <td>4</td>
-              <td></td> {/* Row 4 Label: Blank as requested */}
+              <td></td> 
               <td>
                 <SubField label="Nationality" value={formData.nationality} minWidth="80px" />
                 <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
                 <SubField label="Religion" value={formData.religion} minWidth="80px" />
               </td>
             </tr>
+            {/* --- END FIX --- */}
+
             <tr>
               <td>5</td>
               <td>Caste</td>
               <td>{fill(formData.caste, '150px')}</td>
             </tr>
 
-            {/* --- FIX: Row 6 changed to 2x2 Grid --- */}
+            {/* --- FIX (Item 6): 2x2 Grid ke liye inline styles add kiye --- */}
             <tr>
               <td>6</td>
               <td>Birth place(State/City)</td>
               <td>
-                {/* This outer div will be display: block by default in our SCSS */}
-                <div className={styles.gridWrapper}>
-                  {/* Top row of the grid */}
-                  <div className={styles.gridRow}>
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '5px' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px 20px' }}>
                     <SubField label="Place" value={formData.birthPlace} minWidth="80px" />
                     <SubField label="Taluka" value={formData.birthTaluka} minWidth="80px" />
                   </div>
-                  {/* Bottom row of the grid */}
-                  <div className={styles.gridRow}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px 20px' }}>
                     <SubField label="Dist" value={formData.birthDistrict} minWidth="80px" />
                     <SubField label="State" value={formData.birthState} minWidth="80px" />
                   </div>
@@ -193,6 +197,9 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>Previous School Name</td>
               <td>{fill(formData.previousSchool, '200px')}</td>
             </tr>
+            
+            {/* --- FIX (Item 10): Yeh code pehle se hi sahi tha --- */}
+            {/* SCSS is 'td' ko 'display: flex' banata hai, isliye yeh ek line mein aayega */}
             <tr>
               <td>10</td>
               <td>Date of Admission</td>
@@ -201,6 +208,8 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                 <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
               </td>
             </tr>
+            {/* --- END FIX --- */}
+
             <tr>
               <td>11</td>
               <td>Progress of Study</td>
@@ -237,6 +246,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
         {/* Certification Text (No Change) */}
         <p className={styles.certText}>
           This is to certify that, Above mentioned information is as per 
+          {/* Yeh School Profile ke 'genRegNo' se auto-fill hoga */}
           School General Register No. {fill(formData.genRegNo, '80px')}
         </p>
 
