@@ -1,4 +1,3 @@
-// app/admin/profile/page.tsx
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
@@ -18,7 +17,9 @@ interface SchoolFormData {
   udiseNo: string;
   govtReg: string; 
   place: string; 
-  logoUrl: string; // Yeh ab sirf existing URL ya Base64 preview ke liye hai
+  logoUrl: string;
+  // --- FIX 1: Naya field add kiya ---
+  genRegNo: string; // General Register No.
 }
 
 const SchoolProfilePage = () => {
@@ -34,15 +35,13 @@ const SchoolProfilePage = () => {
     udiseNo: '',
     govtReg: '',
     place: '',
-    logoUrl: ''
+    logoUrl: '',
+    // --- FIX 1: Naye field ko initialize kiya ---
+    genRegNo: '' 
   });
 
-  // --- YEH HAI AAPKA FIX (KADAM 1) ---
-  // Hum file ko preview ke liye Base64 (imagePreview) aur submit ke liye File object (imageFile) mein save karenge
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null); // Naya state file object ke liye
-  // --- FIX ENDS HERE ---
-
+  const [imageFile, setImageFile] = useState<File | null>(null); 
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -73,7 +72,7 @@ const SchoolProfilePage = () => {
     }
   }, [user]);
 
-  // useEffect fetches school profile (No change)
+  // useEffect fetches school profile
   useEffect(() => {
     const fetchSchoolProfile = async () => {
       if (!user) {
@@ -94,7 +93,9 @@ const SchoolProfilePage = () => {
           udiseNo: res.data.udiseNo || '',
           govtReg: res.data.recognitionNumber || '', 
           place: res.data.place || '',
-          logoUrl: res.data.logoUrl || ''
+          logoUrl: res.data.logoUrl || '',
+          // --- FIX 1: Naya field fetch kiya ---
+          genRegNo: res.data.genRegNo || '' 
         });
 
         if (res.data.logoUrl) {
@@ -122,29 +123,24 @@ const SchoolProfilePage = () => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // --- YEH HAI AAPKA FIX (KADAM 2) ---
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError('');
     setSuccessMessage('');
     const file = e.target.files?.[0];
     if (file) {
-      // --- YEH HAI AAPKI 800KB LIMIT ---
-      if (file.size > 800 * 1024) { // 800KB limit
-          setError("File is too large. Please select an image under 800KB.");
+      // --- FIX 2: Limit ko 2MB kiya ---
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+          setError("File is too large. Please select an image under 2MB.");
           setImageFile(null); // File ko clear karein
           return;
       }
       
-      // Nayi file ko state mein save karein (submit ke liye)
       setImageFile(file);
 
-      // File ka preview generate karein (UI ke liye)
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result as string;
         setImagePreview(base64String);
-        // Hum ab Base64 ko 'formData' mein save NAHI kar rahe hain
-        // setFormData(prevData => ({ ...prevData, logoUrl: base64String })); // <-- YEH LINE HATA DI GAYI
       };
       reader.onerror = () => {
           setError("Failed to read the image file.");
@@ -152,19 +148,16 @@ const SchoolProfilePage = () => {
       reader.readAsDataURL(file);
     }
   };
-  // --- FIX ENDS HERE ---
 
   const handleInputClick = (e: React.MouseEvent<HTMLInputElement>) => { (e.target as HTMLInputElement).value = ''; };
 
-  // --- YEH HAI AAPKA FIX (KADAM 3) ---
-  // handleFormSubmit ab Base64 ke bajaye 'FormData' bhejega
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(''); 
     setSuccessMessage(''); 
     setIsSubmitting(true);
 
-    // Validations (No change)
+    // Validations
     if (!formData.name) {
         setError('School Name (Main/Trust) is required.');
         setIsSubmitting(false);
@@ -185,35 +178,34 @@ const SchoolProfilePage = () => {
         setIsSubmitting(false);
         return;
     }
+    // --- FIX 1: Naye field ke liye validation add kiya ---
+     if (!formData.genRegNo) {
+        setError('General Register No. is required.');
+        setIsSubmitting(false);
+        return;
+    }
 
     try {
-      // JSON 'payload' ke bajaye, hum 'FormData' object banayenge
       const data = new FormData();
 
       // Saare text fields ko append karein
       data.append('name', formData.name);
       data.append('name2', formData.name2);
       data.append('address', formData.address);
-      data.append('contactNumber', formData.mobNo); // Map mobNo to backend 'contactNumber'
+      data.append('contactNumber', formData.mobNo); 
       data.append('email', formData.email);
       data.append('udiseNo', formData.udiseNo);
-      data.append('recognitionNumber', formData.govtReg); // Map govtReg to backend 'recognitionNumber'
+      data.append('recognitionNumber', formData.govtReg);
       data.append('place', formData.place);
+      // --- FIX 1: Naya field submit data mein add kiya ---
+      data.append('genRegNo', formData.genRegNo);
       
-      // Sirf tabhi image append karein jab user ne nayi file select ki ho
       if (imageFile) {
-        data.append('logo', imageFile); // 'logo' woh key hai jo backend (multer) expect karega
+        data.append('logo', imageFile); 
       }
-      // Hum 'logoUrl' ko yahaan NAHI bhej rahe hain.
-
-      console.log("Submitting school profile as FormData..."); // Naya log
       
-      // Axios ko 'FormData' bhejein.
-      // Axios automatically 'Content-Type' ko 'multipart/form-data' set kar dega.
       const response = await api.put('/api/school/profile', data); 
       
-      console.log("API Response:", response.data); 
-
       if (response.data.token) {
         console.log("Received new token, updating context.");
         await login(response.data.token);
@@ -230,12 +222,14 @@ const SchoolProfilePage = () => {
             udiseNo: savedData.udiseNo || '',
             govtReg: savedData.recognitionNumber || '', 
             place: savedData.place || '',
-            logoUrl: savedData.logoUrl || ''
+            logoUrl: savedData.logoUrl || '',
+            // --- FIX 1: Naya field response se update kiya ---
+            genRegNo: savedData.genRegNo || ''
         });
         if(savedData.logoUrl) {
             setImagePreview(savedData.logoUrl);
         }
-        setImageFile(null); // Nayi file ko reset karein
+        setImageFile(null); 
       } else {
           console.warn("Backend did not return updated school data in response.school");
       }
@@ -247,7 +241,6 @@ const SchoolProfilePage = () => {
       }, 1500);
 
     } catch (err: any) {
-      // 'Payload Too Large' error ab nahi aana chahiye
       const backendError = err.response?.data?.message || err.response?.data?.msg || 'Failed to update profile. Please check details and try again.';
       setError(backendError);
       console.error("Profile update error:", err.response?.data || err);
@@ -255,7 +248,6 @@ const SchoolProfilePage = () => {
       setIsSubmitting(false);
     }
   };
-  // --- FIX ENDS HERE ---
 
   const handleCancel = () => {
     if (!isSubmitting) {
@@ -270,7 +262,6 @@ const SchoolProfilePage = () => {
   if (!user && !isLoading) {
       return <div className={styles.loadingScreen}>Error loading user data. Please try logging in again.</div>;
   }
-
 
   return (
     <div className={styles.profileContainer}>
@@ -288,7 +279,8 @@ const SchoolProfilePage = () => {
             <div className={styles.imageUploadWrapper}>
               <label htmlFor="imageUpload" className={styles.uploadButton}>Change Logo</label>
               <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/webp" onChange={handleImageChange} onClick={handleInputClick} style={{ display: 'none' }} disabled={isSubmitting} />
-               <small className={styles.uploadHint}>Max 800KB (PNG, JPG, WEBP)</small> {/* <-- Limit update ki */}
+               {/* --- FIX 2: Hint text ko 2MB kiya --- */}
+               <small className={styles.uploadHint}>Max 2MB (PNG, JPG, WEBP)</small>
             </div>
           </div>
 
@@ -361,6 +353,15 @@ const SchoolProfilePage = () => {
               <input type="text" id="govtReg" name="govtReg" value={formData.govtReg} onChange={handleInputChange} disabled={isSubmitting} placeholder="e.g., GFH-1714/PN-49/SK-4" />
             </div>
           </div>
+          
+          {/* --- FIX 1: Naya field add kiya --- */}
+          <div className={styles.formGroup}>
+            <label htmlFor="genRegNo">General Register No. (For L.C. Footer) *</label>
+            <input type="text" id="genRegNo" name="genRegNo" value={formData.genRegNo} onChange={handleInputChange} required disabled={isSubmitting} placeholder="e.g., 44434" />
+            <small>This will auto-fill the 'General Register No.' on certificates.</small>
+          </div>
+          {/* --- FIX ENDS HERE --- */}
+
 
           {/* Buttons */}
           <div className={styles.buttonGroup}>

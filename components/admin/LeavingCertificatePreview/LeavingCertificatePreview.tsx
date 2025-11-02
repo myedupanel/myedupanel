@@ -120,28 +120,26 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
         {/* Student Info Table */}
         <table className={styles.studentInfoTable}>
           <tbody>
-            {/* --- FIX 1: Removed Sr. No. row --- */}
-
-            {/* --- FIX 2: Re-numbered all rows --- */}
+            {/* --- FIX: Swapped rows 1 and 2 --- */}
             <tr>
               <td>1</td>
+              <td>Student's Full Name</td>
+              <td>{fill(student?.name, '300px')}</td>
+            </tr>
+            <tr>
+              <td>2</td>
               <td>UID No (Aadhar card No.)</td>
               {/* This is already set to auto-fetch from the student prop */}
               <td>{fill(student?.aadhaarNo, '200px')}</td>
             </tr>
-            <tr>
-              <td>2</td>
-              <td>Student's Full Name</td>
-              <td>{fill(student?.name, '300px')}</td>
-            </tr>
+            
+            {/* --- FIX: Renumbered remaining rows --- */}
             <tr>
               <td>3</td>
               <td>Mother's Name</td>
               {/* This is already set to auto-fetch from the student prop */}
               <td>{fill(student?.motherName, '300px')}</td>
             </tr>
-            
-            {/* --- FIX 3: Updated Row 4 (formerly 5) --- */}
             <tr>
               <td>4</td>
               <td>Nationality, Mother Tongue & Religion</td>
@@ -151,7 +149,6 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                 <SubField label="Religion" value={formData.religion} minWidth="80px" />
               </td>
             </tr>
-            
             <tr>
               <td>5</td>
               <td>Caste</td>

@@ -51,6 +51,7 @@ router.get('/classes', [authMiddleware], async (req, res) => {
 
 // @route   GET /api/students/search
 // (Yeh route crash ho raha tha)
+// --- YAHAN FIX KIYA GAYA HAI ---
 router.get('/search', authMiddleware, async (req, res) => {
      try {
         const schoolId = req.user.schoolId;
@@ -62,30 +63,53 @@ router.get('/search', authMiddleware, async (req, res) => {
         const students = await prisma.students.findMany({
             where: {
                 schoolId: schoolId,
-                // --- YEH HAI AAPKA FIX ---
-                // MySQL default case-insensitive hai, isliye 'mode' ki zaroorat nahi hai
                 OR: [
-                  { first_name: { contains: studentName } }, // 'mode' hata diya
-                  { father_name: { contains: studentName } }, // 'mode' hata diya
-                  { last_name: { contains: studentName } },  // 'mode' hata diya
+                  { first_name: { contains: studentName, mode: 'insensitive' } }, // 'mode' wapas add karna safe hai
+                  { father_name: { contains: studentName, mode: 'insensitive' } },
+                  { last_name: { contains: studentName, mode: 'insensitive' } },
                 ]
-                // --- FIX ENDS HERE ---
             },
+            // --- FIX 1: Humne auto-fill ke liye saara data select kiya ---
             select: {
                 studentid: true,
                 first_name: true,
                 father_name: true,
                 last_name: true,
-                class: { select: { class_name: true } } 
+                class: { select: { class_name: true } },
+                
+                // LC Certificate ke liye zaroori fields
+                dob: true,
+                roll_number: true,    // Point 1 (Sr. No)
+                uid_number: true,     // Point 2 (Aadhaar)
+                mother_name: true,    // Point 4
+                nationality: true,    // Point 5
+                caste: true,          // Point 5
+                birth_place: true,    // Point 6
+                previous_school: true, // Point 9
+                admission_date: true, // Point 10
             },
             take: 10
         });
 
-        // Yeh code pehle se theek tha (s.class?.class_name)
+        // --- FIX 2: Humne yeh data response mein add kiya ---
         const formattedStudents = students.map(s => ({
-            id: s.studentid,
+            id: s.studentid.toString(), // ID ko string mein convert kiya
             name: getFullName(s),
-            class: s.class?.class_name || 'N/A' 
+            class: s.class?.class_name || 'N/A',
+            
+            // Auto-fill data (Student interface se match karta hua)
+            dob: s.dob ? s.dob.toISOString().split('T')[0] : undefined,
+            studentId: s.roll_number || '',
+            aadhaarNo: s.uid_number || '',
+            motherName: s.mother_name || '',
+            nationality: s.nationality || 'Indian',
+            caste: s.caste || '',
+            birthPlace: s.birth_place || '',
+            previousSchool: s.previous_school || '',
+            dateOfAdmission: s.admission_date ? s.admission_date.toISOString().split('T')[0] : undefined,
+            
+            // Jo fields DB mein nahi hain (e.g., religion, motherTongue), 
+            // woh frontend ko 'undefined' ya default milenge
         }));
 
         res.json(formattedStudents);
@@ -94,6 +118,8 @@ router.get('/search', authMiddleware, async (req, res) => {
         res.status(500).send("Server Error");
     }
 });
+// --- FIX YAHAN KHATAM HUA ---
+
 
 // @route   GET /api/students/:id
 // (Yeh code pehle se sahi tha)
