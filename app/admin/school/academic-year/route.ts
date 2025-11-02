@@ -1,9 +1,9 @@
 // File: app/api/school/academic-year/route.ts
 
 import { NextResponse } from "next/server";
-// --- FIX 1: Apne saare model types ko seedha import karein ---
+// --- YEH IMPORT 100% SAHI HAI ---
 import { Prisma, PrismaClient, Classes, FeeTemplate } from "@prisma/client";
-// -----------------------------------------------------------
+// ---------------------------------
 
 // Aapka session/auth helper yahaan import karein (e.g., getAuthSession)
 // import { getAuthSession } from "@/lib/auth"; 
@@ -30,6 +30,7 @@ export async function POST(req: Request) {
     }
 
     // --- Saara logic ab ek Transaction ke andar chalega ---
+    // (tx ka type Prisma.TransactionClient bilkul sahi hai)
     const newAcademicYear = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       
       // --- AAPKA BUSINESS RULE 1: 300-Din ka Limit ---
@@ -81,9 +82,9 @@ export async function POST(req: Request) {
 
         if (oldClasses.length > 0) {
           
-          // --- FIX 2: 'c' ko 'Classes' type dein ---
+          // --- YEH TYPE (Classes) BHI 100% SAHI HAI ---
           const classesToCreate = oldClasses.map((c: Classes) => ({
-          // ---------------------------------------
+          // -------------------------------------------
             class_name: c.class_name,
             schoolId: schoolId,
             academicYearId: year.id 
@@ -102,9 +103,9 @@ export async function POST(req: Request) {
 
         if (oldFeeTemplates.length > 0) {
           
-          // --- FIX 3: 't' ko 'FeeTemplate' type dein ---
+          // --- YEH TYPE (FeeTemplate) BHI 100% SAHI HAI ---
           const templatesToCreate = oldFeeTemplates.map((t: FeeTemplate) => ({
-          // --------------------------------------------
+          // -----------------------------------------------
             name: t.name,
             description: t.description,
             items: t.items as any, // 'as any' JSON ke liye zaroori hai
