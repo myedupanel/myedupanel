@@ -1,9 +1,11 @@
 import React, { useRef } from 'react';
 import styles from './FeeReceipt.module.scss';
 import { FiPrinter, FiDownload } from 'react-icons/fi';
-import { useReactToPrint } from 'react-to-print';
+// --- FIX: Nayi libraries import ki ---
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
-// --- Interface Definitions (No Change - Keeping your exported types) ---
+// --- Interface Definitions (No Change) ---
 export interface SchoolInfo {
     name?: string; address?: string; logo?: string;
     session?: string; phone?: string; email?: string;
@@ -23,8 +25,6 @@ export interface FeeRecordInfo {
 export interface CollectorInfo {
     name: string;
 }
-
-// --- Transaction Interface (No Change - Keeping your exported types) ---
 export interface Transaction {
     id: number;
     receiptId: string;
@@ -54,10 +54,7 @@ export interface Transaction {
     currentBalanceDue?: number; 
     feeRecordStatus?: string;
 }
-
-// Export the ReceiptData type alias
 export type ReceiptData = Transaction;
-
 
 interface FeeReceiptProps {
     transaction: Transaction | null;
@@ -83,99 +80,86 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
 
-    // --- FIX: Print Hiding Logic ---
+    // --- Print Function (No Change) ---
+    const handlePrint = () => {
+        const printContent = componentRef.current;
+        if (!printContent) return;
 
-    const getBackdropElement = (): HTMLElement | null => {
-        // Most common selectors for modal backdrops (overlay)
-        const selectors = [
-            '[role="dialog"][aria-modal="true"]', // Generic modal wrapper (often contains backdrop)
-            '.modal-backdrop', // Bootstrap/Generic CSS class
-            '.MuiBackdrop-root', // Material UI
-            '[data-modal-backdrop="true"]', // Custom attribute
-            '.ant-modal-mask', // Ant Design
-            'body > div:last-child[style*="z-index"]', // Fallback for overlays
-        ];
+        const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+                           .map(el => el.outerHTML)
+                           .join('');
+
+        const printWindow = window.open('', '', 'height=800,width=800');
         
-        let backdrop: HTMLElement | null = null;
-        for (const selector of selectors) {
-            backdrop = document.querySelector(selector);
-            if (backdrop) {
-                // If the element is found, check if it's visible (optional safety check)
-                if (window.getComputedStyle(backdrop).display !== 'none') {
-                    return backdrop;
-                }
-            }
-        }
-        return null;
-    };
-
-    const handleBeforePrint = () => {
-        const backdrop = getBackdropElement();
-        if (backdrop) {
-            // Temporarily hide the backdrop before the native print dialog opens
-            backdrop.style.display = 'none';
-        }
-        // Small delay to ensure DOM update takes effect (if needed)
-        return Promise.resolve();
-    };
-
-    const handleAfterPrint = () => {
-        // Restore the backdrop after the print dialog is closed
-        const backdrop = getBackdropElement();
-        if (backdrop) {
-            backdrop.style.display = ''; // Revert to default display style
-        }
-    };
-    
-    const getPrintPageStyle = () => {
-         return `
-            @page { 
-                size: A4; 
-                margin: 15mm; 
-            } 
+        if (printWindow) {
+            printWindow.document.write('<html><head><title>Print Receipt</title>');
+            printWindow.document.write(styles); 
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(printContent.innerHTML); 
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
             
-            @media print { 
-                body { 
-                    -webkit-print-color-adjust: exact; 
-                    color-adjust: exact; 
-                }
-                
-                /* CRITICAL: Hides everything except the receipt content */
-                body > * {
-                    visibility: hidden;
-                    display: none !important;
-                }
-                
-                /* ...SIRF receipt content ko chhodkar */
-                #printable-receipt {
-                    visibility: visible !important;
-                    display: block !important;
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                }
-                
-                /* Receipt ke andar ke .no-print elements ko hide karo */
-                .no-print { 
-                    display: none !important; 
-                }
-            }
-        `;
+            printWindow.document.fonts.ready.then(() => {
+                printWindow.print();
+                printWindow.close();
+            });
+        }
     };
+    // --- END Print ---
 
+    // --- Download PDF Function (FIXED) ---
+    const handleDownloadPDF = () => {
+        const input = componentRef.current;
+        if (!input) {
+            alert("Could not find receipt content to download.");
+            return;
+        }
 
-    const handlePrint = useReactToPrint({
-        content: () => componentRef.current, 
-        documentTitle: `FeeReceipt_${transaction?.receiptId || transaction?.id || 'details'}`,
-        pageStyle: getPrintPageStyle(),
-        onBeforePrint: handleBeforePrint, // <-- Backdrop hiding function
-        onAfterPrint: handleAfterPrint,   // <-- Backdrop restoring function
-    } as any);
-    // --- END FIX ---
+        input.classList.add(styles.printing);
+
+        // --- FIX 1: 'as any' ko add kiya 'html2canvas' options mein ---
+        html2canvas(input, {
+            scale: 2.5, // High resolution
+            useCORS: true,
+            backgroundColor: '#ffffff' // Force white background
+        } as any).then(canvas => { // <-- YAHAN FIX KIYA
+            // Class ko hata dein
+            input.classList.remove(styles.printing);
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4'); // A4 size, portrait
+            
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            
+            // --- FIX 2: 'as any' ko add kiya 'pdf.getImageProperties' ke liye ---
+            const imgProps = (pdf as any).getImageProperties(imgData); // <-- YAHAN FIX KIYA
+            const imgRatio = imgProps.height / imgProps.width;
+
+            const margin = 10; // 10mm margin
+            let imgWidth = pdfWidth - (margin * 2);
+            let imgHeight = imgWidth * imgRatio;
+
+            if (imgHeight > pdfHeight - (margin * 2)) {
+                imgHeight = pdfHeight - (margin * 2);
+                imgWidth = imgHeight / imgRatio;
+            }
+            
+            const x = (pdfWidth - imgWidth) / 2; 
+            const y = margin; 
+
+            pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+            pdf.save(`FeeReceipt_${transaction?.receiptId || 'download'}.pdf`);
+        
+        }).catch(err => {
+            input.classList.remove(styles.printing);
+            console.error("Error downloading PDF:", err);
+            alert("Could not download PDF. Please try printing.");
+        });
+    };
+    // --- END FIX 2 ---
     
-    const handleDownload = handlePrint; 
-
+    // ... (Baaki saara code waisa hi hai) ...
     if (!transaction) {
         return <div className={styles.noData}>No transaction details available.</div>;
     }
@@ -209,13 +193,16 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         : (transaction.status !== 'Success' ? transaction.status.toUpperCase() : (balanceDue < 0.01 ? 'PAID' : 'PARTIAL'))
     );
 
+
     return (
         <div className={styles.receiptContainer}>
-            {/* Action Buttons (No Change) */}
+            {/* --- Buttons (No Change) --- */}
             <div className={`${styles.actions} no-print`}>
-                <button onClick={handleDownload} className={styles.downloadButton}><FiDownload /> Download PDF</button>
+                <button onClick={handleDownloadPDF} className={styles.downloadButton}><FiDownload /> Download PDF</button>
                 <button onClick={handlePrint} className={styles.printButton}><FiPrinter /> Print Receipt</button>
             </div>
+            {/* --- END --- */}
+
 
             {/* --- Receipt Content (No Change in JSX) --- */}
             <div id="printable-receipt" className={styles.receiptContent} ref={componentRef}>
@@ -301,7 +288,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     {transaction.notes && <p className={styles.notes}><strong>Remarks:</strong> {transaction.notes}</p>}
                 </section>
 
-                 {/* Balance Summary (Bug-fixed) */}
+                 {/* Balance Summary */}
                  <section className={styles.balanceSection}>
                      <p><strong>Balance Due:</strong> 
                         <span 
@@ -316,7 +303,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                      }
                  </section>
 
-                {/* Footer (No Change) */}
+                {/* Footer */}
                 <footer className={styles.footer}>
                      <p className={styles.collectedBy}>Received By: {collectedByNameDisplay}</p>
                     <div className={styles.signatureArea}>
