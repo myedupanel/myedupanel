@@ -1314,3 +1314,27 @@ body {
     visibility: hidden !important;
   }
 }
+@media print {
+    /* Body ke saare children ko chhupaao */
+    body * {
+        visibility: hidden;
+        /* display: none; ko avoid karte hain, visibility use karte hain */
+    }
+    
+    /* Sirf receipt container ko visible karo */
+    /* .printableArea class yahan aayegi, ya hum 'receiptPageWrapper' use karenge */
+    .receiptPageWrapper {
+        visibility: visible;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        /* Font size ko fix karna bhi zaroori hai */
+        font-size: 11pt;
+    }
+
+    /* Print media mein receipt ko page par fit karein */
+    .receiptPageWrapper * {
+        visibility: visible !important;
+    }
+}
