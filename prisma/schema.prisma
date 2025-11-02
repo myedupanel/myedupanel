@@ -28,7 +28,11 @@ model School {
   recognitionNumber String?
   udiseNo           String? @unique
   logoUrl           String?
-  genRegNo          String? // Yeh naya field hai
+  
+  // --- YEH FIELD ZAROORI HAI ---
+  genRegNo          String? 
+  // --- END ---
+  
   logo              String?
   session           String?
   lateFineAmount    Float?  @default(100)
@@ -60,6 +64,8 @@ model School {
   timetablePeriods  TimetableAssignment[]
 }
 
+// ... baaki saare models (User, Students, etc.) ...
+// (Unmein koi change ki zaroorat nahi hai)
 // 4. User Model
 model User {
   id                    Int      @id @default(autoincrement())
@@ -108,7 +114,7 @@ model Classes {
   @@unique([schoolId, class_name])
 }
 
-// 6. Students Model (No Change - onDelete: Cascade logic is preserved)
+// 6. Students Model
 model Students {
   studentid         Int       @id @default(autoincrement())
   first_name        String    @db.VarChar(100)
@@ -149,7 +155,7 @@ model Students {
   assignments  Assignment[]
 }
 
-// 7. Teachers Model (No Change)
+// 7. Teachers Model
 model Teachers {
   teacher_dbid  Int     @id @default(autoincrement())
   teacherId     String  @db.VarChar(100)
@@ -165,7 +171,7 @@ model Teachers {
   @@unique([schoolId, teacherId])
 }
 
-// 8. FeeTemplate Model (No Change)
+// 8. FeeTemplate Model
 model FeeTemplate {
   id          Int     @id @default(autoincrement())
   name        String
@@ -182,7 +188,7 @@ model FeeTemplate {
   @@unique([schoolId, name])
 }
 
-// 9. FeeRecord Model (No Change)
+// 9. FeeRecord Model
 model FeeRecord {
   id         Int      @id @default(autoincrement())
   amount     Float
@@ -211,7 +217,7 @@ model FeeRecord {
   @@unique([studentId, templateId, schoolId])
 }
 
-// 10. Transaction Model (No Change)
+// 10. Transaction Model
 model Transaction {
   id                   Int      @id @default(autoincrement())
   receiptId            String   @unique
@@ -239,13 +245,13 @@ model Transaction {
   template   FeeTemplate @relation(fields: [templateId], references: [id])
 
   feeRecordId Int
-  feeRecord   FeeRecord @relation(fields: [feeRecordId], references: [id], onDelete: Cascade) // <-- FIX HO GAYA
+  feeRecord   FeeRecord @relation(fields: [feeRecordId], references: [id], onDelete: Cascade) 
 
   collectedById Int?
   collectedBy   User? @relation(fields: [collectedById], references: [id])
 }
 
-// 11. Parent Model (No Change)
+// 11. Parent Model
 model Parent {
   id            Int     @id @default(autoincrement())
   name          String
@@ -265,7 +271,7 @@ model Parent {
   @@unique([schoolId, email])
 }
 
-// 12. Attendance Model (No Change)
+// 12. Attendance Model
 model Attendance {
   id         Int      @id @default(autoincrement())
   date       DateTime @db.Date
@@ -281,7 +287,7 @@ model Attendance {
   @@unique([studentId, date, schoolId])
 }
 
-// 13. StaffAttendance Model (No Change)
+// 13. StaffAttendance Model
 model StaffAttendance {
   id     Int      @id @default(autoincrement())
   date   DateTime @db.Date
@@ -296,7 +302,7 @@ model StaffAttendance {
   @@unique([userId, date])
 }
 
-// 14. Exam Model (No Change)
+// 14. Exam Model
 model Exam {
   id             Int       @id @default(autoincrement())
   name           String
@@ -318,7 +324,7 @@ model Exam {
   @@unique([schoolId, name, date])
 }
 
-// 15. Mark Model (No Change)
+// 15. Mark Model
 model Mark {
   id            Int       @id @default(autoincrement())
   marksObtained Float?
@@ -340,7 +346,7 @@ model Mark {
   @@unique([studentId, assessmentId, subject, schoolId])
 }
 
-// 16. Assignment Model (No Change)
+// 16. Assignment Model
 model Assignment {
   id          Int       @id @default(autoincrement())
   title       String
@@ -364,7 +370,7 @@ model Assignment {
   createdAt DateTime @default(now())
 }
 
-// 17. Quiz Model (No Change)
+// 17. Quiz Model
 model Quiz {
   id             Int      @id @default(autoincrement())
   title          String
@@ -377,7 +383,7 @@ model Quiz {
   createdAt DateTime @default(now())
 }
 
-// 18. Event Model (No Change)
+// 18. Event Model
 model Event {
   id          Int      @id @default(autoincrement())
   title       String
@@ -390,7 +396,7 @@ model Event {
   school   School @relation(fields: [schoolId], references: [id])
 }
 
-// 19. LiveClass Model (No Change)
+// 19. LiveClass Model
 model LiveClass {
   id          Int      @id @default(autoincrement())
   topic       String
@@ -406,7 +412,7 @@ model LiveClass {
   school   School @relation(fields: [schoolId], references: [id])
 }
 
-// 20. GradingScale Model (No Change)
+// 20. GradingScale Model
 model GradingScale {
   id     Int    @id @default(autoincrement())
   scale  Json @default("[{\"grade\":\"A+\",\"min\":90,\"max\":100},{\"grade\":\"A\",\"min\":80,\"max\":89},{\"grade\":\"B\",\"min\":70,\"max\":79},{\"grade\":\"C\",\"min\":60,\"max\":69},{\"grade\":\"D\",\"min\":50,\"max\":59},{\"grade\":\"F\",\"min\":0,\"max\":49}]")
@@ -415,7 +421,7 @@ model GradingScale {
   school   School @relation(fields: [schoolId], references: [id])
 }
 
-// 21. StudyMaterial Model (No Change)
+// 21. StudyMaterial Model
 model StudyMaterial {
   id               Int      @id @default(autoincrement())
   title            String
@@ -433,11 +439,7 @@ model StudyMaterial {
   updatedAt DateTime @updatedAt
 }
 
-// ---------------------------------------------
-// --- TIMETABLE MODELS (CORRECTED FINAL PLACEMENT) ---
-// ---------------------------------------------
-
-// 22. TimeSlot Model: School के लिए सभी समय स्लॉट
+// 22. TimeSlot Model
 model TimeSlot {
   id             Int                   @id @default(autoincrement())
   name           String
@@ -453,7 +455,7 @@ model TimeSlot {
   @@unique([schoolId, name])
 }
 
-// 23. WorkingDay Model: School के काम के दिन
+// 23. WorkingDay Model
 model WorkingDay {
   id         Int    @id @default(autoincrement())
   name       String
@@ -465,7 +467,7 @@ model WorkingDay {
   @@unique([schoolId, name])
 }
 
-// 24. TimetableAssignment Model: Class, Teacher, TimeSlot के बीच का मुख्य संबंध
+// 24. TimetableAssignment Model
 model TimetableAssignment {
   id           Int      @id @default(autoincrement())
   day          String
