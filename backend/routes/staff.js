@@ -1,3 +1,5 @@
+// backend/routes/staff.js
+
 const express = require('express');
 const router = express.Router();
 const generatePassword = require('generate-password');
@@ -10,7 +12,6 @@ const bcrypt = require('bcryptjs');
 // @route   POST /api/staff
 // @desc    Add staff user (Login + Profile)
 // @access  Private (Admin)
-// --- YAHAN BADLAAV KIYA GAYA HAI ---
 router.post('/', [authMiddleware, authorize('Admin')], async (req, res) => {
     const { staffId, name, role: staffRole, contactNumber, email, joiningDate, leavingDate } = req.body;
     console.log("[POST /staff] Received data:", req.body);
@@ -61,6 +62,13 @@ router.post('/', [authMiddleware, authorize('Admin')], async (req, res) => {
                 password: hashedPassword,
                 role: staffRole,
                 isVerified: true,
+                // --- FIX 1: details JSON field mein data add kiya ---
+                details: {
+                    staffId: staffId, // Redundant, but added for schema consistency
+                    contactNumber: contactNumber,
+                    joiningDate: joiningDate,
+                },
+                // --- END FIX 1 ---
                 // Naya Staff Profile bhi saath mein banayein
                 staffProfile: {
                     create: {
@@ -123,7 +131,6 @@ router.post('/', [authMiddleware, authorize('Admin')], async (req, res) => {
 // @route   GET /api/staff
 // @desc    Get staff list
 // @access  Private (Admin)
-// --- YAHAN BADLAAV KIYA GAYA HAI ---
 router.get('/', [authMiddleware, authorize('Admin')], async (req, res) => {
     console.log("[GET /staff] Request received.");
     try {
@@ -139,9 +146,10 @@ router.get('/', [authMiddleware, authorize('Admin')], async (req, res) => {
                 schoolId: schoolIdFromToken,
                 role: { in: staffRoles }
             },
-            // Naya Staff Profile data include karein
+            // --- FIX 2: details field ko wapas include kiya ---
             include: {
-                staffProfile: true 
+                staffProfile: true,
+                details: true // <-- YEH AB INCLUDE HOGA
             },
             orderBy: {
                 name: 'asc'
@@ -156,7 +164,7 @@ router.get('/', [authMiddleware, authorize('Admin')], async (req, res) => {
             
             // User aur Staff Profile ko mix karke ek object banayein
             return {
-                ...safeUser, // id, name, email, role etc.
+                ...safeUser, // id, name, email, role, details etc.
                 ...(safeUser.staffProfile || {}) // contactNumber, staffId, joiningDate etc.
             };
         });
@@ -165,7 +173,12 @@ router.get('/', [authMiddleware, authorize('Admin')], async (req, res) => {
         res.json({ data: formattedStaffList }); // Naya formatted list bhej rahe hain
 
     } catch (err) {
+        // --- CRITICAL: Login error yahaan bhi fix hona chahiye ---
         console.error("[GET /staff] Error:", err.message, err.stack);
+        // Is error ko log karne ke liye
+        if (err.message.includes("User.details does not exist")) {
+            console.error("Critical Schema Mismatch: The database does not have the 'details' column.");
+        }
         res.status(500).send('Server Error fetching staff.');
     }
 });
@@ -174,7 +187,6 @@ router.get('/', [authMiddleware, authorize('Admin')], async (req, res) => {
 // @route   PUT /api/staff/:id
 // @desc    Update staff user
 // @access  Private (Admin)
-// --- YAHAN BADLAAV KIYA GAYA HAI ---
 router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => {
     const { id } = req.params; // Yeh User ID hai
     const { staffId, name, role: staffRole, contactNumber, email, joiningDate, leavingDate } = req.body;
@@ -217,6 +229,14 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => {
                     name: name,
                     role: staffRole,
                     ...emailUpdateData,
+                    // --- FIX 3: details field ko update karein ---
+                     details: {
+                         staffId: staffId,
+                         contactNumber: contactNumber,
+                         joiningDate: joiningDate,
+                         leavingDate: leavingDate
+                     }
+                    // --- END FIX 3 ---
                 }
             }),
             // 2. Staff table update karein
@@ -270,7 +290,6 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => {
 // @route   DELETE /api/staff/:id
 // @desc    Delete staff user (Login + Profile)
 // @access  Private (Admin)
-// --- YAHAN BADLAAV KIYA GAYA HAI ---
 router.delete('/:id', [authMiddleware, authorize('Admin')], async (req, res) => {
     const { id } = req.params; // Yeh User ID hai
     const schoolIdFromToken = req.user.schoolId;
