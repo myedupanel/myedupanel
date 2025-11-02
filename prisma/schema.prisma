@@ -62,10 +62,11 @@ model School {
   timeSlots         TimeSlot[]
   workingDays       WorkingDay[]
   timetablePeriods  TimetableAssignment[]
+  
+  // --- FIX: Naya Staff relation add kiya ---
+  staff             Staff[]
 }
 
-// ... baaki saare models (User, Students, etc.) ...
-// (Unmein koi change ki zaroorat nahi hai)
 // 4. User Model
 model User {
   id                    Int      @id @default(autoincrement())
@@ -75,7 +76,10 @@ model User {
   role                  String
   status                String?  @default("active")
   isVerified            Boolean  @default(false)
-  details               Json?
+  
+  // --- FIX: Confusing 'details' field hata diya ---
+  // details               Json? 
+  
   otp                   String?
   otpExpires            DateTime?
   resetPasswordToken    String?
@@ -93,6 +97,9 @@ model User {
   parent                Parent?
   // --- TIMETABLE RELATION ADDED ---
   assignedPeriods       TimetableAssignment[] @relation("TeacherAssignments")
+
+  // --- FIX: Naya Staff Profile relation add kiya ---
+  staffProfile          Staff?     @relation("StaffProfile")
 }
 
 // 5. Classes Model
@@ -489,4 +496,23 @@ model TimetableAssignment {
   // Conflict Checks
   @@unique([day, classId, timeSlotId], name: "class_time_unique")
   @@unique([day, teacherId, timeSlotId], name: "teacher_time_unique")
+}
+
+// --- FIX: Naya STAFF Model (No. 25) ---
+model Staff {
+  id            Int       @id @default(autoincrement())
+  staffId       String    @unique // Form se aayega
+  contactNumber String?
+  joiningDate   DateTime?
+  leavingDate   DateTime?
+
+  // School se Relation
+  schoolId      String
+  school        School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  // User (login) se Relation
+  userId        Int       @unique // One-to-one
+  user          User      @relation("StaffProfile", fields: [userId], references: [id], onDelete: Cascade) // User delete toh staff profile delete
+
+  @@unique([schoolId, staffId]) // Staff ID har school ke liye unique hona chahiye
 }
