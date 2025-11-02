@@ -94,7 +94,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* Header (Pehle se updated hai) */}
+        {/* Header (No Change) */}
         <header className={styles.certHeader}>
           <div className={styles.schoolInfoBlock}>
             <div className={styles.schoolName1}>{schoolDetails.name}</div>
@@ -107,6 +107,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           </div>
           <div className={styles.titleRow}>
             <div className={styles.headerSrNo}>
+              {/* This is already set to auto-fetch from the student prop */}
               Sr. No: {fill(student?.studentId, '100px')}
             </div>
             <h2>LEAVING CERTIFICATE</h2>
@@ -119,44 +120,45 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
         {/* Student Info Table */}
         <table className={styles.studentInfoTable}>
           <tbody>
+            {/* --- FIX 1: Removed Sr. No. row --- */}
+
+            {/* --- FIX 2: Re-numbered all rows --- */}
             <tr>
               <td>1</td>
-              <td>Sr. No.</td>
-              <td>{fill(student?.studentId, '100px')}</td>
-            </tr>
-            <tr>
-              <td>2</td>
               <td>UID No (Aadhar card No.)</td>
+              {/* This is already set to auto-fetch from the student prop */}
               <td>{fill(student?.aadhaarNo, '200px')}</td>
             </tr>
             <tr>
-              <td>3</td>
+              <td>2</td>
               <td>Student's Full Name</td>
               <td>{fill(student?.name, '300px')}</td>
             </tr>
             <tr>
-              <td>4</td>
+              <td>3</td>
               <td>Mother's Name</td>
+              {/* This is already set to auto-fetch from the student prop */}
               <td>{fill(student?.motherName, '300px')}</td>
             </tr>
-            {/* Point 5 (Pehle se updated hai) */}
+            
+            {/* --- FIX 3: Updated Row 4 (formerly 5) --- */}
             <tr>
-              <td>5</td>
-              <td>Nationality</td>
+              <td>4</td>
+              <td>Nationality, Mother Tongue & Religion</td>
               <td>
                 <SubField label="Nationality" value={formData.nationality} minWidth="80px" />
                 <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
                 <SubField label="Religion" value={formData.religion} minWidth="80px" />
               </td>
             </tr>
+            
             <tr>
-              <td>6</td>
+              <td>5</td>
               <td>Caste</td>
               <td>{fill(formData.caste, '150px')}</td>
             </tr>
-            {/* Point 7 (Pehle se updated hai) */}
             <tr>
-              <td>7</td>
+              <td>6</td>
               <td>Birth place(State/City)</td>
               <td>
                 <SubField label="Place" value={formData.birthPlace} minWidth="80px" />
@@ -167,65 +169,55 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               </td>
             </tr>
             <tr>
-              <td>8</td>
+              <td>7</td>
               <td>Date of Birth (Words)</td>
               <td>{fill(studentDobFormatted, '150px')}</td>
             </tr>
             <tr>
-              <td>9</td>
+              <td>8</td>
               <td>Date of Birth (in Words)</td>
               <td>{fill(formData.dobWords, '300px')}</td>
             </tr>
             <tr>
-              <td>10</td>
+              <td>9</td>
               <td>Previous School Name</td>
               <td>{fill(formData.previousSchool, '200px')}</td>
             </tr>
             <tr>
-              <td>11</td>
+              <td>10</td>
               <td>Date of Admission</td>
               <td>
                 <SubField label="Date" value={dateOfAdmission} minWidth="100px" />
                 <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
               </td>
             </tr>
-            
-            {/* --- FIX 1 (Point 12 Layout) --- */}
             <tr>
-              <td>12</td>
+              <td>11</td>
               <td>Progress of Study</td>
               <td>
-                {/* Blueprint jaisa: "Good" aur "Conduct: ___" */}
                 {fill(formData.progress, '100px')} 
                 <SubField label="Conduct" value={formData.conduct} minWidth="80px" />
               </td>
             </tr>
-            {/* --- END FIX 1 --- */}
-
             <tr>
-              <td>13</td>
+              <td>12</td>
               <td>Date of School Leaving</td>
               <td>{fill(dateOfLeaving, '150px')}</td>
             </tr>
-
-            {/* --- FIX 2 (Point 14 Layout) --- */}
             <tr>
-              <td>14</td>
+              <td>13</td>
               <td>Standard in which studying and since when (in Words)</td>
               <td>
-                {/* Blueprint jaisa: "8th / 31st June 2023" */}
                 {fill(formData.standardLeaving, '80px')} / {fill(formData.sinceWhenLeaving, '100px')}
               </td>
             </tr>
-            {/* --- END FIX 2 --- */}
-
             <tr>
-              <td>15</td>
+              <td>14</td>
               <td>Reason for leaving school</td>
               <td>{fill(formData.reasonForLeaving, '200px')}</td>
             </tr>
             <tr>
-              <td>16</td>
+              <td>15</td>
               <td>Remarks</td>
               <td>{fill(formData.remarks, '200px')}</td>
             </tr>
@@ -238,7 +230,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           School General Register No. {fill(formData.genRegNo, '80px')}
         </p>
 
-        {/* Footer (Pehle se updated hai) */}
+        {/* Footer (No Change) */}
         <footer className={styles.certFooterWrapper}>
           <div className={styles.datePlace}>
             <span>Date: {fill(null, '50px')} / {fill(null, '50px')} / {fill(null, '70px')}</span>
