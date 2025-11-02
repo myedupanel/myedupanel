@@ -50,7 +50,6 @@ router.get('/classes', [authMiddleware], async (req, res) => {
 
 
 // @route   GET /api/students/search
-// (Yeh route crash ho raha tha)
 // --- YAHAN FIX KIYA GAYA HAI ---
 router.get('/search', authMiddleware, async (req, res) => {
      try {
@@ -63,13 +62,14 @@ router.get('/search', authMiddleware, async (req, res) => {
         const students = await prisma.students.findMany({
             where: {
                 schoolId: schoolId,
+                // --- FIX: 'mode: "insensitive"' ko hata diya gaya hai ---
                 OR: [
-                  { first_name: { contains: studentName, mode: 'insensitive' } }, // 'mode' wapas add karna safe hai
-                  { father_name: { contains: studentName, mode: 'insensitive' } },
-                  { last_name: { contains: studentName, mode: 'insensitive' } },
+                  { first_name: { contains: studentName } }, 
+                  { father_name: { contains: studentName } },
+                  { last_name: { contains: studentName } },
                 ]
             },
-            // --- FIX 1: Humne auto-fill ke liye saara data select kiya ---
+            // Select waala part bilkul perfect hai, use change nahi kiya
             select: {
                 studentid: true,
                 first_name: true,
@@ -91,9 +91,9 @@ router.get('/search', authMiddleware, async (req, res) => {
             take: 10
         });
 
-        // --- FIX 2: Humne yeh data response mein add kiya ---
+        // Format waala part bhi bilkul sahi hai
         const formattedStudents = students.map(s => ({
-            id: s.studentid.toString(), // ID ko string mein convert kiya
+            id: s.studentid.toString(), 
             name: getFullName(s),
             class: s.class?.class_name || 'N/A',
             
@@ -107,13 +107,11 @@ router.get('/search', authMiddleware, async (req, res) => {
             birthPlace: s.birth_place || '',
             previousSchool: s.previous_school || '',
             dateOfAdmission: s.admission_date ? s.admission_date.toISOString().split('T')[0] : undefined,
-            
-            // Jo fields DB mein nahi hain (e.g., religion, motherTongue), 
-            // woh frontend ko 'undefined' ya default milenge
         }));
 
         res.json(formattedStudents);
     } catch (error) {
+        // --- FIX: Ab yeh error nahi aana chahiye ---
         console.error("Error searching students:", error.message);
         res.status(500).send("Server Error");
     }

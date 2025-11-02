@@ -39,7 +39,7 @@ export interface Student {
 }
 // --- END ---
 
-// --- SchoolDetails interface (No Change) ---
+// --- SchoolDetails interface (FIX 1) ---
 export interface SchoolDetails {
   name: string;
   name2?: string;
@@ -52,13 +52,15 @@ export interface SchoolDetails {
   place?: string;
   affiliationIndex?: string;
   affiliationDetails?: string;
+  // --- FIX 1: 'genRegNo' ko interface mein add kiya ---
+  genRegNo?: string; 
 }
 // --- END ---
 
-// --- LeavingFormData interface (No Change) ---
+// --- LeavingFormData interface (FIX 2) ---
 export interface LeavingFormData {
-  genRegNo?: string;
-  regNo?: string; // Yeh School ka "Sr. No." hai
+  genRegNo?: string; // Yeh School ka General Register No. hai (Footer)
+  regNo?: string; // Yeh School ka Reg. No. hai (Header)
   studentAadharNo?: string; 
   nationality?: string;     
   motherTongue?: string;    
@@ -81,11 +83,13 @@ export interface LeavingFormData {
   reasonForLeaving?: string;  
   remarks?: string;           
   issueDate?: string;         
-  signatoryRole?: string;     
+  signatoryRole?: string;
+  // --- FIX 2: 'motherName' ko interface mein add kiya ---
+  motherName?: string;
 }
 // --- END ---
 
-// --- FIX 3: Helper function (Standard ko words mein convert karne ke liye) ---
+// --- Helper function (No Change - Yeh perfect tha) ---
 const standardMap: { [key: string]: string } = {
   '1': 'First',
   '2': 'Second',
@@ -101,29 +105,18 @@ const standardMap: { [key: string]: string } = {
   '12': 'Twelfth',
 };
 
-/**
- * "7th" ya "Nursery" ko "Seventh" ya "Nursery" mein convert karta hai
- */
 const convertStandardToWords = (standard: string | undefined): string => {
   if (!standard) return '';
-
-  // "7th" -> 7 -> "7"
   const numStr = parseInt(standard, 10).toString(); 
-  
-  // Agar '7' map mein hai, toh 'Seventh' return karo
   if (standardMap[numStr]) {
     return standardMap[numStr];
   }
-  
-  // Agar "Nursery", "Jr. KG" jaisa kuch hai, toh wahi return karo
   if (isNaN(parseInt(standard, 10))) {
      return standard; 
   }
-
-  // Fallback (jaise "13th" etc.)
   return standard;
 };
-// --- END FIX 3 ---
+// --- END ---
 
 
 // --- MAIN PAGE COMPONENT ---
@@ -134,8 +127,8 @@ const LeavingCertificateBuilderPage = () => {
 
   // --- formData state (No Change) ---
   const [formData, setFormData] = useState<LeavingFormData>({
-    genRegNo: '',
-    regNo: '', // Yeh School Sr. No. hai
+    genRegNo: '', // Yeh auto-fill hoga
+    regNo: '', // Yeh auto-fill hoga
     studentAadharNo: '',
     nationality: 'Indian', 
     motherTongue: '',
@@ -158,7 +151,8 @@ const LeavingCertificateBuilderPage = () => {
     reasonForLeaving: "Parent's Application", 
     remarks: '',
     issueDate: new Date().toISOString().split('T')[0],
-    signatoryRole: 'Head Master'
+    signatoryRole: 'Head Master',
+    motherName: '', // Yeh auto-fill hoga
   });
   // --- END ---
 
@@ -167,12 +161,13 @@ const LeavingCertificateBuilderPage = () => {
     name: "Loading...", name2: "", address: "Loading...",
     mobNo: "Loading...", email: "Loading...", govtReg: "Loading...",
     udiseNo: "Loading...", place: "Loading...", logoUrl: undefined,
-    affiliationIndex: "Loading...", affiliationDetails: "Loading..."
+    affiliationIndex: "Loading...", affiliationDetails: "Loading...",
+    genRegNo: "Loading..." // Initial state add kiya
   });
   // --- END ---
 
 
-   // --- FIX 1 & 3: Student data se form pre-fill karna (Updated) ---
+   // --- Student data se form pre-fill karna (No Change - Yeh perfect tha) ---
    useEffect(() => {
     
     const formatDate = (dateStr?: string) => {
@@ -184,10 +179,8 @@ const LeavingCertificateBuilderPage = () => {
       // Student select hone par form data update karo
       setFormData(prev => ({
           ...prev,
-          // --- FIX 1: Mother's Name yahan add kiya ---
           motherName: selectedStudent.motherName || '', 
           studentAadharNo: selectedStudent.aadhaarNo || '',
-          
           nationality: selectedStudent.nationality || 'Indian', 
           motherTongue: selectedStudent.motherTongue || '',
           religion: selectedStudent.religion || '',
@@ -200,35 +193,44 @@ const LeavingCertificateBuilderPage = () => {
           previousSchool: selectedStudent.previousSchool || '',
           dateOfAdmission: formatDate(selectedStudent.dateOfAdmission),
           standardAdmitted: selectedStudent.standardAdmitted || '',
-          
           standardLeaving: selectedStudent.class || '', 
-          
-          // --- FIX 3: TODO poora kiya ---
           standardLeavingWords: convertStandardToWords(selectedStudent.class),
-          
-          // TODO: Generate sinceWhenLeaving (usually start of session)
        }));
     } else {
        // Student clear karne par form data clear karo
+       // (Hum 'regNo' aur 'genRegNo' ko clear nahi karenge kyunki woh school se related hain)
        setFormData(prev => ({ 
            ...prev, 
-           motherName: '', // Clear Mother's Name
-           studentAadharNo: '', // Clear Aadhaar
+           motherName: '', 
+           studentAadharNo: '', 
            standardLeaving: '',
            standardLeavingWords: '',
-           // ... baaki fields bhi clear kar sakte hain
+           // ... baaki student-specific fields
+           nationality: 'Indian',
+           motherTongue: '',
+           religion: '',
+           caste: '',
+           birthPlace: '',
+           birthTaluka: '',
+           birthDistrict: '',
+           birthState: '',
+           dobWords: '',
+           previousSchool: '',
+           dateOfAdmission: '',
+           standardAdmitted: '',
        }));
     }
    }, [selectedStudent]);
-   // --- END FIX ---
+   // --- END ---
 
-  // --- FIX 2: School Profile Fetch karna (Updated) ---
+  // --- FIX 3: School Profile Fetch karna (Updated) ---
   useEffect(() => {
     const fetchSchoolProfile = async () => { 
       console.log("Fetching school profile for LC...");
       try {
         const res = await api.get('/api/school/profile');
         if (res.data) {
+          // School details state set kiya
           setSchoolDetails({
             name: res.data.name || "N/A",
             name2: res.data.name2 || res.data.name,
@@ -236,18 +238,22 @@ const LeavingCertificateBuilderPage = () => {
             address: res.data.address || "N/A",
             mobNo: res.data.contactNumber || "N/A",
             email: res.data.email || "N/A",
-            govtReg: res.data.recognitionNumber || "N/A",
+            govtReg: res.data.recognitionNumber || "N/A", // Header Reg. No
             udiseNo: res.data.udiseNo || "N/A",
             place: res.data.place || "N/A",
             affiliationIndex: res.data.affiliationIndex || "N/A",
-            affiliationDetails: res.data.affiliationDetails || "N/A"
+            affiliationDetails: res.data.affiliationDetails || "N/A",
+            // --- FIX 3: 'genRegNo' ko state mein save kiya ---
+            genRegNo: res.data.genRegNo || "N/A" // Footer Sr. No
           });
 
-          // --- FIX 2: School ka Sr. No. form state mein set kiya ---
-          // (Hum maan rahe hain ki 'recognitionNumber' hi aapka 'regNo' hai)
+          // Form data state ko school details se update kiya
           setFormData(prev => ({
             ...prev,
-            regNo: res.data.recognitionNumber || ''
+            // Header Reg. No.
+            regNo: res.data.recognitionNumber || '', 
+            // --- FIX 3: Footer General Reg. No. ko form mein set kiya ---
+            genRegNo: res.data.genRegNo || '' 
           }));
 
         } else { throw new Error("No data"); }
@@ -257,7 +263,8 @@ const LeavingCertificateBuilderPage = () => {
             ...prev,
             name: user?.schoolName || "Error", name2: user?.schoolName || "Error",
             address: "Error", mobNo: "Error", email: "Error", govtReg: "Error",
-            udiseNo: "Error", place: "Error", affiliationIndex: "Error", affiliationDetails: "Error"
+            udiseNo: "Error", place: "Error", affiliationIndex: "Error", affiliationDetails: "Error",
+            genRegNo: "Error"
         }));
       }
     };
