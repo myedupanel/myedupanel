@@ -501,7 +501,8 @@ model TimetableAssignment {
 // --- FIX: Naya STAFF Model (No. 25) ---
 model Staff {
   id            Int       @id @default(autoincrement())
-  staffId       String    @unique // Form se aayega
+  // --- FIX: Redundant @unique hata diya ---
+  staffId       String    // Form se aayega
   contactNumber String?
   joiningDate   DateTime?
   leavingDate   DateTime?
