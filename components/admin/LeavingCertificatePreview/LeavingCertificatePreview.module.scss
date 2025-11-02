@@ -1,221 +1,155 @@
-/* src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss */
-
-/* --- FIX (PRINT BREAK) --- */
+/* --- Basic Setup --- */
 .certificatePaper {
-  width: 210mm;
-  padding: 10mm;
+  width: 210mm; /* A4 width */
+  min-height: 297mm; /* A4 height */
   margin: 20px auto;
-  font-family: 'Times New Roman', Times, serif;
-  /* --- FIX 1: Base font size kam kiya --- */
-  font-size: 12pt;
-  color: #000;
-  background: #fff;
-  border: 1px solid #ccc;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 15mm;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: white;
   box-sizing: border-box;
-  display: flex;
 }
 
 .outerBorder {
   border: 2px solid #000;
-  padding: 12mm 10mm;
+  padding: 10mm;
+  height: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  flex-grow: 1;
-}
-/* --- END FIX --- */
-
-
-/* --- Data Fill-in Styles --- */
-.fill {
-  font-weight: bold;
-  padding: 0 4px;
-  border-bottom: 1px dotted #333;
-}
-.fillBlank {
-  display: inline-block;
-  border-bottom: 1px dotted #333;
-  vertical-align: bottom;
-  padding: 0 4px;
 }
 
-/* --- Header Style (Font size adjust kiya) --- */
+/* --- Header Styles --- */
 .certHeader {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* --- FIX 2: Gaps kam kiye --- */
-  gap: 8px;
-  border-bottom: 1.5px solid #000;
-  padding-bottom: 8px;
-  margin-bottom: 10px;
+  text-align: center;
+  border-bottom: 2px solid #000;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
 
-  .logo { display: none; }
-  
-  .schoolInfoBlock {
-    flex-grow: 0;
-    text-align: center;
-    padding: 0;
-    .schoolName1 { font-size: 12pt; font-weight: bold; margin: 0; }
-    /* --- FIX 1: Font size kam kiya --- */
-    .schoolName2 { font-size: 18pt; font-weight: bold; margin: 2px 0; }
-    .schoolAddressCode { font-size: 10pt; margin: 0; line-height: 1.4; }
-  }
-  
-  .titleBlock { display: none; }
+.schoolInfoBlock {
+  margin-bottom: 10px;
+}
+
+.schoolName1 {
+  font-size: 22px;
+  font-weight: bold;
+}
+.schoolName2 {
+  font-size: 18px;
+}
+.schoolAddressCode {
+  font-size: 14px;
 }
 
 .titleRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
-  /* --- FIX 2: Gap kam kiya --- */
-  margin-top: 8px;
+  margin-top: 10px;
 
-  h2 { /* Title */
-    /* --- FIX 1: Font size kam kiya --- */
-    font-size: 15pt;
-    font-weight: bold;
+  h2 {
     margin: 0;
-    padding: 0 10px; 
-    text-align: center;
-    flex-grow: 1;
-    flex-shrink: 1;
-  }
-
-  .headerSrNo, .headerRegNo {
-    /* --- FIX 1: Font size kam kiya --- */
-    font-size: 11pt;
-    font-weight: bold;
-    white-space: nowrap;
-    flex-basis: auto;
-    flex-shrink: 0;
-  }
-
-  .headerSrNo {
-    text-align: left;
-    margin-right: 15px;
-  }
-  
-  .headerRegNo {
-    text-align: right;
-    margin-left: 15px;
+    font-size: 20px;
+    text-decoration: underline;
   }
 }
-/* --- END HEADER FIX --- */
 
+.headerSrNo, .headerRegNo {
+  font-size: 14px;
+  font-weight: bold;
+}
 
-/* --- Student Info Table (Main Fixes) --- */
+/* --- Student Info Table Styles --- */
 .studentInfoTable {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
-  /* Font size ab base (12pt) se inherit karega */
-  
-  tbody tr td {
-    /* --- FIX 3: SABSE IMPORTANT (Vertical Padding kam ki) --- */
-    padding: 7px 5px;
-    vertical-align: top;
-    /* --- FIX 4: Line height thoda kam kiya --- */
-    line-height: 1.4;
-    border-bottom: 1px solid #eee;
-  }
-  tbody tr td:nth-child(1) { width: 35px; text-align: center; font-weight: normal; }
-  tbody tr td:nth-child(2) { width: 35%; font-weight: normal; }
-  
-  tbody tr td:nth-child(3) {
-    width: 60%;
-    font-weight: bold;
-    display: flex;
-    flex-wrap: wrap; 
-    align-items: center;
-    gap: 5px 20px;
-  }
-  
-  /* --- YEH HAI AAPKA FIX --- */
-  /* Row numbers ko update kiya (kyunki row 1 delete ho gayi thi) */
-  /* Yeh un fields ke liye hai jo wrap hone chahiye (e.g., long text) */
-  tbody tr:nth-child(8) td:nth-child(3),  /* 8. DOB (Words) */
-  tbody tr:nth-child(9) td:nth-child(3),  /* 9. Previous School */
-  tbody tr:nth-child(14) td:nth-child(3), /* 14. Reason */
-  tbody tr:nth-child(15) td:nth-child(3)  /* 15. Remarks */
-  {
-     display: block;
-  }
-  /* Row 6 (Birth place) ko yahan se hata diya hai, 
-     taaki woh aapke TSX file ke inline styles (2x2 grid) ko use kar sake. */
-}
-/* --- FIX ENDS HERE --- */
+  font-size: 14px;
+  margin-bottom: 20px;
 
+  td {
+    border: 1px solid #000;
+    padding: 8px;
+    vertical-align: top;
+  }
+
+  /* Column widths */
+  td:nth-child(1) { width: 5%; text-align: center; }
+  td:nth-child(2) { width: 35%; }
+  td:nth-child(3) { width: 60%; }
+}
+
+/* --- Helper Component Styles (Fill/SubField) --- */
+.fill {
+  font-weight: bold;
+  padding: 0 5px;
+  border-bottom: 1px dotted #000;
+}
+
+.fillBlank {
+  display: inline-block;
+  border-bottom: 1px dotted #000;
+}
 
 .subField {
   font-weight: normal;
-  white-space: nowrap;
-  .fill, .fillBlank {
-    font-weight: bold;
-  }
+  display: inline-block; // Important for alignment
 }
 
-/* --- Certification Text --- */
+/* * --- LAYOUT FIXES ---
+ */
+
+/* FIX for Row 4, 10, 11, 13: Ek line mein align karne ke liye */
+.inlineFields {
+  display: flex;
+  flex-wrap: wrap; // Agar line choti pade toh wrap karega
+  gap: 15px; // Items ke beech mein space
+  align-items: center;
+}
+
+/* FIX for Row 6: 2x2 Grid layout ke liye */
+.gridWrapper {
+  display: flex;
+  flex-direction: column; // Do rows ko upar-neeche rakhega
+  gap: 8px; // Dono rows ke beech mein gap
+}
+
+.gridRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px; // "Place" aur "Taluka" ke beech mein gap
+}
+
+
+/* --- Certification Text & Footer --- */
 .certText {
-  /* --- FIX 1 & 2: Font size aur margin kam kiya --- */
-  font-size: 11pt;
-  text-align: left;
-  margin-top: 15px;
-  line-height: 1.6;
+  font-size: 14px;
+  text-align: center;
+  margin-top: auto; /* Footer ko niche push karne ke liye */
+  padding-top: 20px;
 }
 
-/* --- Footer Layout (Spacing kam ki) --- */
 .certFooterWrapper {
-  margin-top: auto; /* Hamesha neeche */
-  /* --- FIX 2: Gap kam kiya --- */
-  padding-top: 20px;
-  font-size: 12pt;
-  font-weight: bold;
-  background: #fff !important;
-  color: #000 !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: 40px;
+  font-size: 14px;
 }
 
 .datePlace {
-  text-align: left;
-  /* --- FIX 2: Gap kam kiya --- */
-  margin-bottom: 30px;
+  // Yeh style aapke .tsx file mein use hua hai
+  // Aap isme specific styles add kar sakte hain, jaise:
+  font-weight: bold;
 }
 
 .signatures {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  gap: 40px;
+  text-align: center;
 }
 
 .sigBox {
-  text-align: center;
-  width: 30%;
-  /* --- FIX 2: Gap kam kiya --- */
-  padding-top: 30px;
-  border-top: 1px solid #000; /* Signature line */
-}
-/* --- END FOOTER --- */
-
-
-/* --- Print Fix (Final) --- */
-@media print {
-  .certificatePaper {
-    box-shadow: none;
-    border: none;
-    margin: 0;
-    padding: 0;
-    height: 100%;
-  }
-  .outerBorder {
-    border: 1px solid #000;
-    padding: 10mm 8mm;
-    min-height: 0;
-    height: 100%;
-  }
-  .studentInfoTable tbody tr td {
-    border-bottom: none;
-  }
+  border-top: 1px dotted #000;
+  padding-top: 5px;
+  min-width: 150px;
 }

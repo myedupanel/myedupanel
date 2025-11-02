@@ -100,7 +100,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* Header */}
+        {/* Header (No Change) */}
         <header className={styles.certHeader}>
           <div className={styles.schoolInfoBlock}>
             <div className={styles.schoolName1}>{schoolDetails.name}</div>
@@ -112,13 +112,12 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             </div>
           </div>
           <div className={styles.titleRow}>
-            {/* --- FIX 1: 'Sr. No.' ko School Profile ke 'genRegNo' se link kiya --- */}
+             {/* --- FIX 1: Yeh 'formData.genRegNo' use kar raha hai (Aapke code ke according) --- */}
             <div className={styles.headerSrNo}>
               Sr. No: {fill(formData.genRegNo, '100px')}
             </div>
             <h2>LEAVING CERTIFICATE</h2>
             <div className={styles.headerRegNo}>
-              {/* Yeh SCHOOL ka Reg. No. hai */}
               Reg. No: {fill(formData.regNo, '100px')}
             </div>
           </div>
@@ -143,14 +142,16 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>{fill(formData.motherName, '300px')}</td>
             </tr>
 
-            {/* --- FIX 2: Row 4 - Label blank, content ek line mein --- */}
+            {/* --- FIX 2: Row 4 - Ek line mein 3 items --- */}
             <tr>
               <td>4</td>
-              <td></td> {/* Label blank, jaisa aapne kaha */}
+              <td></td> {/* Label blank */}
               <td>
-                <SubField label="Nationality" value={formData.nationality} minWidth="80px" />
-                <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
-                <SubField label="Religion" value={formData.religion} minWidth="80px" />
+                <div className={styles.inlineFields}>
+                  <SubField label="Nationality" value={formData.nationality} minWidth="80px" />
+                  <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
+                  <SubField label="Religion" value={formData.religion} minWidth="80px" />
+                </div>
               </td>
             </tr>
             {/* --- END FIX --- */}
@@ -161,7 +162,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>{fill(formData.caste, '150px')}</td>
             </tr>
 
-            {/* --- FIX 3: Row 6 - 2x2 Grid (SCSS ke saath) --- */}
+            {/* --- FIX 3: Row 6 - 2x2 Grid --- */}
             <tr>
               <td>6</td>
               <td>Birth place(State/City)</td>
@@ -196,13 +197,15 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>{fill(formData.previousSchool, '200px')}</td>
             </tr>
             
-            {/* --- FIX 4: Row 10 - Ek hi line mein (SCSS handle karega) --- */}
+            {/* --- FIX 4: Row 10 - Ek hi line mein --- */}
             <tr>
               <td>10</td>
               <td>Date of Admission</td>
               <td>
-                <SubField label="Date" value={dateOfAdmission} minWidth="100px" />
-                <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
+                 <div className={styles.inlineFields}>
+                  <SubField label="Date" value={dateOfAdmission} minWidth="100px" />
+                  <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
+                 </div>
               </td>
             </tr>
             {/* --- END FIX --- */}
@@ -211,8 +214,10 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>11</td>
               <td>Progress of Study</td>
               <td>
-                {fill(formData.progress, '100px')} 
-                <SubField label="Conduct" value={formData.conduct} minWidth="80px" />
+                 <div className={styles.inlineFields}>
+                    {fill(formData.progress, '100px')} 
+                    <SubField label="Conduct" value={formData.conduct} minWidth="80px" />
+                 </div>
               </td>
             </tr>
             <tr>
@@ -224,7 +229,9 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>13</td>
               <td>Standard in which studying and since when (in Words)</td>
               <td>
-                {fill(formData.standardLeaving, '80px')} / {fill(formData.sinceWhenLeaving, '100px')}
+                <div className={styles.inlineFields}>
+                  {fill(formData.standardLeaving, '80px')} / {fill(formData.sinceWhenLeaving, '100px')}
+                </div>
               </td>
             </tr>
             <tr>
@@ -240,10 +247,9 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           </tbody>
         </table>
 
-        {/* Certification Text */}
+        {/* Certification Text (No Change) */}
         <p className={styles.certText}>
           This is to certify that, Above mentioned information is as per 
-          {/* Yeh School Profile ke 'genRegNo' se auto-fill hoga */}
           School General Register No. {fill(formData.genRegNo, '80px')}
         </p>
 
