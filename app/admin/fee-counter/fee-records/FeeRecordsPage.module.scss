@@ -11,8 +11,8 @@ $white: #FFFFFF;
 $radius: 8px;
 
 .pageContainer {
-    /* SCALE INCREASE: Base padding badhaya, GAPS HATAANE KE LIYE SIDE PADDING RAKHA */
-    padding: 2.5rem 3rem; 
+    /* FULL WIDTH FIT: Side padding adjust kiya */
+    padding: 2.5rem 2rem; 
     background-color: $background-light;
     min-height: 100vh;
 }
@@ -137,8 +137,8 @@ $radius: 8px;
         }
         
         /* COLUMN WIDTHS OPTIMIZATION: Date space badhaya, Total must be 100% */
-        th:nth-child(1) { width: 15%; }  /* Receipt ID */
-        th:nth-child(2) { width: 17%; }  /* Student Name */
+        th:nth-child(1) { width: 14%; }  /* Receipt ID */
+        th:nth-child(2) { width: 18%; }  /* Student Name */
         th:nth-child(3) { width: 8%; }   /* Class */
         th:nth-child(4) { width: 12%; }  /* Amount Paid */
         th:nth-child(5) { width: 12%; }  /* Payment Mode */

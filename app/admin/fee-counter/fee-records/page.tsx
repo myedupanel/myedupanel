@@ -92,12 +92,12 @@ const FeeRecordsPage: React.FC = () => {
     params.append('limit', '15'); 
     
     // Student Name Search (Uses Debounced query)
+    // NOTE: Backend feeController.js handles search by student name/receipt ID via 'search' param
     if (debouncedSearchQuery) params.append('search', debouncedSearchQuery);
     if (filterMode !== 'All') params.append('paymentMode', filterMode);
     if (filterStatus !== 'All') params.append('status', filterStatus); 
     
     // ADD CLASS FILTER
-    // Note: Backend Controller handles the classId filtering (FeeController.getTransactions)
     if (filterClassId !== 'All') params.append('classId', filterClassId.toString());
 
     try {
@@ -182,6 +182,7 @@ const FeeRecordsPage: React.FC = () => {
       <header className={styles.header}>
         <h1 className={styles.title}>Fee Records & Transaction History 💰</h1>
         <div className={styles.actions}>
+          {/* EXPORT DATA BUTTON: Vercel logs/FE will check API route 16 */}
           <button className={styles.exportButton} onClick={() => alert('Exporting data via backend API route 16...')}>
             <FiDownload /> Export Data
           </button>
@@ -189,13 +190,14 @@ const FeeRecordsPage: React.FC = () => {
       </header>
 
       <div className={styles.controls}>
-        {/* Search Bar */}
+        {/* Search Bar (Uses Debounce) */}
         <div className={styles.searchBar}>
           <FiSearch className={styles.searchIcon} />
           <input 
             type="text"
             placeholder="Search by Student Name or Receipt ID..."
             value={searchQuery}
+            // Updates local state immediately, debounce handles API call delay
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
@@ -204,7 +206,6 @@ const FeeRecordsPage: React.FC = () => {
         <div className={styles.filters}>
           <select 
             value={filterClassId} 
-            // Send 0 or actual ID to backend
             onChange={(e) => {setFilterClassId(Number(e.target.value) || 'All'); setCurrentPage(1);}}
           >
             <option value="All">All Classes</option>
@@ -239,7 +240,7 @@ const FeeRecordsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* --- Transaction Table --- */}
+      {/* --- Transaction Table (Perfectly Fitted) --- */}
       <div className={styles.tableContainer}>
         <table className={styles.transactionsTable}>
           <thead>
@@ -263,6 +264,7 @@ const FeeRecordsPage: React.FC = () => {
                 return (
                   <tr key={t.id} className={styles.transactionRow}>
                     <td className={styles.receiptIdCol}>
+                      {/* View Receipt Trigger */}
                       <a href="#" onClick={(e) => {e.preventDefault(); handleViewReceipt(t.id); }}>
                           {t.receiptId}
                       </a>
@@ -321,7 +323,7 @@ const FeeRecordsPage: React.FC = () => {
         </div>
       )}
       
-      {/* --- MODAL FOR RECEIPT (The main goal) --- */}
+      {/* --- MODAL FOR RECEIPT (View Receipt opens this) --- */}
       <Modal 
         isOpen={isReceiptModalOpen} 
         onClose={handleCloseReceiptModal} 
@@ -330,6 +332,7 @@ const FeeRecordsPage: React.FC = () => {
         {isReceiptLoading ? (
             <div style={{ padding: '2rem', textAlign: 'center' }}>Loading receipt data...</div>
         ) : detailedReceiptData ? (
+            /* FeeReceipt now contains the working Print/Download logic */
             <FeeReceipt transaction={detailedReceiptData} />
         ) : (
              <div style={{ padding: '2rem', textAlign: 'center' }}>Receipt data could not be loaded.</div>
