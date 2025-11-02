@@ -1,5 +1,3 @@
-// backend/server.js
-
 // --- FIX: Only run dotenv in development ---
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config(); // Environment variables load karein (sirf local par)
@@ -50,12 +48,16 @@ const PORT = process.env.PORT || 5000;
 // --- 2. MONGOOSE MODEL IMPORTS HATA DIYE ---
 // ... (jaisa pehle tha) ...
 
-// Standard Middlewares
+// --- Standard Middlewares (ORDER IS FIXED) ---
 app.use(cors({
   origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE"]
 }));
-// --- END ---
+
+// --- YEH HAI FIX ---
+// JSON parser ko hamesha routes register karne se PEHLE rakhein
+app.use(express.json({ limit: '2mb' })); 
+// --- FIX ENDS HERE ---
 
 // --- Debugging Middleware (No Change) ---
 app.use((req, res, next) => {
@@ -83,9 +85,8 @@ app.get('/', (req, res) => {
   res.send('SchoolPro Backend is running (Prisma Version)!'); 
 });
 
+// Ab sabhi routes 'express.json()' ke baad register honge
 app.use('/api/school', schoolRoutes); 
-app.use(express.json({ limit: '2mb' })); 
-
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/students', studentRoutes);
