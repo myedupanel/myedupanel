@@ -243,33 +243,36 @@ $border-color: #ccc;
     pointer-events: none;
 }
 
-@media print {
-    /* FIX: Global body selector ko Vercel-safe banaya */
-    :global(body) > :global(*) {
-        visibility: hidden !important;
-        display: none !important;
-    }
+:global {
+    @media print {
+        /* Hide everything except the receipt wrapper */
+        body > * {
+            visibility: hidden !important;
+            display: none !important;
+        }
 
-    /* FIX: Receipt container ko zabardasti visible aur top-left par set kiya */
-    .receiptPageWrapper, .receiptContainer {
-        visibility: visible !important;
-        display: block !important;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        box-shadow: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    
-    .receiptContainer {
-        border: none !important;
-        padding: 15mm !important; /* Proper A4 margins */
-    }
+        /* Make the specific receipt content visible and styled for A4 */
+        .receiptPageWrapper, .receiptContainer {
+            visibility: visible !important;
+            display: block !important;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 11pt !important; /* Printing font size adjust kiya */
+        }
+        
+        .receiptContainer {
+            border: none !important;
+            padding: 15mm !important; /* Proper A4 margins */
+        }
 
-    /* Hide the print/download buttons */
-    .noPrint {
-        display: none !important;
+        /* Hide the print/download buttons */
+        .noPrint {
+            display: none !important;
+        }
     }
 }
