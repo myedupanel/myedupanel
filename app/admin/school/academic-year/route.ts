@@ -1,7 +1,10 @@
 // File: app/api/school/academic-year/route.ts
 
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+// --- YEH RAHA BADLAAV 1 ---
+import { Prisma, PrismaClient } from "@prisma/client";
+// -------------------------
+
 // Aapka session/auth helper yahaan import karein (e.g., getAuthSession)
 // import { getAuthSession } from "@/lib/auth"; 
 
@@ -32,7 +35,10 @@ export async function POST(req: Request) {
     }
 
     // --- Saara logic ab ek Transaction ke andar chalega ---
-    const newAcademicYear = await prisma.$transaction(async (tx) => {
+    
+    // --- YEH RAHA BADLAAV 2 ---
+    const newAcademicYear = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    // -------------------------
       
       // --- AAPKA BUSINESS RULE 1: 300-Din ka Limit ---
       const latestYear = await tx.academicYear.findFirst({
@@ -106,7 +112,7 @@ export async function POST(req: Request) {
           const templatesToCreate = oldFeeTemplates.map(t => ({
             name: t.name,
             description: t.description,
-            // --- YEH RAHA FIX ---
+            // --- YEH RAHA FIX (Pichla wala) ---
             items: t.items as any, // Cast to 'any' to bypass TS/Prisma type mismatch
             // --- FIX ENDS ---
             totalAmount: t.totalAmount,
