@@ -372,4 +372,4 @@ router.get('/exam-structure', [authMiddleware], async (req, res) => {
     }
 });
 
-module.exports = router; // Ensure this is the last line
+module.exports = router; // Ensure this is the last line   
