@@ -148,12 +148,9 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {/* FIX 2: Item 4 को एक ही लाइन में align किया */}
             <tr>
               <td>4</td>
-              <td></td> 
+              <td><SubField label="Nationality" value={formData.nationality} minWidth="80px" /><td><SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" /></td><td><SubField label="Religion" value={formData.religion} minWidth="80px" /></td></td> 
               <td style={{ display: 'flex', gap: '20px' }}>
-                <SubField label="Nationality" value={formData.nationality} minWidth="80px" />
-                <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
-                <SubField label="Religion" value={formData.religion} minWidth="80px" />
-              </td>
+                 </td>
             </tr>
 
             <tr>
@@ -169,12 +166,10 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>
                 <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '5px' }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px 20px' }}>
-                    <SubField label="Place" value={formData.birthPlace} minWidth="80px" />
-                    <SubField label="Taluka" value={formData.birthTaluka} minWidth="80px" />
+                    <SubField label="Place" value={formData.birthPlace} minWidth="80px" /><div> <SubField label="Taluka" value={formData.birthTaluka} minWidth="80px" /></div>   
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px 20px' }}>
-                    <SubField label="Dist" value={formData.birthDistrict} minWidth="80px" />
-                    <SubField label="State" value={formData.birthState} minWidth="80px" />
+                    <SubField label="Dist" value={formData.birthDistrict} minWidth="80px" /><div><SubField label="State" value={formData.birthState} minWidth="80px" /></div>
                   </div>
                 </div>
               </td>
@@ -201,8 +196,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>10</td>
               <td>Date of Admission</td>
               <td style={{ display: 'flex', gap: '20px' }}>
-                <SubField label="Date" value={dateOfAdmission} minWidth="100px" />
-                <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
+                <SubField label="Date" value={dateOfAdmission} minWidth="100px" /><td><SubField label="Std" value={formData.standardAdmitted} minWidth="50px" /></td>   
               </td>
             </tr>
 
