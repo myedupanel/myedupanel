@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { useRouter } from 'next/navigation'; // <-- 🚨 IMPORT ADDED
+import { useRouter } from 'next/navigation'; // ✅ IMPORT ADDED
 import styles from './FeeReceipt.module.scss';
 import { FiPrinter, FiDownload } from 'react-icons/fi';
 import jsPDF from 'jspdf';
@@ -58,7 +58,7 @@ export type ReceiptData = Transaction;
 
 interface FeeReceiptProps {
     transaction: Transaction | null;
-    isPreviewPage?: boolean;
+    isPreviewPage?: boolean; // ✅ ADDED THIS IN PREVIOUS STEP
 }
 
 // --- Helper Functions (No Change) ---
@@ -80,13 +80,14 @@ const formatDate = (dateString: string | undefined): string => {
 
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
-    const router = useRouter(); // <-- 🚨 HOOK INITIALIZED
+    const router = useRouter(); // ✅ HOOK INITIALIZED
 
     // --- FIX 1: handlePrint function ko redirect se badla ---
     const handlePrint = () => {
         if (!transaction?.id) return;
         
-        const previewUrl = `/admin/receipt/preview/[id]${transaction.id}`;
+        // 🚨 FIX: transaction.id ko [id] folder ke dynamic segment mein daala
+        const previewUrl = `/admin/receipt/preview/${transaction.id}`;
         
         // Modal close karne ke liye koi prop use ho sakta hai,
         // Lekin abhi hum seedha new tab mein kholenge (jo print karega)
