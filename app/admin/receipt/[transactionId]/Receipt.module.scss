@@ -245,10 +245,9 @@ $border-color: #ccc;
 
 @media print {
     /* **CRITICAL**: Yahan se saare global selectors hata diye gaye hain.
-       Ab sirf local receipt classes ko visible karenge. */
+       Ab hum inhein globally define karenge. */
        
     .receiptPageWrapper, .receiptContainer {
-        /* Yeh classes ab globally define kiye gaye body reset ke upar visible hongi */
         visibility: visible !important;
         display: block !important;
         position: absolute;
