@@ -1,3 +1,4 @@
+// app/admin/fee-counter/page.tsx
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
 import { io } from 'socket.io-client'; 
@@ -6,7 +7,8 @@ import styles from './FeeDashboard.module.scss';
 import StatCard from '@/components/admin/StatCard/StatCard';
 import FeeTabs from '@/components/admin/FeeTabs/FeeTabs';
 import { MdSchedule, MdCreditCard, MdAccountBalanceWallet, MdSchool, MdChevronRight, MdRssFeed } from 'react-icons/md'; 
-// FIX: useSession import हटा दिया गया
+
+// FIX: useSession Import हटा दिया गया
 
 // --- TYPE DEFINITIONS (No Change) ---
 interface DashboardData {
@@ -62,6 +64,7 @@ const FeeDashboardPage = () => {
     // FIX 2: Session Logic हटा दिया गया
     const fetchDashboardOverview = useCallback(async () => {
         try {
+            // FIX: API call से sessionId param हटा दिया गया
             const dashboardRes = await api.get<DashboardData>('/fees/dashboard-overview');
             setDashboardData(dashboardRes.data);
         } catch (err) {
@@ -74,6 +77,7 @@ const FeeDashboardPage = () => {
     // FIX 3: Session Logic हटा दिया गया
     const fetchTemplates = useCallback(async () => {
         try {
+            // FIX: API call से sessionId param हटा दिया गया
             const templatesRes = await api.get<Template[]>('/fees/templates');
             const templatesData = templatesRes.data;
             setTemplates(templatesData);
@@ -122,7 +126,6 @@ const FeeDashboardPage = () => {
             setError('');
 
             try {
-                // डेटा फ़ेच करने और Timeout के बीच रेस लगाएं
                 await Promise.race([dataFetchPromise, timeoutPromise]);
                 
             } catch (err: any) {
@@ -130,9 +133,9 @@ const FeeDashboardPage = () => {
                 
                 if (err.message.includes("Timeout")) {
                     setError('Dashboard timed out (2s). Backend is slow/down.');
-                } else {
-                    // यदि कोई 400 या 500 error आता है
-                    setError('Error loading initial data. Check backend logs.');
+                } else if (err.response && err.response.status === 400) {
+                     // 400 error के लिए स्पेसिफिक मैसेज
+                    setError('Error: API requires Session ID (Time Travel logic) which is currently reversed.');
                 }
                 
                 setDashboardData(null); 
@@ -153,7 +156,7 @@ const FeeDashboardPage = () => {
         }
     }, [selectedTemplate, fetchTemplateDetails]); 
 
-    // --- YEH HAI REAL-TIME useEffect (UPDATED) ---
+    // --- YEH HAI REAL-TIME useEffect (No Change) ---
     useEffect(() => {
         const BACKEND_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "https://myedupanel.onrender.com";
         const socket = io(BACKEND_URL);
@@ -189,7 +192,7 @@ const FeeDashboardPage = () => {
     // --- AAPKA BAAKI KA CODE ---
 
     if (loading) return <div className={styles.loadingState}>Loading Fee Dashboard...</div>;
-    // Error check अब ज्यादा सख्त है
+    
     if (error || !dashboardData) return <div className={styles.errorState}>{error || "Failed to load dashboard data. Please check logs."}</div>;
 
     const getStudentProgress = () => {
