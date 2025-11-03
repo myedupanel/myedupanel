@@ -5,9 +5,10 @@ import api from '@/backend/utils/api';
 import styles from './FeeDashboard.module.scss';
 import StatCard from '@/components/admin/StatCard/StatCard';
 import FeeTabs from '@/components/admin/FeeTabs/FeeTabs';
-import { MdSchedule, MdCreditCard, MdAccountBalanceWallet, MdSchool, MdChevronRight, MdRssFeed } from 'react-icons/md'; // MdRssFeed add kiya
+import { MdSchedule, MdCreditCard, MdAccountBalanceWallet, MdSchool, MdChevronRight, MdRssFeed } from 'react-icons/md'; 
+// FIX: useSession import हटा दिया गया
 
-// --- TYPE DEFINITIONS ---
+// --- TYPE DEFINITIONS (No Change) ---
 interface DashboardData {
     lateCollection: { amount: number; studentCount: number };
     onlinePayment: { transactionCount: number; totalStudents: number };
@@ -44,6 +45,9 @@ const formatCurrency = (amount: number) => {
 };
 
 const FeeDashboardPage = () => {
+    // FIX 1: useSession hook कॉल हटा दिया गया
+    // const { viewingSession } = useSession(); 
+    
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [templates, setTemplates] = useState<Template[]>([]);
     const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -52,38 +56,41 @@ const FeeDashboardPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     
-    // --- NAYA STATE ---
     const [feed, setFeed] = useState<FeedItem[]>([]);
-    // ---
-
-    // --- YEH HAIN NAYE REFACTORED FUNCTIONS ---
     
     // 1. Dashboard Stat Cards ke liye data fetch karna
+    // FIX 2: Session Logic हटा दिया गया
     const fetchDashboardOverview = useCallback(async () => {
         try {
             const dashboardRes = await api.get<DashboardData>('/fees/dashboard-overview');
             setDashboardData(dashboardRes.data);
         } catch (err) {
             console.error("Failed to fetch dashboard overview:", err);
-            setError('Failed to load dashboard data. Please try again.');
+            throw new Error('API_FETCH_DASHBOARD_FAILED'); 
         }
     }, []); 
 
     // 2. Fee Templates ki list fetch karna
+    // FIX 3: Session Logic हटा दिया गया
     const fetchTemplates = useCallback(async () => {
         try {
             const templatesRes = await api.get<Template[]>('/fees/templates');
-            setTemplates(templatesRes.data);
+            const templatesData = templatesRes.data;
+            setTemplates(templatesData);
             
-            if (!selectedTemplate && templatesRes.data && templatesRes.data.length > 0) {
-                setSelectedTemplate(templatesRes.data[0]);
+            if (!selectedTemplate && templatesData && templatesData.length > 0) {
+                setSelectedTemplate(templatesData[0]);
+            } else if (selectedTemplate && !templatesData.some(t => t.id === selectedTemplate.id)) {
+                 setSelectedTemplate(templatesData[0] || null);
             }
         } catch (err) {
             console.error("Failed to fetch templates:", err);
+             throw new Error('API_FETCH_TEMPLATES_FAILED'); 
         }
     }, [selectedTemplate]); 
 
     // 3. Selected Template ki details fetch karna
+    // FIX 4: Session Logic हटा दिया गया
     const fetchTemplateDetails = useCallback(async (templateId: string) => {
         setDetailsLoading(true);
         setTemplateDetails(null);
@@ -98,29 +105,57 @@ const FeeDashboardPage = () => {
     }, []); 
 
 
-    // --- PEHLA useEffect (Sirf Page Load par run hoga) ---
+    // --- PEHLA useEffect (Timeout Logic) ---
     useEffect(() => {
-        const fetchInitialData = async () => {
+        const dataFetchPromise = Promise.all([
+            fetchDashboardOverview(),
+            fetchTemplates()
+        ]);
+        
+        // 💡 2-सेकंड का Timeout Promise (बरकरार)
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error("Fee Dashboard Load Timeout")), 2000)
+        );
+
+        const loadInitialData = async () => {
             setLoading(true);
-            await Promise.all([
-                fetchDashboardOverview(),
-                fetchTemplates()
-            ]);
-            setLoading(false);
+            setError('');
+
+            try {
+                // डेटा फ़ेच करने और Timeout के बीच रेस लगाएं
+                await Promise.race([dataFetchPromise, timeoutPromise]);
+                
+            } catch (err: any) {
+                console.error("Fee Dashboard Load Failed or Timed Out:", err.message);
+                
+                if (err.message.includes("Timeout")) {
+                    setError('Dashboard timed out (2s). Backend is slow/down.');
+                } else {
+                    // यदि कोई 400 या 500 error आता है
+                    setError('Error loading initial data. Check backend logs.');
+                }
+                
+                setDashboardData(null); 
+                setTemplates([]);
+            } finally {
+                setLoading(false);
+            }
         };
-        fetchInitialData();
+        
+        loadInitialData();
+
     }, [fetchDashboardOverview, fetchTemplates]); 
 
     // --- DOOSRA useEffect (Jab bhi selectedTemplate badlega, run hoga) ---
     useEffect(() => {
-        if (selectedTemplate) {
+        if (selectedTemplate && selectedTemplate.id) { 
             fetchTemplateDetails(selectedTemplate.id);
         }
     }, [selectedTemplate, fetchTemplateDetails]); 
 
     // --- YEH HAI REAL-TIME useEffect (UPDATED) ---
     useEffect(() => {
-        const BACKEND_URL = "https://myedupanel.onrender.com";
+        const BACKEND_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "https://myedupanel.onrender.com";
         const socket = io(BACKEND_URL);
 
         socket.on('connect', () => {
@@ -136,15 +171,12 @@ const FeeDashboardPage = () => {
             }
         });
 
-        // --- YEH NAYA LISTENER HAI ---
         socket.on('new_transaction_feed', (newFeedItem: FeedItem) => {
             console.log('Received new transaction feed:', newFeedItem);
-            // Nayi item ko list ke upar add karein, aur list ko 5 items tak limit karein
             setFeed(prevFeed => 
                 [newFeedItem, ...prevFeed].slice(0, 5) 
             );
         });
-        // --- NAYA LISTENER END ---
 
         return () => {
             socket.disconnect();
@@ -154,10 +186,11 @@ const FeeDashboardPage = () => {
     }, [fetchDashboardOverview, fetchTemplates, fetchTemplateDetails, selectedTemplate]);
 
 
-    // --- AAPKA BAAKI KA CODE (NO CHANGE) ---
+    // --- AAPKA BAAKI KA CODE ---
 
     if (loading) return <div className={styles.loadingState}>Loading Fee Dashboard...</div>;
-    if (error) return <div className={styles.errorState}>{error}</div>;
+    // Error check अब ज्यादा सख्त है
+    if (error || !dashboardData) return <div className={styles.errorState}>{error || "Failed to load dashboard data. Please check logs."}</div>;
 
     const getStudentProgress = () => {
         if (!templateDetails || !templateDetails.studentCount) return 0;
@@ -175,7 +208,6 @@ const FeeDashboardPage = () => {
             
             {dashboardData && (
                 <div className={styles.statsGrid}>
-                    {/* ... (StatCard components - no change) ... */}
                     <StatCard
                         icon={<MdSchedule />}
                         title="Late Collection"
@@ -263,8 +295,6 @@ const FeeDashboardPage = () => {
                 </div>
 
                 {/* --- YEH NAYA CARD HAI --- */}
-                {/* Note: Yeh card aapke grid mein add hoga. */}
-                {/* Aapko .mainContentGrid ke CSS ko 3 column layout ke liye adjust karna pad sakta hai */}
                 <div className={styles.recentActivityCard}>
                      <div className={styles.cardHeader}>
                         <h3><MdRssFeed style={{ marginRight: '8px', verticalAlign: 'bottom' }} /> Live Feed</h3>
