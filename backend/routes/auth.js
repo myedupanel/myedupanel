@@ -370,4 +370,4 @@ router.post('/resend-otp', async (req, res) => {
     } catch (error) { console.error('Resend OTP Error:', error.message); res.status(500).send('Server Error while resending OTP.'); }
 });
 
-module.exports = router; 
+module.exports = router;
