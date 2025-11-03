@@ -1,5 +1,4 @@
 import React, { useRef } from 'react';
-import { useRouter } from 'next/navigation'; // ✅ IMPORT ADDED
 import styles from './FeeReceipt.module.scss';
 import { FiPrinter, FiDownload } from 'react-icons/fi';
 import jsPDF from 'jspdf';
@@ -58,7 +57,6 @@ export type ReceiptData = Transaction;
 
 interface FeeReceiptProps {
     transaction: Transaction | null;
-    isPreviewPage?: boolean; // ✅ ADDED THIS IN PREVIOUS STEP
 }
 
 // --- Helper Functions (No Change) ---
@@ -80,24 +78,42 @@ const formatDate = (dateString: string | undefined): string => {
 
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
-    const router = useRouter(); // ✅ HOOK INITIALIZED
 
-    // --- FIX 1: handlePrint function ko redirect se badla ---
+    // --- FIX: 'Print' Function ko 'onload' event ke saath update kiya ---
     const handlePrint = () => {
-        if (!transaction?.id) return;
+        const printContent = componentRef.current;
+        if (!printContent) return;
+
+        // 1. Styles ko copy karein (No Change)
+        const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+                           .map(el => el.outerHTML)
+                           .join('');
+
+        // 2. Nayi window kholein (No Change)
+        const printWindow = window.open('', '', 'height=800,width=800');
         
-        // 🚨 FIX: transaction.id ko [id] folder ke dynamic segment mein daala
-        const previewUrl = `/admin/receipt/preview/${transaction.id}`;
-        
-        // Modal close karne ke liye koi prop use ho sakta hai,
-        // Lekin abhi hum seedha new tab mein kholenge (jo print karega)
-        window.open(previewUrl, '_blank'); 
-        
-        // Agar aap same tab mein redirect karna chahte hain, toh yeh use karein:
-        // router.push(previewUrl);
+        if (printWindow) {
+            // 3. Poora HTML content likhein (No Change)
+            printWindow.document.write('<html><head><title>Print Receipt</title>');
+            printWindow.document.write(styles); 
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(printContent.innerHTML); 
+            printWindow.document.write('</body></html>');
+
+            // --- YEH HAI ASLI FIX ---
+            // Hum document.fonts.ready ke bajaye window.onload ka istemaal karenge
+            // Taaki hum print tabhi karein jab sab kuch render ho chuka ho.
+            printWindow.onload = () => {
+                printWindow.focus(); // Nayi window par focus karein
+                printWindow.print(); // Ab print dialog kholein
+                printWindow.close(); // Print ke baad window ko band kar dein
+            };
+            // --- END FIX ---
+            
+            printWindow.document.close(); // 'onload' event ko trigger karne ke liye zaroori
+        }
     };
     // --- END PRINT FIX ---
-
 
     // --- Download PDF Function (No Change - Yeh pehle se theek tha) ---
     const handleDownloadPDF = () => {
@@ -107,7 +123,6 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             return;
         }
 
-        // is method mein class switching ki zaroorat nahi, sirf printing class lagate hain
         input.classList.add(styles.printing);
 
         html2canvas(input, {
@@ -185,7 +200,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
     return (
         <div className={styles.receiptContainer}>
-            {/* --- Buttons (Use 'no-print' class from globals.scss) --- */}
+            {/* --- Buttons (No Change) --- */}
             <div className={`${styles.actions} no-print`}>
                 <button onClick={handleDownloadPDF} className={styles.downloadButton}><FiDownload /> Download PDF</button>
                 <button onClick={handlePrint} className={styles.printButton}><FiPrinter /> Print Receipt</button>
@@ -193,9 +208,8 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             {/* --- END --- */}
 
 
-            {/* --- Receipt Content (ADD 'printable-area' class) --- */}
-            {/* global.scss mein is class par visibility set hogi */}
-            <div id="printable-receipt" className={`${styles.receiptContent} printable-area`} ref={componentRef}>
+            {/* --- Receipt Content (No Change in JSX) --- */}
+            <div id="printable-receipt" className={styles.receiptContent} ref={componentRef}>
                 {/* Header */}
                 <header className={styles.header}>
                     {schoolInfo.logo && (<img src={schoolInfo.logo} alt={`${schoolInfo.name || 'School'} Logo`} className={styles.logo} />)}
