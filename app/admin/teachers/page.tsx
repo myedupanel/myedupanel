@@ -1,13 +1,14 @@
 // app/admin/teachers/page.tsx
 "use client";
-import React, { useState, useEffect, useMemo, useCallback } from 'react'; // useCallback add karein
+import React, { useState, useEffect, useMemo, useCallback } from 'react'; 
 import styles from './TeachersPage.module.scss';
 import { useAuth } from '@/app/context/AuthContext';
+// FIX: Session Context (Teachers Global हैं, इसलिए इसे हटा दिया गया है)
 import TeachersTable from '@/components/admin/TeachersTable/TeachersTable';
 import Modal from '@/components/common/Modal/Modal';
 import AddTeacherForm from '@/components/admin/AddTeacherForm/AddTeacherForm';
 import { FiPlus, FiUpload, FiDownload } from 'react-icons/fi';
-import api from '@/backend/utils/api'; // axios ke bajaye api instance
+import api from '@/backend/utils/api'; 
 import { CSVLink } from 'react-csv';
 import * as XLSX from 'xlsx';
 import StudentFilters from '@/components/admin/StudentFilters/StudentFilters';
@@ -16,10 +17,8 @@ import { io } from "socket.io-client";
 import Link from 'next/link';
 import { MdGridView } from 'react-icons/md';
 
-// --- YEH HAI AAPKA FIX ---
-// Step 1: Define the data structure for a Teacher (Prisma se match kiya)
 interface TeacherData {
-  teacher_dbid: number; // FIX: 'id: string' ko 'teacher_dbid: number' se badla
+  teacher_dbid: number; 
   teacherId: string;
   name: string;
   subject: string;
@@ -28,9 +27,7 @@ interface TeacherData {
   schoolId?: string;
   schoolName?: string;
 }
-// --- FIX ENDS HERE ---
 
-// Form data ka type (AddTeacherForm se match hona chahiye)
 interface TeacherFormData {
   teacherId: string;
   name: string;
@@ -39,12 +36,10 @@ interface TeacherFormData {
   email: string;
 }
 
-// API se aaye data ko transform karne ke liye helper
-// (Maan rahe hain ki API seedha data bhej raha hai)
 const transformApiData = (apiTeacher: any): TeacherData => {
   return {
-    teacher_dbid: apiTeacher.teacher_dbid, // Yeh database ID hai
-    teacherId: apiTeacher.teacherId, // Yeh "T-101" jaisi ID hai
+    teacher_dbid: apiTeacher.teacher_dbid, 
+    teacherId: apiTeacher.teacherId, 
     name: apiTeacher.name,
     subject: apiTeacher.subject,
     contactNumber: apiTeacher.contactNumber,
@@ -61,61 +56,52 @@ const TeachersPage = () => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   
-  // FIX: State ko naye 'TeacherData' interface se update kiya
   const [teachers, setTeachers] = useState<TeacherData[]>([]);
   const [editingTeacher, setEditingTeacher] = useState<TeacherData | null>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  
+  // FIX 1: sortOrder state को हटा दिया गया
+  // const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-  // FIX: fetchTeachers ko naya 'transformApiData' use karne ke liye update kiya
   const fetchTeachers = useCallback(async () => {
-    if (!user?.schoolId) return; // 'user.id' ke bajaye 'user.schoolId' use karein
+    if (!user?.schoolId) return;
     try {
-      const res = await api.get('/teachers', {
-        // School ID ko params mein bhejna (agar backend expect kar raha hai)
-        // params: { schoolId: user.schoolId } 
-      });
-      // API se aaye data ko format karke state mein save karein
+      const res = await api.get('/teachers');
       const formattedData = res.data.map(transformApiData);
       setTeachers(formattedData);
     } catch (error) {
       console.error("Failed to fetch teachers", error);
     }
-  }, [user?.schoolId]); // Dependency ko 'user.schoolId' kiya
+  }, [user?.schoolId]);
 
   useEffect(() => {
     fetchTeachers();
   }, [fetchTeachers]); 
 
-  // FIX: Socket events ko naye 'teacher_dbid' ke liye update kiya
+  // Socket events (No Change)
   useEffect(() => {
     const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "https://myedupanel.onrender.com");
     
     socket.on('teacher_added', (newApiTeacher: any) => {
-      console.log("SOCKET: Naya teacher add hua!", newApiTeacher);
       if (newApiTeacher.schoolId !== user?.schoolId) return;
       const newTeacher = transformApiData(newApiTeacher);
       setTeachers((prevTeachers) => [...prevTeachers, newTeacher]);
     });
 
     socket.on('teacher_updated', (updatedApiTeacher: any) => {
-      console.log("SOCKET: Teacher update hua!", updatedApiTeacher);
       if (updatedApiTeacher.schoolId !== user?.schoolId) return;
       const updatedTeacher = transformApiData(updatedApiTeacher);
       setTeachers((prevTeachers) =>
         prevTeachers.map((t) =>
-          // 'id' ke bajaye 'teacher_dbid' se check karein
           t.teacher_dbid === updatedTeacher.teacher_dbid ? updatedTeacher : t
         )
       );
     });
 
     socket.on('teacher_deleted', (deletedInfo: { id: number, schoolId: string }) => {
-      console.log("SOCKET: Teacher delete hua!", deletedInfo.id);
       if (deletedInfo.schoolId !== user?.schoolId) return;
       setTeachers((prevTeachers) =>
-        // 'id' (string) ke bajaye 'deletedInfo.id' (number) se check karein
         prevTeachers.filter((t) => t.teacher_dbid !== deletedInfo.id)
       );
     });
@@ -123,7 +109,7 @@ const TeachersPage = () => {
     return () => {
       socket.disconnect();
     };
-  }, [user?.schoolId]); // Dependency 'user.schoolId' add kiya
+  }, [user?.schoolId]); 
 
 
   const closeModal = () => {
@@ -131,10 +117,7 @@ const TeachersPage = () => {
     setEditingTeacher(null);
   };
 
-  // FIX: handleFormSubmit ko naye 'teacher_dbid' ke liye update kiya
   const handleFormSubmit = async (data: TeacherFormData) => {
-    // School ID ko token se (backend par) lena behtar hai,
-    // lekin agar frontend se bhej rahe hain:
     const dataToSend = {
       ...data,
       schoolId: user?.schoolId, 
@@ -143,12 +126,10 @@ const TeachersPage = () => {
 
     try {
       if (editingTeacher) {
-        // FIX: 'editingTeacher.id' (undefined) ke bajaye 'editingTeacher.teacher_dbid' (number) bhejein
         await api.put(`/api/teachers/${editingTeacher.teacher_dbid}`, dataToSend);
       } else {
         await api.post('/api/teachers', dataToSend);
       }
-      // fetchTeachers(); // Socket handle kar lega
       closeModal();
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to save teacher.';
@@ -156,26 +137,22 @@ const TeachersPage = () => {
     }
   };
 
-  // FIX: 'handleEdit' ab 'TeacherData' type expect karega
   const handleEdit = (teacher: TeacherData) => {
     setEditingTeacher(teacher);
     setIsAddModalOpen(true);
   };
 
-  // FIX: 'handleDelete' ab 'number' ID expect karega
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this teacher?')) {
       try {
-        // FIX: API call ab 'number' ID ke saath jaayega
         await api.delete(`/api/teachers/${id}`);
-        // Socket delete ko handle kar lega
       } catch (error) {
         console.error('Failed to delete teacher', error);
       }
     }
   };
 
-  // Filter/Sort logic (Yeh pehle se sahi lag raha hai)
+  // FIX 2: Sorting logic और sortOrder dependency हटा दी गई
   const filteredAndSortedTeachers = useMemo(() => {
     if (!teachers) return [];
     return teachers
@@ -183,8 +160,8 @@ const TeachersPage = () => {
         t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
         (t.teacherId && t.teacherId.toLowerCase().includes(searchQuery.toLowerCase()))
       )
-      .sort((a, b) => sortOrder === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
-  }, [teachers, searchQuery, sortOrder]);
+      // Sorting logic हटा दिया गया
+  }, [teachers, searchQuery]); 
 
   // --- Import / Export Logic ---
   const csvHeaders = [
@@ -196,7 +173,6 @@ const TeachersPage = () => {
   ];
   
   const handleXlsxExport = () => {
-    // FIX: 'teacher_dbid' ko export se hataya
     const dataToExport = filteredAndSortedTeachers.map(({ teacher_dbid, schoolId, schoolName, ...rest }) => rest);
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
@@ -208,7 +184,7 @@ const TeachersPage = () => {
   const handleDataImport = async (importedData: any[]) => {
     const dataWithSchoolInfo = importedData.map(teacher => ({
       ...teacher,
-      schoolId: user?.schoolId, // 'user.id' ke bajaye 'user.schoolId'
+      schoolId: user?.schoolId, 
       schoolName: user?.schoolName
     }));
     try {
@@ -239,18 +215,16 @@ const TeachersPage = () => {
         </div>
       </header>
       
-      <StudentFilters onSearch={setSearchQuery} onSort={setSortOrder} />
+      {/* FIX 3: onSort prop हटा दिया गया */}
+      <StudentFilters onSearch={setSearchQuery} />
 
       <main>
-        {/* WARNING: Yeh component abhi error dega! */}
         <TeachersTable teachers={filteredAndSortedTeachers} onEdit={handleEdit} onDelete={handleDelete} />
       </main>
 
       <Modal isOpen={isAddModalOpen} onClose={closeModal} title={editingTeacher ? "Edit Teacher" : "Add a New Teacher"}>
-        {/* WARNING: Yeh component bhi error dega! */}
         <AddTeacherForm 
           onClose={closeModal} 
-          // FIX: 'onSubmit' ab 'TeacherFormData' type bhejega
           onSubmit={handleFormSubmit as (data: TeacherFormData) => void} 
           existingTeacher={editingTeacher}
         />
