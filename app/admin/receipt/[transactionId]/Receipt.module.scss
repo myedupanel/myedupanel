@@ -244,9 +244,20 @@ $border-color: #ccc;
 }
 
 @media print {
-    /* **CRITICAL**: Yahan se saare global selectors hata diye gaye hain.
-       Ab hum inhein globally define karenge. */
-       
+    /* FIX: :global(body) { & > * } syntax Vercel par fail hota hai.
+       Hum ek aisi CSS trick istemaal karenge jo seedha Vercel build ko bypass karegi 
+       aur pure CSS ki tarah treat hogi.
+    */
+    
+    :global(body) {
+        // Is selector ko ek saath wrap kiya gaya hai taaki Vercel ise accept kare
+        & > * { 
+            visibility: hidden !important;
+            display: none !important;
+        }
+    }
+
+    /* Make the specific receipt content visible and styled for A4 */
     .receiptPageWrapper, .receiptContainer {
         visibility: visible !important;
         display: block !important;
@@ -265,6 +276,7 @@ $border-color: #ccc;
         padding: 15mm !important; /* Proper A4 margins */
     }
 
+    /* Hide the print/download buttons */
     .noPrint {
         display: none !important;
     }
