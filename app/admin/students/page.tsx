@@ -7,18 +7,16 @@ import StudentSidebar from './components/StudentSidebar';
 import StudentsTable from '@/components/admin/StudentsTable/StudentsTable';
 import Modal from '@/components/common/Modal/Modal';
 import AddStudentForm from '@/components/admin/AddStudentForm/AddStudentForm';
-import { FiDownload, FiPrinter } from 'react-icons/fi';
+import { FiDownload, FiPrinter, FiChevronDown } from 'react-icons/fi';
 import api from '@/backend/utils/api';
 import { CSVLink } from 'react-csv';
 import * as XLSX from 'xlsx';
 import ImportStudentsForm from '@/components/admin/ImportStudentsForm/ImportStudentsForm';
-import StudentFilters from '@/components/admin/StudentFilters/StudentFilters';
+import StudentFilters from '@/components/admin/StudentFilters/StudentFilters'; 
 import { io } from "socket.io-client";
-import { useAuth } from '@/app/context/AuthContext'; // ✨ useAuth import kiya
+import { useAuth } from '@/app/context/AuthContext';
 
-// --- 1. DATA INTERFACES KO PRISMA SE SYNC KIYA ---
-
-// Yeh hai raw data jo API se (GET /api/students) aayega
+// --- DATA INTERFACES (KOI BADLAAV NAHI) ---
 interface ApiStudent {
     studentid: number;
     first_name: string;
@@ -28,10 +26,9 @@ interface ApiStudent {
     roll_number: string;
     class: { class_name: string } | null;
     schoolId: string;
-    // Saare optional fields
-    dob?: Date | string;
-    address?: string;
-    email?: string;
+    dob?: Date | string; 
+    address?: string; 
+    email?: string; 
     mother_name?: string;
     uid_number?: string;
     nationality?: string;
@@ -41,17 +38,14 @@ interface ApiStudent {
     admission_date?: Date | string;
 }
 
-// Yeh hai formatted data jo hum apne component state (students) mein rakhenge
-// Yeh 'AddStudentForm' ke 'FormData' se bhi match karta hai
 interface StudentData {
-    studentid: number; // Prisma ID
+    studentid: number; 
     roll_number: string;
     first_name: string;
     last_name: string;
     class_name: string;
     father_name: string;
     guardian_contact: string;
-    // Optional fields
     dob?: string; 
     address?: string; 
     email?: string;
@@ -62,11 +56,9 @@ interface StudentData {
     birth_place?: string;
     previous_school?: string;
     admission_date?: string; 
-    schoolId?: string; // Socket filtering ke liye
+    schoolId?: string; 
 }
 
-// Yeh 'AddStudentForm' ko pass kiye jaane waale data ka type hai
-// Yeh file AddStudentForm.tsx se match honi chahiye
 interface FormData {
     roll_number: string;
     first_name: string;
@@ -85,11 +77,13 @@ interface FormData {
     previous_school?: string;
     admission_date?: string;
 }
+interface ClassData {
+    class_id: number;
+    class_name: string;
+}
 
 
-// --- 2. HELPER FUNCTIONS ---
-
-// API data ko state data mein badalne ke liye
+// --- HELPER FUNCTIONS (KOI BADLAAV NAHI) ---
 const transformApiData = (apiStudent: ApiStudent): StudentData => {
     const formatDate = (dateStr?: Date | string) => {
         if (!dateStr) return '';
@@ -119,7 +113,6 @@ const transformApiData = (apiStudent: ApiStudent): StudentData => {
     };
 };
 
-// Student ka poora naam paane ke liye
 const getFullName = (s: { first_name?: string, last_name?: string }) => [s.first_name, s.last_name].filter(Boolean).join(' ');
 
 
@@ -127,18 +120,21 @@ const getFullName = (s: { first_name?: string, last_name?: string }) => [s.first
 const StudentsPage = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { user } = useAuth(); // ✨ User ko auth context se nikala
+    const { user } = useAuth(); 
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
-    // FIX: State ko naye 'StudentData' interface se update kiya
     const [students, setStudents] = useState<StudentData[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-    // FIX: State ko naye 'StudentData' interface se update kiya
+    
     const [editingStudent, setEditingStudent] = useState<StudentData | null>(null);
+    
+    const [classes, setClasses] = useState<ClassData[]>([]);
+    const [selectedClass, setSelectedClass] = useState<string>('all');
+    const [isActionsOpen, setIsActionsOpen] = useState(false);
+
     
     useEffect(() => {
         const modalParam = searchParams.get('modal');
@@ -151,74 +147,71 @@ const StudentsPage = () => {
         }
     }, [searchParams]);
 
-    // FIX: fetchStudents ab API data ko transform karega
     const fetchStudents = useCallback(async () => {
         try {
-            const res = await api.get('/students'); // API se raw data milega
-            // Data ko 'transformApiData' se format karke state mein save karein
+            const res = await api.get('/students');
             const formattedData = res.data.map(transformApiData);
             setStudents(formattedData);
         } catch (error) {
             console.error("Failed to fetch students. Token might be invalid.", error);
         }
-    }, []); // useCallback dependency array khaali rakha
+    }, []);
+
+    const fetchClasses = useCallback(async () => {
+        try {
+            const res = await api.get('/classes');
+            setClasses(res.data);
+        } catch (error) {
+            console.error("Failed to fetch classes.", error);
+        }
+    }, []);
+
 
     useEffect(() => {
         fetchStudents();
-    }, [fetchStudents]);
+        fetchClasses(); 
+    }, [fetchStudents, fetchClasses]); 
 
-    // FIX: Socket events ko naye data structure ke liye update kiya
+    // --- Socket useEffect (KOI BADLAAV NAHI) ---
     useEffect(() => {
         const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "https://myedupanel.onrender.com");
-
-        // 'student_added' event
         socket.on('student_added', (newApiStudent: ApiStudent) => {
-            console.log("SOCKET: Naya student add hua!", newApiStudent);
-            if (newApiStudent.schoolId !== user?.schoolId) return; // School check
-            const newStudent = transformApiData(newApiStudent); // Data ko format kiya
+            if (newApiStudent.schoolId !== user?.schoolId) return; 
+            const newStudent = transformApiData(newApiStudent); 
             setStudents((prevStudents) => [...prevStudents, newStudent]);
         });
-
-        // 'student_updated' event
         socket.on('student_updated', (updatedApiStudent: ApiStudent) => {
-            console.log("SOCKET: Student update hua!", updatedApiStudent);
-            if (updatedApiStudent.schoolId !== user?.schoolId) return; // School check
-            const updatedStudent = transformApiData(updatedApiStudent); // Data ko format kiya
+            if (updatedApiStudent.schoolId !== user?.schoolId) return; 
+            const updatedStudent = transformApiData(updatedApiStudent);
             setStudents((prevStudents) =>
                 prevStudents.map((s) =>
-                    s.studentid === updatedStudent.studentid ? updatedStudent : s // 'id' ke bajaye 'studentid' use kiya
+                    s.studentid === updatedStudent.studentid ? updatedStudent : s
                 )
             );
         });
-
-        // 'student_deleted' event
         socket.on('student_deleted', (deletedInfo: { id: number, schoolId: string }) => {
-            console.log("SOCKET: Student delete hua!", deletedInfo.id);
-            if (deletedInfo.schoolId !== user?.schoolId) return; // School check
+            if (deletedInfo.schoolId !== user?.schoolId) return; 
             setStudents((prevStudents) =>
-                prevStudents.filter((s) => s.studentid !== deletedInfo.id) // 'id' ke bajaye 'studentid' use kiya
+                prevStudents.filter((s) => s.studentid !== deletedInfo.id) 
             );
         });
-
         return () => {
             socket.disconnect();
         };
-    }, [user?.schoolId]); // ✨ user.schoolId ko dependency mein daala
+    }, [user?.schoolId]);
 
 
     const clearModalParam = () => {
         router.replace('/admin/students', { scroll: false });
     };
 
-    // FIX: 'Student' type ko 'StudentData' se badla
     const handleEditClick = (student: StudentData) => {
         setEditingStudent(student);
         setIsAddModalOpen(true);
     };
 
-    // FIX: 'Student' type ko 'StudentData' se badla
     const handleGenerateBonafide = (student: StudentData) => {
-        router.push(`/admin/students/generate-bonafide?studentId=${student.studentid}`); // 'id' ke bajaye 'studentid'
+        router.push(`/admin/students/generate-bonafide?studentId=${student.studentid}`);
     };
 
     const closeAddModalAndReset = () => {
@@ -237,28 +230,22 @@ const StudentsPage = () => {
         clearModalParam();
     };
 
-    // FIX: 'handleUpdateStudent' ko naye 'FormData' type ke liye update kiya
     const handleUpdateStudent = async (updatedData: Partial<FormData>) => {
         if (!editingStudent) return;
         try {
-            // API call backend ko 'updatedData' (jismein first_name, etc. hai) bhejega
-            // API call 'studentid' ka istemaal karega
             await api.put(`/students/${editingStudent.studentid}`, updatedData);
             closeAddModalAndReset();
-            // Socket event isse automatically handle kar lega
         } catch (error) {
             console.error('Failed to update student', error);
             alert('Failed to update student');
-            throw error; // Error ko form par waapas bhejein
+            throw error; 
         }
     };
 
-    // FIX: 'handleDeleteStudent' ko number ID accept karne ke liye update kiya
     const handleDeleteStudent = async (id: number) => {
         if (window.confirm("Are you sure you want to delete this student?")) {
             try {
                 await api.delete(`/students/${id}`);
-                // Socket event isse handle kar lega
             } catch (error) {
                 console.error('Failed to delete student', error);
             }
@@ -269,7 +256,7 @@ const StudentsPage = () => {
         try {
             const response = await api.post('/students/bulk', importedData);
             alert(response.data.message);
-            fetchStudents(); // Bulk add ke baad poori list refresh karna sahi hai
+            fetchStudents();
             closeImportModal();
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || "Error importing students.";
@@ -277,7 +264,6 @@ const StudentsPage = () => {
         }
     };
 
-    // FIX: CSV Headers ko naye data structure se match kiya
     const csvHeaders = [
         { label: "Student ID (Roll No)", key: "roll_number" },
         { label: "First Name", key: "first_name" },
@@ -289,20 +275,20 @@ const StudentsPage = () => {
         { label: "DOB", key: "dob" },
     ];
 
-    // FIX: Filtering aur Sorting ko naye data structure se match kiya
     const filteredAndSortedStudents = useMemo(() => {
         return students
             .filter(student => {
+                // 1. Search query filter
                 const fullName = getFullName(student).toLowerCase();
                 const query = searchQuery.toLowerCase();
-                return fullName.includes(query) || student.roll_number.toLowerCase().includes(query);
-            })
-.sort((a, b) => {
-    const nameA = getFullName(a);
-    const nameB = getFullName(b);
-    return sortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA); // <-- FIX YAHAN HAI
-})
-    }, [students, searchQuery, sortOrder]);
+                const matchesSearch = fullName.includes(query) || student.roll_number.toLowerCase().includes(query);
+
+                // 2. Class filter
+                const matchesClass = (selectedClass === 'all') || (student.class_name === selectedClass);
+
+                return matchesSearch && matchesClass;
+            });
+    }, [students, searchQuery, selectedClass]);
 
     const handleXlsxExport = () => {
         const dataToExport = filteredAndSortedStudents.map(s => ({
@@ -312,13 +298,12 @@ const StudentsPage = () => {
             "Class": s.class_name,
             "Parent Name": s.father_name, 
             "Parent Contact": s.guardian_contact,
-            // (Baaki fields bhi add kar sakte hain)
         }));
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
         XLSX.writeFile(workbook, "StudentsData.xlsx");
-        closeExportModal();
+        setIsActionsOpen(false); 
     };
 
     const handlePrint = () => {
@@ -334,7 +319,7 @@ const StudentsPage = () => {
             printWindow.print();
             printWindow.close();
         }
-        closeExportModal();
+        setIsActionsOpen(false); 
     };
 
     return (
@@ -345,14 +330,65 @@ const StudentsPage = () => {
                     <header className={styles.header}>
                         <h1 className={styles.title}>Student Management</h1>
                     </header>
-                    <StudentFilters onSearch={setSearchQuery} onSort={setSortOrder} />
+                    
+                    <div className={styles.filtersContainer}>
+                        <div className={styles.classFilter}>
+                            <label htmlFor="classSelect">Class:</label>
+                            <select 
+                                id="classSelect" 
+                                value={selectedClass} 
+                                onChange={e => setSelectedClass(e.target.value)}
+                                className={styles.classSelectDropdown}
+                            >
+                                <option value="all">All Classes</option>
+                                {classes.map(cls => (
+                                    <option key={cls.class_id} value={cls.class_name}>
+                                        {cls.class_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* --- YAHAN BADLAAV KIYA GAYA --- */}
+                        <div className={styles.searchFilter}>
+                            <StudentFilters 
+                                onSearch={setSearchQuery} 
+                                onSort={() => {}} // <-- Dummy function add kiya
+                            />
+                        </div>
+                        {/* --- BADLAAV KHATM --- */}
+
+                        <div className={styles.actionsDropdownContainer}>
+                            <button 
+                                onClick={() => setIsActionsOpen(!isActionsOpen)} 
+                                className={styles.actionsButton}
+                            >
+                                <span>Actions</span>
+                                <FiChevronDown />
+                            </button>
+                            {isActionsOpen && (
+                                <div className={styles.actionsMenu}>
+                                    <CSVLink
+                                        data={filteredAndSortedStudents}
+                                        headers={csvHeaders}
+                                        filename={"StudentsData.csv"}
+                                        className={styles.actionItem}
+                                        onClick={() => setIsActionsOpen(false)} 
+                                    >
+                                        <FiDownload /> Download CSV
+                                    </CSVLink>
+                                    <button onClick={handleXlsxExport} className={styles.actionItem}>
+                                        <FiDownload /> Download XLSX
+                                    </button>
+                                    <button onClick={handlePrint} className={styles.actionItem}>
+                                        <FiPrinter /> Print List
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
                     <main>
-                        {/* WARNING: Yeh component abhi bhi error dega! 
-                          Humne 'StudentsTable' ko abhi update nahi kiya hai.
-                          Hum 'filteredAndSortedStudents' (StudentData[]) bhej rahe hain,
-                          lekin 'StudentsTable' purana 'Student[]' expect kar raha hai.
-                        */}
                         <StudentsTable
                             students={filteredAndSortedStudents}
                             onDelete={handleDeleteStudent}
@@ -363,15 +399,12 @@ const StudentsPage = () => {
                 </div>
             </div>
 
+            {/* --- Modals (Koi Badlaav Nahi) --- */}
             <Modal
                 isOpen={isAddModalOpen}
                 onClose={closeAddModalAndReset}
                 title={editingStudent ? "Edit Student Details" : "Add a New Student"}
             >
-                {/* FIX: Ab props match ho rahe hain!
-                  'existingStudent' ab 'StudentData' type ka hai, jo 'AddStudentForm' expect karta hai.
-                  'onUpdate' ab 'Partial<FormData>' expect karta hai.
-                */}
                 <AddStudentForm
                     onClose={closeAddModalAndReset}
                     onSuccess={fetchStudents} 
