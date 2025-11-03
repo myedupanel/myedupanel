@@ -34,7 +34,7 @@ export async function POST(req: Request) {
 
     // --- Saara logic ab ek Transaction ke andar chalega ---
     // (tx ka type Prisma.TransactionClient bilkul sahi hai)
-    const newAcademicYear = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const newacademicYear = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       
       // --- AAPKA BUSINESS RULE 1: 300-Din ka Limit ---
       const latestYear = await tx.academicYear.findFirst({
@@ -127,7 +127,7 @@ export async function POST(req: Request) {
       return year;
     });
 
-    return NextResponse.json(newAcademicYear, { status: 201 }); 
+    return NextResponse.json(newacademicYear, { status: 201 }); 
 
   } catch (error: any) {
     console.error("[ACADEMIC_YEAR_POST]", error);

@@ -1,4 +1,4 @@
-// backend/routes/admin.js (UPDATED with AcademicYear Fix)
+
 
 const express = require('express');
 const router = express.Router();
@@ -46,7 +46,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
         } else {
             // Agar koi ID nahi aayi, toh 'isCurrent' wala saal dhoondho
             // ❌ OLD: const currentYear = await prisma.academicYear.findFirst({
-            const currentYear = await prisma.AcademicYear.findFirst({ // ✅ FIX: Use PascalCase 'AcademicYear'
+            const currentYear = await prisma.academicYear.findFirst({ // ✅ FIX: Use PascalCase
                 where: { schoolId: schoolId, isCurrent: true },
                 select: { id: true }
             });
@@ -57,7 +57,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             } else {
                 // Agar 'isCurrent' bhi nahi hai, toh sabse naya saal dhoondho
                 // ❌ OLD: const newestYear = await prisma.academicYear.findFirst({
-                const newestYear = await prisma.AcademicYear.findFirst({ // ✅ FIX: Use PascalCase 'AcademicYear'
+                const newestYear = await prisma.academicYear.findFirst({ // ✅ FIX: Use PascalCase 'academicYear'
                     where: { schoolId: schoolId },
                     orderBy: { createdAt: 'desc' },
                     select: { id: true }
@@ -412,7 +412,7 @@ const seedStandardClasses = async (req, res) => {
         
         // --- TODO: Is function ko bhi 'activeYearId' ki zaroorat hogi ---
         // Abhi ke liye, hum maan rahe hain ki classes seedha school se link hongi,
-        // Lekin hamaare naye schema ke hisaab se classes 'AcademicYear' se link honi chahiye.
+        // Lekin hamaare naye schema ke hisaab se classes 'academicYear' se link honi chahiye.
         // Yeh ek alag update hoga. Abhi ke liye, main purana logic hi chhod raha hoon.
 
         const standardClasses = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
@@ -452,7 +452,7 @@ const seedStandardClasses = async (req, res) => {
         */
 
         res.status(201).json({
-            message: `Successfully added 0 new standard classes. (Route needs update for AcademicYear)`,
+            message: `Successfully added 0 new standard classes. (Route needs update for academicYear)`,
             added: 0,
         });
 
