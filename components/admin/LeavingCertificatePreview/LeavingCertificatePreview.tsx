@@ -87,14 +87,11 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     }
     return <span className={styles.fillBlank} style={{ minWidth }}>&nbsp;</span>;
   }
-  // --- SubField (Updated to match Khandeshwar example font-weight) ---
   const SubField = ({ label, value, minWidth = '50px' }: { label: string, value: string | undefined | null, minWidth?: string }) => (
     <span className={styles.subField}>
-      {label}: <span className={styles.subFieldValue}>{fill(value, minWidth)}</span> {/* Naya span add kiya */}
+      {label}: {fill(value, minWidth)}
     </span>
   );
-  // --- End SubField Update ---
-
   const dateOfAdmission = formatDate(formData.dateOfAdmission);
   const dateOfLeaving = formatDate(formData.dateOfLeaving);
   const studentDobFormatted = formatDate(student?.dob);
@@ -144,24 +141,21 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>Mother's Name</td>
               <td>{fill(formData.motherName, '300px')}</td>
             </tr>
-            {/* --- FIX 1: Row 4: Increased gap for professional look --- */}
             <tr>
               <td>4</td>
               <td colSpan={2}> 
-                <div className={`${styles.inlineFields} ${styles.row4Spacing}`}> {/* Naya class added */}
+                <div className={styles.inlineFields}>
                   <SubField label="Nationality" value={formData.nationality} minWidth="80px" />
                   <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
                   <SubField label="Religion" value={formData.religion} minWidth="80px" />
                 </div>
               </td>
             </tr>
-            {/* --- END FIX 1 --- */}
             <tr>
               <td>5</td>
               <td>Caste</td>
               <td>{fill(formData.caste, '150px')}</td>
             </tr>
-            {/* --- FIX 2: Row 6: 2x2 Grid Layout for Birth Place --- */}
             <tr>
               <td>6</td>
               <td>Birth place(State/City)</td>
@@ -178,7 +172,6 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                 </div>
               </td>
             </tr>
-            {/* --- END FIX 2 --- */}
             <tr>
               <td>7</td>
               <td>Date of Birth (Figures)</td>
@@ -195,19 +188,20 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>{fill(formData.previousSchool, '200px')}</td>
             </tr>
             
-            {/* --- FIX 3: Row 10: Date of Admission - Increased gap --- */}
+            {/* --- YAHAN BADLAAV KIYA GAYA (ROW 10) --- */}
             <tr>
               <td>10</td>
+              {/* colSpan={2} use kiya taaki label aur values ek cell mein aa jayein */}
               <td colSpan={2}>
                  <div className={styles.inlineFields}>
                   {/* Label ko SubField ke bahar, inlineFields ke andar rakha */}
-                  <span style={{ marginRight: '30px' }}>Date of Admission</span> {/* GAp increase kiya */}
+                  <span style={{ marginRight: '15px' }}>Date of Admission</span>
                   <SubField label="Date" value={dateOfAdmission} minWidth="100px" />
                   <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
                  </div>
               </td>
             </tr>
-            {/* --- END FIX 3 --- */}
+            {/* --- BADLAAV KHATM --- */}
 
             <tr>
               <td>11</td>
