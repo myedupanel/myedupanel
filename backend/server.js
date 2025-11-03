@@ -1,5 +1,3 @@
-// server.js (UPDATED: CORS & PORT FIXES)
-
 // --- FIX: Only run dotenv in development ---
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config(); // Environment variables load karein (sirf local par)
@@ -8,17 +6,16 @@ if (process.env.NODE_ENV !== 'production') {
 // --- END FIX ---
 
 const express = require('express');
-const cors = require('cors'); // <-- Duplicate removed, only one here
+const cors = require('cors');
 const http = require('http');
 const { Server } = require("socket.io");
-const prisma = require('./config/prisma'); 
+const prisma = require('./config/prisma'); // <-- 1. PRISMA CLIENT IMPORT KAREIN
 
-// --- Allowed URLs ki list (FRONTEND_URL ko dynamic rakha) ---
+// --- Allowed URLs ki list (No Change) ---
 const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:3000", 
   "http://localhost:3000",
-  "https://myedupanel.vercel.app", // Aapka Vercel App
-  "https://myedupanel.onrender.com" // Agar Render pe koi test/staging domain ho
+  "https://myedupanel.vercel.app" 
 ];
 // --- END ---
 
@@ -42,36 +39,26 @@ const analyticsRoutes = require('./routes/analytics');
 const classRoutes = require('./routes/classes');
 const attendanceRoutes = require('./routes/attendance'); 
 const timetableRoutes = require('./routes/timetable');
-const academicYearRoutes = require('./routes/academicYear');
+const academicYearRoutes = require('./routes/academicYear');// <-- NAYA ADD KIYA
+// const dashboardRoutes = require('./routes/dashboard'); 
 
-// --- Express App Setup ---
+// --- Express App Setup (No Change) ---
 const app = express();
-// --- FIX: PORT ENV variable use karein ---
-const PORT = process.env.PORT || 5000; // Render ya cloud PORT set karega, warna 5000
+const PORT = process.env.PORT || 5000;
 
-// --- NAYA CORS CONFIGURATION (Use function for strict checking) ---
-const corsOptions = {
-    origin: (origin, callback) => {
-        // Agar request ka koi origin nahi hai (jaise Postman ya same server), ya woh allowed list mein hai
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            // Isse browser mein specific CORS error milega, server 500 nahi dega
-            callback(new Error(`CORS policy not allowing access from origin: ${origin}`));
-        }
-    },
-    credentials: true, // Zaroori hai cookies/headers ke liye
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"] // Essential headers explicitly allow karein
-};
+// --- 2. MONGOOSE MODEL IMPORTS HATA DIYE ---
+// ... (jaisa pehle tha) ...
 
-// CORS middleware ko sabse pehle apply karein
-app.use(cors(corsOptions)); 
-// --- END CORS FIX ---
+// --- Standard Middlewares (ORDER IS FIXED) ---
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE"]
+}));
 
-
+// --- YEH HAI FIX ---
 // JSON parser ko hamesha routes register karne se PEHLE rakhein
 app.use(express.json({ limit: '2mb' })); 
+// --- FIX ENDS HERE ---
 
 // --- Debugging Middleware (No Change) ---
 app.use((req, res, next) => {
@@ -82,7 +69,10 @@ app.use((req, res, next) => {
 // --- HTTP Server and Socket.IO Setup (No Change) ---
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: corsOptions // Socket.IO mein bhi wahi CORS options use karein
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE"]
+  }
 });
 
 app.set('socketio', io);
@@ -91,11 +81,12 @@ app.use((req, res, next) => {
     next();
 });
 
-// --- Register API Routes (Order and paths are correct) ---
+// --- Register API Routes (ORDER IS UPDATED) ---
 app.get('/', (req, res) => {
   res.send('SchoolPro Backend is running (Prisma Version)!'); 
 });
 
+// Ab sabhi routes 'express.json()' ke baad register honge
 app.use('/api/school', schoolRoutes); 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
@@ -112,10 +103,10 @@ app.use('/api/study-material', studyMaterialRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/classes', classRoutes);
-app.use('/api/attendance', attendanceRoutes); 
+app.use('/api/attendance', attendanceRoutes); // <-- NAYA ADD KIYA
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/school', academicYearRoutes);
-
+// app.use('/api/dashboard', dashboardRoutes);
 
 // --- Socket.IO Connection Handler (No Change) ---
 io.on('connection', (socket) => {
@@ -125,7 +116,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// --- DATABASE CONNECTION & START SERVER (Final Listening) ---
+// --- 3. DATABASE CONNECTION & START SERVER (Updated for Prisma) ---
 async function startServer() {
   try {
     // Prisma client ko connect karein
@@ -133,7 +124,6 @@ async function startServer() {
     console.log("Prisma Database connected successfully!");
 
     // Database connect hone ke baad hi server listen karein
-    // '0.0.0.0' address zaroori hai cloud deployment ke liye
     server.listen(PORT, '0.0.0.0', () => { 
       console.log(`Server (Prisma Version) is running on port: ${PORT}`);
     });
@@ -146,3 +136,4 @@ async function startServer() {
 
 // Server ko start karein
 startServer();
+// --- END FIX ---
