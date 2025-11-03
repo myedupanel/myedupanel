@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link'; // --- BADLAAV YAHAN --- (Link component import kiya)
+import Link from 'next/link';
 import api from '@/backend/utils/api'; // Ensure correct path
 import { io } from "socket.io-client";
 import Header from '@/components/admin/Header/Header';
@@ -10,11 +10,9 @@ import StudentClassChart from '@/components/admin/academics/StudentClassChart'; 
 import RecentPayments from '@/components/admin/RecentPayments/RecentPayments';
 import { MdPeople, MdSchool, MdAttachMoney, MdFamilyRestroom, MdBadge, MdClass } from 'react-icons/md';
 import styles from './AdminDashboard.module.scss';
-import { useAuth, User } from '../../context/AuthContext'; // Import User type
+import { useAuth, User } from '../../context/AuthContext'; 
 
-// --- TYPE DEFINITIONS ---
-// (Yahaan koi badlaav nahi)
-// ... (saare interfaces waise hi rahenge) ...
+// --- TYPE DEFINITIONS (UPDATED) ---
 interface MonthlyAdmissionData {
   name: string;
   admissions: number;
@@ -25,6 +23,8 @@ interface ClassCountData {
     count: number;
     color: string;
 }
+
+// 🎯 FIX 1: Backend interface mein Revenue fields add kiye
 interface BackendDashboardData {
   admissionsData: { name: string; admissions: number }[];
   classCounts: { name: string; count: number }[];
@@ -38,16 +38,18 @@ interface BackendDashboardData {
   totalParents?: number;
   totalClasses?: number;
   totalStaff?: number;
+  currentMonthRevenue?: number; // <--- ADDED
+  currentMonthName?: string;    // <--- ADDED
 }
+
 interface FormattedDashboardData {
-  stats: { title: string; value: string }[];
+  stats: { title: string; value: string; monthName?: string }[]; // <--- monthName added to stat
   monthlyAdmissions: MonthlyAdmissionData[];
   classCounts: ClassCountData[];
   recentPayments: { id: string; student: string; amount: string; date: string }[];
 }
 
-// --- COLOR PALETTES ---
-// (Yahaan koi badlaav nahi)
+// --- COLOR PALETTES (No Change) ---
 const classColors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#D97706'];
 const admissionColors = {
     high: '#22c55e',
@@ -56,18 +58,28 @@ const admissionColors = {
 };
 
 // --- CARD DETAILS ---
-// (Yahaan koi badlaav nahi)
+// Monthly Revenue title update kiya
 const cardDetails = {
   "Total Students": { icon: <MdPeople />, theme: "blue" },
   "Total Teachers": { icon: <MdSchool />, theme: "teal" },
-  "Monthly Revenue": { icon: <MdAttachMoney />, theme: "green" },
+  "Monthly Revenue": { icon: <MdAttachMoney />, theme: "green" }, // Base title rakha
   "Total Parents": { icon: <MdFamilyRestroom />, theme: "purple" },
   "Total Staff": { icon: <MdBadge />, theme: "orange" },
   "Total Classes": { icon: <MdClass />, theme: "sky" }
 } as const;
 
-// --- HELPER FUNCTION ---
-// (Yahaan koi badlaav nahi)
+// --- CARD LINKS (No Change) ---
+const cardLinks: { [key: string]: string } = {
+  "Total Students": "/admin/students",
+  "Total Teachers": "/admin/teachers",
+  "Total Staff": "/admin/staff",
+  "Total Parents": "/admin/parents",
+  "Monthly Revenue": "/admin/fee-counter",
+  "Total Classes": "/admin/school/classes"
+};
+// --- END CARD LINKS ---
+
+// --- HELPER FUNCTION (No Change) ---
 const getAdmissionColor = (value: number, min: number, max: number): string => {
     if (value <= 0) return '#9ca3af';
     if (max === min && value > 0) return admissionColors.medium;
@@ -78,26 +90,12 @@ const getAdmissionColor = (value: number, min: number, max: number): string => {
 };
 
 
-// --- BADLAAV YAHAN ---
-// Humne card titles ko unke respective links se map kiya hai
-const cardLinks: { [key: string]: string } = {
-  "Total Students": "/admin/students",
-  "Total Teachers": "/admin/teachers",
-  "Total Staff": "/admin/staff",
-  "Total Parents": "/admin/parents",
-  "Monthly Revenue": "/admin/fee-counter",
-  "Total Classes": "/admin/school/classes" // <-- YEH LINE ADD KI GAYI HAI
-};
-// --- END BADLAAV ---
-
-
 const AdminDashboardPage = () => {
   const { user, token } = useAuth() as { user: User | null; token: string | null; login: (token: string) => Promise<any> };
   const [dashboardData, setDashboardData] = useState<FormattedDashboardData | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
 
-  // --- fetchDashboardData ---
-  // (Yahaan koi badlaav nahi)
+  // --- fetchDashboardData (UPDATED) ---
   const fetchDashboardData = useCallback(async () => {
     if (!token) {
         console.log("fetchDashboardData: No token found, skipping fetch.");
@@ -109,7 +107,7 @@ const AdminDashboardPage = () => {
       const data = response.data;
       console.log("fetchDashboardData: Data received from backend:", data);
 
-      // Process Monthly Admissions
+      // Process Monthly Admissions (No Change)
       const monthlyDataFromApi = data.admissionsData || [];
       let coloredMonthlyData: MonthlyAdmissionData[] = [];
       if (monthlyDataFromApi.length > 0) {
@@ -128,7 +126,7 @@ const AdminDashboardPage = () => {
       }
       console.log("fetchDashboardData: Processed Monthly Admissions:", coloredMonthlyData);
 
-      // Process Class Counts
+      // Process Class Counts (No Change)
       const classDataFromApi = data.classCounts || [];
       let coloredClassData: ClassCountData[] = [];
       if (classDataFromApi.length > 0) {
@@ -142,11 +140,17 @@ const AdminDashboardPage = () => {
       }
       console.log("fetchDashboardData: Processed Class Counts:", coloredClassData);
 
+      // 🎯 FIX 2: Revenue Data ko format karna
+      const revenueAmount = data.currentMonthRevenue || 0;
+      const formattedRevenue = `₹${revenueAmount.toLocaleString('en-IN')}`; // Indian format
+      const monthName = data.currentMonthName || 'Monthly';
+      const revenueTitle = `${monthName.substring(0, 3)} Revenue`; // Short month name
+
       // Format Stats
       const formattedStats = [
         { title: "Total Students", value: (data.totalStudents || 0).toString() },
         { title: "Total Teachers", value: (data.totalTeachers || 0).toString() },
-        { title: "Monthly Revenue", value: "₹0" }, // Static
+        { title: revenueTitle, value: formattedRevenue, monthName: monthName }, // <--- REVENUE STAT UPDATED
         { title: "Total Parents", value: (data.totalParents || 0).toString() },
         { title: "Total Staff", value: (data.totalStaff || 0).toString() },
         { title: "Total Classes", value: (classDataFromApi.length || 0).toString() }
@@ -168,9 +172,9 @@ const AdminDashboardPage = () => {
       setDashboardData({ stats: [], monthlyAdmissions: [], classCounts: [], recentPayments: [] });
     }
   }, [token]);
+  // --- END fetchDashboardData ---
 
-  // --- loadProfileData ---
-  // (Yahaan koi badlaav nahi)
+  // --- loadProfileData (No Change) ---
   const loadProfileData = useCallback(() => {
     if (user) {
       let profileData: AdminProfile = {
@@ -194,8 +198,7 @@ const AdminDashboardPage = () => {
     } else { setAdminProfile(null); }
   }, [user]);
 
-  // --- useEffect ---
-  // (Yahaan koi badlaav nahi)
+  // --- useEffect (No Change) ---
   useEffect(() => {
     if (token) {
         fetchDashboardData();
@@ -223,32 +226,34 @@ const AdminDashboardPage = () => {
     };
   }, [fetchDashboardData, loadProfileData, token]);
 
-  // --- Loading state ---
+  // --- Loading state (No Change) ---
   if (!adminProfile || !dashboardData) {
     return <div className={styles.loading}>Loading Dashboard...</div>;
   }
 
-  // --- JSX (UPDATED) ---
+  // --- JSX (UPDATED for Dynamic Title) ---
   return (
     <div className={styles.dashboardContainer}>
       <Header admin={adminProfile} />
       
       <div className={styles.statsGrid}>
-        {/* --- BADLAAV YAHAN --- */}
-        {/* Ab hum .map() ke andar check karenge ki link hai ya nahi */}
         {dashboardData.stats.map((stat) => {
-          const href = cardLinks[stat.title as keyof typeof cardLinks];
+          // 🎯 FIX 3: Dynamic title check karna padega (jaise "Nov Revenue")
+          const baseTitle = stat.title.includes('Revenue') ? "Monthly Revenue" : stat.title; 
+          const href = cardLinks[baseTitle as keyof typeof cardLinks];
           
           const cardComponent = (
             <StatCard
+              // Use the full title (Nov Revenue) for display
               title={stat.title}
               value={stat.value}
-              icon={cardDetails[stat.title as keyof typeof cardDetails]?.icon}
-              theme={cardDetails[stat.title as keyof typeof cardDetails]?.theme}
+              // Icon/Theme ke liye "Monthly Revenue" (base title) use karna padega
+              icon={cardDetails["Monthly Revenue"]?.icon}
+              theme={cardDetails["Monthly Revenue"]?.theme}
             />
           );
 
-          // Agar 'href' (link) hai, toh card ko <Link> se wrap karo
+          // Link check base title par hi karna padega
           if (href) {
             return (
               <Link href={href} key={stat.title} className={styles.statLink}>
@@ -257,14 +262,12 @@ const AdminDashboardPage = () => {
             );
           }
 
-          // Agar link nahi hai, toh sirf card dikhao (jaise "Total Classes")
           return (
-            <div key={stat.title}> {/* Key ko wrapper par rakha */}
+            <div key={stat.title}>
               {cardComponent}
             </div>
           );
         })}
-        {/* --- END BADLAAV --- */}
       </div>
       
       <div className={styles.chartsRow}>
@@ -285,8 +288,7 @@ const AdminDashboardPage = () => {
 
 export default AdminDashboardPage;
 
-// --- AdminProfile Interface ---
-// (Yahaan koi badlaav nahi)
+// --- AdminProfile Interface (No Change) ---
 interface AdminProfile {
   id: number;
   adminName: string;
