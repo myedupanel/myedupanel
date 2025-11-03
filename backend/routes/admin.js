@@ -1,4 +1,4 @@
-// backend/routes/admin.js
+// backend/routes/admin.js (UPDATED with AcademicYear Fix)
 
 const express = require('express');
 const router = express.Router();
@@ -45,7 +45,8 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             console.log(`[GET /dashboard-data] Using requested yearId: ${activeYearId}`);
         } else {
             // Agar koi ID nahi aayi, toh 'isCurrent' wala saal dhoondho
-            const currentYear = await prisma.academicYear.findFirst({
+            // ❌ OLD: const currentYear = await prisma.academicYear.findFirst({
+            const currentYear = await prisma.AcademicYear.findFirst({ // ✅ FIX: Use PascalCase 'AcademicYear'
                 where: { schoolId: schoolId, isCurrent: true },
                 select: { id: true }
             });
@@ -55,7 +56,8 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                 console.log(`[GET /dashboard-data] Using 'isCurrent' yearId: ${activeYearId}`);
             } else {
                 // Agar 'isCurrent' bhi nahi hai, toh sabse naya saal dhoondho
-                const newestYear = await prisma.academicYear.findFirst({
+                // ❌ OLD: const newestYear = await prisma.academicYear.findFirst({
+                const newestYear = await prisma.AcademicYear.findFirst({ // ✅ FIX: Use PascalCase 'AcademicYear'
                     where: { schoolId: schoolId },
                     orderBy: { createdAt: 'desc' },
                     select: { id: true }
@@ -72,7 +74,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                     // Zeroed-out data bhejo
                     return res.json({
                         totalStudents: 0,
-                        totalTeachers: 0, // Yeh school-wide hai, par 0 bhej dete hain
+                        totalTeachers: 0, // Yeh school-wide hai, par 0 bhej دیتے hain
                         totalParents: 0,
                         totalStaff: 0,
                         admissionsData: [],

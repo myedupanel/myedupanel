@@ -78,40 +78,88 @@ const getFeeTemplates = async (req, res) => {
       } catch (error) { console.error("Error in getFeeTemplates:", error); res.status(500).send("Server Error"); }
 };
 
-// 3. Get Single Template Details
 const getTemplateDetails = async (req, res) => { 
+
     try {
+
         const schoolId = req.user.schoolId;
+
         const templateIdInt = parseInt(req.params.id);
+
+
 
         if (isNaN(templateIdInt)) return res.status(400).json({ msg: 'Invalid Template ID' });
 
+
+
         const template = await prisma.feeTemplate.findUnique({ 
+
             where: { id: templateIdInt, schoolId: schoolId } 
+
         });
+
         if (!template) return res.status(404).json({ msg: 'Template not found' });
 
+
+
         // Fee record stats
+
         const stats = await prisma.feeRecord.aggregate({
+
             where: { templateId: templateIdInt, schoolId: schoolId },
+
             _sum: { amount: true },
+
         });
-        const studentCount = await prisma.feeRecord.count({
+
+
+
+        // --- LINE 102-105: FIX FOR studentCount ---
+
+        // Purana: const studentCount = await prisma.feeRecord.count({ where: {...}, distinct: ['studentId'] });
+
+        const assignedStudents = await prisma.feeRecord.groupBy({
+
+            by: ['studentId'],
+
             where: { templateId: templateIdInt, schoolId: schoolId },
-            distinct: ['studentId']
+
         });
 
-        // Transaction stats
+        const studentCount = assignedStudents.length;
+
+        // --- END FIX ---
+
+
+
+
+
+        // Transaction stats (Lines 107-110)
+
         const collectionStats = await prisma.transaction.aggregate({
+
           where: { templateId: templateIdInt, schoolId: schoolId, status: 'Success' },
+
           _sum: { amountPaid: true }
+
         });
 
-        // Paid student count
-        const paidStudentCount = await prisma.feeRecord.count({
+
+
+        // --- LINE 112-115: FIX FOR paidStudentCount ---
+
+        // Purana: const paidStudentCount = await prisma.feeRecord.count({ where: {...}, distinct: ['studentId'] });
+
+        const paidStudents = await prisma.feeRecord.groupBy({
+
+            by: ['studentId'],
+
             where: { templateId: templateIdInt, schoolId: schoolId, status: "Paid" },
-            distinct: ['studentId']
+
         });
+
+        const paidStudentCount = paidStudents.length;
+
 
         const templateDetails = {
           name: template.name,

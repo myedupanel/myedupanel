@@ -1,4 +1,4 @@
-// File: backend/routes/academicYear.js
+// File: backend/routes/academicYear.js (FIXED)
 
 const express = require('express');
 const router = express.Router();
@@ -18,7 +18,8 @@ router.get('/academic-year', [authMiddleware, adminMiddleware], async (req, res)
     }
 
     // Database se saare saal fetch karein, sabse naya upar
-    const academicYears = await prisma.academicYear.findMany({
+    // --- FIX: academicYear -> AcademicYear ---
+    const academicYears = await prisma.AcademicYear.findMany({ // <--- FIXED LINE 21
       where: {
         schoolId: schoolId,
       },
@@ -58,7 +59,8 @@ router.post('/academic-year', [authMiddleware, adminMiddleware], async (req, res
     const newAcademicYear = await prisma.$transaction(async (tx) => {
       
       // --- AAPKA BUSINESS RULE 1: 300-Din ka Limit ---
-      const latestYear = await tx.academicYear.findFirst({
+      // --- FIX: academicYear -> AcademicYear ---
+      const latestYear = await tx.AcademicYear.findFirst({ // <--- FIXED LINE 49
         where: { schoolId: schoolId },
         orderBy: { createdAt: 'desc' }, 
       });
@@ -78,13 +80,15 @@ router.post('/academic-year', [authMiddleware, adminMiddleware], async (req, res
       console.log("300-din ka check paas ho gaya.");
 
       // Naya saal banane se pehle, baaki saare saal ko 'isCurrent = false' set karein
-      await tx.academicYear.updateMany({
+      // --- FIX: academicYear -> AcademicYear ---
+      await tx.AcademicYear.updateMany({ // <--- FIXED LINE 64
           where: { schoolId: schoolId },
           data: { isCurrent: false },
       });
 
       // Ab naya saal banayein
-      const year = await tx.academicYear.create({
+      // --- FIX: academicYear -> AcademicYear ---
+      const year = await tx.AcademicYear.create({ // <--- FIXED LINE 71
         data: {
           name: name,
           startDate: new Date(startDate),
@@ -96,7 +100,7 @@ router.post('/academic-year', [authMiddleware, adminMiddleware], async (req, res
       
       console.log("Naya academic saal ban gaya:", year.id);
 
-      // --- AAPKA BUSINESS RULE 2: Template se Data Clone Karna ---
+      // --- AAPKA BUSINESS RULE 2: Template se Data Clone Karna (No changes needed here as only cloning logic is inside) ---
       if (templateYearId) {
         console.log(`Cloning shuru karni hai... template se: ${templateYearId}`);
 
@@ -145,6 +149,10 @@ router.post('/academic-year', [authMiddleware, adminMiddleware], async (req, res
       const userMessage = error.message.split(":")[1]; 
       return res.status(403).json({ msg: userMessage }); // 403 Forbidden
     }
+    // Check for unique constraint error (P2002) for schoolId_name
+     if (error.code === 'P2002') {
+         return res.status(400).json({ msg: 'A year with this name already exists for this school.' });
+     }
     res.status(500).send('Server Error');
   }
 });
