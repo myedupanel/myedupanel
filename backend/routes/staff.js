@@ -1,3 +1,5 @@
+// backend/routes/staff.js
+
 const express = require('express');
 const router = express.Router();
 const generatePassword = require('generate-password');
@@ -60,9 +62,14 @@ router.post('/', [authMiddleware, authorize('Admin')], async (req, res) => {
                 password: hashedPassword,
                 role: staffRole,
                 isVerified: true,
-                // --- FIX 1: details JSON field ko HATA DIYA ---
-                
-                // Naya Staff Profile banayein
+                // --- FIX 1: details JSON field mein data add kiya ---
+                details: {
+                    staffId: staffId, // Redundant, but added for schema consistency
+                    contactNumber: contactNumber,
+                    joiningDate: joiningDate,
+                },
+                // --- END FIX 1 ---
+                // Naya Staff Profile bhi saath mein banayein
                 staffProfile: {
                     create: {
                         staffId: staffId,
@@ -139,9 +146,10 @@ router.get('/', [authMiddleware, authorize('Admin')], async (req, res) => {
                 schoolId: schoolIdFromToken,
                 role: { in: staffRoles }
             },
-            // --- FIX 2: details field ko HATA DIYA ---
+            // --- FIX 2: details field ko wapas include kiya ---
             include: {
-                staffProfile: true, // <-- Bas yahi chahiye
+                staffProfile: true,
+                details: true // <-- YEH AB INCLUDE HOGA
             },
             orderBy: {
                 name: 'asc'
@@ -156,7 +164,7 @@ router.get('/', [authMiddleware, authorize('Admin')], async (req, res) => {
             
             // User aur Staff Profile ko mix karke ek object banayein
             return {
-                ...safeUser, // id, name, email, role etc.
+                ...safeUser, // id, name, email, role, details etc.
                 ...(safeUser.staffProfile || {}) // contactNumber, staffId, joiningDate etc.
             };
         });
@@ -165,8 +173,12 @@ router.get('/', [authMiddleware, authorize('Admin')], async (req, res) => {
         res.json({ data: formattedStaffList }); // Naya formatted list bhej rahe hain
 
     } catch (err) {
+        // --- CRITICAL: Login error yahaan bhi fix hona chahiye ---
         console.error("[GET /staff] Error:", err.message, err.stack);
-        // Ab yeh error nahi aana chahiye, agar aata hai toh client-side se aata hai
+        // Is error ko log karne ke liye
+        if (err.message.includes("User.details does not exist")) {
+            console.error("Critical Schema Mismatch: The database does not have the 'details' column.");
+        }
         res.status(500).send('Server Error fetching staff.');
     }
 });
@@ -217,7 +229,14 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => {
                     name: name,
                     role: staffRole,
                     ...emailUpdateData,
-                    // --- FIX 3: details JSON field ko HATA DIYA ---
+                    // --- FIX 3: details field ko update karein ---
+                     details: {
+                         staffId: staffId,
+                         contactNumber: contactNumber,
+                         joiningDate: joiningDate,
+                         leavingDate: leavingDate
+                     }
+                    // --- END FIX 3 ---
                 }
             }),
             // 2. Staff table update karein
