@@ -86,7 +86,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const handlePrint = () => {
         if (!transaction?.id) return;
         
-        const previewUrl = `/admin/receipt/preview/${transaction.id}`;
+        const previewUrl = `/admin/receipt/preview/[id]${transaction.id}`;
         
         // Modal close karne ke liye koi prop use ho sakta hai,
         // Lekin abhi hum seedha new tab mein kholenge (jo print karega)
