@@ -114,15 +114,15 @@
     }
 }
 @media print {
-    
-    // CRITICAL FIX: Global body reset (Purity check pass karne ke liye :global block ka use)
+    // VERCEL COMPILATION FIX: Global styles ko is block mein wrap kiya
     :global {
         body {
+            // Background aur margins ko clear kiya (Blank Page Fix)
             margin: 0 !important;
             padding: 0 !important;
             background-color: #ffffff !important;
             color: #000000;
-            // Ensure colors print correctly
+            // CRITICAL: Ensure colors print correctly (Chrome/Edge ke liye)
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
