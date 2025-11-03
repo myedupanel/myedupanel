@@ -114,15 +114,15 @@
     }
 }
 @media print {
-    // VERCEL COMPILATION FIX: Global styles ko is block mein wrap kiya
+    
+    // CRITICAL FIX: Global body reset (Purity check pass karne ke liye :global block ka use)
     :global {
         body {
-            // Background aur margins ko clear kiya (Blank Page Fix)
             margin: 0 !important;
             padding: 0 !important;
             background-color: #ffffff !important;
             color: #000000;
-            // CRITICAL: Ensure colors print correctly
+            // Ensure colors print correctly
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
@@ -139,7 +139,7 @@
     }
 
     .printableArea {
-        // A4 size for clear printing
+        // A4 size for clear printing (Blank Page Fix)
         width: 210mm;
         height: 297mm;
         min-height: auto;
