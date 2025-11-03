@@ -3,13 +3,15 @@ import React from 'react';
 import styles from './StudentFilters.module.scss';
 import { FiSearch } from 'react-icons/fi';
 
+// --- 1. 'onSort' ko interface se hata diya gaya hai ---
 interface FilterProps {
   onSearch: (query: string) => void;
-  onSort: (order: 'asc' | 'desc') => void;
 }
 
-const StudentFilters: React.FC<FilterProps> = ({ onSearch, onSort }) => {
+// --- 2. 'onSort' ko yahan se bhi hata diya gaya hai ---
+const StudentFilters: React.FC<FilterProps> = ({ onSearch }) => {
   return (
+    // Ab 'controls' mein sirf search bar hai
     <div className={styles.controls}>
       <div className={styles.searchBar}>
         <FiSearch />
@@ -19,13 +21,7 @@ const StudentFilters: React.FC<FilterProps> = ({ onSearch, onSort }) => {
           onChange={(e) => onSearch(e.target.value)}
         />
       </div>
-      <div className={styles.sort}>
-        <label htmlFor="sort">Sort by Name:</label>
-        <select id="sort" onChange={(e) => onSort(e.target.value as 'asc' | 'desc')}>
-          <option value="asc">Ascending (A-Z)</option>
-          <option value="desc">Descending (Z-A)</option>
-        </select>
-      </div>
+      {/* --- 3. 'Sort by Name' wala div yahan se remove kar diya gaya hai --- */}
     </div>
   );
 };

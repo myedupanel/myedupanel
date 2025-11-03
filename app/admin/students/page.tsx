@@ -331,7 +331,18 @@ const StudentsPage = () => {
                         <h1 className={styles.title}>Student Management</h1>
                     </header>
                     
+                    {/* --- YAHAN BADLAAV KIYA GAYA (Re-ordered) --- */}
                     <div className={styles.filtersContainer}>
+                        
+                        {/* 1. Search Bar (Note: Sort UI abhi bhi iske andar hai) */}
+                        <div className={styles.searchFilter}>
+                            <StudentFilters 
+                                onSearch={setSearchQuery} 
+                                onSort={() => {}} // Dummy function
+                            />
+                        </div>
+
+                        {/* 2. Class Filter */}
                         <div className={styles.classFilter}>
                             <label htmlFor="classSelect">Class:</label>
                             <select 
@@ -349,15 +360,7 @@ const StudentsPage = () => {
                             </select>
                         </div>
 
-                        {/* --- YAHAN BADLAAV KIYA GAYA --- */}
-                        <div className={styles.searchFilter}>
-                            <StudentFilters 
-                                onSearch={setSearchQuery} 
-                                onSort={() => {}} // <-- Dummy function add kiya
-                            />
-                        </div>
-                        {/* --- BADLAAV KHATM --- */}
-
+                        {/* 3. Actions Button (yeh right mein align ho jayega) */}
                         <div className={styles.actionsDropdownContainer}>
                             <button 
                                 onClick={() => setIsActionsOpen(!isActionsOpen)} 
@@ -387,6 +390,8 @@ const StudentsPage = () => {
                             )}
                         </div>
                     </div>
+                    {/* --- BADLAAV KHATM --- */}
+
 
                     <main>
                         <StudentsTable
@@ -452,7 +457,7 @@ const StudentsPage = () => {
                         <FiPrinter /> Print List
                     </button>
                 </div>
-            </Modal>
+            </Modal> 
         </>
     );
 };
