@@ -24,7 +24,7 @@ interface SchoolFormData {
 
 // --- NAYA ---
 // Academic Year ke liye interface
-interface academicYear {
+interface AcademicYear {
   id: string;
   name: string;
 }
@@ -67,7 +67,7 @@ const SchoolProfilePage = () => {
 
   // --- NAYA ---
   // Academic Year ke liye naya state
-  const [academicYears, setacademicYears] = useState<academicYear[]>([]);
+  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
   const [newYearForm, setNewYearForm] = useState<NewYearFormData>({
     name: '',
     startDate: '',
@@ -103,10 +103,10 @@ const SchoolProfilePage = () => {
 
   // --- NAYA ---
   // Alag function banaya academic years fetch karne ke liye
-  const fetchacademicYears = useCallback(async () => {
+  const fetchAcademicYears = useCallback(async () => {
     try {
       const res = await api.get('/api/school/academic-year');
-      setacademicYears(res.data);
+      setAcademicYears(res.data);
     } catch (err) {
       console.error("Failed to fetch academic years:", err);
       setError("Failed to load academic years. Please refresh.");
@@ -144,7 +144,7 @@ const SchoolProfilePage = () => {
         }
 
         // Step 2: Academic Years fetch karna (NAYA)
-        await fetchacademicYears();
+        await fetchAcademicYears();
 
       } catch (err: any) {
         console.error("Failed to fetch school data:", err);
@@ -158,7 +158,7 @@ const SchoolProfilePage = () => {
     };
 
     fetchSchoolProfile();
-  }, [user, fetchacademicYears]); // --- UPDATE ---
+  }, [user, fetchAcademicYears]); // --- UPDATE ---
 
   // Input handlers (No change)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -336,7 +336,7 @@ const SchoolProfilePage = () => {
       setNewYearForm({ name: '', startDate: '', endDate: '', templateYearId: '' });
       
       // List ko refresh karo taaki naya saal template mein dikhe
-      await fetchacademicYears();
+      await fetchAcademicYears();
 
     } catch (err: any) {
       // 300-din wala error dikhao

@@ -26,7 +26,7 @@ interface ClassCountData {
 
 // --- NAYA ---
 // Academic Year ke liye interface
-interface academicYear {
+interface AcademicYear {
   id: string;
   name: string;
   isCurrent: boolean;
@@ -99,7 +99,7 @@ const AdminDashboardPage = () => {
   
   // --- NAYA ---
   // Naye state academic year ke liye
-  const [academicYears, setacademicYears] = useState<academicYear[]>([]);
+  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
   const [selectedYearId, setSelectedYearId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true); // Loading state
   // --- END NAYA ---
@@ -107,17 +107,17 @@ const AdminDashboardPage = () => {
 
   // --- NAYA ---
   // Function jo saare academic years fetch karega
-  const fetchacademicYears = useCallback(async () => {
+  const fetchAcademicYears = useCallback(async () => {
     if (!token) {
-        console.log("fetchacademicYears: No token, skipping.");
+        console.log("fetchAcademicYears: No token, skipping.");
         return;
     }
     console.log("Fetching academic years...");
     try {
       // Yeh 'GET' route humne pehle banaya tha
       const response = await api.get('/api/school/academic-year');
-      const years: academicYear[] = response.data;
-      setacademicYears(years);
+      const years: AcademicYear[] = response.data;
+      setAcademicYears(years);
 
       if (years.length > 0) {
         // Automatically current saal select karein
@@ -257,14 +257,14 @@ const AdminDashboardPage = () => {
   useEffect(() => {
     loadProfileData();
     if (token) {
-      fetchacademicYears(); // Pehle saal fetch karein
+      fetchAcademicYears(); // Pehle saal fetch karein
     }
     window.addEventListener('focus', loadProfileData); 
     
     return () => {
         window.removeEventListener('focus', loadProfileData);
     }
-  }, [token, loadProfileData, fetchacademicYears]);
+  }, [token, loadProfileData, fetchAcademicYears]);
 
   // 2. Dashboard Data aur Sockets ko manage karne ke liye
   useEffect(() => {

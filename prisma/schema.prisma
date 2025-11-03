@@ -67,7 +67,7 @@ model School {
   staff             Staff[]
   
   // --- ACADEMIC YEAR RELATION (Aapne add kar diya tha - Perfect!) ---
-  academicYears     academicYear[]
+  academicYears     AcademicYear[]
 }
 
 // 4. User Model
@@ -116,7 +116,7 @@ model Classes {
 
   // --- NAYA FIELD ---
   academicYearId String?
-  academicYear   academicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
 
   // Relations
   students         Students[]
@@ -165,7 +165,7 @@ model Students {
 
   // --- NAYA FIELD (FIXED) ---
   academicYearId String?
-  academicYear   academicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
 
   feeRecords   FeeRecord[]
   transactions Transaction[]
@@ -205,7 +205,7 @@ model FeeTemplate {
 
   // --- NAYA FIELD ---
   academicYearId String?
-  academicYear   academicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
 
   feeRecords   FeeRecord[]
   transactions Transaction[]
@@ -240,7 +240,7 @@ model FeeRecord {
 
   // --- NAYA FIELD (Aapne add kar diya tha - Perfect!) ---
   academicYearId String?
-  academicYear   academicYear? @relation(fields: [academicYearId], references: [id], onDelete: NoAction)
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: NoAction)
 
   transactions Transaction[]
 
@@ -283,7 +283,7 @@ model Transaction {
 
   // --- NAYA FIELD ---
   academicYearId String?
-  academicYear   academicYear? @relation(fields: [academicYearId], references: [id], onDelete: NoAction)
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: NoAction)
 }
 
 // 11. Parent Model
@@ -322,7 +322,7 @@ model Attendance {
 
   // --- NAYA FIELD ---
   academicYearId String?
-  academicYear   academicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
 
   // --- UPDATED UNIQUE ---
   @@unique([studentId, date, schoolId, academicYearId])
@@ -363,7 +363,7 @@ model Exam {
 
   // --- NAYA FIELD ---
   academicYearId String?
-  academicYear   academicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
 
   marks Mark[]
 
@@ -392,7 +392,7 @@ model Mark {
 
   // --- NAYA FIELD ---
   academicYearId String?
-  academicYear   academicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
 
   // --- UPDATED UNIQUE ---
   @@unique([studentId, assessmentId, subject, schoolId, academicYearId])
@@ -421,7 +421,7 @@ model Assignment {
 
   // --- NAYA FIELD ---
   academicYearId String?
-  academicYear   academicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 }
@@ -454,7 +454,7 @@ model Event {
 
   // --- NAYA FIELD ---
   academicYearId String?
-  academicYear   academicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
 }
 
 // 19. LiveClass Model
@@ -474,7 +474,7 @@ model LiveClass {
 
   // --- NAYA FIELD ---
   academicYearId String?
-  academicYear   academicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
 }
 
 // 20. GradingScale Model
@@ -503,7 +503,7 @@ model StudyMaterial {
 
   // --- NAYA FIELD ---
   academicYearId String?
-  academicYear   academicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -560,7 +560,7 @@ model TimetableAssignment {
 
   // --- NAYA FIELD ---
   academicYearId String?
-  academicYear   academicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
 
   // Conflict Checks
   @@unique([day, classId, timeSlotId, academicYearId], name: "class_time_unique")
@@ -588,9 +588,9 @@ model Staff {
   @@unique([schoolId, staffId]) // Staff ID har school ke liye unique hona chahiye
 }
 
-// 26. academicYear Model (NEW)
+// 26. AcademicYear Model (NEW)
 // (Aapne add kar diya tha - Perfect!)
-model academicYear {
+model AcademicYear {
   id        String   @id @default(cuid())
   name      String   // Jaise "2024-25"
   startDate DateTime @db.Date // Saal ki shuruat

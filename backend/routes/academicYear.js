@@ -18,8 +18,8 @@ router.get('/academic-year', [authMiddleware, adminMiddleware], async (req, res)
     }
 
     // Database se saare saal fetch karein, sabse naya upar
-    // --- FIX: academicYear -> academicYear ---
-    const academicYears = await prisma.academicYear.findMany({ // <--- FIXED LINE 21
+    // --- FIX: academicYear -> AcademicYear ---
+    const academicYears = await prisma.AcademicYear.findMany({ // <--- FIXED LINE 21
       where: {
         schoolId: schoolId,
       },
@@ -56,11 +56,11 @@ router.post('/academic-year', [authMiddleware, adminMiddleware], async (req, res
     }
 
     // --- Saara logic ek Transaction ke andar chalega ---
-    const newacademicYear = await prisma.$transaction(async (tx) => {
+    const newAcademicYear = await prisma.$transaction(async (tx) => {
       
       // --- AAPKA BUSINESS RULE 1: 300-Din ka Limit ---
-      
-      const latestYear = await tx.academicYear.findFirst({ // <--- FIXED LINE 49
+      // --- FIX: academicYear -> AcademicYear ---
+      const latestYear = await tx.AcademicYear.findFirst({ // <--- FIXED LINE 49
         where: { schoolId: schoolId },
         orderBy: { createdAt: 'desc' }, 
       });
@@ -80,15 +80,15 @@ router.post('/academic-year', [authMiddleware, adminMiddleware], async (req, res
       console.log("300-din ka check paas ho gaya.");
 
       // Naya saal banane se pehle, baaki saare saal ko 'isCurrent = false' set karein
-      // --- FIX: academicYear -> academicYear ---
-      await tx.academicYear.updateMany({ // <--- FIXED LINE 64
+      // --- FIX: academicYear -> AcademicYear ---
+      await tx.AcademicYear.updateMany({ // <--- FIXED LINE 64
           where: { schoolId: schoolId },
           data: { isCurrent: false },
       });
 
       // Ab naya saal banayein
-   
-      const year = await tx.academicYear.create({ // <--- FIXED LINE 71
+      // --- FIX: academicYear -> AcademicYear ---
+      const year = await tx.AcademicYear.create({ // <--- FIXED LINE 71
         data: {
           name: name,
           startDate: new Date(startDate),
@@ -141,7 +141,7 @@ router.post('/academic-year', [authMiddleware, adminMiddleware], async (req, res
       return year;
     });
 
-    res.status(201).json(newacademicYear); // 201 Created
+    res.status(201).json(newAcademicYear); // 201 Created
 
   } catch (error) {
     console.error("[ACADEMIC_YEAR_POST]", error);
