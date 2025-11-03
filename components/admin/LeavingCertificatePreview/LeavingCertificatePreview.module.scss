@@ -188,22 +188,33 @@
   }
 }
 
+/* --- YAHAN BADLAAV KIYA GAYA HAI --- */
 /* * Print-Specific Styles
  * Jab user print karega (Ctrl+P), toh shadow hat jayega
  */
 @media print {
-  body, .certificatePaper {
+  
+  /* 'body' ek global tag hai, isliye :global() zaroori hai */
+  :global(body) {
     margin: 0;
     padding: 0;
     box-shadow: none;
     font-size: 11pt;
   }
   
+  /* .certificatePaper ek local class hai, isey :global() ki zaroorat nahi */
   .certificatePaper {
-    // Exact A4 dimensions ke liye print settings
+    /* Print ke liye styles */
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    font-size: 11pt;
+    
+    /* Exact A4 dimensions ke liye print settings */
     width: 210mm;
     height: 297mm;
     padding: 15mm; // Print margin
     box-sizing: border-box;
   }
 }
+/* --- BADLAAV KHATM --- */
