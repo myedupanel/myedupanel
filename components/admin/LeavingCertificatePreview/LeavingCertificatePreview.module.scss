@@ -24,29 +24,33 @@
   flex-grow: 1;
 }
 
+// --- Fill-in Styles (Updated for clearer look) ---
 .fill {
-  font-weight: bold;
+  font-weight: bold; // Filled data bold dikhegi
   padding: 0 4px;
-  border-bottom: 1px dotted #333;
+  border-bottom: 1px dotted #333; // Dotted underline
+  white-space: nowrap; // Text wrap na ho
+  min-width: 30px; // Minimal width
 }
 .fillBlank {
   display: inline-block;
   border-bottom: 1px dotted #333;
   vertical-align: bottom;
   padding: 0 4px;
+  min-width: 30px; // Minimal width
 }
 /* --- End Base Styles --- */
 
 
-/* --- Header Style (No Change) --- */
+/* --- Header Styles (Khandeshwar Look) --- */
 .certHeader {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 5px; /* Gaps ko aur kam kiya for compact header */
   border-bottom: 1.5px solid #000;
-  padding-bottom: 8px;
-  margin-bottom: 10px;
+  padding-bottom: 5px; /* Padding kam ki */
+  margin-bottom: 8px; /* Margin kam kiya */
 
   .logo { display: none; }
   
@@ -54,9 +58,13 @@
     flex-grow: 0;
     text-align: center;
     padding: 0;
-    .schoolName1 { font-size: 12pt; font-weight: bold; margin: 0; }
-    .schoolName2 { font-size: 18pt; font-weight: bold; margin: 2px 0; }
-    .schoolAddressCode { font-size: 10pt; margin: 0; line-height: 1.4; }
+    .schoolName1 { font-size: 11pt; font-weight: bold; margin: 0; } /* Font size aur kam */
+    .schoolName2 { font-size: 16pt; font-weight: bold; margin: 2px 0; } /* Font size aur kam */
+    .schoolAddressCode { 
+      font-size: 9pt; /* Font size aur kam */
+      margin: 0; 
+      line-height: 1.3; /* Line height kam ki */
+    }
   }
 }
 
@@ -65,10 +73,10 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-top: 8px;
+  margin-top: 5px; /* Margin kam kiya */
 
   h2 { /* Title */
-    font-size: 15pt;
+    font-size: 14pt; /* Font size aur kam */
     font-weight: bold;
     margin: 0;
     padding: 0 10px; 
@@ -78,59 +86,53 @@
   }
 
   .headerSrNo, .headerRegNo {
-    font-size: 11pt;
+    font-size: 10pt; /* Font size aur kam */
     font-weight: bold;
     white-space: nowrap;
     flex-basis: auto;
     flex-shrink: 0;
   }
-  .headerSrNo { text-align: left; margin-right: 15px; }
-  .headerRegNo { text-align: right; margin-left: 15px; }
+  .headerSrNo { text-align: left; margin-right: 10px; } /* Margin kam ki */
+  .headerRegNo { text-align: right; margin-left: 10px; } /* Margin kam ki */
 }
-/* --- End Header Style --- */
+/* --- End Header Styles --- */
 
 
-/* --- Student Info Table (GRID FIXES APPLIED) --- */
+/* --- Student Info Table (Khandeshwar Grid Styles Applied) --- */
 .studentInfoTable {
   width: 100%;
-  border-collapse: collapse; /* Borders ko milata hai */
-  margin-top: 10px;
+  border-collapse: collapse; 
+  margin-top: 8px; /* Margin kam kiya */
   border: 1px solid #000; /* Outer border */
   
   tbody tr td {
-    /* --- FIX 1: Grid Borders --- */
-    border: 1px solid #ddd; 
-    
-    /* --- FIX 2: Vertical Alignment --- */
-    padding: 7px 5px;
-    vertical-align: top; /* Text hamesha top se shuru ho */
-    line-height: 1.4;
+    border: 1px solid #000; /* Darker grid borders, jaisa example mein hai */
+    padding: 2px 5px; /* Padding bahut kam kiya for compact fields */
+    vertical-align: top; 
+    line-height: 1.3; /* Line height kam ki */
   }
   tbody tr td:nth-child(1) { 
-    width: 35px; 
+    width: 30px; /* Width adjust kiya */
     text-align: center; 
     font-weight: normal; 
-    border-right: 1px solid #000; /* Row number aur label ke beech darker border */
   }
   tbody tr td:nth-child(2) { 
     width: 35%; 
     font-weight: normal; 
-    border-right: 1px solid #000; /* Label aur value ke beech darker border */
   }
   
   tbody tr td:nth-child(3) {
-    width: 60%;
+    width: calc(65% - 10px); /* Adjust width */
     font-weight: bold;
     display: flex; 
     flex-wrap: wrap; 
     align-items: center;
-    gap: 5px 20px; 
-    border-right: none; /* Last column mein right border ki zaroorat nahi */
+    gap: 5px 10px; /* Gap kam kiya */
   }
   
-  /* FIX 3: Row 4 Spacing (Aapke pichle fix se) */
+  /* Row 4 Spacing (Aapke pichle fix se) */
   .row4Spacing {
-    gap: 5px 40px !important; 
+    gap: 5px 20px !important; /* Default 10px se badha diya */
   }
   
   /* Birth Place Grid */
@@ -143,12 +145,21 @@
       display: flex;
       justify-content: space-between; 
       width: 100%;
-      margin-bottom: 5px;
+      margin-bottom: 2px; /* Margin kam kiya */
       
       .subField {
         flex-basis: 48%; 
         display: flex;
         align-items: baseline;
+        
+        // Khandeshwar example jaisa label: value style
+        span:first-child { // Label
+          font-weight: normal; 
+          margin-right: 5px;
+        }
+        .fill, .fillBlank { // Value
+          font-weight: bold;
+        }
       }
     }
   }
@@ -164,26 +175,26 @@
 }
 
 .subField {
-  font-weight: normal;
+  font-weight: normal; /* Labels normal weight mein */
   white-space: nowrap;
   .fill, .fillBlank {
-    font-weight: bold;
+    font-weight: bold; /* Filled data bold mein */
   }
 }
 
-/* --- Certification Text (No Change) --- */
+/* --- Certification Text (Khandeshwar Look) --- */
 .certText {
-  font-size: 11pt;
+  font-size: 10pt; /* Font size kam kiya */
   text-align: left;
-  margin-top: 15px;
-  line-height: 1.6;
+  margin-top: 10px; /* Margin kam kiya */
+  line-height: 1.5;
 }
 
-/* --- Footer Layout (No Change) --- */
+/* --- Footer Layout (Khandeshwar Look) --- */
 .certFooterWrapper {
   margin-top: auto;
-  padding-top: 20px;
-  font-size: 12pt;
+  padding-top: 15px; /* Padding kam kiya */
+  font-size: 11pt; /* Font size kam kiya */
   font-weight: bold;
   background: #fff !important;
   color: #000 !important;
@@ -191,7 +202,7 @@
 
 .datePlace {
   text-align: left;
-  margin-bottom: 30px;
+  margin-bottom: 20px; /* Margin kam kiya */
 }
 
 .signatures {
@@ -203,11 +214,11 @@
 .sigBox {
   text-align: center;
   width: 30%;
-  padding-top: 30px;
+  padding-top: 25px; /* Padding kam kiya */
   border-top: 1px solid #000;
 }
 
-/* --- Print Fix (No Change) --- */
+/* --- Print Fix (Updated) --- */
 @media print {
   .certificatePaper {
     box-shadow: none;
@@ -223,6 +234,6 @@
     height: 100%;
   }
   .studentInfoTable tbody tr td {
-    border: 1px solid #000; /* Print mein borders black rakhte hain */
+    border: 1px solid #000; /* Print mein bhi darker borders */
   }
 }

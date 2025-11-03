@@ -87,11 +87,14 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     }
     return <span className={styles.fillBlank} style={{ minWidth }}>&nbsp;</span>;
   }
+  // --- SubField (Updated to match Khandeshwar example font-weight) ---
   const SubField = ({ label, value, minWidth = '50px' }: { label: string, value: string | undefined | null, minWidth?: string }) => (
     <span className={styles.subField}>
-      {label}: {fill(value, minWidth)}
+      {label}: <span className={styles.subFieldValue}>{fill(value, minWidth)}</span> {/* Naya span add kiya */}
     </span>
   );
+  // --- End SubField Update ---
+
   const dateOfAdmission = formatDate(formData.dateOfAdmission);
   const dateOfLeaving = formatDate(formData.dateOfLeaving);
   const studentDobFormatted = formatDate(student?.dob);
