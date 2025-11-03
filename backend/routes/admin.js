@@ -10,10 +10,12 @@ const sendEmail = require('../utils/sendEmail');
 const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware'); 
 const userController = require('../controllers/userController'); 
 
-// ... (Helper functions 'getFullName' aur 'generateToken' mein koi badlaav nahi) ...
+// Helper: Get Full Name (Student ke liye) (No Change)
 const getFullName = (student) => {
   return [student?.first_name, student?.father_name, student?.last_name].filter(Boolean).join(' ');
 }
+
+// Helper Function: JWT Token Generate karna (No Change)
 const generateToken = (userId, schoolId) => {
   return jwt.sign({ id: userId, schoolId: schoolId }, process.env.JWT_SECRET, {
     expiresIn: '30d', 
@@ -25,7 +27,6 @@ router.post('/create-user', [authMiddleware, adminMiddleware], userController.cr
 
 
 // @route GET /api/admin/dashboard-data
-// --- YEH ROUTE POORA UPDATE HUA HAI ---
 router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res) => {
     console.log("[GET /dashboard-data] Request received.");
     try {
@@ -35,90 +36,36 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             return res.status(400).json({ msg: 'Admin school information missing.' });
         }
         console.log(`[GET /dashboard-data] Fetching data for schoolId: ${schoolId}`);
-
-        // --- NAYA LOGIC: Active Academic Year ID Dhoondhna ---
-        let activeYearId;
-        const requestedYearId = req.query.yearId; // Frontend se bheja gaya ID
-
-        if (requestedYearId) {
-            activeYearId = requestedYearId;
-            console.log(`[GET /dashboard-data] Using requested yearId: ${activeYearId}`);
-        } else {
-            // Agar koi ID nahi aayi, toh 'isCurrent' wala saal dhoondho
-            const currentYear = await prisma.academicYear.findFirst({
-                where: { schoolId: schoolId, isCurrent: true },
-                select: { id: true }
-            });
-            
-            if (currentYear) {
-                activeYearId = currentYear.id;
-                console.log(`[GET /dashboard-data] Using 'isCurrent' yearId: ${activeYearId}`);
-            } else {
-                // Agar 'isCurrent' bhi nahi hai, toh sabse naya saal dhoondho
-                const newestYear = await prisma.academicYear.findFirst({
-                    where: { schoolId: schoolId },
-                    orderBy: { createdAt: 'desc' },
-                    select: { id: true }
-                });
-
-                if (newestYear) {
-                    activeYearId = newestYear.id;
-                    console.log(`[GET /dashboard-data] Using newest yearId (fallback): ${activeYearId}`);
-                } else {
-                    // Agar school mein ek bhi saal nahi hai
-                    console.log(`[GET /dashboard-data] No academic years found for school ${schoolId}. Returning empty stats.`);
-                    const now = new Date();
-                    const currentMonthName = now.toLocaleString('en-US', { month: 'long' });
-                    // Zeroed-out data bhejo
-                    return res.json({
-                        totalStudents: 0,
-                        totalTeachers: 0, // Yeh school-wide hai, par 0 bhej dete hain
-                        totalParents: 0,
-                        totalStaff: 0,
-                        admissionsData: [],
-                        classCounts: [],
-                        recentStudents: [],
-                        recentTeachers: [],
-                        recentParents: [],
-                        recentStaff: [],
-                        recentFees: [],
-                        currentMonthRevenue: 0,
-                        currentMonthName: currentMonthName
-                    });
-                }
-            }
-        }
-        // --- END NAYA LOGIC ---
-
-
-        // --- Monthly Revenue Time Range (No Change) ---
+        
+        // --- FIX 1: Monthly Revenue Time Range Taiyaar Karna ---
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
         endOfMonth.setHours(23, 59, 59, 999);
-        const currentMonthName = now.toLocaleString('en-US', { month: 'long' }); 
-        
+        const currentMonthName = now.toLocaleString('en-US', { month: 'long' }); // For frontend display
+        // --- END FIX 1 ---
+
+
         const staffRoles = ['Accountant', 'Office Admin', 'Librarian', 'Security', 'Transport Staff', 'Other', 'Staff']; 
 
         const [
-            revenueStats,
+            revenueStats, // <-- NEW 1st item: Revenue
             studentCount,
-            teacherCount, // School-wide
+            teacherCount,
             parentCount,
-            staffCount, // School-wide
+            staffCount,
             recentStudents,
-            recentTeachers, // School-wide
+            recentTeachers,
             recentParents,
-            recentStaff, // School-wide
+            recentStaff,
             recentPaidFeeRecords,
             admissionsDataRaw,
             classCountsRaw
         ] = await Promise.all([
-            // 1. Monthly Revenue (Query Updated)
+            // --- FIX 2: Monthly Revenue Query Add Kiya ---
             prisma.transaction.aggregate({
                 where: {
                     schoolId: schoolId,
-                    academicYearId: activeYearId, // <-- FILTER ADDED
                     status: 'Success',
                     paymentDate: {
                         gte: startOfMonth,
@@ -129,37 +76,15 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                     amountPaid: true
                 }
             }),
+            // --- END FIX 2 ---
 
-            // 2. Total Students (Query Updated)
-            prisma.students.count({ 
-                where: { schoolId: schoolId, academicYearId: activeYearId } // <-- FILTER ADDED
-            }), 
-
-            // 3. Total Teachers (No Change - School-wide)
+            // Existing Promises (Adjusted for 1st index)
+            prisma.students.count({ where: { schoolId: schoolId } }), 
             prisma.user.count({ where: { role: 'Teacher', schoolId: schoolId } }), 
-
-            // 4. Total Parents (Query Updated & Fixed)
-            prisma.parent.count({ 
-                where: { 
-                    schoolId: schoolId, 
-                    student: { // Student ke through filter
-                        academicYearId: activeYearId 
-                    }
-                } 
-            }),   
-
-            // 5. Total Staff (No Change - School-wide)
+            prisma.user.count({ where: { role: 'Parent', schoolId: schoolId } }),   
             prisma.user.count({ where: { role: { in: staffRoles }, schoolId: schoolId } }),
-
-            // 6. Recent Students (Query Updated)
-            prisma.students.findMany({ 
-                where: { schoolId, academicYearId: activeYearId }, // <-- FILTER ADDED
-                orderBy: { studentid: 'desc' }, 
-                take: 5, 
-                select: { first_name: true, father_name: true, last_name: true, class: { select: { class_name: true } }, admission_date: true } 
-            }), 
+            prisma.students.findMany({ where: { schoolId }, orderBy: { studentid: 'desc' }, take: 5, select: { first_name: true, father_name: true, last_name: true, class: { select: { class_name: true } }, admission_date: true } }), 
             
-            // 7. Recent Teachers (No Change - School-wide)
             prisma.teachers.findMany({ 
                 where: { schoolId }, 
                 orderBy: { teacher_dbid: 'desc' }, 
@@ -167,25 +92,12 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                 select: { name: true, subject: true, teacher_dbid: true } 
             }),
 
-            // 8. Recent Parents (Query Updated & Fixed)
-            prisma.parent.findMany({ 
-                where: { 
-                    schoolId, 
-                    student: { // Student ke through filter
-                        academicYearId: activeYearId 
-                    }
-                }, 
-                orderBy: { id: 'desc' }, 
-                take: 5, 
-                select: { name: true, id: true } 
-            }), 
-
-            // 9. Recent Staff (No Change - School-wide)
+            prisma.parent.findMany({ where: { schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, id: true } }), 
             prisma.user.findMany({ where: { role: { in: staffRoles }, schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, role: true, id: true } }), 
 
-            // 10. Recent Fee Records (Query Updated)
+            // Recent Fee Records (Paid)
             prisma.feeRecord.findMany({
-                where: { schoolId: schoolId, academicYearId: activeYearId, status: 'Paid' }, // <-- FILTER ADDED
+                where: { schoolId: schoolId, status: 'Paid' },
                 orderBy: { id: 'desc' }, 
                 take: 5,
                 select: { 
@@ -201,18 +113,18 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                 } 
             }),
 
-            // 11. Admission Chart (Query Updated)
+            // Admission Chart Aggregation
              prisma.students.groupBy({
                  by: ['admission_date'], 
-                 where: { schoolId: schoolId, academicYearId: activeYearId, admission_date: { not: null } }, // <-- FILTER ADDED
+                 where: { schoolId: schoolId, admission_date: { not: null } },
                  _count: { studentid: true }, 
                  orderBy: { admission_date: 'asc'}
              }),
              
-            // 12. Class Counts (Query Updated)
+            // Class Counts Aggregation
             prisma.students.groupBy({
                 by: ['classid'],
-                where: { schoolId: schoolId, academicYearId: activeYearId }, // <-- FILTER ADDED
+                where: { schoolId: schoolId },
                 _count: { studentid: true }, 
             }),
 
@@ -221,7 +133,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             throw err; 
         });
 
-        // ... (Baaki ka saara data processing logic 'Process Admissions', 'Process Class Counts', 'Format Recent' etc. same rahega) ...
+        console.log(`[GET /dashboard-data] Counted Staff: ${staffCount}`);
 
         // --- Process Admissions Data (No Change) ---
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -236,6 +148,8 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             }
         });
         const admissionsData = Array.from(admissionsMap.values());
+        console.log("[GET /dashboard-data] Formatted Admissions (Month):", admissionsData);
+
 
         // --- Process Class Counts Data (No Change) ---
          const classIds = classCountsRaw.map(item => item.classid);
@@ -250,6 +164,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                  count: item._count.studentid 
              }
          }).sort((a, b) => a.name.localeCompare(b.name)); 
+        console.log("[GET /dashboard-data] Formatted Class Counts:", classCounts);
 
         // --- Format Recent Payments (No Change) ---
         const recentFees = recentPaidFeeRecords.map(record => ({
@@ -261,13 +176,14 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
 
         // --- Format Recent Lists (No Change) ---
          const formattedRecentStudents = recentStudents.map(s => ({ ...s, name: getFullName(s), class: s.class?.class_name }));
+         
          const formattedRecentTeachers = recentTeachers.map(t => ({
              ...t,
              id: t.teacher_dbid 
          }));
 
 
-        // --- Final Data Object (No Change) ---
+        // --- FIX 3: Final Data Object Update ---
         const monthlyRevenue = revenueStats._sum.amountPaid || 0;
 
         const dashboardData = {
@@ -282,10 +198,12 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             recentParents: recentParents || [],
             recentStaff: recentStaff || [],
             recentFees,
+            // --- NEW FIELDS ADDED ---
             currentMonthRevenue: monthlyRevenue,
             currentMonthName: currentMonthName
+            // --- END NEW FIELDS ---
         };
-        
+        console.log(`[GET /dashboard-data] Sending final data. Staff: ${dashboardData.totalStaff}`);
         res.json(dashboardData);
 
     } catch (err) {
@@ -397,8 +315,6 @@ router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => {
 
 
 // @route POST /api/admin/seed-standard-classes (No Change)
-// --- NOTE: Yeh function ab Academic Year se link hona chahiye ---
-// --- Hum isse baad mein fix kar sakte hain, abhi ke liye aise hi chhod dete hain ---
 const seedStandardClasses = async (req, res) => {
     console.log("[POST /seed-standard-classes] Request received.");
     try {
@@ -407,19 +323,11 @@ const seedStandardClasses = async (req, res) => {
             console.log("[POST /seed-standard-classes] Error: Missing schoolId.");
             return res.status(400).json({ msg: 'Admin school information missing.' });
         }
-        
-        // --- TODO: Is function ko bhi 'activeYearId' ki zaroorat hogi ---
-        // Abhi ke liye, hum maan rahe hain ki classes seedha school se link hongi,
-        // Lekin hamaare naye schema ke hisaab se classes 'AcademicYear' se link honi chahiye.
-        // Yeh ek alag update hoga. Abhi ke liye, main purana logic hi chhod raha hoon.
 
         const standardClasses = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 
-        // Hamein yahaan 'activeYearId' ki zaroorat padegi
-        // const activeYearId = ... (fetch karna padega)
-
         const existingClasses = await prisma.classes.findMany({
-            where: { schoolId: schoolId, class_name: { in: standardClasses } /*, academicYearId: activeYearId */ },
+            where: { schoolId: schoolId, class_name: { in: standardClasses } },
             select: { class_name: true }
         });
         const existingClassNames = new Set(existingClasses.map(c => c.class_name));
@@ -436,22 +344,17 @@ const seedStandardClasses = async (req, res) => {
         const newClassDocs = missingClassNames.map(name => ({
             class_name: name,
             schoolId: schoolId,
-            // academicYearId: activeYearId // <-- Yeh add karna zaroori hoga
         }));
-        
-        // createMany abhi kaam nahi karega agar activeYearId nahi hai.
-        // Main is logic ko comment out kar raha hoon taaki aapka app crash na ho.
-        /*
+
         const result = await prisma.classes.createMany({
             data: newClassDocs,
             skipDuplicates: true 
         });
         console.log(`[POST /seed] Inserted ${result.count} new classes.`);
-        */
 
         res.status(201).json({
-            message: `Successfully added 0 new standard classes. (Route needs update for AcademicYear)`,
-            added: 0,
+            message: `Successfully added ${result.count} new standard classes.`,
+            added: result.count,
         });
 
     } catch (err) {
@@ -464,6 +367,5 @@ const seedStandardClasses = async (req, res) => {
 };
 
 router.post('/seed-standard-classes', [authMiddleware, adminMiddleware], seedStandardClasses);
-
 
 module.exports = router;

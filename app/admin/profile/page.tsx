@@ -1,13 +1,12 @@
 "use client";
-import React, { useState, useEffect, useMemo, useCallback } from 'react'; // --- UPDATE ---
+import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import styles from './ProfilePage.module.scss'; 
 import { useAuth, User } from '../../context/AuthContext';
 import DefaultAvatar from '../../../components/common/DefaultAvatar';
 import api from '@/backend/utils/api';
-// --- UPDATE ---
-import { FiAlertCircle, FiCheckCircle, FiLoader, FiCalendar } from 'react-icons/fi'; 
+import { FiAlertCircle, FiCheckCircle, FiLoader } from 'react-icons/fi'; 
 
 interface SchoolFormData {
   name: string;
@@ -19,23 +18,9 @@ interface SchoolFormData {
   govtReg: string; 
   place: string; 
   logoUrl: string;
-  genRegNo: string; 
+  // --- FIX 1: Naya field add kiya ---
+  genRegNo: string; // General Register No.
 }
-
-// --- NAYA ---
-// Academic Year ke liye interface
-interface AcademicYear {
-  id: string;
-  name: string;
-}
-// Form state naye saal ke liye
-interface NewYearFormData {
-  name: string; // "2025-26"
-  startDate: string; // "2025-06-01"
-  endDate: string; // "2026-03-31"
-  templateYearId: string; // Puraane saal ki ID ya ""
-}
-// --- END NAYA ---
 
 const SchoolProfilePage = () => {
   const router = useRouter();
@@ -51,6 +36,7 @@ const SchoolProfilePage = () => {
     govtReg: '',
     place: '',
     logoUrl: '',
+    // --- FIX 1: Naye field ko initialize kiya ---
     genRegNo: '' 
   });
 
@@ -61,26 +47,11 @@ const SchoolProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 90-day rule (No change)
+  // 90-day rule logic (No change)
   const [canUpdateSchoolName, setCanUpdateSchoolName] = useState(true);
   const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
 
-  // --- NAYA ---
-  // Academic Year ke liye naya state
-  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
-  const [newYearForm, setNewYearForm] = useState<NewYearFormData>({
-    name: '',
-    startDate: '',
-    endDate: '',
-    templateYearId: ''
-  });
-  const [yearError, setYearError] = useState('');
-  const [yearSuccess, setYearSuccess] = useState('');
-  const [isCreatingYear, setIsCreatingYear] = useState(false);
-  // --- END NAYA ---
-
   useMemo(() => {
-    // ... (Aapka 90-day logic yahaan same rahega) ...
     if (user?.schoolNameLastUpdated) {
       const lastUpdate = new Date(user.schoolNameLastUpdated);
       const ninetyDaysAgo = new Date();
@@ -101,54 +72,39 @@ const SchoolProfilePage = () => {
     }
   }, [user]);
 
-  // --- NAYA ---
-  // Alag function banaya academic years fetch karne ke liye
-  const fetchAcademicYears = useCallback(async () => {
-    try {
-      const res = await api.get('/api/school/academic-year');
-      setAcademicYears(res.data);
-    } catch (err) {
-      console.error("Failed to fetch academic years:", err);
-      setError("Failed to load academic years. Please refresh.");
-    }
-  }, []);
-  // --- END NAYA ---
-
-  // --- UPDATE ---
-  // useEffect ab profile aur academic years dono fetch karega
+  // useEffect fetches school profile
   useEffect(() => {
     const fetchSchoolProfile = async () => {
       if (!user) {
         setIsLoading(false);
         return;
       }
+
       setIsLoading(true);
       setError('');
       try {
-        // Step 1: Profile fetch karna (No change)
-        const profileRes = await api.get('/api/school/profile');
+        const res = await api.get('/api/school/profile');
         setFormData({
-          name: profileRes.data.name || user.schoolName || '',
-          name2: profileRes.data.name2 || '',
-          address: profileRes.data.address || '',
-          mobNo: profileRes.data.contactNumber || '', 
-          email: profileRes.data.email || '',
-          udiseNo: profileRes.data.udiseNo || '',
-          govtReg: profileRes.data.recognitionNumber || '', 
-          place: profileRes.data.place || '',
-          logoUrl: profileRes.data.logoUrl || '',
-          genRegNo: profileRes.data.genRegNo || '' 
+          name: res.data.name || user.schoolName || '',
+          name2: res.data.name2 || '',
+          address: res.data.address || '',
+          mobNo: res.data.contactNumber || '', 
+          email: res.data.email || '',
+          udiseNo: res.data.udiseNo || '',
+          govtReg: res.data.recognitionNumber || '', 
+          place: res.data.place || '',
+          logoUrl: res.data.logoUrl || '',
+          // --- FIX 1: Naya field fetch kiya ---
+          genRegNo: res.data.genRegNo || '' 
         });
-        if (profileRes.data.logoUrl) {
-          setImagePreview(profileRes.data.logoUrl);
+
+        if (res.data.logoUrl) {
+          setImagePreview(res.data.logoUrl);
         }
 
-        // Step 2: Academic Years fetch karna (NAYA)
-        await fetchAcademicYears();
-
       } catch (err: any) {
-        console.error("Failed to fetch school data:", err);
-        setError('Failed to load school data. Please try refreshing.');
+        console.error("Failed to fetch school profile:", err);
+        setError('Failed to load school profile. Please ensure you have completed setup or try refreshing.');
         if (user.schoolName) {
            setFormData(prev => ({...prev, name: user.schoolName}));
         }
@@ -158,28 +114,29 @@ const SchoolProfilePage = () => {
     };
 
     fetchSchoolProfile();
-  }, [user, fetchAcademicYears]); // --- UPDATE ---
+  }, [user]); 
 
-  // Input handlers (No change)
+  // Input handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setError('');
     setSuccessMessage('');
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // Image change handler (No change)
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-     // ... (Aapka image logic yahaan same rahega) ...
     setError('');
     setSuccessMessage('');
     const file = e.target.files?.[0];
     if (file) {
+      // --- FIX 2: Limit ko 2MB kiya ---
       if (file.size > 2 * 1024 * 1024) { // 2MB limit
           setError("File is too large. Please select an image under 2MB.");
-          setImageFile(null);
+          setImageFile(null); // File ko clear karein
           return;
       }
+      
       setImageFile(file);
+
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result as string;
@@ -192,12 +149,9 @@ const SchoolProfilePage = () => {
     }
   };
 
-  // Input click handler (No change)
   const handleInputClick = (e: React.MouseEvent<HTMLInputElement>) => { (e.target as HTMLInputElement).value = ''; };
 
-  // Profile Form Submit (No change)
   const handleFormSubmit = async (e: React.FormEvent) => {
-     // ... (Aapka profile submit logic yahaan same rahega) ...
     e.preventDefault();
     setError(''); 
     setSuccessMessage(''); 
@@ -224,6 +178,7 @@ const SchoolProfilePage = () => {
         setIsSubmitting(false);
         return;
     }
+    // --- FIX 1: Naye field ke liye validation add kiya ---
      if (!formData.genRegNo) {
         setError('General Register No. is required.');
         setIsSubmitting(false);
@@ -232,6 +187,8 @@ const SchoolProfilePage = () => {
 
     try {
       const data = new FormData();
+
+      // Saare text fields ko append karein
       data.append('name', formData.name);
       data.append('name2', formData.name2);
       data.append('address', formData.address);
@@ -240,6 +197,7 @@ const SchoolProfilePage = () => {
       data.append('udiseNo', formData.udiseNo);
       data.append('recognitionNumber', formData.govtReg);
       data.append('place', formData.place);
+      // --- FIX 1: Naya field submit data mein add kiya ---
       data.append('genRegNo', formData.genRegNo);
       
       if (imageFile) {
@@ -265,6 +223,7 @@ const SchoolProfilePage = () => {
             govtReg: savedData.recognitionNumber || '', 
             place: savedData.place || '',
             logoUrl: savedData.logoUrl || '',
+            // --- FIX 1: Naya field response se update kiya ---
             genRegNo: savedData.genRegNo || ''
         });
         if(savedData.logoUrl) {
@@ -274,10 +233,13 @@ const SchoolProfilePage = () => {
       } else {
           console.warn("Backend did not return updated school data in response.school");
       }
+
       setSuccessMessage('School profile updated successfully!');
+
       setTimeout(() => {
         router.push('/admin/dashboard'); 
       }, 1500);
+
     } catch (err: any) {
       const backendError = err.response?.data?.message || err.response?.data?.msg || 'Failed to update profile. Please check details and try again.';
       setError(backendError);
@@ -286,73 +248,17 @@ const SchoolProfilePage = () => {
       setIsSubmitting(false);
     }
   };
-  
-  // Cancel button handler (No change)
+
   const handleCancel = () => {
     if (!isSubmitting) {
       router.back(); 
     }
   };
 
-  // --- NAYA ---
-  // Naye saal ke form ke liye handlers
-  const handleYearFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setYearError('');
-    setYearSuccess('');
-    setNewYearForm(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
-
-  const handleCreateYearSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setYearError('');
-    setYearSuccess('');
-    setIsCreatingYear(true);
-
-    // Validation
-    if (!newYearForm.name || !newYearForm.startDate || !newYearForm.endDate) {
-      setYearError("Please fill in the new year's name, start date, and end date.");
-      setIsCreatingYear(false);
-      return;
-    }
-
-    try {
-      const dataToSubmit = {
-        name: newYearForm.name,
-        startDate: newYearForm.startDate,
-        endDate: newYearForm.endDate,
-        // templateYearId ko tabhi bhejo jab woh select ho
-        templateYearId: newYearForm.templateYearId || undefined 
-      };
-
-      // API call jo humne banayi thi
-      const response = await api.post('/api/school/academic-year', dataToSubmit);
-
-      setYearSuccess(`Successfully created new academic year: ${response.data.name}`);
-      
-      // Form ko reset karo
-      setNewYearForm({ name: '', startDate: '', endDate: '', templateYearId: '' });
-      
-      // List ko refresh karo taaki naya saal template mein dikhe
-      await fetchAcademicYears();
-
-    } catch (err: any) {
-      // 300-din wala error dikhao
-      const backendError = err.response?.data?.message || err.response?.data?.msg || 'Failed to create new year.';
-      setYearError(backendError);
-      console.error("Create year error:", err.response?.data || err);
-    } finally {
-      setIsCreatingYear(false);
-    }
-  };
-  // --- END NAYA ---
-
-
   if (isLoading) {
     return <div className={styles.loadingScreen}><FiLoader /> Loading profile...</div>;
   }
+
   if (!user && !isLoading) {
       return <div className={styles.loadingScreen}>Error loading user data. Please try logging in again.</div>;
   }
@@ -361,11 +267,9 @@ const SchoolProfilePage = () => {
     <div className={styles.profileContainer}>
       <h1 className={styles.title}>Edit School Profile</h1>
 
-      {/* --- School Profile Form Card (No change) --- */}
       <div className={styles.profileCard}>
         <form className={styles.profileForm} onSubmit={handleFormSubmit}>
-          {/* ... (Aapka poora profile form JSX yahaan same rahega) ... */}
-          
+
           <div className={styles.profileHeader}>
             {imagePreview ? (
               <Image src={imagePreview} alt="School Logo" width={100} height={100} className={styles.profileImage} />
@@ -375,6 +279,7 @@ const SchoolProfilePage = () => {
             <div className={styles.imageUploadWrapper}>
               <label htmlFor="imageUpload" className={styles.uploadButton}>Change Logo</label>
               <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/webp" onChange={handleImageChange} onClick={handleInputClick} style={{ display: 'none' }} disabled={isSubmitting} />
+               {/* --- FIX 2: Hint text ko 2MB kiya --- */}
                <small className={styles.uploadHint}>Max 2MB (PNG, JPG, WEBP)</small>
             </div>
           </div>
@@ -389,8 +294,6 @@ const SchoolProfilePage = () => {
             <input type="text" id="name" name="name" value={formData.name} onChange={handleInputChange} required disabled={!canUpdateSchoolName || isSubmitting} className={!canUpdateSchoolName ? styles.disabledInput : ''} />
             {!canUpdateSchoolName && daysRemaining !== null && (<p className={styles.infoMessage}> You can change school name again in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}. </p> )}
           </div>
-          
-          {/* ... (name2, address, place, loginEmail, grid, etc. sab same) ... */}
 
           {/* School Name 2 (Tagline) */}
           <div className={styles.formGroup}>
@@ -414,7 +317,15 @@ const SchoolProfilePage = () => {
           {/* Login Email (Read-Only) */}
           <div className={styles.formGroup}>
             <label htmlFor="loginEmail">Login Email (Cannot be changed)</label>
-            <input type="email" id="loginEmail" name="loginEmail" value={user?.email || 'Loading...'} disabled readOnly className={styles.disabledInput} />
+            <input
+              type="email"
+              id="loginEmail"
+              name="loginEmail"
+              value={user?.email || 'Loading...'} 
+              disabled
+              readOnly 
+              className={styles.disabledInput}
+            />
           </div>
 
           {/* Form Grid for Contact / Public Email */}
@@ -443,14 +354,16 @@ const SchoolProfilePage = () => {
             </div>
           </div>
           
-          {/* General Register No. */}
+          {/* --- FIX 1: Naya field add kiya --- */}
           <div className={styles.formGroup}>
             <label htmlFor="genRegNo">General Register No. (For L.C. Footer) *</label>
             <input type="text" id="genRegNo" name="genRegNo" value={formData.genRegNo} onChange={handleInputChange} required disabled={isSubmitting} placeholder="e.g., 44434" />
             <small>This will auto-fill the 'General Register No.' on certificates.</small>
           </div>
+          {/* --- FIX ENDS HERE --- */}
 
-          {/* Profile Save Buttons */}
+
+          {/* Buttons */}
           <div className={styles.buttonGroup}>
             <button type="button" className={styles.cancelButton} onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
             <button type="submit" className={styles.saveButton} disabled={isSubmitting || isLoading}>
@@ -459,97 +372,6 @@ const SchoolProfilePage = () => {
           </div>
         </form>
       </div>
-
-      {/* --- NAYA --- */}
-      {/* Naya Card Academic Year Management ke liye */}
-      <h2 className={styles.title} style={{marginTop: '40px'}}>
-        <FiCalendar /> Academic Year Management
-      </h2>
-      <div className={styles.profileCard}>
-        <form className={styles.profileForm} onSubmit={handleCreateYearSubmit}>
-          <p className={styles.infoMessage}>
-            Yahaan se naya academic saal (session) banayein. Aap 300 din mein ek baar hi naya saal bana sakte hain.
-          </p>
-          
-          {/* Messages Area */}
-          {yearError && <p className={styles.errorMessage}><FiAlertCircle /> {yearError}</p>}
-          {yearSuccess && <p className={styles.successMessage}><FiCheckCircle /> {yearSuccess}</p>}
-
-          {/* New Year Name */}
-          <div className={styles.formGroup}>
-            <label htmlFor="name">New Academic Year Name *</label>
-            <input 
-              type="text" 
-              id="name" 
-              name="name" 
-              value={newYearForm.name} 
-              onChange={handleYearFormChange} 
-              required 
-              disabled={isCreatingYear} 
-              placeholder="e.g., 2025-26" 
-            />
-          </div>
-
-          {/* Dates Grid */}
-          <div className={styles.formGrid}>
-            <div className={styles.formGroup}>
-              <label htmlFor="startDate">Start Date *</label>
-              <input 
-                type="date" 
-                id="startDate" 
-                name="startDate" 
-                value={newYearForm.startDate} 
-                onChange={handleYearFormChange} 
-                required 
-                disabled={isCreatingYear} 
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="endDate">End Date *</label>
-              <input 
-                type="date" 
-                id="endDate" 
-                name="endDate" 
-                value={newYearForm.endDate} 
-                onChange={handleYearFormChange} 
-                required 
-                disabled={isCreatingYear} 
-              />
-            </div>
-          </div>
-
-          {/* Template Selector */}
-          <div className={styles.formGroup}>
-            <label htmlFor="templateYearId">Copy Settings from (Optional)</label>
-            <select 
-              id="templateYearId" 
-              name="templateYearId" 
-              value={newYearForm.templateYearId} 
-              onChange={handleYearFormChange} 
-              disabled={isCreatingYear || academicYears.length === 0}
-            >
-              <option value="">Don't copy settings</option>
-              {academicYears.map(year => (
-                <option key={year.id} value={year.id}>
-                  Copy from {year.name}
-                </option>
-              ))}
-            </select>
-            <small>
-              Yeh pichle saal ki Classes aur Fee Templates ko naye saal mein copy kar dega.
-            </small>
-          </div>
-
-          {/* Submit Button */}
-          <div className={styles.buttonGroup} style={{justifyContent: 'flex-end'}}>
-            <button type="submit" className={styles.saveButton} disabled={isCreatingYear || isSubmitting}>
-              {isCreatingYear ? <><FiLoader className={styles.spinner}/> Creating Year...</> : 'Create New Academic Year'}
-            </button>
-          </div>
-        </form>
-      </div>
-      {/* --- END NAYA --- */}
-
     </div>
   );
 };

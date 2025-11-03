@@ -1,12 +1,12 @@
 "use client";
+// --- FIX 1: 'useState' ko React se import kiya ---
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import './Sidebar.scss';
 import { useAuth } from '@/app/context/AuthContext';
-// --- FIX: Icons for Plus, Download, Upload, Briefcase, X, and LOCK added ---
-import { FiFileText, FiDownload, FiUpload, FiPlus, FiBriefcase, FiX, FiLock } from 'react-icons/fi'; 
-import { MdGridView, MdLogout, MdAttachMoney } from 'react-icons/md'; // MdAttachMoney for Expense
+import { FiFileText, FiDownload, FiUpload, FiPlus, FiBriefcase, FiX } from 'react-icons/fi'; // --- FIX: Icons add kiye
+import { MdGridView, MdLogout } from 'react-icons/md';
 
 interface MenuItem {
   title: string;
@@ -23,7 +23,7 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
   const router = useRouter(); 
   const { logout } = useAuth();
 
-  // Popup state for Gov Schemes
+  // --- FIX 2: Popup ko control karne ke liye state banaya ---
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   const isStudentPage = pathname === '/admin/students';
@@ -43,13 +43,8 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
     router.push('/admin/teachers?modal=add');
   };
   
-  // --- FIX: New handler for the locked Expense feature ---
-  const handleExpenseClick = () => {
-    alert("Expense tracking is an upcoming feature and is currently locked.");
-  };
-  
   return (
-    <>
+    <> {/* --- FIX: Fragment add kiya taaki popup ko include kar sakein --- */}
       <aside className="sidebar-container">
         <div className="logo-section">
           <Link href="/admin/dashboard">
@@ -60,6 +55,7 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
         <nav className="menu-section">
           <ul className="menu-list">
             {menuItems.map((item, index) => {
+              // Pehle ki tarah dynamic items render karein
               const isActive = (pathname.startsWith(item.path) && item.path !== '/') || (pathname === '/' && item.path === '/');
               return (
                 <li
@@ -76,8 +72,10 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
               );
             })}
 
-            {/* Gov Schemes Button (Opens Popup) */}
+            {/* --- FIX 3: Naya 'Gov Schemes' button yahan add kiya --- */}
+            {/* Yeh 'School' ke baad dikhega (agar School item-2 hai) */}
             <li className="menu-item item-3">
+              {/* Yeh ek button hai, Link nahi */}
               <button onClick={() => setIsPopupOpen(true)} className="menu-button-link">
                 <span className="icon" style={{ color: '#ff6b6b' }}>
                   <FiBriefcase />
@@ -85,22 +83,11 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
                 <span>Gov Schemes</span>
               </button>
             </li>
-
-            {/* --- FIX: New Expense Button (Locked Feature) --- */}
-            <li className="menu-item item-4 disabled-feature">
-              {/* Note: Yeh Link nahi hai, yeh ek button hai jo alert trigger karta hai */}
-              <button onClick={handleExpenseClick} className="menu-button-link">
-                <span className="icon" style={{ color: '#10b981' }}>
-                  <MdAttachMoney /> 
-                </span>
-                <span>Expense</span>
-                <FiLock className="lock-icon" /> {/* Lock Icon */}
-              </button>
-            </li>
             {/* --- END FIX --- */}
             
           </ul>
 
+          {/* Naya Teacher Menu (Ab functional hai) */}
           {isTeacherPage && (
             <div className="contextual-menu">
               <p className="contextual-title">Teacher Options</p>
@@ -121,11 +108,12 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
 
           {isStudentPage && (
             <div className="contextual-menu">
-              {/* ... (student menu) ... */}
+              {/* ... (aapka student menu) ... */}
             </div>
           )}
         </nav>
 
+        {/* ... (aapka footer code) ... */}
         <footer className="sidebar-footer">
           {pathname === '/admin/school' && (
             <Link href="/admin/dashboard" className="footer-button">
@@ -142,7 +130,7 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
         </footer>
       </aside>
 
-      {/* Gov Schemes Popup */}
+      {/* --- FIX 4: Naya "Upcoming" Popup --- */}
       {isPopupOpen && (
         <div className="popup-backdrop" onClick={() => setIsPopupOpen(false)}>
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
@@ -154,6 +142,7 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
           </div>
         </div>
       )}
+      {/* --- END FIX --- */}
     </>
   );
 };

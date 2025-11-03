@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
-import api from '@/backend/utils/api'; 
+import api from '@/backend/utils/api'; // Ensure correct path
 import { io } from "socket.io-client";
 import Header from '@/components/admin/Header/Header';
 import StatCard from '@/components/admin/StatCard/StatCard';
@@ -23,18 +23,7 @@ interface ClassCountData {
     count: number;
     color: string;
 }
-
-// --- NAYA ---
-// Academic Year ke liye interface
-interface AcademicYear {
-  id: string;
-  name: string;
-  isCurrent: boolean;
-}
-// --- END NAYA ---
-
 // --- FIX 1: Backend Interface Update ---
-// (Ismein koi change nahi)
 interface BackendDashboardData {
   admissionsData: { name: string; admissions: number }[]; 
   classCounts: { name: string; count: number }[];       
@@ -48,8 +37,10 @@ interface BackendDashboardData {
   totalParents?: number;
   totalClasses?: number; 
   totalStaff?: number;
+  // --- NEW FIELDS ---
   currentMonthRevenue?: number;
   currentMonthName?: string;
+  // --- END NEW FIELDS ---
 }
 interface FormattedDashboardData {
   stats: { title: string; value: string }[];
@@ -59,13 +50,16 @@ interface FormattedDashboardData {
 }
 // --- END TYPE DEFINITIONS ---
 
-// ... (Color Palettes, Card details, Card Links, Helper Function mein koi change nahi) ...
+// --- Color Palettes (No Change) ---
 const classColors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1', '#D97706'];
 const admissionColors = {
     high: '#22c55e', 
     medium: '#8b5cf6', 
     low: '#ef4444' 
 };
+// --- END NEW ---
+
+// Card details (No Change)
 const cardDetails = {
   "Total Students": { icon: <MdPeople />, theme: "blue" },
   "Total Teachers": { icon: <MdSchool />, theme: "teal" },
@@ -74,6 +68,8 @@ const cardDetails = {
   "Total Staff": { icon: <MdBadge />, theme: "orange" },
   "Total Classes": { icon: <MdClass />, theme: "sky" }
 } as const;
+
+// --- Card Links (No Change) ---
 const cardLinks: { [key: string]: string } = {
   "Total Students": "/admin/students",
   "Total Teachers": "/admin/teachers",
@@ -82,6 +78,9 @@ const cardLinks: { [key: string]: string } = {
   "Total Parents": "/admin/parents", 
   "Total Classes": "/admin/school/classes"  
 };
+// --- END ---
+
+// --- Helper Function (No Change) ---
 const getAdmissionColor = (value: number, min: number, max: number): string => {
     if (value <= 0) return '#9ca3af'; 
     if (max === min && value > 0) return admissionColors.medium; 
@@ -90,77 +89,26 @@ const getAdmissionColor = (value: number, min: number, max: number): string => {
     const mid = (max + min) / 2;
     return value >= mid ? admissionColors.medium : admissionColors.low; 
 };
+// --- END HELPER ---
 
 
 const AdminDashboardPage = () => {
   const { user, token } = useAuth() as { user: User | null; token: string | null; login: (token: string) => Promise<any> };
   const [dashboardData, setDashboardData] = useState<FormattedDashboardData | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
-  
-  // --- NAYA ---
-  // Naye state academic year ke liye
-  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
-  const [selectedYearId, setSelectedYearId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // Loading state
-  // --- END NAYA ---
 
-
-  // --- NAYA ---
-  // Function jo saare academic years fetch karega
-  const fetchAcademicYears = useCallback(async () => {
-    if (!token) {
-        console.log("fetchAcademicYears: No token, skipping.");
-        return;
-    }
-    console.log("Fetching academic years...");
-    try {
-      // Yeh 'GET' route humne pehle banaya tha
-      const response = await api.get('/api/school/academic-year');
-      const years: AcademicYear[] = response.data;
-      setAcademicYears(years);
-
-      if (years.length > 0) {
-        // Automatically current saal select karein
-        const currentYear = years.find(y => y.isCurrent);
-        if (currentYear) {
-          setSelectedYearId(currentYear.id);
-          console.log(`Current academic year set: ${currentYear.id}`);
-        } else {
-          // Ya fir list ka pehla saal
-          setSelectedYearId(years[0].id);
-          console.log(`Fallback academic year set: ${years[0].id}`);
-        }
-      } else {
-        console.warn("Koi academic year nahi mila.");
-        setIsLoading(false);
-      }
-    } catch (error) {
-      console.error("Failed to fetch academic years:", error);
-    }
-  }, [token]);
-  // --- END NAYA ---
-
-
-  // --- UPDATE ---
-  // fetchDashboardData ko 'yearId' accept karne ke liye update kiya
-  const fetchDashboardData = useCallback(async (yearId: string) => {
+  // --- FIX 2: fetchDashboardData Update ---
+  const fetchDashboardData = useCallback(async () => {
     if (!token) {
         console.log("fetchDashboardData: No token found, skipping fetch.");
         return; 
     }
-    console.log(`fetchDashboardData: Fetching data for year ${yearId}...`);
+    console.log("fetchDashboardData: Fetching data...");
     try {
-      // --- UPDATE ---
-      // API call mein 'yearId' as a query parameter bheja
-      const response = await api.get<BackendDashboardData>(`/admin/dashboard-data?yearId=${yearId}`); 
-      // NOTE: Aapko apne backend route '/admin/dashboard-data' ko update karna hoga
-      // taaki woh 'yearId' parameter ko handle kare.
-      // --- END UPDATE ---
-      
+      const response = await api.get<BackendDashboardData>('/admin/dashboard-data'); 
       const data = response.data;
       console.log("fetchDashboardData: Data received from backend:", data);
 
-      // ... (Aapka baaki ka data processing logic same rahega) ...
       // Process Monthly Admissions
       const monthlyDataFromApi = data.admissionsData || [];
       let coloredMonthlyData: MonthlyAdmissionData[] = [];
@@ -168,13 +116,18 @@ const AdminDashboardPage = () => {
           const admissionValues = monthlyDataFromApi.map(d => d.admissions).filter(v => v > 0); 
           const maxVal = admissionValues.length > 0 ? Math.max(...admissionValues) : 0;
           const minVal = admissionValues.length > 0 ? Math.min(...admissionValues) : 0;
+          console.log(`Monthly Admissions Min: ${minVal}, Max: ${maxVal}`);
+
           coloredMonthlyData = monthlyDataFromApi.map(item => ({
               name: item.name,
               admissions: item.admissions,
               color: getAdmissionColor(item.admissions, minVal, maxVal) 
           }));
+      } else {
+           console.log("fetchDashboardData: No monthly admissions data found.");
       }
-      
+      console.log("fetchDashboardData: Processed Monthly Admissions:", coloredMonthlyData);
+
       // Process Class Counts
       const classDataFromApi = data.classCounts || [];
       let coloredClassData: ClassCountData[] = [];
@@ -184,21 +137,26 @@ const AdminDashboardPage = () => {
               count: item.count,
               color: classColors[index % classColors.length] 
           }));
+      } else {
+            console.log("fetchDashboardData: No class count data found.");
       }
+      console.log("fetchDashboardData: Processed Class Counts:", coloredClassData);
 
-      // Revenue Logic
+      // --- NEW REVENUE LOGIC ---
       const revenueAmount = data.currentMonthRevenue || 0;
       const revenueMonth = data.currentMonthName || 'Monthly';
       const formattedRevenue = `₹${revenueAmount.toLocaleString('en-IN')}`;
       const revenueDisplay = revenueAmount > 0 
           ? `${formattedRevenue} (${revenueMonth})`
           : `${formattedRevenue} (No Revenue)`;
+      // --- END NEW REVENUE LOGIC ---
+
 
       // Format Stats
       const formattedStats = [
         { title: "Total Students", value: (data.totalStudents || 0).toString() },
         { title: "Total Teachers", value: (data.totalTeachers || 0).toString() },
-        { title: "Monthly Revenue", value: revenueDisplay },
+        { title: "Monthly Revenue", value: revenueDisplay }, // <--- UPDATED STAT VALUE
         { title: "Total Parents", value: (data.totalParents || 0).toString() },
         { title: "Total Staff", value: (data.totalStaff || 0).toString() },
         { title: "Total Classes", value: (classDataFromApi.length || 0).toString() }
@@ -218,14 +176,11 @@ const AdminDashboardPage = () => {
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
       setDashboardData({ stats: [], monthlyAdmissions: [], classCounts: [], recentPayments: [] });
-    } finally {
-        setIsLoading(false); // Data load hone ke baad loading false karein
     }
-  }, [token]); // --- UPDATE --- token dependency rakhein, check upar hai
+  }, [token]); 
   // --- END fetchDashboardData Update ---
 
-  
-  // ... (loadProfileData mein koi change nahi) ...
+  // --- loadProfileData (No Change) ---
   const loadProfileData = useCallback(() => {
     if (user) {
       let profileData: AdminProfile = {
@@ -248,96 +203,54 @@ const AdminDashboardPage = () => {
       setAdminProfile(profileData);
     } else { setAdminProfile(null); }
   }, [user]);
+  // --- END loadProfileData ---
 
-
-  // --- UPDATE ---
-  // useEffect ko do alag parts mein manage karenge
-  
-  // 1. Profile aur Academic Years ko load karne ke liye
+  // --- useEffect (No Change) ---
   useEffect(() => {
-    loadProfileData();
     if (token) {
-      fetchAcademicYears(); // Pehle saal fetch karein
+        fetchDashboardData();
     }
-    window.addEventListener('focus', loadProfileData); 
-    
-    return () => {
-        window.removeEventListener('focus', loadProfileData);
-    }
-  }, [token, loadProfileData, fetchAcademicYears]);
+    loadProfileData(); 
 
-  // 2. Dashboard Data aur Sockets ko manage karne ke liye
-  useEffect(() => {
-    // Jab selectedYearId aur token ho, tabhi data fetch karein
-    if (selectedYearId && token) {
-      setIsLoading(true);
-      fetchDashboardData(selectedYearId);
-    }
-
-    // Socket setup
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "https://myedupanel.onrender.com"; 
     const socket = io(socketUrl);
 
-    socket.on('connect', () => console.log('Socket.IO: Connected!'));
-    
-    // Socket update aane par data dobara fetch karein
+    socket.on('connect', () => {
+        console.log('Socket.IO: Connected!');
+        console.log('Socket.IO: Connected to URL:', socketUrl); 
+    });
+
     socket.on('updateDashboard', () => {
       console.log('Socket.IO: Update event received! Refreshing dashboard data...');
-      if (selectedYearId && token) { // Check karein ki yearId abhi bhi hai
-          fetchDashboardData(selectedYearId); 
-      }
+      fetchDashboardData(); 
     });
-    
-    socket.on('connect_error', (err) => console.error('Socket.IO: Connection Error!', err.message));
-    
+    socket.on('connect_error', (err) => console.error('Socket.IO: Connection Error!', err.message, err.cause));
+    window.addEventListener('focus', loadProfileData); 
+
     return () => { 
+      window.removeEventListener('focus', loadProfileData);
       socket.disconnect();
       console.log('Socket.IO: Disconnected');
     };
-  }, [selectedYearId, token, fetchDashboardData]); // Yeh 'chain' hai
-  // --- END UPDATE ---
+  }, [fetchDashboardData, loadProfileData, token]);
+  // --- END useEffect ---
 
-
-  // --- UPDATE ---
-  // Loading state ko behtar tareeke se handle karein
-  if (!adminProfile || isLoading || !dashboardData) {
+  // Loading state (No Change)
+  if (!adminProfile || !dashboardData) {
     return <div className={styles.loading}>Loading Dashboard...</div>;
   }
-  // --- END UPDATE ---
 
-  
+  // --- JSX Return (No Change) ---
   return (
     <div className={styles.dashboardContainer}>
       <Header admin={adminProfile} />
       
-      {/* --- NAYA --- */}
-      {/* Year Selector Dropdown */}
-      <div className={styles.controlsContainer}>
-        <div className={styles.yearSelector}>
-          <label htmlFor="yearSelect">Academic Year: </label>
-          <select 
-            id="yearSelect"
-            value={selectedYearId || ''}
-            onChange={(e) => setSelectedYearId(e.target.value)}
-            disabled={academicYears.length === 0 || isLoading}
-          >
-            {academicYears.length === 0 ? (
-              <option>Loading years...</option>
-            ) : (
-              academicYears.map((year) => (
-                <option key={year.id} value={year.id}>
-                  {year.name} {year.isCurrent ? "(Current)" : ""}
-                </option>
-              ))
-            )}
-          </select>
-        </div>
-      </div>
-      {/* --- END NAYA --- */}
-      
       <div className={styles.statsGrid}>
         {dashboardData.stats.map((stat) => {
+          // 1. Link ka path check karein
           const linkPath = cardLinks[stat.title as keyof typeof cardLinks];
+
+          // 2. Card ko ek variable mein banayein
           const card = (
             <StatCard
               title={stat.title}
@@ -347,6 +260,7 @@ const AdminDashboardPage = () => {
             />
           );
 
+          // 3. Agar link hai, toh Link component se wrap karein
           if (linkPath) {
             return (
               <Link href={linkPath} key={stat.title} className={styles.statCardLink}>
@@ -354,7 +268,13 @@ const AdminDashboardPage = () => {
               </Link>
             );
           }
-          return (<div key={stat.title}>{card}</div>);
+
+          // 4. Agar link nahi hai, toh card ko aise hi render karein
+          return (
+            <div key={stat.title}>
+              {card}
+            </div>
+          );
         })}
       </div>
       
@@ -371,6 +291,7 @@ const AdminDashboardPage = () => {
       </div>
     </div>
   );
+  // --- END JSX Return ---
 };
 
 export default AdminDashboardPage;
