@@ -24,7 +24,6 @@ interface ClassCountData {
     color: string;
 }
 
-// 🎯 FIX 1: Backend interface mein Revenue fields add kiye
 interface BackendDashboardData {
   admissionsData: { name: string; admissions: number }[];
   classCounts: { name: string; count: number }[];
@@ -38,12 +37,12 @@ interface BackendDashboardData {
   totalParents?: number;
   totalClasses?: number;
   totalStaff?: number;
-  currentMonthRevenue?: number; // <--- ADDED
-  currentMonthName?: string;    // <--- ADDED
+  currentMonthRevenue?: number;
+  currentMonthName?: string;
 }
 
 interface FormattedDashboardData {
-  stats: { title: string; value: string; monthName?: string }[]; // <--- monthName added to stat
+  stats: { title: string; value: string; monthName?: string }[];
   monthlyAdmissions: MonthlyAdmissionData[];
   classCounts: ClassCountData[];
   recentPayments: { id: string; student: string; amount: string; date: string }[];
@@ -58,7 +57,6 @@ const admissionColors = {
 };
 
 // --- CARD DETAILS ---
-// Monthly Revenue title update kiya
 const cardDetails = {
   "Total Students": { icon: <MdPeople />, theme: "blue" },
   "Total Teachers": { icon: <MdSchool />, theme: "teal" },
@@ -114,7 +112,6 @@ const AdminDashboardPage = () => {
           const admissionValues = monthlyDataFromApi.map(d => d.admissions).filter(v => v > 0);
           const maxVal = admissionValues.length > 0 ? Math.max(...admissionValues) : 0;
           const minVal = admissionValues.length > 0 ? Math.min(...admissionValues) : 0;
-          console.log(`Monthly Admissions Min: ${minVal}, Max: ${maxVal}`);
 
           coloredMonthlyData = monthlyDataFromApi.map(item => ({
               name: item.name,
@@ -124,7 +121,6 @@ const AdminDashboardPage = () => {
       } else {
            console.log("fetchDashboardData: No monthly admissions data found.");
       }
-      console.log("fetchDashboardData: Processed Monthly Admissions:", coloredMonthlyData);
 
       // Process Class Counts (No Change)
       const classDataFromApi = data.classCounts || [];
@@ -138,19 +134,18 @@ const AdminDashboardPage = () => {
       } else {
             console.log("fetchDashboardData: No class count data found.");
       }
-      console.log("fetchDashboardData: Processed Class Counts:", coloredClassData);
 
-      // 🎯 FIX 2: Revenue Data ko format karna
+      // Revenue Data ko format karna
       const revenueAmount = data.currentMonthRevenue || 0;
-      const formattedRevenue = `₹${revenueAmount.toLocaleString('en-IN')}`; // Indian format
+      const formattedRevenue = `₹${revenueAmount.toLocaleString('en-IN')}`;
       const monthName = data.currentMonthName || 'Monthly';
-      const revenueTitle = `${monthName.substring(0, 3)} Revenue`; // Short month name
+      const revenueTitle = `${monthName.substring(0, 3)} Revenue`; 
 
       // Format Stats
       const formattedStats = [
         { title: "Total Students", value: (data.totalStudents || 0).toString() },
         { title: "Total Teachers", value: (data.totalTeachers || 0).toString() },
-        { title: revenueTitle, value: formattedRevenue, monthName: monthName }, // <--- REVENUE STAT UPDATED
+        { title: revenueTitle, value: formattedRevenue, monthName: monthName }, 
         { title: "Total Parents", value: (data.totalParents || 0).toString() },
         { title: "Total Staff", value: (data.totalStaff || 0).toString() },
         { title: "Total Classes", value: (classDataFromApi.length || 0).toString() }
@@ -238,7 +233,6 @@ const AdminDashboardPage = () => {
       
       <div className={styles.statsGrid}>
         {dashboardData.stats.map((stat) => {
-          // 🎯 FIX 3: Dynamic title check karna padega (jaise "Nov Revenue")
           const baseTitle = stat.title.includes('Revenue') ? "Monthly Revenue" : stat.title; 
           const href = cardLinks[baseTitle as keyof typeof cardLinks];
           
@@ -247,9 +241,12 @@ const AdminDashboardPage = () => {
               // Use the full title (Nov Revenue) for display
               title={stat.title}
               value={stat.value}
-              // Icon/Theme ke liye "Monthly Revenue" (base title) use karna padega
-              icon={cardDetails["Monthly Revenue"]?.icon}
-              theme={cardDetails["Monthly Revenue"]?.theme}
+              
+              // --- 🎯 YAHAN FIX KIYA GAYA HAI ---
+              // Icon/Theme ke liye 'baseTitle' (dynamic) use karna padega
+              icon={cardDetails[baseTitle as keyof typeof cardDetails]?.icon}
+              theme={cardDetails[baseTitle as keyof typeof cardDetails]?.theme}
+              // --- END FIX ---
             />
           );
 

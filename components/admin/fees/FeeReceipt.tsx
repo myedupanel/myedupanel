@@ -79,41 +79,23 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
 
-    // --- FIX: 'Print' Function ko 'onload' event ke saath update kiya ---
+    // --- FIX 1: handlePrint function ko Class Switching se replace kiya ---
     const handlePrint = () => {
-        const printContent = componentRef.current;
-        if (!printContent) return;
-
-        // 1. Styles ko copy karein (No Change)
-        const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-                           .map(el => el.outerHTML)
-                           .join('');
-
-        // 2. Nayi window kholein (No Change)
-        const printWindow = window.open('', '', 'height=800,width=800');
+        // Step 1: Body par printing class add karein
+        // Yeh class globals.scss mein visibility rules trigger karegi
+        document.body.classList.add('printing-receipt-active'); 
         
-        if (printWindow) {
-            // 3. Poora HTML content likhein (No Change)
-            printWindow.document.write('<html><head><title>Print Receipt</title>');
-            printWindow.document.write(styles); 
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(printContent.innerHTML); 
-            printWindow.document.write('</body></html>');
-
-            // --- YEH HAI ASLI FIX ---
-            // Hum document.fonts.ready ke bajaye window.onload ka istemaal karenge
-            // Taaki hum print tabhi karein jab sab kuch render ho chuka ho.
-            printWindow.onload = () => {
-                printWindow.focus(); // Nayi window par focus karein
-                printWindow.print(); // Ab print dialog kholein
-                printWindow.close(); // Print ke baad window ko band kar dein
-            };
-            // --- END FIX ---
-            
-            printWindow.document.close(); // 'onload' event ko trigger karne ke liye zaroori
-        }
+        // Step 2: Native Print dialog kholo
+        window.print();
+        
+        // Step 3: Print ke baad class hata do
+        // Small timeout zaroori hai taki print job shuru ho jaaye
+        setTimeout(() => {
+          document.body.classList.remove('printing-receipt-active');
+        }, 500); 
     };
     // --- END PRINT FIX ---
+
 
     // --- Download PDF Function (No Change - Yeh pehle se theek tha) ---
     const handleDownloadPDF = () => {
@@ -123,6 +105,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             return;
         }
 
+        // is method mein class switching ki zaroorat nahi, sirf printing class lagate hain
         input.classList.add(styles.printing);
 
         html2canvas(input, {
@@ -200,7 +183,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
     return (
         <div className={styles.receiptContainer}>
-            {/* --- Buttons (No Change) --- */}
+            {/* --- Buttons (Use 'no-print' class from globals.scss) --- */}
             <div className={`${styles.actions} no-print`}>
                 <button onClick={handleDownloadPDF} className={styles.downloadButton}><FiDownload /> Download PDF</button>
                 <button onClick={handlePrint} className={styles.printButton}><FiPrinter /> Print Receipt</button>
@@ -208,8 +191,9 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             {/* --- END --- */}
 
 
-            {/* --- Receipt Content (No Change in JSX) --- */}
-            <div id="printable-receipt" className={styles.receiptContent} ref={componentRef}>
+            {/* --- Receipt Content (ADD 'printable-area' class) --- */}
+            {/* global.scss mein is class par visibility set hogi */}
+            <div id="printable-receipt" className={`${styles.receiptContent} printable-area`} ref={componentRef}>
                 {/* Header */}
                 <header className={styles.header}>
                     {schoolInfo.logo && (<img src={schoolInfo.logo} alt={`${schoolInfo.name || 'School'} Logo`} className={styles.logo} />)}
