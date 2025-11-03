@@ -1,15 +1,12 @@
 // File: app/api/school/academic-year/route.ts
 
 import { NextResponse } from "next/server";
-// --- YEH IMPORT FIX KIYA GAYA HAI ---
-// Classes aur FeeTemplate ko yahaan se import nahi karna chahiye
-import { Prisma, PrismaClient } from "@prisma/client";
-// -----------------------------------
+// --- YEH IMPORT 100% SAHI HAI ---
+import { Prisma, PrismaClient, Classes, FeeTemplate } from "@prisma/client";
+// ---------------------------------
 
-// Naye types define karne ke liye, hum use karenge:
-type PrismaClassesType = Prisma.ClassesGetPayload<{}>;
-type PrismaFeeTemplateType = Prisma.FeeTemplateGetPayload<{}>;
-
+// Aapka session/auth helper yahaan import karein (e.g., getAuthSession)
+// import { getAuthSession } from "@/lib/auth"; 
 
 const prisma = new PrismaClient();
 
@@ -79,15 +76,15 @@ export async function POST(req: Request) {
         console.log(`Cloning shuru karni hai... template se: ${templateYearId}`);
 
         // 1. Classes ko Clone karna
-        // NOTE: academicYearId ki jagah classId use ho raha tha purane code mein
         const oldClasses = await tx.classes.findMany({
           where: { academicYearId: templateYearId, schoolId: schoolId }
         });
 
         if (oldClasses.length > 0) {
           
-          // FIX: Type ko Prisma.ClassesGetPayload<{}> use kiya
-          const classesToCreate = oldClasses.map((c: PrismaClassesType) => ({
+          // --- YEH TYPE (Classes) BHI 100% SAHI HAI ---
+          const classesToCreate = oldClasses.map((c: Classes) => ({
+          // -------------------------------------------
             class_name: c.class_name,
             schoolId: schoolId,
             academicYearId: year.id 
@@ -106,8 +103,9 @@ export async function POST(req: Request) {
 
         if (oldFeeTemplates.length > 0) {
           
-          // FIX: Type ko Prisma.FeeTemplateGetPayload<{}> use kiya
-          const templatesToCreate = oldFeeTemplates.map((t: PrismaFeeTemplateType) => ({
+          // --- YEH TYPE (FeeTemplate) BHI 100% SAHI HAI ---
+          const templatesToCreate = oldFeeTemplates.map((t: FeeTemplate) => ({
+          // -----------------------------------------------
             name: t.name,
             description: t.description,
             items: t.items as any, // 'as any' JSON ke liye zaroori hai
