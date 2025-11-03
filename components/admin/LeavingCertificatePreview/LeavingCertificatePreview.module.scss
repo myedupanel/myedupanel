@@ -90,37 +90,50 @@
 /* --- End Header Style --- */
 
 
-/* --- Student Info Table (Main Fixes) --- */
+/* --- Student Info Table (GRID FIXES APPLIED) --- */
 .studentInfoTable {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: collapse; /* Borders ko milata hai */
   margin-top: 10px;
+  border: 1px solid #000; /* Outer border */
   
   tbody tr td {
+    /* --- FIX 1: Grid Borders --- */
+    border: 1px solid #ddd; 
+    
+    /* --- FIX 2: Vertical Alignment --- */
     padding: 7px 5px;
-    vertical-align: top;
+    vertical-align: top; /* Text hamesha top se shuru ho */
     line-height: 1.4;
-    border-bottom: 1px solid #eee;
   }
-  tbody tr td:nth-child(1) { width: 35px; text-align: center; font-weight: normal; }
-  tbody tr td:nth-child(2) { width: 35%; font-weight: normal; }
+  tbody tr td:nth-child(1) { 
+    width: 35px; 
+    text-align: center; 
+    font-weight: normal; 
+    border-right: 1px solid #000; /* Row number aur label ke beech darker border */
+  }
+  tbody tr td:nth-child(2) { 
+    width: 35%; 
+    font-weight: normal; 
+    border-right: 1px solid #000; /* Label aur value ke beech darker border */
+  }
   
   tbody tr td:nth-child(3) {
     width: 60%;
     font-weight: bold;
-    // Default display flex rakhte hain, jisse inlineFields kaam kare
     display: flex; 
     flex-wrap: wrap; 
     align-items: center;
     gap: 5px 20px; 
+    border-right: none; /* Last column mein right border ki zaroorat nahi */
   }
   
-  /* --- FIX 1: Increased gap for inline fields (Row 4) --- */
+  /* FIX 3: Row 4 Spacing (Aapke pichle fix se) */
   .row4Spacing {
-    gap: 5px 40px !important; // Default 20px se badha diya
+    gap: 5px 40px !important; 
   }
   
-  /* --- FIX 2: 2x2 Grid for Birth Place (Row 6) --- */
+  /* Birth Place Grid */
   .gridWrapper {
     display: flex;
     flex-direction: column;
@@ -128,12 +141,12 @@
     
     .gridRow {
       display: flex;
-      justify-content: space-between; // Fields ke beech space
+      justify-content: space-between; 
       width: 100%;
       margin-bottom: 5px;
       
       .subField {
-        flex-basis: 48%; // Do fields ko 2x2 mein fit karne ke liye
+        flex-basis: 48%; 
         display: flex;
         align-items: baseline;
       }
@@ -210,6 +223,6 @@
     height: 100%;
   }
   .studentInfoTable tbody tr td {
-    border-bottom: none;
+    border: 1px solid #000; /* Print mein borders black rakhte hain */
   }
 }
