@@ -395,7 +395,7 @@ router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => {
               return res.status(400).json({ message: error.message });
          }
          if (error.message === 'Forbidden.') {
-              return res.status(403).json({ message: error.message });
+              return res.status(43).json({ message: error.message });
          }
         res.status(500).send('Server Error updating profile');
     }
