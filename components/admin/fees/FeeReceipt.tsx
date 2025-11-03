@@ -1,3 +1,5 @@
+// File: FeeReceipt.tsx (Updated)
+
 import React, { useRef } from 'react';
 import styles from './FeeReceipt.module.scss';
 import { FiPrinter, FiDownload } from 'react-icons/fi';
@@ -79,7 +81,7 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
 
-    // --- FIX: 'Print' Function ko 'onload' event ke saath update kiya ---
+    // --- YEH RAHA AAPKA FIX ---
     const handlePrint = () => {
         const printContent = componentRef.current;
         if (!printContent) return;
@@ -100,22 +102,23 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             printWindow.document.write(printContent.innerHTML); 
             printWindow.document.write('</body></html>');
 
-            // --- YEH HAI ASLI FIX ---
-            // Hum document.fonts.ready ke bajaye window.onload ka istemaal karenge
-            // Taaki hum print tabhi karein jab sab kuch render ho chuka ho.
-            printWindow.onload = () => {
+            // --- YEH BADLAAV HAI (Timeout Fix) ---
+            // 'onload' kaam nahi kar raha tha, isliye hum 'setTimeout' ka istemaal karenge.
+            printWindow.document.close(); // Pehle document ko close karein
+
+            setTimeout(() => {
                 printWindow.focus(); // Nayi window par focus karein
                 printWindow.print(); // Ab print dialog kholein
-                printWindow.close(); // Print ke baad window ko band kar dein
-            };
-            // --- END FIX ---
-            
-            printWindow.document.close(); // 'onload' event ko trigger karne ke liye zaroori
+                
+                // Print ke baad window ko band kar dein
+                printWindow.close(); 
+            }, 300); // 300ms ka delay, ise 500 kar sakte hain agar yeh abhi bhi fail ho.
+            // --- END BADLAAV ---
         }
     };
     // --- END PRINT FIX ---
 
-    // --- Download PDF Function (No Change - Yeh pehle se theek tha) ---
+    // --- Download PDF Function (No Change) ---
     const handleDownloadPDF = () => {
         const input = componentRef.current;
         if (!input) {
