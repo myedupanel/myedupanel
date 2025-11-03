@@ -114,15 +114,19 @@
     }
 }
 @media print {
-    // VERCEL COMPILATION FIX: Global styles ko is block mein wrap kiya
-    :global {
-        body {
-            // Background aur margins ko clear kiya (Blank Page Fix)
+    
+    // CRITICAL Purity Fix: We target the body using a pseudo-element 
+    // attached to a local selector (printableArea) to make it 'pure'.
+    // This injects the essential body reset styles globally.
+    .printableArea::before {
+        content: "";
+        
+        // This is where we inject the global body styles safely
+        :global(body) {
             margin: 0 !important;
             padding: 0 !important;
             background-color: #ffffff !important;
             color: #000000;
-            // CRITICAL: Ensure colors print correctly (Chrome/Edge ke liye)
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
