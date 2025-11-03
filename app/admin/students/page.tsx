@@ -338,7 +338,6 @@ const StudentsPage = () => {
                         <div className={styles.searchFilter}>
                             <StudentFilters 
                                 onSearch={setSearchQuery} 
-                                onSort={() => {}} // Dummy function
                             />
                         </div>
 
