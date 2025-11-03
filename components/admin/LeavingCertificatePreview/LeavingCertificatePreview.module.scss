@@ -1,12 +1,11 @@
 /* src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss */
 
-/* --- FIX (PRINT BREAK) --- */
+/* --- Base Styles (No Change) --- */
 .certificatePaper {
   width: 210mm;
   padding: 10mm;
   margin: 20px auto;
   font-family: 'Times New Roman', Times, serif;
-  /* --- FIX 1: Base font size kam kiya --- */
   font-size: 12pt;
   color: #000;
   background: #fff;
@@ -24,10 +23,7 @@
   width: 100%;
   flex-grow: 1;
 }
-/* --- END FIX --- */
 
-
-/* --- Data Fill-in Styles --- */
 .fill {
   font-weight: bold;
   padding: 0 4px;
@@ -39,13 +35,14 @@
   vertical-align: bottom;
   padding: 0 4px;
 }
+/* --- End Base Styles --- */
 
-/* --- Header Style (Font size adjust kiya) --- */
+
+/* --- Header Style (No Change) --- */
 .certHeader {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* --- FIX 2: Gaps kam kiye --- */
   gap: 8px;
   border-bottom: 1.5px solid #000;
   padding-bottom: 8px;
@@ -58,12 +55,9 @@
     text-align: center;
     padding: 0;
     .schoolName1 { font-size: 12pt; font-weight: bold; margin: 0; }
-    /* --- FIX 1: Font size kam kiya --- */
     .schoolName2 { font-size: 18pt; font-weight: bold; margin: 2px 0; }
     .schoolAddressCode { font-size: 10pt; margin: 0; line-height: 1.4; }
   }
-  
-  .titleBlock { display: none; }
 }
 
 .titleRow {
@@ -71,11 +65,9 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  /* --- FIX 2: Gap kam kiya --- */
   margin-top: 8px;
 
   h2 { /* Title */
-    /* --- FIX 1: Font size kam kiya --- */
     font-size: 15pt;
     font-weight: bold;
     margin: 0;
@@ -86,25 +78,16 @@
   }
 
   .headerSrNo, .headerRegNo {
-    /* --- FIX 1: Font size kam kiya --- */
     font-size: 11pt;
     font-weight: bold;
     white-space: nowrap;
     flex-basis: auto;
     flex-shrink: 0;
   }
-
-  .headerSrNo {
-    text-align: left;
-    margin-right: 15px;
-  }
-  
-  .headerRegNo {
-    text-align: right;
-    margin-left: 15px;
-  }
+  .headerSrNo { text-align: left; margin-right: 15px; }
+  .headerRegNo { text-align: right; margin-left: 15px; }
 }
-/* --- END HEADER FIX --- */
+/* --- End Header Style --- */
 
 
 /* --- Student Info Table (Main Fixes) --- */
@@ -112,13 +95,10 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
-  /* Font size ab base (12pt) se inherit karega */
   
   tbody tr td {
-    /* --- FIX 3: SABSE IMPORTANT (Vertical Padding kam ki) --- */
     padding: 7px 5px;
     vertical-align: top;
-    /* --- FIX 4: Line height thoda kam kiya --- */
     line-height: 1.4;
     border-bottom: 1px solid #eee;
   }
@@ -128,27 +108,47 @@
   tbody tr td:nth-child(3) {
     width: 60%;
     font-weight: bold;
-    display: flex;
+    // Default display flex rakhte hain, jisse inlineFields kaam kare
+    display: flex; 
     flex-wrap: wrap; 
     align-items: center;
-    gap: 5px 20px;
+    gap: 5px 20px; 
   }
   
-  /* --- YEH HAI AAPKA FIX --- */
-  /* Row numbers ko update kiya (kyunki row 1 delete ho gayi thi) */
-  /* Yeh un fields ke liye hai jo wrap hone chahiye (e.g., long text) */
-  tbody tr:nth-child(8) td:nth-child(3),  /* 8. DOB (Words) */
-  tbody tr:nth-child(9) td:nth-child(3),  /* 9. Previous School */
-  tbody tr:nth-child(14) td:nth-child(3), /* 14. Reason */
-  tbody tr:nth-child(15) td:nth-child(3)  /* 15. Remarks */
+  /* --- FIX 1: Increased gap for inline fields (Row 4) --- */
+  .row4Spacing {
+    gap: 5px 40px !important; // Default 20px se badha diya
+  }
+  
+  /* --- FIX 2: 2x2 Grid for Birth Place (Row 6) --- */
+  .gridWrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    
+    .gridRow {
+      display: flex;
+      justify-content: space-between; // Fields ke beech space
+      width: 100%;
+      margin-bottom: 5px;
+      
+      .subField {
+        flex-basis: 48%; // Do fields ko 2x2 mein fit karne ke liye
+        display: flex;
+        align-items: baseline;
+      }
+    }
+  }
+
+  // Ensure these rows use display: block to stop wrapping issues
+  tbody tr:nth-child(8) td:nth-child(3),
+  tbody tr:nth-child(9) td:nth-child(3),
+  tbody tr:nth-child(14) td:nth-child(3),
+  tbody tr:nth-child(15) td:nth-child(3) 
   {
      display: block;
   }
-  /* Row 6 (Birth place) ko yahan se hata diya hai, 
-     taaki woh aapke TSX file ke inline styles (2x2 grid) ko use kar sake. */
 }
-/* --- FIX ENDS HERE --- */
-
 
 .subField {
   font-weight: normal;
@@ -158,19 +158,17 @@
   }
 }
 
-/* --- Certification Text --- */
+/* --- Certification Text (No Change) --- */
 .certText {
-  /* --- FIX 1 & 2: Font size aur margin kam kiya --- */
   font-size: 11pt;
   text-align: left;
   margin-top: 15px;
   line-height: 1.6;
 }
 
-/* --- Footer Layout (Spacing kam ki) --- */
+/* --- Footer Layout (No Change) --- */
 .certFooterWrapper {
-  margin-top: auto; /* Hamesha neeche */
-  /* --- FIX 2: Gap kam kiya --- */
+  margin-top: auto;
   padding-top: 20px;
   font-size: 12pt;
   font-weight: bold;
@@ -180,7 +178,6 @@
 
 .datePlace {
   text-align: left;
-  /* --- FIX 2: Gap kam kiya --- */
   margin-bottom: 30px;
 }
 
@@ -193,14 +190,11 @@
 .sigBox {
   text-align: center;
   width: 30%;
-  /* --- FIX 2: Gap kam kiya --- */
   padding-top: 30px;
-  border-top: 1px solid #000; /* Signature line */
+  border-top: 1px solid #000;
 }
-/* --- END FOOTER --- */
 
-
-/* --- Print Fix (Final) --- */
+/* --- Print Fix (No Change) --- */
 @media print {
   .certificatePaper {
     box-shadow: none;
