@@ -1,20 +1,22 @@
 // app/admin/parents/page.tsx
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import styles from '../parents/ParentsPage.module.scss'; // Student page ke styles use kar rahe hain
+import styles from './ParentsPage.module.scss';
 import ParentsTable from '@/components/admin/ParentsTable/ParentsTable';
 import Modal from '@/components/common/Modal/Modal';
 import AddParentForm from '@/components/admin/AddParentForm/AddParentForm';
 import StudentFilters from '@/components/admin/StudentFilters/StudentFilters';
 import { FiPlus } from 'react-icons/fi';
-import api from '@/backend/utils/api'; // axios ke bajaye api instance
+import api from '@/backend/utils/api'; 
 import Link from 'next/link';
 import { MdGridView } from 'react-icons/md';
-import { useAuth } from '@/app/context/AuthContext'; // Socket filtering ke liye
+import { useAuth } from '@/app/context/AuthContext'; 
+// --- NAYE IMPORTS ---
+// FIX 1: useSession Import हटा दिया गया
+// import { useSession } from '@/app/context/SessionContext';
 
 // --- 1. INTERFACES (PRISMA-AWARE) ---
 
-// Yeh data API se aayega (assuming populated student)
 interface ApiParent {
   id: number;
   name: string;
@@ -22,8 +24,6 @@ interface ApiParent {
   email: string;
   occupation: string;
   schoolId: string;
-  // Yeh assumption hai ki backend parent ke saath student ko populate karke bhej raha hai
-  // Aapke purane code (`studentId: Student`) ke logic ke hisaab se
   student?: { 
     studentid: number;
     first_name: string;
@@ -32,7 +32,6 @@ interface ApiParent {
   };
 }
 
-// Yeh data hum component ke state mein rakhenge
 interface ParentData {
   id: number;
   name: string;
@@ -40,19 +39,17 @@ interface ParentData {
   email: string;
   occupation: string;
   schoolId: string;
-  // Student data ko flat kar diya
   studentid: number | null;
   studentName: string;
   studentClass: string;
 }
 
-// Yeh data form se submit hoga (matches AddParentForm.tsx)
 interface FormData {
   name: string;
   contactNumber: string;
   email: string;
   occupation: string;
-  studentId: number | null; // Yeh student ka 'studentid' hai
+  studentId: number | null; 
 }
 
 // --- 2. HELPER FUNCTIONS ---
@@ -62,7 +59,6 @@ const getFullName = (s: { first_name?: string, last_name?: string } | null | und
   return [s.first_name, s.last_name].filter(Boolean).join(' ');
 }
 
-// API data ko state data mein badalne ke liye
 const transformApiData = (parent: ApiParent): ParentData => ({
   id: parent.id,
   name: parent.name,
@@ -70,7 +66,6 @@ const transformApiData = (parent: ApiParent): ParentData => ({
   email: parent.email,
   occupation: parent.occupation || '',
   schoolId: parent.schoolId,
-  // Agar parent se student linked nahi hai toh handle karein
   studentid: parent.student?.studentid || null,
   studentName: getFullName(parent.student),
   studentClass: parent.student?.class?.class_name || 'N/A',
@@ -80,42 +75,48 @@ const transformApiData = (parent: ApiParent): ParentData => ({
 // --- 3. MAIN COMPONENT ---
 const ParentsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [parents, setParents] = useState<ParentData[]>([]); // FIX: Naya interface use kiya
-  const [editingParent, setEditingParent] = useState<ParentData | null>(null); // FIX: Naya interface use kiya
+  const [parents, setParents] = useState<ParentData[]>([]);
+  const [editingParent, setEditingParent] = useState<ParentData | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const { user } = useAuth(); // Socket filtering ke liye
+  
+  // Sorting state हटा दिया गया
+  
+  const { user } = useAuth();
+  // FIX 2: useSession hook कॉल हटा दिया गया
+  // const { viewingSession } = useSession();
 
+  // FIX 3: fetchParents को Non-Session Aware बनाया गया
   const fetchParents = useCallback(async () => {
+    // FIX: Session-Aware Check हटा दिया गया
+    // if (!viewingSession) { console.log("ParentsPage: Session load nahi hua, fetch skip kar rahe hain."); return; }
+    
     try {
+      // API call से sessionId param हटा दिया गया
       const res = await api.get('/parents');
-      const formattedData = res.data.map(transformApiData); // Data ko transform kiya
+      const formattedData = res.data.map(transformApiData);
       setParents(formattedData);
       console.log("Fetched and Transformed Parents Data:", formattedData);
     } catch (error) {
       console.error("Failed to fetch parents", error);
     }
-  }, []); // useCallback dependency
+  }, []); // viewingSession dependency हटा दी गई
 
   useEffect(() => {
     fetchParents();
   }, [fetchParents]);
-
-  // (Aap yahaan baad mein Socket.IO listeners add kar sakte hain)
 
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingParent(null);
   };
 
-  // FIX: handleFormSubmit ko naye FormData ke liye update kiya
   const handleFormSubmit = async (data: FormData) => {
     const payload = {
         name: data.name,
         contactNumber: data.contactNumber,
         email: data.email,
         occupation: data.occupation,
-        studentId: data.studentId // Yeh student ka 'studentid' (number) hai
+        studentId: data.studentId 
     };
     
     try {
@@ -126,7 +127,7 @@ const ParentsPage = () => {
         await api.post('/parents', payload);
         alert('Parent added successfully!');
       }
-      fetchParents(); // List ko refresh karein
+      fetchParents(); 
       closeModal();
     } catch (error: any) {
       console.error("Failed to save parent", error);
@@ -134,25 +135,22 @@ const ParentsPage = () => {
     }
   };
 
-  // FIX: 'Parent' type ko 'ParentData' se badla
   const handleEdit = (parent: ParentData) => {
     setEditingParent(parent);
     setIsModalOpen(true);
   };
 
-  // FIX: 'id' ko 'string' se 'number' kiya
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this parent?')) {
       try {
         await api.delete(`/parents/${id}`);
-        fetchParents(); // List ko refresh karein
+        fetchParents(); 
       } catch (error) {
         console.error('Failed to delete parent', error);
       }
     }
   };
   
-  // FIX: Filter logic ko naye 'studentName' field ke liye update kiya
   const filteredAndSortedParents = useMemo(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
     
@@ -164,14 +162,8 @@ const ParentsPage = () => {
           studentName.includes(lowercasedQuery)
         );
       })
-      .sort((a, b) => {
-        if (sortOrder === 'asc') {
-          return a.name.localeCompare(b.name);
-        } else {
-          return b.name.localeCompare(a.name);
-        }
-      });
-  }, [parents, searchQuery, sortOrder]);
+      // Sorting logic हटा दिया गया
+  }, [parents, searchQuery]);
 
 
   return (
@@ -184,10 +176,10 @@ const ParentsPage = () => {
         </button>
       </header>
       
-      <StudentFilters onSearch={setSearchQuery} onSort={setSortOrder} />
+      {/* FIX 4: onSort prop हटा दिया गया */}
+      <StudentFilters onSearch={setSearchQuery} />
 
       <main>
-        {/* WARNING: Yeh component abhi error dega! */}
         <ParentsTable parents={filteredAndSortedParents} onEdit={handleEdit} onDelete={handleDelete} />
       </main>
 
@@ -196,21 +188,18 @@ const ParentsPage = () => {
         onClose={closeModal} 
         title={editingParent ? "Edit Parent" : "Add a New Parent"}
       >
-        {/* --- YEH AAPKA REQUESTED FIX HAI --- */}
         <AddParentForm 
           onClose={closeModal} 
           onSubmit={handleFormSubmit}
           existingParent={editingParent ? {
-            // Hum 'ParentData' state ko 'AddParentForm' ke props se map kar rahe hain
-            studentid: editingParent.studentid, // 'studentid' (number | null)
-            studentName: editingParent.studentName, // 'studentName' (string)
+            studentid: editingParent.studentid, 
+            studentName: editingParent.studentName, 
             name: editingParent.name,
             contactNumber: editingParent.contactNumber,
             email: editingParent.email,
             occupation: editingParent.occupation
           } : null}
         />
-        {/* --- END FIX --- */}
       </Modal>
 
       <Link href="/admin/school" className={styles.dashboardLinkButton}>
