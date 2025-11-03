@@ -1314,3 +1314,43 @@ body {
     visibility: hidden !important;
   }
 }
+@media print {
+  /* CRITICAL: Saare non-printable elements ko hide karein */
+  .no-print {
+    display: none !important;
+  }
+
+  /* CRITICAL: Body reset, jisse margins clear ho jaate hain */
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #ffffff !important;
+    color: #000000;
+    /* Browser ko bolta hai ki colors aur backgrounds ko print karo */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Sirf woh area dikhana jismein receipt hai */
+  body * {
+    visibility: hidden; /* Pehle sabkuch hide karo */
+  }
+  
+  /* Sirf .printable-area aur uske andar ke content ko visible karo */
+  .printable-area, .printable-area * {
+    visibility: visible;
+  }
+  
+  /* Printable area ko poore page par set karein aur margins hata dein */
+  .printable-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    box-shadow: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+}
