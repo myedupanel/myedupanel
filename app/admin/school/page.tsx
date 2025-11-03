@@ -27,7 +27,7 @@ import api from '@/backend/utils/api';
 interface MenuItem {
     id: string;
     title: string;
-    path: string; // FIX: Path is required
+    path: string;
     icon: React.ReactNode;
     color: string;
 }
@@ -35,9 +35,7 @@ interface MenuItem {
 const schoolMenuItems: MenuItem[] = [
     { id: 'students', title: 'Students', path: '/admin/students', icon: <MdPeople />, color: '#3b82f6' },
     { id: 'teachers', title: 'Teachers', path: '/admin/teachers', icon: <MdSchool />, color: '#8b5cf6' },
-    // FIX: Missing path added
     { id: 'parents', title: 'Parents', path: '/admin/parents', icon: <MdFamilyRestroom />, color: '#ef4444' },
-    // FIX: Missing path added
     { id: 'staff', title: 'Staff', path: '/admin/staff', icon: <MdBadge />, color: '#f97316' },
     // --- 2. YEH NAYA LINK "STAFF" KE NEECHE ADD KIYA HAI ---
     { 
@@ -64,17 +62,9 @@ interface DashboardData {
     recentStaff: { id: string; name: string; role?: string; details?: { role?: string } }[];
 }
 
-// FIX: Empty Dashboard Data Fallback
-const EMPTY_DASHBOARD_DATA: DashboardData = {
-    admissionsData: [],
-    recentStudents: [],
-    recentTeachers: [],
-    recentParents: [],
-    recentFees: [],
-    recentStaff: []
-};
-
 const DashboardControlCenter = () => {
+    // ... (Poora DashboardControlCenter component code waisa hi rahega) ...
+    // ... (No changes needed inside this component) ...
     const { token } = useAuth();
     const router = useRouter();
     const [data, setData] = useState<DashboardData | null>(null);
@@ -122,58 +112,30 @@ const DashboardControlCenter = () => {
         }
     };
 
-    // 💡 FIX: fetchData logic updated for 2-second timeout
     useEffect(() => {
-        const fetchRemoteData = async () => {
+        const fetchData = async () => {
             if (!token) {
-                throw new Error('Authentication token not found.');
+                setLoading(false);
+                setError('Authentication token not found.');
+                return;
             }
-            const response = await api.get<DashboardData>('/admin/dashboard-data');
-            return response.data;
-        };
-
-        const timeoutPromise = new Promise<DashboardData>((_, reject) => 
-            setTimeout(() => reject(new Error('Control Center Load Timeout')), 2000) // 2 seconds timeout
-        );
-
-        const loadData = async () => {
-            setLoading(true);
-            setError('');
-            
             try {
-                // Race the actual API call against the 2-second timeout
-                const data = await Promise.race([fetchRemoteData(), timeoutPromise]);
-                setData(data);
-
+                setLoading(true);
+                setError('');
+                const response = await api.get<DashboardData>('/admin/dashboard-data');
+                setData(response.data);
             } catch (err: any) {
-                // If timeout or error occurs, log it and set empty data
-                console.error("Control Center Load Failed or Timed Out:", err.message || err);
-                setError(err.message === 'Control Center Load Timeout' ? 'Dashboard timed out. Backend is slow/down.' : 'Could not load dashboard data.');
-                setData(EMPTY_DASHBOARD_DATA); // Show empty UI instead of loading spinner
-
+                setError('Could not load dashboard data.');
+                console.error("API fetch error:", err.response?.data || err.message);
             } finally {
                 setLoading(false);
             }
         };
-        
-        loadData();
+        fetchData();
     }, [token]);
-    // END FIX
 
-    // --- Loading/Error Handling ---
     if (loading) { return <div className={styles.message}>Loading Control Center...</div>; }
-    
-    // Show user-friendly error state on timeout/hard error
-    if (error && data?.admissionsData.length === 0) { 
-        return (
-            <div className={`${styles.message} ${styles.error}`}>
-                <h2>Connection Error</h2>
-                <p>{error}</p>
-                <p>Please check your backend connection. Displaying minimal data structure.</p>
-            </div>
-        ); 
-    }
-    
+    if (error) { return <div className={`${styles.message} ${styles.error}`}>{error}</div>; }
     if (!data) { return <div className={styles.message}>No dashboard data available.</div>; }
 
 
@@ -191,19 +153,15 @@ const DashboardControlCenter = () => {
                 <div className={`${styles.summaryBox} ${styles.chartBox}`}>
                      <div className={styles.boxHeader}><h2><MdAssessment/> Student Admissions</h2></div>
                      <div className={styles.chartContainer}>
-                        {data.admissionsData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height={250}>
-                                <BarChart data={data.admissionsData || []} margin={{ top: 5, right: 0, left: -20, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="name" fontSize={10} interval={0} />
-                                    <YAxis fontSize={10} allowDecimals={false}/>
-                                    <Tooltip wrapperStyle={{ fontSize: '12px' }}/>
-                                    <Bar dataKey="admissions" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div className={styles.noDataChart}>No admission data available.</div>
-                        )}
+                        <ResponsiveContainer width="100%" height={250}>
+                            <BarChart data={data.admissionsData || []} margin={{ top: 5, right: 0, left: -20, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <XAxis dataKey="name" fontSize={10} interval={0} />
+                                <YAxis fontSize={10} allowDecimals={false}/>
+                                <Tooltip wrapperStyle={{ fontSize: '12px' }}/>
+                                <Bar dataKey="admissions" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} />
+                            </BarChart>
+                        </ResponsiveContainer>
                      </div>
                 </div>
 
