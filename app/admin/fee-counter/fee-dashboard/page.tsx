@@ -1,4 +1,3 @@
-// app/admin/fee-counter/page.tsx
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
 import { io } from 'socket.io-client'; 
@@ -47,8 +46,6 @@ const formatCurrency = (amount: number) => {
 };
 
 const FeeDashboardPage = () => {
-    // FIX 1: useSession hook कॉल हटा दिया गया
-    // const { viewingSession } = useSession(); 
     
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [templates, setTemplates] = useState<Template[]>([]);
@@ -61,23 +58,20 @@ const FeeDashboardPage = () => {
     const [feed, setFeed] = useState<FeedItem[]>([]);
     
     // 1. Dashboard Stat Cards ke liye data fetch karna
-    // FIX 2: Session Logic हटा दिया गया
     const fetchDashboardOverview = useCallback(async () => {
         try {
-            // FIX: API call से sessionId param हटा दिया गया
             const dashboardRes = await api.get<DashboardData>('/fees/dashboard-overview');
             setDashboardData(dashboardRes.data);
+            // Original logic: setError यहाँ नहीं सेट करना
         } catch (err) {
             console.error("Failed to fetch dashboard overview:", err);
-            throw new Error('API_FETCH_DASHBOARD_FAILED'); 
+            setError('Failed to load dashboard data. Please try again.'); // Error को catch करें
         }
     }, []); 
 
     // 2. Fee Templates ki list fetch karna
-    // FIX 3: Session Logic हटा दिया गया
     const fetchTemplates = useCallback(async () => {
         try {
-            // FIX: API call से sessionId param हटा दिया गया
             const templatesRes = await api.get<Template[]>('/fees/templates');
             const templatesData = templatesRes.data;
             setTemplates(templatesData);
@@ -89,12 +83,11 @@ const FeeDashboardPage = () => {
             }
         } catch (err) {
             console.error("Failed to fetch templates:", err);
-             throw new Error('API_FETCH_TEMPLATES_FAILED'); 
+            // Original logic: setError यहाँ नहीं सेट करना
         }
     }, [selectedTemplate]); 
 
     // 3. Selected Template ki details fetch karna
-    // FIX 4: Session Logic हटा दिया गया
     const fetchTemplateDetails = useCallback(async (templateId: string) => {
         setDetailsLoading(true);
         setTemplateDetails(null);
@@ -109,45 +102,19 @@ const FeeDashboardPage = () => {
     }, []); 
 
 
-    // --- PEHLA useEffect (Timeout Logic) ---
+    // --- PEHLA useEffect (Original Loading Logic) ---
     useEffect(() => {
-        const dataFetchPromise = Promise.all([
-            fetchDashboardOverview(),
-            fetchTemplates()
-        ]);
-        
-        // 💡 2-सेकंड का Timeout Promise (बरकरार)
-        const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error("Fee Dashboard Load Timeout")), 2000)
-        );
-
-        const loadInitialData = async () => {
+        const fetchInitialData = async () => {
             setLoading(true);
-            setError('');
-
-            try {
-                await Promise.race([dataFetchPromise, timeoutPromise]);
-                
-            } catch (err: any) {
-                console.error("Fee Dashboard Load Failed or Timed Out:", err.message);
-                
-                if (err.message.includes("Timeout")) {
-                    setError('Dashboard timed out (2s). Backend is slow/down.');
-                } else if (err.response && err.response.status === 400) {
-                     // 400 error के लिए स्पेसिफिक मैसेज
-                    setError('Error: API requires Session ID (Time Travel logic) which is currently reversed.');
-                }
-                
-                setDashboardData(null); 
-                setTemplates([]);
-            } finally {
-                setLoading(false);
-            }
+            // Promise.all से दोनों fetch का इंतज़ार करें
+            await Promise.all([
+                fetchDashboardOverview(),
+                fetchTemplates()
+            ]);
+            setLoading(false);
         };
-        
-        loadInitialData();
-
-    }, [fetchDashboardOverview, fetchTemplates]); 
+        fetchInitialData();
+    }, [fetchDashboardOverview, fetchTemplates]); // Dependencies Original ही रहेंगी
 
     // --- DOOSRA useEffect (Jab bhi selectedTemplate badlega, run hoga) ---
     useEffect(() => {
@@ -193,6 +160,7 @@ const FeeDashboardPage = () => {
 
     if (loading) return <div className={styles.loadingState}>Loading Fee Dashboard...</div>;
     
+    // Original error check: अगर error string सेट है, या dashboardData null है
     if (error || !dashboardData) return <div className={styles.errorState}>{error || "Failed to load dashboard data. Please check logs."}</div>;
 
     const getStudentProgress = () => {
