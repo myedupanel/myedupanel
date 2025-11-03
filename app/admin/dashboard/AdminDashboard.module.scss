@@ -67,17 +67,3 @@
   font-size: 1.2rem;
   color: #555;
 }
-
-/* --- FIX: Stat Card ko link jaisa dikhne se rokne ke liye --- */
-.statCardLink {
-  text-decoration: none; // Link ka underline hatata hai
-  color: inherit;        // Text color ko card ke default color par set karta hai
-  display: block;        // Poore card ko clickable banata hai
-  
-  // Hover effect (optional, lekin accha lagta hai)
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
-  }
-}
