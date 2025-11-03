@@ -85,8 +85,8 @@ const cardLinks: { [key: string]: string } = {
   "Total Teachers": "/admin/teachers",
   "Total Staff": "/admin/staff",
   "Total Parents": "/admin/parents",
-  "Monthly Revenue": "/admin/feecounter"
-  // "Total Classes" ka link nahi hai, isliye woh add nahi kiya
+  "Monthly Revenue": "/admin/fee-counter",
+  "Total Classes": "/admin/school/classes" // <-- YEH LINE ADD KI GAYI HAI
 };
 // --- END BADLAAV ---
 
