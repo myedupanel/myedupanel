@@ -11,8 +11,11 @@ import RecentPayments from '@/components/admin/RecentPayments/RecentPayments';
 import { MdPeople, MdSchool, MdAttachMoney, MdFamilyRestroom, MdBadge, MdClass } from 'react-icons/md';
 import styles from './AdminDashboard.module.scss';
 import { useAuth, User } from '../../context/AuthContext'; 
+// --- NAYA IMPORT ---
+// FIX: useSession import हटा दिया गया
+// import { useSession } from '@/app/context/SessionContext';
 
-// --- TYPE DEFINITIONS (UPDATED) ---
+// --- TYPE DEFINITIONS (No Change) ---
 interface MonthlyAdmissionData {
   name: string;
   admissions: number;
@@ -56,11 +59,11 @@ const admissionColors = {
     low: '#ef4444'
 };
 
-// --- CARD DETAILS ---
+// --- CARD DETAILS (No Change) ---
 const cardDetails = {
   "Total Students": { icon: <MdPeople />, theme: "blue" },
   "Total Teachers": { icon: <MdSchool />, theme: "teal" },
-  "Monthly Revenue": { icon: <MdAttachMoney />, theme: "green" }, // Base title rakha
+  "Monthly Revenue": { icon: <MdAttachMoney />, theme: "green" }, 
   "Total Parents": { icon: <MdFamilyRestroom />, theme: "purple" },
   "Total Staff": { icon: <MdBadge />, theme: "orange" },
   "Total Classes": { icon: <MdClass />, theme: "sky" }
@@ -90,83 +93,76 @@ const getAdmissionColor = (value: number, min: number, max: number): string => {
 
 const AdminDashboardPage = () => {
   const { user, token } = useAuth() as { user: User | null; token: string | null; login: (token: string) => Promise<any> };
+  
+  // FIX: useSession hook हटा दिया गया
+  // const { viewingSession } = useSession(); 
+  
   const [dashboardData, setDashboardData] = useState<FormattedDashboardData | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
+  const [isDataLoaded, setIsDataLoaded] = useState(false); // Loading state control
 
-  // --- fetchDashboardData (UPDATED) ---
+  // --- fetchDashboardData (NOW NON-SESSION AWARE) ---
   const fetchDashboardData = useCallback(async () => {
     if (!token) {
-        console.log("fetchDashboardData: No token found, skipping fetch.");
-        return;
+        throw new Error("Missing token");
     }
+    
     console.log("fetchDashboardData: Fetching data...");
-    try {
-      const response = await api.get<BackendDashboardData>('/admin/dashboard-data');
-      const data = response.data;
-      console.log("fetchDashboardData: Data received from backend:", data);
+    
+    // FIX: API call से sessionId param हटा दिया गया
+    const response = await api.get<BackendDashboardData>('/admin/dashboard-data');
+    
+    const data = response.data;
+    console.log("fetchDashboardData: Data received from backend:", data);
 
-      // Process Monthly Admissions (No Change)
-      const monthlyDataFromApi = data.admissionsData || [];
-      let coloredMonthlyData: MonthlyAdmissionData[] = [];
-      if (monthlyDataFromApi.length > 0) {
-          const admissionValues = monthlyDataFromApi.map(d => d.admissions).filter(v => v > 0);
-          const maxVal = admissionValues.length > 0 ? Math.max(...admissionValues) : 0;
-          const minVal = admissionValues.length > 0 ? Math.min(...admissionValues) : 0;
+    // --- Processing Logic (No Change) ---
+    const monthlyDataFromApi = data.admissionsData || [];
+    let coloredMonthlyData: MonthlyAdmissionData[] = [];
+    if (monthlyDataFromApi.length > 0) {
+        const admissionValues = monthlyDataFromApi.map(d => d.admissions).filter(v => v > 0);
+        const maxVal = admissionValues.length > 0 ? Math.max(...admissionValues) : 0;
+        const minVal = admissionValues.length > 0 ? Math.min(...admissionValues) : 0;
 
-          coloredMonthlyData = monthlyDataFromApi.map(item => ({
-              name: item.name,
-              admissions: item.admissions,
-              color: getAdmissionColor(item.admissions, minVal, maxVal)
-          }));
-      } else {
-           console.log("fetchDashboardData: No monthly admissions data found.");
-      }
+        coloredMonthlyData = monthlyDataFromApi.map(item => ({
+            name: item.name,
+            admissions: item.admissions,
+            color: getAdmissionColor(item.admissions, minVal, maxVal)
+        }));
+    } 
 
-      // Process Class Counts (No Change)
-      const classDataFromApi = data.classCounts || [];
-      let coloredClassData: ClassCountData[] = [];
-      if (classDataFromApi.length > 0) {
-          coloredClassData = classDataFromApi.map((item, index) => ({
-              name: item.name,
-              count: item.count,
-              color: classColors[index % classColors.length]
-          }));
-      } else {
-            console.log("fetchDashboardData: No class count data found.");
-      }
+    const classDataFromApi = data.classCounts || [];
+    let coloredClassData: ClassCountData[] = [];
+    if (classDataFromApi.length > 0) {
+        coloredClassData = classDataFromApi.map((item, index) => ({
+            name: item.name,
+            count: item.count,
+            color: classColors[index % classColors.length]
+        }));
+    } 
 
-      // Revenue Data ko format karna
-      const revenueAmount = data.currentMonthRevenue || 0;
-      const formattedRevenue = `₹${revenueAmount.toLocaleString('en-IN')}`;
-      const monthName = data.currentMonthName || 'Monthly';
-      const revenueTitle = `${monthName.substring(0, 3)} Revenue`; 
+    const revenueAmount = data.currentMonthRevenue || 0;
+    const formattedRevenue = `₹${revenueAmount.toLocaleString('en-IN')}`;
+    const monthName = data.currentMonthName || 'Monthly';
+    const revenueTitle = `${monthName.substring(0, 3)} Revenue`; 
 
-      // Format Stats
-      const formattedStats = [
-        { title: "Total Students", value: (data.totalStudents || 0).toString() },
-        { title: "Total Teachers", value: (data.totalTeachers || 0).toString() },
-        { title: revenueTitle, value: formattedRevenue, monthName: monthName }, 
-        { title: "Total Parents", value: (data.totalParents || 0).toString() },
-        { title: "Total Staff", value: (data.totalStaff || 0).toString() },
-        { title: "Total Classes", value: (classDataFromApi.length || 0).toString() }
-      ];
+    const formattedStats = [
+      { title: "Total Students", value: (data.totalStudents || 0).toString() },
+      { title: "Total Teachers", value: (data.totalTeachers || 0).toString() },
+      { title: revenueTitle, value: formattedRevenue, monthName: monthName }, 
+      { title: "Total Parents", value: (data.totalParents || 0).toString() },
+      { title: "Total Staff", value: (data.totalStaff || 0).toString() },
+      { title: "Total Classes", value: (classDataFromApi.length || 0).toString() }
+    ];
 
-      // Set final formatted data
-      const formattedData: FormattedDashboardData = {
-        stats: formattedStats,
-        monthlyAdmissions: coloredMonthlyData,
-        classCounts: coloredClassData,
-        recentPayments: data.recentFees || []
-      };
-
-      setDashboardData(formattedData);
-      console.log("fetchDashboardData: Dashboard state updated.");
-
-    } catch (error) {
-      console.error("Failed to fetch dashboard data:", error);
-      setDashboardData({ stats: [], monthlyAdmissions: [], classCounts: [], recentPayments: [] });
-    }
-  }, [token]);
+    const formattedData: FormattedDashboardData = {
+      stats: formattedStats,
+      monthlyAdmissions: coloredMonthlyData,
+      classCounts: coloredClassData,
+      recentPayments: data.recentFees || []
+    };
+    
+    return formattedData; // Data को Promise के रूप में लौटाएं
+  }, [token]); // FIX: viewingSession dependency हटा दी गई
   // --- END fetchDashboardData ---
 
   // --- loadProfileData (No Change) ---
@@ -193,23 +189,57 @@ const AdminDashboardPage = () => {
     } else { setAdminProfile(null); }
   }, [user]);
 
-  // --- useEffect (No Change) ---
+  // --- useEffect (Fixed with Timeout) ---
   useEffect(() => {
-    if (token) {
-        fetchDashboardData();
+    if (!token) {
+      // FIX: Session check हटा दिया गया
+      if (adminProfile && dashboardData) setIsDataLoaded(true); 
+      return; 
     }
-    loadProfileData(); 
+    
+    const dataFetchPromise = fetchDashboardData();
 
+    // 💡 2-सेकंड का Timeout Promise
+    const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Dashboard Load Timeout")), 2000)
+    );
+
+    const loadData = async () => {
+      try {
+        // डेटा फ़ेच करने और Timeout के बीच रेस लगाएं
+        const result = await Promise.race([dataFetchPromise, timeoutPromise]);
+        
+        // यदि डेटा पहले आता है
+        setDashboardData(result as FormattedDashboardData);
+        console.log("Dashboard data fetched successfully.");
+        
+      } catch (error) {
+        // यदि Timeout जीतता है या कोई और error आता है
+        console.error("Dashboard data load failed or timed out:", error);
+        
+        // Fallback: Empty data सेट करें ताकि UX स्टक न हो
+        setDashboardData({ 
+            stats: [], 
+            monthlyAdmissions: [], 
+            classCounts: [], 
+            recentPayments: [] 
+        });
+      } finally {
+        loadProfileData();
+        setIsDataLoaded(true); // Loading state समाप्त
+      }
+    };
+    
+    loadData();
+
+    // --- Socket.IO setup (No Change) ---
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "https://myedupanel.onrender.com";
     const socket = io(socketUrl);
 
-    socket.on('connect', () => {
-        console.log('Socket.IO: Connected!');
-        console.log('Socket.IO: Connected to URL:', socketUrl);
-    });
     socket.on('updateDashboard', () => {
-      console.log('Socket.IO: Update event received! Refreshing dashboard data...');
-      fetchDashboardData();
+      // Timeout के बाद भी, अपडेट आने पर फिर से फ़ेच करने का प्रयास करें
+      console.log('Socket.IO: Update event received! Retrying fetch...');
+      fetchDashboardData().then(setDashboardData).catch(err => console.error("Socket fetch failed:", err));
     });
     socket.on('connect_error', (err) => console.error('Socket.IO: Connection Error!', err.message, err.cause));
     window.addEventListener('focus', loadProfileData);
@@ -217,16 +247,29 @@ const AdminDashboardPage = () => {
     return () => {
       window.removeEventListener('focus', loadProfileData);
       socket.disconnect();
-      console.log('Socket.IO: Disconnected');
     };
-  }, [fetchDashboardData, loadProfileData, token]);
+  }, [fetchDashboardData, token]); // FIX: viewingSession dependency हटा दी गई
 
-  // --- Loading state (No Change) ---
-  if (!adminProfile || !dashboardData) {
+
+  // --- Loading state (Now checks new isDataLoaded state) ---
+  if (!adminProfile || !isDataLoaded) {
     return <div className={styles.loading}>Loading Dashboard...</div>;
   }
 
-  // --- JSX (UPDATED for Dynamic Title) ---
+  // --- JSX (UPDATED) ---
+  // Fallback data के लिए null check
+  if (!dashboardData || dashboardData.stats.length === 0) {
+      return (
+          <div className={styles.dashboardContainer}>
+              <Header admin={adminProfile} />
+              <div className={styles.emptyState}>
+                  <h2>Connection Error/Timeout</h2>
+                  <p>Dashboard data could not be loaded within 2 seconds. Please check your backend server connection (Render logs).</p>
+              </div>
+          </div>
+      );
+  }
+
   return (
     <div className={styles.dashboardContainer}>
       <Header admin={adminProfile} />
@@ -241,12 +284,8 @@ const AdminDashboardPage = () => {
               // Use the full title (Nov Revenue) for display
               title={stat.title}
               value={stat.value}
-              
-              // --- 🎯 YAHAN FIX KIYA GAYA HAI ---
-              // Icon/Theme ke liye 'baseTitle' (dynamic) use karna padega
               icon={cardDetails[baseTitle as keyof typeof cardDetails]?.icon}
               theme={cardDetails[baseTitle as keyof typeof cardDetails]?.theme}
-              // --- END FIX ---
             />
           );
 
