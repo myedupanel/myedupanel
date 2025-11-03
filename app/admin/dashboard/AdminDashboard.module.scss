@@ -67,3 +67,19 @@
   font-size: 1.2rem;
   color: #555;
 }
+.statLink {
+  text-decoration: none; /* Link ka underline hatata hai */
+  color: inherit;       /* Text color normal rakhta hai */
+  display: block;       /* Poori grid cell ko cover karta hai */
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px); /* Hover par card ko thoda upar uthata hai */
+    /* Thoda shadow add karta hai, professional look ke liye */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active {
+    transform: translateY(-2px); /* Click karne par thoda neeche dabta hai */
+  }
+}

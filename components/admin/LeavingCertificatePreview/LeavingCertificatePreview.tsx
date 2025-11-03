@@ -102,6 +102,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
         
         {/* Header (No Change) */}
         <header className={styles.certHeader}>
+          {/* ... (header code) ... */}
           <div className={styles.schoolInfoBlock}>
             <div className={styles.schoolName1}>{schoolDetails.name}</div>
             <div className={styles.schoolName2}>{schoolDetails.name2 || schoolDetails.name}</div>
@@ -112,7 +113,6 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             </div>
           </div>
           <div className={styles.titleRow}>
-             {/* --- FIX 1: Yeh 'formData.genRegNo' use kar raha hai (Aapke code ke according) --- */}
             <div className={styles.headerSrNo}>
               Sr. No: {fill(formData.genRegNo, '100px')}
             </div>
@@ -141,12 +141,9 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>Mother's Name</td>
               <td>{fill(formData.motherName, '300px')}</td>
             </tr>
-
-            {/* --- FIX 2: Row 4 - Ek line mein 3 items --- */}
             <tr>
               <td>4</td>
-              <td></td> {/* Label blank */}
-              <td>
+              <td colSpan={2}> 
                 <div className={styles.inlineFields}>
                   <SubField label="Nationality" value={formData.nationality} minWidth="80px" />
                   <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
@@ -154,15 +151,11 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                 </div>
               </td>
             </tr>
-            {/* --- END FIX --- */}
-
             <tr>
               <td>5</td>
               <td>Caste</td>
               <td>{fill(formData.caste, '150px')}</td>
             </tr>
-
-            {/* --- FIX 3: Row 6 - 2x2 Grid --- */}
             <tr>
               <td>6</td>
               <td>Birth place(State/City)</td>
@@ -179,8 +172,6 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                 </div>
               </td>
             </tr>
-            {/* --- END FIX --- */}
-
             <tr>
               <td>7</td>
               <td>Date of Birth (Figures)</td>
@@ -197,18 +188,20 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>{fill(formData.previousSchool, '200px')}</td>
             </tr>
             
-            {/* --- FIX 4: Row 10 - Ek hi line mein --- */}
+            {/* --- YAHAN BADLAAV KIYA GAYA (ROW 10) --- */}
             <tr>
               <td>10</td>
-              <td>Date of Admission</td>
-              <td>
+              {/* colSpan={2} use kiya taaki label aur values ek cell mein aa jayein */}
+              <td colSpan={2}>
                  <div className={styles.inlineFields}>
+                  {/* Label ko SubField ke bahar, inlineFields ke andar rakha */}
+                  <span style={{ marginRight: '15px' }}>Date of Admission</span>
                   <SubField label="Date" value={dateOfAdmission} minWidth="100px" />
                   <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
                  </div>
               </td>
             </tr>
-            {/* --- END FIX --- */}
+            {/* --- BADLAAV KHATM --- */}
 
             <tr>
               <td>11</td>
@@ -226,7 +219,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>{fill(dateOfLeaving, '150px')}</td>
             </tr>
             <tr>
-              <td>13</td>
+              <td>1D3</td>
               <td>Standard in which studying and since when (in Words)</td>
               <td>
                 <div className={styles.inlineFields}>
@@ -255,6 +248,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
 
         {/* Footer (No Change) */}
         <footer className={styles.certFooterWrapper}>
+          {/* ... (footer code) ... */}
           <div className={styles.datePlace}>
             <span>Date: {fill(null, '50px')} / {fill(null, '50px')} / {fill(null, '70px')}</span>
           </div>
