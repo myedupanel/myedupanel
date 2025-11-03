@@ -68,14 +68,14 @@ export default function ReceiptPage() {
     fetchTransaction();
   }, [transactionId]);
 
-  // --- FIX: Print Logic ko aur reliable banaya ---
+  // --- FIX 2: Print/Download Logic Update ---
+  // Simple window.print() abhi bhi blank ho sakta hai. Hum use CSS se theek karenge.
   const handlePrint = () => {
-      // 1. Content ko browser mein render hone ke liye 50ms ka base delay
-      setTimeout(() => {
-          window.print();
-      }, 50); 
+    // CSS load hone ke liye chhota sa delay dete hain
+    setTimeout(() => {
+        window.print();
+    }, 100); 
   };
-  // --- END FIX ---
   
   const handleDownloadPDF = () => {
       alert("PDF download feature will be implemented using jsPDF and html2canvas.");
