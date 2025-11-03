@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useRouter } from 'next/navigation'; // <-- 🚨 IMPORT ADDED
 import styles from './FeeReceipt.module.scss';
 import { FiPrinter, FiDownload } from 'react-icons/fi';
 import jsPDF from 'jspdf';
@@ -57,6 +58,7 @@ export type ReceiptData = Transaction;
 
 interface FeeReceiptProps {
     transaction: Transaction | null;
+    isPreviewPage?: boolean;
 }
 
 // --- Helper Functions (No Change) ---
@@ -78,21 +80,20 @@ const formatDate = (dateString: string | undefined): string => {
 
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
+    const router = useRouter(); // <-- 🚨 HOOK INITIALIZED
 
-    // --- FIX 1: handlePrint function ko Class Switching se replace kiya ---
+    // --- FIX 1: handlePrint function ko redirect se badla ---
     const handlePrint = () => {
-        // Step 1: Body par printing class add karein
-        // Yeh class globals.scss mein visibility rules trigger karegi
-        document.body.classList.add('printing-receipt-active'); 
+        if (!transaction?.id) return;
         
-        // Step 2: Native Print dialog kholo
-        window.print();
+        const previewUrl = `/admin/receipt/preview/${transaction.id}`;
         
-        // Step 3: Print ke baad class hata do
-        // Small timeout zaroori hai taki print job shuru ho jaaye
-        setTimeout(() => {
-          document.body.classList.remove('printing-receipt-active');
-        }, 500); 
+        // Modal close karne ke liye koi prop use ho sakta hai,
+        // Lekin abhi hum seedha new tab mein kholenge (jo print karega)
+        window.open(previewUrl, '_blank'); 
+        
+        // Agar aap same tab mein redirect karna chahte hain, toh yeh use karein:
+        // router.push(previewUrl);
     };
     // --- END PRINT FIX ---
 
