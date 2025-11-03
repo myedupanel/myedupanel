@@ -114,24 +114,42 @@
     }
 }
 @media print {
-    // Print karte waqt non-receipt cheezon ko hide kar dein
+    // CRITICAL FIX 1: Global body styles
+    :global(body) {
+        // Page margins aur padding hatao
+        margin: 0 !important;
+        padding: 0 !important;
+        
+        // Background aur color adjustment (zaruri agar background-color white nahi hai)
+        background-color: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        color: #000000;
+    }
+    
+    // Non-printing elements ko hide karein
     .noPrint {
         display: none;
     }
 
-    /* --- :global(body) block yahan se HATA diya gaya hai --- */
-
+    // CRITICAL FIX 2: Printable area ko A4 size dena
     .receiptContainer {
         padding: 0;
-        background-color: #ffffff; // Local container ko style karna theek hai
+        margin: 0;
+        width: 100%; // Ensure it takes full print width
+        background-color: #ffffff;
     }
 
     .printableArea {
-        width: 100%;
-        min-height: auto;
+        width: 210mm; // Fixed A4 width
+        min-height: 297mm; // Fixed A4 height
         box-shadow: none;
         border: none;
-        padding: 0; // Print ke liye padding adjust kar sakte hain
-        margin: 0;
+        padding: 10mm 15mm; // Print ke liye clear padding set kiya
+        margin: 0 auto;
+        
+        // CRITICAL FIX 3: Content visibility
+        box-sizing: border-box;
+        overflow: visible; // Content ko hide hone se bachata hai
     }
 }
