@@ -36,7 +36,7 @@
 
 /* --- PRINTABLE RECEIPT AREA: Official Look --- */
 .receiptContent {
-  width: 210mm; 
+  width: 210mm; /* A4 width standard */
   margin: 16px auto; 
   padding: 25px; 
   background-color: #ffffff; 
@@ -55,12 +55,13 @@
   margin-bottom: 15px;
   
   .schoolDetails {
-    /* LEFT SIDE: School Name Only */
+    /* LEFT SIDE: School Name Only (Logo, Name, City) */
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    gap: 2px;
     
-    .logo { max-width: 65px; max-height: 65px; margin-bottom: 5px; } /* Logo removed from JSX in TSX */
+    .logo { max-width: 65px; max-height: 65px; margin-bottom: 5px; }
     h1 {
       font-size: 1.6rem; 
       font-weight: 800; 
@@ -71,12 +72,12 @@
         margin: 0;
         font-size: 0.85rem; 
         color: #555;
-    } /* City name/Address display */
+    }
   }
 
   /* RIGHT SIDE: Receipt Metadata */
   .metaHeader {
-    text-align: left; /* Alignment of key/value pairs */
+    text-align: left; /* Key-value alignment */
     font-size: 0.85rem;
     margin-top: 5px;
     padding-left: 20px; 
@@ -104,7 +105,7 @@
   h2 { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; color: #111; }
 }
 
-/* 3. Details Sections (Student/Payment) */
+/* 3. Student Details / Compact View */
 .detailsSection {
   margin-bottom: 10px; 
   
@@ -131,10 +132,16 @@
 .itemsTable {
   margin-top: 10px; 
   font-size: 0.9rem;
+
   thead tr { background-color: #f0f0f0; } 
   th { padding: 6px 10px; font-weight: 700; } 
   td { padding: 4px 10px; } 
-  .grandTotal { background-color: #e6f3ff; font-size: 0.95rem; }
+  
+  .grandTotal {
+    background-color: #e6f3ff; 
+    font-size: 0.95rem; 
+    td { font-weight: 700; }
+  }
 }
 
 /* 5. Payment Details, Balance Due (Compact Two-Column Layout) */
@@ -156,12 +163,12 @@
         padding-top: 10px; 
         
         .balanceSection {
-            background-color: #ffffff; 
+            background-color: #ffffff;
             border: 1px solid #ddd;
             padding: 8px 12px; 
             font-size: 0.9rem;
             
-            p strong { min-width: 80px; display: inline-block; } /* Align balance labels */
+            p strong { min-width: 80px; display: inline-block; } 
         }
     }
 }
@@ -185,10 +192,9 @@
   .signatureBox {
     border-top: 1px solid #000;
     width: 35%; 
-    height: 1px; /* Only line */
+    height: 1px; 
   }
   
-  /* Signature Labels (Aligned below lines) */
   .signatureLabels {
     display: flex;
     justify-content: space-between;
@@ -196,14 +202,14 @@
     
     .cashierLabel { 
         width: 35%; 
-        text-align: left; /* Cashier Left Align */
+        text-align: left; /* Accountant/Cashier Left Align */
         font-weight: 600;
         margin: 0;
     }
     
     .signatoryLabel { 
         width: 35%; 
-        text-align: right; /* Signatory Right Align */
+        text-align: right; /* Authorised Signatory Right Align */
         font-weight: 600;
         margin: 0;
     }
@@ -212,16 +218,25 @@
   .footerNote { text-align: center; margin-top: 15px; font-style: italic; font-weight: 400;}
 }
 
-/* --- PRINT MEDIA QUERY (Single Page Guarantee) --- */
+/* --- FINAL PRINT MEDIA QUERY (Single Page Guarantee) --- */
 @media print {
     .actions { display: none !important; }
     
-    /* Content Area ko single page par fit karne ke liye */
+    /* Vercel Compliance Fix */
+    :global(body), :global(html) { 
+        background-color: white !important; 
+        color: black !important; /* Text color safety */
+    }
+    
     .receiptContent {
-        padding: 10mm !important; 
+        padding: 10mm !important; /* Minimal A4 margin */
         width: 210mm !important; 
         box-shadow: none !important;
         border: none !important;
+        height: auto !important;
+        
+        /* Force White Background on potentially colored elements */
+        background-color: white !important;
     }
 
     /* CRUCIAL: Page Break Avoidance (Single Page Fix) */
@@ -235,12 +250,7 @@
     /* Ensure no dark backgrounds are captured in print */
     .balanceSection, .itemsTable thead tr {
         background-color: #ffffff !important;
-        -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-    }
-    
-    /* Footer labels ko align rakhe */
-    .signatureLabels {
-        padding: 0 !important;
+        -webkit-print-color-adjust: exact;
     }
 }
