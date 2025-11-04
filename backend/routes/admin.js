@@ -1,7 +1,7 @@
 // backend/routes/admin.js
 const express = require('express');
 const router = express.Router();
-const prisma = require('../config/prisma'); // Prisma client
+const prisma = require('../config/prisma'); 
 const bcrypt = require('bcryptjs'); 
 const crypto = require('crypto'); 
 const jwt = require('jsonwebtoken'); 
@@ -25,7 +25,7 @@ const generateToken = (userId, schoolId) => {
 router.post('/create-user', [authMiddleware, adminMiddleware], userController.createUserByAdmin);
 
 
-// @route GET /api/admin/dashboard-data
+// @route GET /api/admin/dashboard-data (FIXED)
 router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res) => {
     console.log("[GET /dashboard-data] Request received.");
     try {
@@ -51,20 +51,26 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             admissionsDataRaw,
             classCountsRaw
         ] = await Promise.all([
-            // Total Counts (Session-Free)
+            // Total Counts (No Change)
             prisma.students.count({ where: { schoolId: schoolId } }), 
-            prisma.teachers.count({ where: { schoolId: schoolId } }), // Teachers model use kiya
+            prisma.teachers.count({ where: { schoolId: schoolId } }),
             prisma.parent.count({ where: { schoolId: schoolId } }),   
             prisma.user.count({ where: { role: { in: staffRoles }, schoolId: schoolId } }),
 
-            // --- RECENT LISTS (FIXED: Select -> Include) ---
+            // --- 1. RECENT STUDENTS (FIXED QUERY STRUCTURE) ---
             prisma.students.findMany({ 
                 where: { schoolId }, 
                 orderBy: { studentid: 'desc' }, 
                 take: 5, 
-                // FIX 1: class relation को include करें
-                include: { class: { select: { class_name: true } } },
-                select: { studentid: true, first_name: true, father_name: true, last_name: true, admission_date: true, classid: true }
+                select: { 
+                    studentid: true, 
+                    first_name: true, 
+                    father_name: true, 
+                    last_name: true, 
+                    admission_date: true,
+                    // FIX: class relation को select के अंदर ही object के रूप में पास किया
+                    class: { select: { class_name: true } } 
+                }
             }), 
             
             prisma.teachers.findMany({ 
@@ -77,20 +83,22 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             prisma.parent.findMany({ where: { schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, id: true } }), 
             prisma.user.findMany({ where: { role: { in: staffRoles }, schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, role: true, id: true } }), 
 
-            // Recent Fee Records (Paid)
+            // --- 2. RECENT FEE RECORDS (FIXED QUERY STRUCTURE) ---
             prisma.feeRecord.findMany({
                 where: { schoolId: schoolId, status: 'Paid' },
                 orderBy: { id: 'desc' }, 
                 take: 5,
-                // FIX 2: student relation को include करें
-                include: { student: { 
-                    select: { first_name: true, father_name: true, last_name: true } 
-                } },
-                select: { id: true, amount: true, studentId: true }
+                select: { 
+                    id: true, 
+                    amount: true, 
+                    student: { // FIX: student relation को select के अंदर ही object के रूप में पास किया
+                        select: { first_name: true, father_name: true, last_name: true } 
+                    }
+                }
             }),
-            // --- END RECENT LISTS ---
+            // --- END RECENT LISTS FIXES ---
 
-            // Admission Chart Aggregation (No Change)
+            // Aggregations (No Change)
              prisma.students.groupBy({
                  by: ['admission_date'], 
                  where: { schoolId: schoolId, admission_date: { not: null } },
@@ -98,7 +106,6 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                  orderBy: { admission_date: 'asc'}
              }),
              
-            // Class Counts Aggregation (No Change)
             prisma.students.groupBy({
                 by: ['classid'],
                 where: { schoolId: schoolId },
@@ -107,9 +114,9 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
 
         ]).catch(err => {
             console.error("[GET /dashboard-data] Error during Promise.all:\n", err);
-            // P1001 या अन्य fatal error को 500 के रूप में फेंकें
+            // Fatal error को 500 के रूप में फेंकें
             res.status(500).send('Server Error fetching dashboard data');
-            throw err; // Stop further execution
+            throw err; 
         });
 
         // --- Process Admissions Data (No Change) ---
@@ -145,15 +152,17 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
         // --- Format Recent Payments ---
         const recentFees = recentPaidFeeRecords.map(record => ({
             id: record.id, 
-            student: getFullName(record.student) || 'Unknown Student',
+            // FIX: record.student अब सीधा select object है
+            student: getFullName(record.student) || 'Unknown Student', 
             amount: `₹${record.amount?.toLocaleString('en-IN') || 0}`,
             date: `ID: ${record.id}` 
         }));
 
         // --- Format Recent Lists ---
          const formattedRecentStudents = recentStudentsRaw.map(s => ({ 
-             id: s.studentid, // id के रूप में studentid उपयोग करें
+             id: s.studentid, 
              name: getFullName(s), 
+             // FIX: s.class अब nested object है
              class: s.class?.class_name 
          }));
          
@@ -183,7 +192,6 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
 
     } catch (err) {
         // यह कैच ब्लॉक अब केवल Promise.all के बाद के errors को संभालेगा
-        // Promise.all error पहले ही हैंडल हो चुका है
     }
 });
 

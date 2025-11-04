@@ -1,3 +1,4 @@
+// app/admin/dashboard/page.tsx
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
@@ -12,7 +13,7 @@ import { MdPeople, MdSchool, MdAttachMoney, MdFamilyRestroom, MdBadge, MdClass }
 import styles from './AdminDashboard.module.scss';
 import { useAuth, User } from '../../context/AuthContext'; 
 
-// --- TYPE DEFINITIONS (UPDATED) ---
+// --- TYPE DEFINITIONS (No Change) ---
 interface MonthlyAdmissionData {
   name: string;
   admissions: number;
@@ -56,11 +57,11 @@ const admissionColors = {
     low: '#ef4444'
 };
 
-// --- CARD DETAILS ---
+// --- CARD DETAILS (No Change) ---
 const cardDetails = {
   "Total Students": { icon: <MdPeople />, theme: "blue" },
   "Total Teachers": { icon: <MdSchool />, theme: "teal" },
-  "Monthly Revenue": { icon: <MdAttachMoney />, theme: "green" }, // Base title rakha
+  "Monthly Revenue": { icon: <MdAttachMoney />, theme: "green" }, 
   "Total Parents": { icon: <MdFamilyRestroom />, theme: "purple" },
   "Total Staff": { icon: <MdBadge />, theme: "orange" },
   "Total Classes": { icon: <MdClass />, theme: "sky" }
@@ -92,8 +93,10 @@ const AdminDashboardPage = () => {
   const { user, token } = useAuth() as { user: User | null; token: string | null; login: (token: string) => Promise<any> };
   const [dashboardData, setDashboardData] = useState<FormattedDashboardData | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
+  // FIX: isDataLoaded state हटा दिया गया
+  // const [isDataLoaded, setIsDataLoaded] = useState(false); 
 
-  // --- fetchDashboardData (UPDATED) ---
+  // --- fetchDashboardData (No Change in core logic) ---
   const fetchDashboardData = useCallback(async () => {
     if (!token) {
         console.log("fetchDashboardData: No token found, skipping fetch.");
@@ -101,11 +104,12 @@ const AdminDashboardPage = () => {
     }
     console.log("fetchDashboardData: Fetching data...");
     try {
+      // FIX: Session param हटा दिया गया
       const response = await api.get<BackendDashboardData>('/admin/dashboard-data');
       const data = response.data;
       console.log("fetchDashboardData: Data received from backend:", data);
 
-      // Process Monthly Admissions (No Change)
+      // Processing Logic (No Change)
       const monthlyDataFromApi = data.admissionsData || [];
       let coloredMonthlyData: MonthlyAdmissionData[] = [];
       if (monthlyDataFromApi.length > 0) {
@@ -122,7 +126,6 @@ const AdminDashboardPage = () => {
            console.log("fetchDashboardData: No monthly admissions data found.");
       }
 
-      // Process Class Counts (No Change)
       const classDataFromApi = data.classCounts || [];
       let coloredClassData: ClassCountData[] = [];
       if (classDataFromApi.length > 0) {
@@ -135,13 +138,11 @@ const AdminDashboardPage = () => {
             console.log("fetchDashboardData: No class count data found.");
       }
 
-      // Revenue Data ko format karna
       const revenueAmount = data.currentMonthRevenue || 0;
       const formattedRevenue = `₹${revenueAmount.toLocaleString('en-IN')}`;
       const monthName = data.currentMonthName || 'Monthly';
       const revenueTitle = `${monthName.substring(0, 3)} Revenue`; 
 
-      // Format Stats
       const formattedStats = [
         { title: "Total Students", value: (data.totalStudents || 0).toString() },
         { title: "Total Teachers", value: (data.totalTeachers || 0).toString() },
@@ -151,7 +152,6 @@ const AdminDashboardPage = () => {
         { title: "Total Classes", value: (classDataFromApi.length || 0).toString() }
       ];
 
-      // Set final formatted data
       const formattedData: FormattedDashboardData = {
         stats: formattedStats,
         monthlyAdmissions: coloredMonthlyData,
@@ -164,6 +164,7 @@ const AdminDashboardPage = () => {
 
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
+      // On error, set empty data to prevent crashes, but keep loading state true
       setDashboardData({ stats: [], monthlyAdmissions: [], classCounts: [], recentPayments: [] });
     }
   }, [token]);
@@ -193,7 +194,7 @@ const AdminDashboardPage = () => {
     } else { setAdminProfile(null); }
   }, [user]);
 
-  // --- useEffect (No Change) ---
+  // --- useEffect (Original Logic) ---
   useEffect(() => {
     if (token) {
         fetchDashboardData();
@@ -211,6 +212,7 @@ const AdminDashboardPage = () => {
       console.log('Socket.IO: Update event received! Refreshing dashboard data...');
       fetchDashboardData();
     });
+    // FIX: fetchDashboardData में Promise.catch को हटा दिया गया है, इसलिए socket logic simple रखा गया है
     socket.on('connect_error', (err) => console.error('Socket.IO: Connection Error!', err.message, err.cause));
     window.addEventListener('focus', loadProfileData);
 
@@ -221,10 +223,26 @@ const AdminDashboardPage = () => {
     };
   }, [fetchDashboardData, loadProfileData, token]);
 
-  // --- Loading state (No Change) ---
+  // --- Loading state (Original Check) ---
+  // यह तब तक Loading... दिखाएगा जब तक adminProfile और dashboardData दोनों सेट नहीं हो जाते।
   if (!adminProfile || !dashboardData) {
+    // FIX: Empty state पर भी Loading spinner दिखाता रहेगा
     return <div className={styles.loading}>Loading Dashboard...</div>;
   }
+  
+  // FIX: Error Handling/Empty State (Dashboard crash होने पर empty data दिखाता है)
+  if (dashboardData.stats.length === 0) {
+      return (
+          <div className={styles.dashboardContainer}>
+              <Header admin={adminProfile} />
+              <div className={styles.emptyState}>
+                  <h2>Dashboard Data Unavailable</h2>
+                  <p>Could not fetch dashboard data. Please check the backend server and try logging in again.</p>
+              </div>
+          </div>
+      );
+  }
+
 
   // --- JSX (UPDATED for Dynamic Title) ---
   return (
@@ -242,11 +260,9 @@ const AdminDashboardPage = () => {
               title={stat.title}
               value={stat.value}
               
-              // --- 🎯 YAHAN FIX KIYA GAYA HAI ---
               // Icon/Theme ke liye 'baseTitle' (dynamic) use karna padega
               icon={cardDetails[baseTitle as keyof typeof cardDetails]?.icon}
               theme={cardDetails[baseTitle as keyof typeof cardDetails]?.theme}
-              // --- END FIX ---
             />
           );
 
