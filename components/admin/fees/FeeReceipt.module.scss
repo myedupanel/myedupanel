@@ -36,7 +36,7 @@
 
 /* --- PRINTABLE RECEIPT AREA: Official Look --- */
 .receiptContent {
-  width: 210mm; /* A4 width standard */
+  width: 210mm; 
   margin: 16px auto; 
   padding: 25px; 
   background-color: #ffffff; 
@@ -49,23 +49,18 @@
 .header {
   display: flex;
   justify-content: space-between; 
-  align-items: flex-start; /* Metadata ko top par rakhe */
+  align-items: flex-start;
   border-bottom: 3px double #333; 
   padding-bottom: 10px; 
   margin-bottom: 15px;
   
   .schoolDetails {
     /* LEFT SIDE: School Name Only */
-    flex-grow: 1; /* Zyada jagah le */
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     
-    .logo { 
-        max-width: 65px; 
-        max-height: 65px; 
-        margin-bottom: 5px; 
-    }
+    .logo { max-width: 65px; max-height: 65px; margin-bottom: 5px; } /* Logo removed from JSX in TSX */
     h1 {
       font-size: 1.6rem; 
       font-weight: 800; 
@@ -73,22 +68,28 @@
       margin: 0;
     }
     p { 
-      font-size: 0.85rem; 
-      color: #555;
-      margin: 0;
-    }
+        margin: 0;
+        font-size: 0.85rem; 
+        color: #555;
+    } /* City name/Address display */
   }
 
   /* RIGHT SIDE: Receipt Metadata */
   .metaHeader {
-    text-align: right;
-    font-size: 0.8rem; /* Compact metadata */
+    text-align: left; /* Alignment of key/value pairs */
+    font-size: 0.85rem;
     margin-top: 5px;
+    padding-left: 20px; 
+    border-left: 1px solid #eee;
+    
     p {
         margin: 1px 0;
         line-height: 1.3;
         white-space: nowrap;
-        strong { font-weight: 700; color: #000; display: inline-block; min-width: 60px; } 
+        display: grid;
+        grid-template-columns: 80px 1fr; /* Key | Value alignment */
+        
+        strong { font-weight: 600; color: #000; } 
     }
   }
 }
@@ -103,7 +104,7 @@
   h2 { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; color: #111; }
 }
 
-/* 3. Student Details / Compact View (Grid) */
+/* 3. Details Sections (Student/Payment) */
 .detailsSection {
   margin-bottom: 10px; 
   
@@ -125,21 +126,15 @@
   }
 }
 
-/* 4. Fee Table (Compact) */
+/* 4. Fee Table */
 .itemsSection {margin-bottom: 12px;}
 .itemsTable {
   margin-top: 10px; 
   font-size: 0.9rem;
-
   thead tr { background-color: #f0f0f0; } 
   th { padding: 6px 10px; font-weight: 700; } 
   td { padding: 4px 10px; } 
-  
-  .grandTotal {
-    background-color: #e6f3ff; 
-    font-size: 0.95rem; 
-    td { font-weight: 700; }
-  }
+  .grandTotal { background-color: #e6f3ff; font-size: 0.95rem; }
 }
 
 /* 5. Payment Details, Balance Due (Compact Two-Column Layout) */
@@ -158,11 +153,15 @@
     
     .balanceBlock {
         text-align: right;
+        padding-top: 10px; 
+        
         .balanceSection {
-            background-color: #ffffff;
+            background-color: #ffffff; 
             border: 1px solid #ddd;
             padding: 8px 12px; 
             font-size: 0.9rem;
+            
+            p strong { min-width: 80px; display: inline-block; } /* Align balance labels */
         }
     }
 }
@@ -175,7 +174,7 @@
   font-size: 0.85rem;
   font-weight: 600; 
 
-  .receivedBy { margin-bottom: 30px; }
+  .receivedBy { margin-bottom: 30px; font-weight: 500; }
   
   .signatureArea {
     display: flex;
@@ -185,52 +184,47 @@
   
   .signatureBox {
     border-top: 1px solid #000;
-    width: 40%; /* Reduced width */
+    width: 35%; 
+    height: 1px; /* Only line */
   }
   
-  /* Labels Alignment */
+  /* Signature Labels (Aligned below lines) */
   .signatureLabels {
     display: flex;
     justify-content: space-between;
-    width: 100%;
+    margin-top: 5px;
     
-    /* LEFT Footer label */
     .cashierLabel { 
-        width: 40%; 
-        text-align: left; /* Explicitly Left */
+        width: 35%; 
+        text-align: left; /* Cashier Left Align */
+        font-weight: 600;
+        margin: 0;
     }
     
-    /* RIGHT Footer label */
     .signatoryLabel { 
-        width: 40%; 
-        text-align: right; /* Explicitly Right */
+        width: 35%; 
+        text-align: right; /* Signatory Right Align */
+        font-weight: 600;
+        margin: 0;
     }
   }
 
   .footerNote { text-align: center; margin-top: 15px; font-style: italic; font-weight: 400;}
 }
 
-
-/* --- FINAL PRINT MEDIA QUERY (Single Page Guarantee) --- */
+/* --- PRINT MEDIA QUERY (Single Page Guarantee) --- */
 @media print {
     .actions { display: none !important; }
     
-    /* Global Background Fix for HTML2Canvas */
-    :global(body), :global(html) { 
-        background-color: white !important; 
-    }
-    
+    /* Content Area ko single page par fit karne ke liye */
     .receiptContent {
-        padding: 10mm !important; /* Minimal A4 margin for single page */
+        padding: 10mm !important; 
         width: 210mm !important; 
         box-shadow: none !important;
         border: none !important;
-        /* Two-page Fix */
-        height: auto !important; 
-        max-height: none !important; 
     }
 
-    /* CRUCIAL: Page Break Avoidance */
+    /* CRUCIAL: Page Break Avoidance (Single Page Fix) */
     .detailsSection, .itemsSection, .paymentAndBalance, .footer, .itemsTable {
         page-break-inside: avoid !important;
     }
@@ -238,21 +232,15 @@
         page-break-before: avoid !important;
     }
     
-    /* Ensure no dark backgrounds are captured in print (For white page print) */
+    /* Ensure no dark backgrounds are captured in print */
     .balanceSection, .itemsTable thead tr {
         background-color: #ffffff !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
     
-    /* Labels should align correctly in print */
-     .signatureLabels {
-        justify-content: space-between;
-    }
-     .signatureLabels .cashierLabel { 
-        text-align: left !important;
-    }
-    .signatureLabels .signatoryLabel { 
-        text-align: right !important;
+    /* Footer labels ko align rakhe */
+    .signatureLabels {
+        padding: 0 !important;
     }
 }
