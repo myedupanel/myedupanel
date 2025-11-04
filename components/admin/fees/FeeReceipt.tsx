@@ -82,68 +82,66 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null); 
 
-    // --- FINAL WORKING PRINT HANDLER ---
+    // --- FINAL WORKING PRINT HANDLER (HTML2Canvas based on Bonafide Logic) ---
     const handlePrint = () => {
-        const printContent = componentRef.current;
-        if (!printContent || !transaction) return;
+        const input = componentRef.current;
+        if (!input) {
+            alert("Please select a transaction and ensure preview is visible."); 
+            return;
+        }
         
-        const printWindow = window.open('', '', 'height=800,width=800');
-        if (!printWindow) return; 
+        // Step 1: HTML2Canvas से स्क्रीनशॉट कैप्चर करें
+        html2canvas(input, {
+            scale: 2.5, // High resolution
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            width: input.offsetWidth,
+            height: input.offsetHeight
+        } as any).then((canvas) => {
+            
+            // Step 2: Canvas को Image data में बदलें
+            const imgData = canvas.toDataURL('image/png');
 
-        // 1. Stylesheets aur Inline <style> tags dono collect karein (CRUCIAL FIX)
-        let stylesToInject = '';
-        const links = document.querySelectorAll('link[rel="stylesheet"], style');
-        links.forEach(link => {
-             // Saare external links aur inline styles copy honge
-            stylesToInject += link.outerHTML;
+            // Step 3: नया window खोलें
+            const printWindow = window.open('', '_blank');
+            
+            if (printWindow) {
+                // Step 4: Image को नए window में डालें और प्रिंट CSS लगाएं
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Fee Receipt - ${transaction?.receiptId || 'Print'}</title>
+                            <style>
+                                /* Reset margins and force image to full page */
+                                @page { size: A4 portrait; margin: 0; } 
+                                body { margin: 0; padding: 0; } 
+                                img { 
+                                    width: 100vw; /* 100% viewport width */
+                                    height: auto; 
+                                    display: block; 
+                                }
+                            </style>
+                        </head>
+                        <body><img src="${imgData}" /></body>
+                    </html>
+                `);
+                printWindow.document.close();
+                
+                // Step 5: Print with a small delay
+                printWindow.onload = () => {
+                    printWindow.focus();
+                    setTimeout(() => {
+                        printWindow.print();
+                        printWindow.close();
+                    }, 250); // 250ms delay is usually safe
+                };
+            }
+        }).catch(err => {
+            console.error("Print Error (HTML2Canvas):", err);
+            alert("Could not generate print preview.");
         });
-        
-        // 2. Naye window ke liye HTML construct karein (Page break aur visibility fix)
-        const htmlContent = `
-            <html>
-                <head>
-                    <title>Fee Receipt - ${transaction.receiptId}</title>
-                    ${stylesToInject} 
-                    <style>
-                        /* --- FORCE GLOBAL RESET (FOR 2-PAGE FIX) --- */
-                        @page { size: A4; margin: 15mm; }
-                        
-                        body { 
-                            margin: 0 !important; 
-                            padding: 0 !important; 
-                            width: 100vw;
-                            height: 100vh;
-                            overflow: hidden; 
-                            background-color: white !important;
-                        }
-                        /* Content ko forcefully visible rakho */
-                        .receiptContent {
-                            visibility: visible !important;
-                            min-height: auto !important;
-                            box-shadow: none !important;
-                        }
-                        .receiptContent * {
-                           visibility: visible !important;
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${printContent.outerHTML} 
-                </body>
-            </html>
-        `;
-
-        // 3. Content likhein aur print trigger karein delay ke saath
-        printWindow.document.write(htmlContent);
-        printWindow.document.close(); 
-        
-        // 4. 500ms delay dein styles ko load hone ka time dene ke liye
-        setTimeout(() => {
-            printWindow.focus(); 
-            printWindow.print(); 
-            printWindow.close(); 
-        }, 500); 
     };
+    // --- END FINAL WORKING PRINT HANDLER ---
     
     // --- Download PDF Function (Logic is correct) ---
     const handleDownloadPDF = () => {
@@ -153,6 +151,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             return;
         }
 
+        // Add a temporary class if needed for printing
         input.classList.add(styles.printing);
 
         html2canvas(input, {
@@ -160,6 +159,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             useCORS: true,
             backgroundColor: '#ffffff'
         } as any).then(canvas => {
+            // Remove the temporary class
             input.classList.remove(styles.printing);
 
             const imgData = canvas.toDataURL('image/png');
@@ -168,6 +168,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
             
+            // Calculate image properties to fit in PDF
             const imgProps = (pdf as any).getImageProperties(imgData); 
             const imgRatio = imgProps.height / imgProps.width;
 
@@ -175,18 +176,20 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             let imgWidth = pdfWidth - (margin * 2);
             let imgHeight = imgWidth * imgRatio;
 
+            // Adjust height if it exceeds PDF height
             if (imgHeight > pdfHeight - (margin * 2)) {
                 imgHeight = pdfHeight - (margin * 2);
                 imgWidth = imgHeight / imgRatio;
             }
             
-            const x = (pdfWidth - imgWidth) / 2; 
-            const y = margin; 
+            const x = (pdfWidth - imgWidth) / 2; // Center horizontally
+            const y = margin; // Start from top margin
 
             pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
             pdf.save(`FeeReceipt_${transaction?.receiptId || 'download'}.pdf`);
         
         }).catch(err => {
+            // Ensure class is removed even on error
             input.classList.remove(styles.printing);
             console.error("Error downloading PDF:", err);
             alert("Could not download PDF. Please try printing.");

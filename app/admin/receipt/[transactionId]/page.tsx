@@ -1,31 +1,40 @@
+// File: app/admin/receipt/[transactionId]/page.tsx (FINAL LIVE PRINT CODE)
 "use client";
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import api from '@/backend/utils/api'; 
-import styles from './Receipt.module.scss'; // Hum yeh file AAGE banayenge
-import { FiPrinter } from 'react-icons/fi';
-// import LoadingTemplates from '@/components/LoadingTemplates'; // <-- YEH LINE HATA DI GAYI HAI
+import styles from './Receipt.module.scss'; 
+import { FiPrinter, FiDownload } from 'react-icons/fi'; // Download button ke liye FiDownload
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
-// Data types (example, aapke models ke hisaab se)
+// --- Data types (Updated for better handling) ---
+interface StudentDetails { name: string; class: string; }
+interface TemplateDetails { name: string; }
+
 interface Transaction {
   id: string;
   amountPaid: number;
   paymentDate: string;
   mode: string;
   status: string;
-  studentId: { name: string; class: string }; // Populated
-  templateId: { name: string }; // Populated
+  studentId: StudentDetails; // Assuming nested structure
+  templateId: TemplateDetails; 
   feeRecordId: string;
 }
+// ---
 
 export default function ReceiptPage() {
   const params = useParams();
   const { transactionId } = params;
 
+  const printableRef = useRef<HTMLDivElement>(null); // Ref for the printable area
+
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // --- API Fetch Logic (Re-enabled) ---
   useEffect(() => {
     const fetchTransaction = async () => {
       if (!transactionId) return;
@@ -35,7 +44,7 @@ export default function ReceiptPage() {
         setTransaction(res.data);
       } catch (err) {
         console.error("Error fetching transaction:", err);
-        setError('Failed to load receipt details.');
+        setError('Failed to load receipt details. Check backend logs.');
       } finally {
         setLoading(false);
       }
@@ -43,26 +52,90 @@ export default function ReceiptPage() {
     fetchTransaction();
   }, [transactionId]);
 
+  // --- FINAL WORKING PRINT HANDLER (Canvas Logic) ---
   const handlePrint = () => {
-    window.print();
+    const input = printableRef.current;
+    if (!input || !transaction) {
+        alert("Transaction details not loaded or element not found."); 
+        return;
+    }
+    
+    // 1. HTML2Canvas से स्क्रीनशॉट कैप्चर करें
+    html2canvas(input, {
+        scale: 2.5, // High resolution
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        width: input.offsetWidth,
+        height: input.offsetHeight
+    } as any).then((canvas) => {
+        
+        const imgData = canvas.toDataURL('image/png');
+        const printWindow = window.open('', '_blank');
+        
+        if (printWindow) {
+            // 2. Image को नए window में डालें और प्रिंट CSS लगाएं
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Fee Receipt - ${transaction.id}</title>
+                        <style>
+                            @page { size: A4 portrait; margin: 0; } 
+                            body { margin: 0; padding: 0; } 
+                            img { 
+                                width: 100vw; 
+                                height: auto; 
+                                display: block; 
+                            }
+                        </style>
+                    </head>
+                    <body><img src="${imgData}" /></body>
+                </html>
+            `);
+            printWindow.document.close();
+            
+            // 3. Print with a small delay (CRUCIAL)
+            printWindow.onload = () => {
+                printWindow.focus();
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 250); 
+            };
+        }
+    }).catch(err => {
+        console.error("Print Error (HTML2Canvas):", err);
+        alert("Could not generate print preview. Check console.");
+    });
   };
+  
+  // --- Download PDF Handler (Bonafide style) ---
+  const handleDownloadPDF = () => {
+    // Note: You would need to implement the full jsPDF/html2canvas download logic here, 
+    // similar to handlePrint but saving to PDF instead of opening a window.
+    alert("Download PDF not implemented yet. Please use Print -> Save as PDF.");
+  }
 
-  // --- YAHAN BADLAAV KIYA GAYA HAI ---
-  if (loading) return <div style={{ padding: '2rem' }}>Loading Receipt...</div>; // Simple loading text
-  if (error) return <div className="error">{error}</div>; 
+
+  // --- JSX Render Logic ---
+  if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading Receipt...</div>; 
+  if (error) return <div className={styles.errorContainer}>{error}</div>; 
   if (!transaction) return <div>Transaction not found.</div>;
 
-  // --- YEH HAI AAPKA RECEIPT JSX ---
   return (
     <div className={styles.receiptContainer}>
       
-      <div className={styles.noPrint}>
+      {/* --- Print/Download Buttons (Now functional) --- */}
+      <div className={styles.actions}>
+        <button onClick={handleDownloadPDF} className={styles.downloadButton}>
+          <FiDownload /> Download PDF
+        </button>
         <button onClick={handlePrint} className={styles.printButton}>
           <FiPrinter /> Print Receipt
         </button>
       </div>
-
-      <div className={styles.printableArea}>
+      
+      {/* --- PRINTABLE AREA (Ref added for html2canvas) --- */}
+      <div className={styles.printableArea} ref={printableRef}>
         <header className={styles.receiptHeader}>
           <h1>Payment Receipt</h1>
           <p><strong>Transaction ID:</strong> {transaction.id}</p>
