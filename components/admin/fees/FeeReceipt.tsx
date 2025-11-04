@@ -6,7 +6,7 @@ import { FiPrinter, FiDownload } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-// --- Interface Definitions (Full Interface List - No Change) ---
+// --- Interface Definitions (No Change) ---
 export interface SchoolInfo {
     name?: string; address?: string; logo?: string;
     session?: string; phone?: string; email?: string;
@@ -85,55 +85,34 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     // --- FINAL WORKING PRINT HANDLER (HTML2Canvas based on Bonafide Logic) ---
     const handlePrint = () => {
         const input = componentRef.current;
-        if (!input) {
-            alert("Please select a transaction and ensure preview is visible."); 
-            return;
-        }
+        if (!input || !transaction) { alert("Details missing."); return; }
         
         // Step 1: HTML2Canvas से स्क्रीनशॉट कैप्चर करें
-        html2canvas(input, {
-            scale: 2.5, // High resolution
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            width: input.offsetWidth,
-            height: input.offsetHeight
-        } as any).then((canvas) => {
-            
-            // Step 2: Canvas को Image data में बदलें
+        html2canvas(input, { scale: 2.5, useCORS: true, backgroundColor: '#ffffff', width: input.offsetWidth, height: input.offsetHeight } as any).then((canvas) => {
             const imgData = canvas.toDataURL('image/png');
-
-            // Step 3: नया window खोलें
             const printWindow = window.open('', '_blank');
             
             if (printWindow) {
-                // Step 4: Image को नए window में डालें और प्रिंट CSS लगाएं
                 printWindow.document.write(`
                     <html>
                         <head>
-                            <title>Fee Receipt - ${transaction?.receiptId || 'Print'}</title>
+                            <title>Fee Receipt - ${transaction.receiptId || 'Print'}</title>
                             <style>
-                                /* Reset margins and force image to full page */
                                 @page { size: A4 portrait; margin: 0; } 
                                 body { margin: 0; padding: 0; } 
-                                img { 
-                                    width: 100vw; /* 100% viewport width */
-                                    height: auto; 
-                                    display: block; 
-                                }
+                                img { width: 100vw; height: auto; display: block; }
                             </style>
                         </head>
                         <body><img src="${imgData}" /></body>
                     </html>
                 `);
                 printWindow.document.close();
-                
-                // Step 5: Print with a small delay
                 printWindow.onload = () => {
                     printWindow.focus();
                     setTimeout(() => {
                         printWindow.print();
                         printWindow.close();
-                    }, 250); // 250ms delay is usually safe
+                    }, 250);
                 };
             }
         }).catch(err => {
@@ -141,55 +120,40 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             alert("Could not generate print preview.");
         });
     };
-    // --- END FINAL WORKING PRINT HANDLER ---
     
     // --- Download PDF Function (Logic is correct) ---
     const handleDownloadPDF = () => {
         const input = componentRef.current;
-        if (!input) {
-            alert("Could not find receipt content to download.");
-            return;
-        }
+        if (!input) { alert("Could not find receipt content to download."); return; }
 
-        // Add a temporary class if needed for printing
         input.classList.add(styles.printing);
 
-        html2canvas(input, {
-            scale: 2.5,
-            useCORS: true,
-            backgroundColor: '#ffffff'
-        } as any).then(canvas => {
-            // Remove the temporary class
+        html2canvas(input, { scale: 2.5, useCORS: true, backgroundColor: '#ffffff' } as any).then(canvas => {
             input.classList.remove(styles.printing);
-
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4'); 
+            // ... (PDF dimension and save logic remains the same) ...
             
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
-            
-            // Calculate image properties to fit in PDF
             const imgProps = (pdf as any).getImageProperties(imgData); 
             const imgRatio = imgProps.height / imgProps.width;
-
             const margin = 10; 
             let imgWidth = pdfWidth - (margin * 2);
             let imgHeight = imgWidth * imgRatio;
 
-            // Adjust height if it exceeds PDF height
             if (imgHeight > pdfHeight - (margin * 2)) {
                 imgHeight = pdfHeight - (margin * 2);
                 imgWidth = imgHeight / imgRatio;
             }
             
-            const x = (pdfWidth - imgWidth) / 2; // Center horizontally
-            const y = margin; // Start from top margin
+            const x = (pdfWidth - imgWidth) / 2; 
+            const y = margin; 
 
             pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
             pdf.save(`FeeReceipt_${transaction?.receiptId || 'download'}.pdf`);
         
         }).catch(err => {
-            // Ensure class is removed even on error
             input.classList.remove(styles.printing);
             console.error("Error downloading PDF:", err);
             alert("Could not download PDF. Please try printing.");
@@ -244,43 +208,45 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             {/* --- END --- */}
 
 
-            {/* --- Receipt Content JSX --- */}
+            {/* --- Receipt Content JSX (Premium Structure) --- */}
             <div id="printable-receipt" className={styles.receiptContent} ref={componentRef}>
-                {/* Header */}
-                <header className={styles.header}>
-                    {schoolInfo.logo && (<img src={schoolInfo.logo} alt={`${schoolInfo.name || 'School'} Logo`} className={styles.logo} />)}
+                
+                {/* 1. HEADER (School Name + Metadata on the right) */}
+                <div className={styles.header}>
+                    
+                    {/* Left: School Name Only */}
                     <div className={styles.schoolDetails}>
-                        <h1>{schoolInfo.name || 'Your School Name'}</h1>
-                        <p>{schoolInfo.address || '123 School Street, City, State, Pin'}</p>
-                        <p>
-                            {schoolInfo.phone && `Ph: ${schoolInfo.phone} | `}
-                            {schoolInfo.email && `Email: ${schoolInfo.email}`}
-                        </p>
+                        {schoolInfo.logo && (<img src={schoolInfo.logo} alt={`${schoolInfo.name || 'School'} Logo`} className={styles.logo} />)}
+                        <h1>{schoolInfo.name || 'My EduPanel'}</h1>
+                        <p>{schoolInfo.address || 'Pune'}</p> {/* Address/City yahan dikhaya (for local branding) */}
                     </div>
-                </header>
 
-                {/* Title and Meta */}
-                <div className={styles.titleMeta}>
-                    <h2>FEE RECEIPT</h2>
-                    <div className={styles.metaInfo}>
+                    {/* Right: Metadata Grid (Receipt No, Date, Session) */}
+                    <div className={styles.metaHeader}>
+                         {/* Receipt metadata ko ek block mein rakha */}
                         <p><strong>Receipt No:</strong> {receiptNoDisplay}</p>
                         <p><strong>Date:</strong> {paymentDateDisplay}</p>
                         <p><strong>Session:</strong> {schoolInfo.session || 'N/A'}</p>
                     </div>
                 </div>
 
-                {/* Student Details */}
+                {/* 2. Central Title */}
+                <div className={styles.titleMeta}>
+                    <h2>FEE RECEIPT</h2>
+                </div>
+
+                {/* 3. Student Details (Compact Grid) */}
                 <section className={styles.detailsSection}>
                     <h3>Student Information</h3>
                     <div className={styles.grid}>
                         <p><strong>Name:</strong> {studentNameDisplay}</p>
-                        <p><strong>Student ID:</strong> {studentRegIdDisplay}</p>
                         <p><strong>Class:</strong> {classDisplay}</p>
+                        <p><strong>Student ID:</strong> {studentRegIdDisplay}</p>
                         <p><strong>Roll No:</strong> {rollNoDisplay}</p>
                     </div>
                 </section>
 
-                {/* Fee Breakdown Table */}
+                {/* 4. Fee Breakdown Table */}
                 <section className={styles.itemsSection}>
                     <h3>Fee Particulars {templateNameDisplay && `(${templateNameDisplay})`}</h3> 
                     <table className={styles.itemsTable}>
@@ -315,44 +281,46 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     </table>
                 </section>
 
-                {/* Payment Details */}
-                <section className={styles.detailsSection}>
-                    <h3>Payment Details</h3>
-                    <div className={styles.grid}>
-                        <p><strong>Amount Paid:</strong> <strong className={styles.paidAmount}>{formatCurrency(amountPaid)}</strong></p>
-                        <p><strong>Payment Mode:</strong> {transaction.paymentMode || 'N/A'}</p>
-                        {transaction.paymentMode === 'UPI' && transaction.transactionId && <p><strong>UPI Transaction ID:</strong> {transaction.transactionId}</p>}
-                        {(transaction.paymentMode === 'Cheque' || transaction.paymentMode === 'Draft') && transaction.chequeNumber && <p><strong>{transaction.paymentMode} No:</strong> {transaction.chequeNumber}</p>}
-                        {(transaction.paymentMode === 'Cheque' || transaction.paymentMode === 'Draft') && transaction.bankName && <p><strong>Bank Name:</strong> {transaction.bankName}</p>}
+                {/* 5. Payment Details, Balance Due (Compact Two-Column Layout) */}
+                <div className={styles.paymentAndBalance}>
+                    
+                    {/* Left Block: Payment Details */}
+                    <div className={styles.paymentBlock}>
+                        <h3>Payment Details</h3>
+                        <div className={styles.grid}>
+                            <p><strong>Amount Paid:</strong> <strong className={styles.paidAmount}>{formatCurrency(amountPaid)}</strong></p>
+                            <p><strong>Payment Mode:</strong> {transaction.paymentMode || 'N/A'}</p>
+                            {transaction.notes && <p className={styles.notes}><strong>Remarks:</strong> {transaction.notes}</p>}
+                        </div>
                     </div>
-                    {transaction.notes && <p className={styles.notes}><strong>Remarks:</strong> {transaction.notes}</p>}
-                </section>
 
-                 {/* Balance Summary */}
-                 <section className={styles.balanceSection}>
-                     <p><strong>Balance Due:</strong> 
-                        <span 
-                            className={styles.balanceAmount} 
-                            data-balance-zero={balanceDue < 0.01}
-                        >
-                            {formatCurrency(balanceDue)}
-                        </span>
-                    </p>
-                     {paymentStatus === 'PAID' ? ( <div className={styles.paidStamp}>PAID</div> ) :
-                       (<div className={`${styles.statusBadge} ${styles[paymentStatus.toLowerCase()]}`}>{paymentStatus}</div>)
-                     }
-                 </section>
+                    {/* Right Block: Balance Due & Status */}
+                    <div className={styles.balanceBlock}>
+                        <section className={styles.balanceSection}>
+                            <p><strong>Balance Due:</strong> 
+                                <span className={styles.balanceAmount} data-balance-zero={balanceDue < 0.01}>{formatCurrency(balanceDue)}</span>
+                            </p>
+                             {paymentStatus === 'PAID' ? ( <div className={styles.paidStamp}>PAID</div> ) :
+                               (<div className={`${styles.statusBadge} ${styles[paymentStatus.toLowerCase()]}`}>{paymentStatus}</div>)
+                             }
+                        </section>
+                    </div>
+                </div>
 
-                {/* Footer */}
+                {/* 6. Footer (Signatures) */}
                 <footer className={styles.footer}>
-                     <p className={styles.collectedBy}>Received By: {collectedByNameDisplay}</p>
+                     <p className={styles.receivedBy}>Received By: {collectedByNameDisplay}</p>
+                    
+                    {/* Signature Area (Space for lines) */}
                     <div className={styles.signatureArea}>
-                        <div className={styles.signatureBox}></div>
-                        <div className={styles.signatureBox}></div>
+                        <span className={styles.signatureBox}></span>
+                        <span className={styles.signatureBox}></span>
                     </div>
+                    
+                    {/* Signature Labels (Aligned below lines) */}
                      <div className={styles.signatureLabels}>
-                         <p>Accountant / Cashier</p>
-                         <p>Authorised Signatory</p>
+                         <p className={styles.cashierLabel}>Accountant / Cashier</p>
+                         <p className={styles.signatoryLabel}>Authorised Signatory</p>
                      </div>
                     <p className={styles.footerNote}>
                         This is a computer-generated receipt {transaction.paymentMode !== 'Online' ? 'and requires a signature.' : 'and does not require a signature if paid online.'}
