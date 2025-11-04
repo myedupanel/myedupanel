@@ -82,7 +82,6 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null); 
 
-    // --- FINAL WORKING PRINT HANDLER ---
     const handlePrint = () => {
         const printContent = componentRef.current;
         if (!printContent || !transaction) return;
@@ -90,36 +89,41 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         const printWindow = window.open('', '', 'height=800,width=800');
         if (!printWindow) return; 
 
-        // 1. Original document से saare stylesheets/styles collect karein (Crucial)
-        let cssLinks = '';
+        // 1. Stylesheets aur Inline <style> tags dono collect karein (CRUCIAL FIX)
+        let stylesToInject = '';
         const links = document.querySelectorAll('link[rel="stylesheet"], style');
         links.forEach(link => {
-            cssLinks += link.outerHTML; 
+             // Saare external links aur inline styles copy honge
+            stylesToInject += link.outerHTML;
         });
-
-        // 2. Naye window ke liye HTML construct karein
+        
+        // 2. Naye window ke liye HTML construct karein (Page break aur visibility fix)
         const htmlContent = `
             <html>
                 <head>
                     <title>Fee Receipt - ${transaction.receiptId}</title>
-                    ${cssLinks} 
+                    ${stylesToInject} 
                     <style>
-                        /* Print CSS rules yahan inject kiye jaate hain */
+                        /* --- FORCE GLOBAL RESET (FOR 2-PAGE FIX) --- */
                         @page { size: A4; margin: 15mm; }
                         
-                        /* Injected CSS: Body aur content ko reset karein for 2-page fix */
-                        body { 
-                            margin: 0; padding: 0; 
-                            background-color: white;
-                            overflow: hidden; /* Two pages issue solve karne ke liye */
+                        body, html { 
+                            margin: 0 !important; 
+                            padding: 0 !important; 
+                            width: 100vw;
+                            height: 100vh; /* Single page constraint */
+                            overflow: hidden;
+                            background-color: white !important;
                         }
                         
-                        /* Content ko single page height ke liye constrain karein */
-                        .receiptContent { 
-                             width: 100%;
-                             min-height: auto;
-                             max-height: 290mm; /* A4 height se thoda kam */
-                             box-sizing: border-box;
+                        /* Content ko forcefully visible rakho */
+                        .receiptContent {
+                            visibility: visible !important;
+                            min-height: auto !important;
+                            box-shadow: none !important;
+                        }
+                        .receiptContent * {
+                           visibility: visible !important;
                         }
                     </style>
                 </head>

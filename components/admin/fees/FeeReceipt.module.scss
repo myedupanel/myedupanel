@@ -305,4 +305,24 @@
 .receiptContent.printing {
   background: #ffffff !important;
 }
+@media print {
+}
+    /* Print होने पर buttons और actions को hide करें (Local selectors) */
+    .actions, .noPrint { 
+        display: none !important; 
+    }
 
+    /* Print होने पर कंटेनर को reset करें */
+    .receiptContainer {
+        max-height: none !important; 
+        overflow: visible !important;
+        box-shadow: none !important;
+    }
+    
+    /* Content Area को Full Width और Clean Print के लिए तैयार करें */
+    .receiptContent {
+        padding: 0 !important; /* Printing ke liye padding hata dein */
+        margin: 0 auto !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
