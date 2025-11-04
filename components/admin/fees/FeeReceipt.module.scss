@@ -308,54 +308,36 @@
 }
 
 @media print {
-    /* 1. Root tags पर global styles apply करने के लिए, local selector के साथ combine करें */
-    
-    /* Vercel/Next.js को संतुष्ट करने के लिए, हम एक local class को anchor बनाते हैं */
-    
-    .receiptContainer { 
-        /* जब print हो रहा हो, तब scrollable behaviour खत्म कर दें */
-        max-height: none !important; 
-        overflow: visible !important;
-    }
-    
-    /* Global tags पर visibility/layout reset करें */
-    /* Vercel Purity Rule: Agar local class (jaise .receiptContainer) use nahi kiya gaya to fail hoga. */
-    /* Isliye hum inhe global block mein bandh karte hain jo local block ke andar nested ho */
-
-    :global {
-        /* body और html पर margin/padding हटाओ */
-        body, html {
-            margin: 0 !important;
-            padding: 0 !important;
-            background-color: white !important;
-            min-height: 100vh;
-        }
-
-        /* Body के सभी elements को शुरू में hide कर दें */
-        body * {
-            visibility: hidden !important; 
-        }
-    }
-    
-    /* 2. Print होने वाले sections को visible करें (Local Selectors) */
-    /* .receiptContainer aur uske content ko visible karo */
-    .receiptContainer, .receiptContainer * {
-        visibility: visible !important;
-        position: static !important; /* Fixed/Absolute se static tak ki printing theek ho */
-    }
-    
-    .receiptContent {
-        width: 100% !important; 
-        box-shadow: none !important;
-        border: none !important;
+    /* 1. Global Reset: Body par visibility: hidden lagao taki sirf hamara container dikhe. */
+    /* Yeh Next.js/Vercel mein safe maana jaata hai. */
+    :global(body) {
+        visibility: hidden !important;
         margin: 0 !important;
-        padding: 20px !important;
-        
-        /* Ensure content takes precedence */
-        z-index: 999999;
+        padding: 0 !important;
+        background-color: white !important;
+        min-height: 100vh;
     }
 
-    /* 3. Non-printable local elements (buttons) ko hide rakhein */
+    /* 2. Main Container (.receiptContainer) aur uske children ko visible karo. */
+    .receiptContainer { 
+        visibility: visible !important;
+        position: absolute !important; /* Screen par top-left se start hoga */
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        max-height: none !important; /* Scroll lock hataya */
+        overflow: visible !important;
+        background-color: white !important;
+        box-shadow: none !important;
+        z-index: 99999;
+    }
+    
+    /* 3. Saare content aur uske andar ke elements ko explicitly visible karo */
+    .receiptContainer, .receiptContent, .receiptContent * {
+        visibility: visible !important;
+    }
+
+    /* 4. Non-Printable local elements (buttons) ko hide rakhein */
     .actions, .noPrint { 
         display: none !important; 
         visibility: hidden !important;

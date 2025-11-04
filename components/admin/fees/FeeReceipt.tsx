@@ -1,4 +1,4 @@
-// File: FeeReceipt.tsx (FINAL CLEANED CODE - No duplicate definition or scope error)
+// File: FeeReceipt.tsx (FINAL CLEANED CODE)
 
 import React, { useRef } from 'react';
 import styles from './FeeReceipt.module.scss';
@@ -6,7 +6,7 @@ import { FiPrinter, FiDownload } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-// --- Interface Definitions (No Change) ---
+// --- Interface Definitions (Full Interface List) ---
 export interface SchoolInfo {
     name?: string; address?: string; logo?: string;
     session?: string; phone?: string; email?: string;
@@ -29,7 +29,6 @@ export interface CollectorInfo {
 export interface Transaction {
     id: number;
     receiptId: string;
-    // Keep this robust for nested/non-standard API responses
     studentId?: StudentInfo | any; 
     templateId?: TemplateInfo | any;
     feeRecordId?: FeeRecordInfo | string;
@@ -79,11 +78,11 @@ const formatDate = (dateString: string | undefined): string => {
 };
 // ---
 
-// --- MAIN COMPONENT DECLARATION (Only Once!) ---
+// --- MAIN COMPONENT DECLARATION ---
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null); 
 
-    // --- FINAL WORKING PRINT HANDLER ---
+    // --- FINAL WORKING PRINT HANDLER (Fixes Blank Page & Styles) ---
     const handlePrint = () => {
         const printContent = componentRef.current;
         if (!printContent || !transaction) return;
@@ -91,7 +90,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         const printWindow = window.open('', '', 'height=800,width=800');
         if (!printWindow) return; 
 
-        // 1. Original document से saare stylesheets/styles collect karein (Crucial for styling fix)
+        // 1. Original document से saare stylesheets/styles collect karein (Crucial)
         let cssLinks = '';
         const links = document.querySelectorAll('link[rel="stylesheet"], style');
         links.forEach(link => {
@@ -126,7 +125,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         }, 500); 
     };
     
-    // --- Download PDF Function (No Change) ---
+    // --- Download PDF Function (Logic is correct) ---
     const handleDownloadPDF = () => {
         const input = componentRef.current;
         if (!input) {
@@ -179,13 +178,11 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         return <div className={styles.noData}>No transaction details available.</div>;
     }
 
-    // --- DATA EXTRACTION & TYPING FIX (THESE MUST BE INSIDE THE COMPONENT FUNCTION) ---
+    // --- Data Extraction & Calculations (Must be defined inside this function scope) ---
     const schoolInfo = transaction.schoolInfo || {};
-    // Access nested data safely using optional chaining or local helper variables
     const studentData = transaction.studentId || {}; 
-    const templateData = transaction.templateId || {}; // <-- templateInfo is now templateData
+    const templateData = transaction.templateId || {}; 
     
-    // Derived variables using local data
     const receiptNoDisplay = transaction.receiptId || 'N/A';
     const paymentDateDisplay = formatDate(transaction.paymentDate); 
     
@@ -262,8 +259,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
                 {/* Fee Breakdown Table */}
                 <section className={styles.itemsSection}>
-                    {/* templateData ke name ko safely access karein */}
-                    <h3>Fee Particulars {templateData?.name && `(${(templateData as any).name})`}</h3> 
+                    <h3>Fee Particulars {templateNameDisplay && `(${templateNameDisplay})`}</h3> 
                     <table className={styles.itemsTable}>
                         <thead>
                             <tr>
