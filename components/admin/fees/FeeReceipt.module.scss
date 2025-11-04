@@ -307,32 +307,44 @@
 }
 
 @media print {
-    /* 1. Body और HTML reset: Inactivity fixes */
+    /* 1. Print होने पर buttons और actions को hide करें (Local selectors) */
+    .actions, .noPrint { 
+        display: none !important; 
+    }
+
+    /* 2. Print होने पर कंटेनर को reset करें */
+    .receiptContainer {
+        /* Screen flow control के लिए settings */
+        max-height: none !important; 
+        overflow: visible !important;
+        box-shadow: none !important;
+    }
+    
+    /* 3. Content Area को Full Width और Clean Print के लिए तैयार करें */
+    .receiptContent {
+        width: 100% !important; 
+        padding: 20px !important; 
+        margin: 0 auto !important;
+        box-shadow: none !important;
+        border: none !important;
+    } 
+    
+    /* Global fixes: Humne isko Global CSS file mein daal diya hai. */
+}
+
+
+/* --- Global CSS File (e.g., globals.css) mein yeh code add karein --- */
+
+/* Print Reset for the surrounding elements */
+@media print {
     body, html {
         margin: 0 !important;
         padding: 0 !important;
         background-color: white !important;
-        min-height: 100vh;
     }
     
-    /* 2. Non-printable elements (Header, Footer, Sidebar, Buttons) को hide करें */
-    body > :not(.receipt-wrapper) {
-        display: none !important;
-        visibility: hidden !important;
-    }
-
-    /* 3. सिर्फ Printable Content को show करें */
-    /* FeeReceipt.tsx में हमने content को div.print-wrapper में wrap किया है */
-    .receipt-wrapper { 
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        visibility: visible;
-        display: block;
-        margin: 0;
-    }
-    .receipt-wrapper * {
-        visibility: visible;
+    /* Hide Next.js's root layout container if needed, so only the print content shows */
+    body > div#__next > * { 
+        display: none; 
     }
 }
