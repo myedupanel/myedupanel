@@ -6,7 +6,7 @@ import { FiPrinter, FiDownload } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-// --- Interface Definitions (Full Interface List) ---
+// --- Interface Definitions (Full Interface List - No Change) ---
 export interface SchoolInfo {
     name?: string; address?: string; logo?: string;
     session?: string; phone?: string; email?: string;
@@ -82,6 +82,7 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null); 
 
+    // --- FINAL WORKING PRINT HANDLER ---
     const handlePrint = () => {
         const printContent = componentRef.current;
         if (!printContent || !transaction) return;
@@ -107,15 +108,14 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                         /* --- FORCE GLOBAL RESET (FOR 2-PAGE FIX) --- */
                         @page { size: A4; margin: 15mm; }
                         
-                        body, html { 
+                        body { 
                             margin: 0 !important; 
                             padding: 0 !important; 
                             width: 100vw;
-                            height: 100vh; /* Single page constraint */
-                            overflow: hidden;
+                            height: 100vh;
+                            overflow: hidden; 
                             background-color: white !important;
                         }
-                        
                         /* Content ko forcefully visible rakho */
                         .receiptContent {
                             visibility: visible !important;
@@ -325,7 +325,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     {transaction.notes && <p className={styles.notes}><strong>Remarks:</strong> {transaction.notes}</p>}
                 </section>
 
-                 /* Balance Summary */
+                 {/* Balance Summary */}
                  <section className={styles.balanceSection}>
                      <p><strong>Balance Due:</strong> 
                         <span 
