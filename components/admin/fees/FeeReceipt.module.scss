@@ -326,3 +326,60 @@
         box-shadow: none !important;
         border: none !important;
     }
+.receiptContent.printing {
+  background: #ffffff !important;
+}
+
+@media print {
+    /* 1. Global Reset (SCSS compliant) */
+    /* Hum .receiptContainer ko anchor bana rahe hain */
+    
+    /* VERCEL/NEXT.JS COMPLIANCE: Screen ke bahar sab hide karo */
+    :global(body) {
+        visibility: hidden; 
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+        background-color: white !important;
+    }
+
+    /* VERCEL/NEXT.JS COMPLIANCE: Body ke children ko bhi hidden rakho */
+    :global(body) > * {
+        display: none !important;
+        visibility: hidden !important; 
+    }
+    
+    /* 2. Print ہونے والے sections ko forcefully visible aur full width/height dein */
+    .receiptContainer, .receiptContent {
+        display: block !important;
+        position: absolute; 
+        top: 0;
+        left: 0;
+        z-index: 99999;
+        box-shadow: none !important;
+        
+        /* Two-page aur blank issue solve karne ke liye height/width control */
+        width: 100% !important;
+        max-height: none !important; 
+        min-height: 100vh !important; 
+        overflow: visible !important;
+        background-color: white !important;
+        
+        margin: 0 auto !important; 
+        padding: 20px !important; 
+        border: none !important;
+    }
+    
+    /* 3. Sabhi inner elements ko visible rakho aur page break control karo */
+    .receiptContent *, .receiptContainer * {
+        visibility: visible !important;
+        /* Optional: Page break ko prevent karne ke liye kuch elements par ye laga sakte hain */
+        /* break-inside: avoid; */
+    }
+
+    /* 4. Actions buttons aur non-printable elements ko hide rakhein */
+    .actions, .noPrint { 
+        display: none !important; 
+        visibility: hidden !important;
+    }
+}

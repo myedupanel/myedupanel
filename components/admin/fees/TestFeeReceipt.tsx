@@ -1,7 +1,7 @@
-// File: components/admin/fees/TestFeeReceipt.tsx
+// File: components/admin/fees/TestFeeReceipt.tsx (FINAL FIX FOR BLANK PREVIEW)
 "use client";
 import React, { useRef } from 'react';
-// New SCSS file import
+// SCSS file import
 import styles from './TestPrintStyles.module.scss'; 
 import { FiPrinter, FiDownload } from 'react-icons/fi';
 
@@ -16,7 +16,7 @@ const dummyTransaction = {
     studentId: '7857',
 };
 
-// Helper Functions (Copy paste kiye hue)
+// Helper Functions (No Change)
 const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-IN', {
         style: 'currency', currency: 'INR',
@@ -34,7 +34,12 @@ const formatDate = (dateString: string): string => {
 const TestFeeReceipt = () => {
     const componentRef = useRef<HTMLDivElement>(null); 
 
-    // --- FINAL WORKING PRINT HANDLER ---
+    // Yahan hum sirf dummy download function de rahe hain
+    const handleDownloadPDF = () => {
+       alert("PDF Download functionality is disabled for this test receipt.");
+    };
+
+    // --- FINAL ROBUST PRINT HANDLER (Fixes Visibility/Blank Page) ---
     const handlePrint = () => {
         const printContent = componentRef.current;
         if (!printContent) return;
@@ -42,7 +47,7 @@ const TestFeeReceipt = () => {
         const printWindow = window.open('', '', 'height=800,width=800');
         if (!printWindow) return; 
 
-        // 1. Stylesheets aur Inline <style> tags dono collect karein (CRUCIAL FIX)
+        // 1. Original document se saare stylesheets/styles collect karein (CRUCIAL FIX)
         let stylesToInject = '';
         const links = document.querySelectorAll('link[rel="stylesheet"], style');
         links.forEach(link => {
@@ -56,6 +61,7 @@ const TestFeeReceipt = () => {
                     <title>Fee Receipt - ${dummyTransaction.receiptId}</title>
                     ${stylesToInject} 
                     <style>
+                        /* --- INJECTED STYLES: AGGRESSIVE RESET --- */
                         @page { size: A4; margin: 15mm; }
                         
                         body, html { 
@@ -66,14 +72,29 @@ const TestFeeReceipt = () => {
                             overflow: hidden; 
                             background-color: white !important;
                         }
+
+                        /* Hide everything in the popup window initially */
+                        body * {
+                             visibility: hidden;
+                             display: none;
+                        }
+                        
+                        /* Force visibility of the main printable content area and its children */
                         .receiptContent {
                             visibility: visible !important;
+                            display: block !important;
+                            position: absolute !important;
+                            top: 0 !important;
+                            left: 0 !important;
                             min-height: auto !important;
                             max-height: 290mm; /* A4 constraint */
                             box-shadow: none !important;
+                            color: black !important; /* Ensure text is visible */
                         }
                         .receiptContent * {
                            visibility: visible !important;
+                           display: block !important;
+                           color: inherit !important;
                         }
                     </style>
                 </head>
@@ -95,11 +116,6 @@ const TestFeeReceipt = () => {
         }, 500); 
     };
     
-    // Yahan hum sirf dummy download function de rahe hain
-    const handleDownloadPDF = () => {
-       alert("PDF Download functionality is disabled for this test receipt.");
-    };
-
     // --- JSX RENDER ---
     return (
         <div className={styles.receiptContainer}>
