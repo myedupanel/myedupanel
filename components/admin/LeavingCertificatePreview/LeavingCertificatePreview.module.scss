@@ -1,215 +1,145 @@
 /* src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss */
 
-/* --- Base Styles (No Change) --- */
+/* * A4 Paper dimensions: Reduced content density */
 .certificatePaper {
   width: 210mm;
-  padding: 10mm;
-  margin: 20px auto;
-  font-family: 'Times New Roman', Times, serif;
-  font-size: 12pt;
+  min-height: 297mm;
+  padding: 12mm; /* Global padding kam kiya */
+  margin: 10px auto; 
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Times New Roman', Times, serif; 
   color: #000;
-  background: #fff;
-  border: 1px solid #ccc;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-  display: flex;
+  font-size: 10.5pt; /* Font size thoda kam kiya */
+  line-height: 1.4; /* Line height kam kiya */
+  box-sizing: border-box; 
 }
 
+/* * Outer Border (Reduced Internal Padding) */
 .outerBorder {
   border: 2px solid #000;
-  padding: 12mm 10mm;
+  padding: 8mm; /* Internal border padding kam kiya */
+  height: 100%;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  flex-grow: 1;
 }
 
-.fill {
-  font-weight: bold;
-  padding: 0 4px;
-  border-bottom: 1px dotted #333;
-}
-.fillBlank {
-  display: inline-block;
-  border-bottom: 1px dotted #333;
-  vertical-align: bottom;
-  padding: 0 4px;
-}
-/* --- End Base Styles --- */
-
-
-/* --- Header Style (No Change) --- */
+/* --- Header Section --- */
 .certHeader {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  border-bottom: 1.5px solid #000;
-  padding-bottom: 8px;
-  margin-bottom: 10px;
+  text-align: center;
+  border-bottom: 2px solid #000;
+  padding-bottom: 8px; /* Padding kam kiya */
+  margin-bottom: 12px; /* Margin kam kiya */
 
-  .logo { display: none; }
-  
   .schoolInfoBlock {
-    flex-grow: 0;
-    text-align: center;
-    padding: 0;
-    .schoolName1 { font-size: 12pt; font-weight: bold; margin: 0; }
-    .schoolName2 { font-size: 18pt; font-weight: bold; margin: 2px 0; }
-    .schoolAddressCode { font-size: 10pt; margin: 0; line-height: 1.4; }
+    margin-bottom: 8px;
+  }
+
+  /* --- ALIGNMENT FIX: Center the Title --- */
+  .titleRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+
+    .headerSrNo, .headerRegNo {
+      /* Sr. No and Reg. No ko fix width diya */
+      flex-basis: 120px; 
+      font-size: 10.5pt;
+    }
+    
+    h2 {
+      /* Title ko center mein rakha */
+      flex-grow: 1;
+      text-align: center;
+      margin: 0;
+      font-size: 16pt; /* Font size maintain kiya */
+      font-weight: bold;
+      text-decoration: underline;
+    }
+    
+    .headerSrNo { text-align: left; }
+    .headerRegNo { text-align: right; }
   }
 }
 
-.titleRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-top: 8px;
-
-  h2 { /* Title */
-    font-size: 15pt;
-    font-weight: bold;
-    margin: 0;
-    padding: 0 10px; 
-    text-align: center;
-    flex-grow: 1;
-    flex-shrink: 1;
-  }
-
-  .headerSrNo, .headerRegNo {
-    font-size: 11pt;
-    font-weight: bold;
-    white-space: nowrap;
-    flex-basis: auto;
-    flex-shrink: 0;
-  }
-  .headerSrNo { text-align: left; margin-right: 15px; }
-  .headerRegNo { text-align: right; margin-left: 15px; }
-}
-/* --- End Header Style --- */
-
-
-/* --- Student Info Table (Main Fixes) --- */
+/* --- Student Info Table (Vertical Space Reduction) --- */
 .studentInfoTable {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
-  
-  tbody tr td {
-    padding: 7px 5px;
-    vertical-align: top;
-    line-height: 1.4;
-    border-bottom: 1px solid #eee;
-  }
-  tbody tr td:nth-child(1) { width: 35px; text-align: center; font-weight: normal; }
-  tbody tr td:nth-child(2) { width: 35%; font-weight: normal; }
-  
-  tbody tr td:nth-child(3) {
-    width: 60%;
-    font-weight: bold;
-    // Default display flex rakhte hain, jisse inlineFields kaam kare
-    display: flex; 
-    flex-wrap: wrap; 
-    align-items: center;
-    gap: 5px 20px; 
-  }
-  
-  /* --- FIX 1: Increased gap for inline fields (Row 4) --- */
-  .row4Spacing {
-    gap: 5px 40px !important; // Default 20px se badha diya
-  }
-  
-  /* --- FIX 2: 2x2 Grid for Birth Place (Row 6) --- */
-  .gridWrapper {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+  margin-bottom: 15px; /* Margin kam kiya */
+
+  td {
+    padding: 6px 5px; /* Vertical padding kam kiya */
+    vertical-align: middle; /* Middle align kiya */
     
-    .gridRow {
-      display: flex;
-      justify-content: space-between; // Fields ke beech space
-      width: 100%;
-      margin-bottom: 5px;
-      
-      .subField {
-        flex-basis: 48%; // Do fields ko 2x2 mein fit karne ke liye
-        display: flex;
-        align-items: baseline;
-      }
+    &:nth-child(2) {
+      width: 230px; /* Label width maintain kiya */
+      font-weight: bold;
+    }
+    
+    /* Longest column mein text wrap/shrink na ho isliye display:flex hata diya gaya */
+    &:nth-child(3) { 
+        display: block; 
     }
   }
-
-  // Ensure these rows use display: block to stop wrapping issues
-  tbody tr:nth-child(8) td:nth-child(3),
-  tbody tr:nth-child(9) td:nth-child(3),
-  tbody tr:nth-child(14) td:nth-child(3),
-  tbody tr:nth-child(15) td:nth-child(3) 
-  {
-     display: block;
-  }
 }
 
-.subField {
-  font-weight: normal;
-  white-space: nowrap;
-  .fill, .fillBlank {
-    font-weight: bold;
-  }
-}
-
-/* --- Certification Text (No Change) --- */
-.certText {
-  font-size: 11pt;
-  text-align: left;
-  margin-top: 15px;
-  line-height: 1.6;
-}
-
-/* --- Footer Layout (No Change) --- */
-.certFooterWrapper {
-  margin-top: auto;
-  padding-top: 20px;
-  font-size: 12pt;
-  font-weight: bold;
-  background: #fff !important;
-  color: #000 !important;
-}
-
-.datePlace {
-  text-align: left;
-  margin-bottom: 30px;
-}
-
-.signatures {
+/* --- Inline Fields (Horizontal Spacing Fix) --- */
+.inlineFields {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-wrap: wrap;
+  align-items: baseline;
+  /* FIX: Horizontal gap badhaya (Row 4 & 10) */
+  gap: 8px 30px; 
 }
 
-.sigBox {
-  text-align: center;
-  width: 30%;
-  padding-top: 30px;
-  border-top: 1px solid #000;
+/* Row 10 ke liye custom style agar zaroori ho */
+.inlineFields span:first-child {
+    /* "Date of Admission" label ke liye */
+    margin-right: 15px; 
 }
 
-/* --- Print Fix (No Change) --- */
+
+/* --- Footer Section (Vertical Space Reduction) --- */
+.certFooterWrapper {
+  margin-top: auto; 
+  padding-top: 20px; /* Padding kam kiya */
+  
+  .datePlace {
+    font-size: 10pt;
+    margin-bottom: 30px; /* Margin kam kiya */
+  }
+
+  .signatures {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  
+  .sigBox {
+    width: 200px;
+    text-align: center;
+    padding-top: 35px; /* Signature space kam kiya */
+    border-top: 1px solid #000;
+    font-weight: bold;
+    font-size: 10pt;
+  }
+}
+
+/* --- Print Styles --- */
 @media print {
-  .certificatePaper {
-    box-shadow: none;
-    border: none;
-    margin: 0;
-    padding: 0;
-    height: 100%;
-  }
-  .outerBorder {
-    border: 1px solid #000;
-    padding: 10mm 8mm;
-    min-height: 0;
-    height: 100%;
-  }
-  .studentInfoTable tbody tr td {
-    border-bottom: none;
-  }
+    /* Print karte samay body aur container se extra margins hatayein */
+    .certificatePaper, :global(body) {
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    
+    .certificatePaper {
+        width: 210mm !important;
+        height: 297mm !important;
+        /* Print ke liye A4 margins adjust kiye */
+        padding: 10mm 8mm !important; 
+    }
 }
