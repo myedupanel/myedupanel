@@ -84,33 +84,88 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
     // --- FINAL WORKING PRINT HANDLER (Fixes Blank Page & Styles) ---
     const handlePrint = () => {
-        const printContent = componentRef.current;
-        if (!printContent || !transaction) return;
-        
-        const printWindow = window.open('', '', 'height=800,width=800');
-        if (!printWindow) return; 
 
-        // 1. Original document से saare stylesheets/styles collect karein (Crucial)
-        let cssLinks = '';
-        const links = document.querySelectorAll('link[rel="stylesheet"], style');
-        links.forEach(link => {
-            cssLinks += link.outerHTML; 
-        });
+    const printContent = componentRef.current;
 
-        const htmlContent = `
-    <html>
-        <head>
-            <title>Fee Receipt - ${transaction.receiptId}</title>
-            ${cssLinks} 
-            <style>
-                @page { size: A4; margin: 15mm; }
-            </style>
-        </head>
-        <body class="receipt-wrapper">  <-- NEW: body ko hi class de di
-            ${printContent.outerHTML} 
-        </body>
-    </html>
-`;
+    if (!printContent || !transaction) return;
+
+    
+
+    const printWindow = window.open('', '', 'height=800,width=800');
+
+    if (!printWindow) return; 
+
+
+
+    let cssLinks = '';
+
+    const links = document.querySelectorAll('link[rel="stylesheet"], style');
+
+    links.forEach(link => {
+
+        cssLinks += link.outerHTML; 
+
+    });
+
+
+
+    // --- FINAL JS HTML CONTENT WITH BODY RESET FIX ---
+
+    const htmlContent = `
+
+        <html>
+
+            <head>
+
+                <title>Fee Receipt - ${transaction.receiptId}</title>
+
+                ${cssLinks} 
+
+                <style>
+
+                    @page { size: A4; margin: 15mm; }
+
+                    
+
+                    /* --- INJECTING GLOBAL RESET VIA JAVASCRIPT --- */
+
+                    /* Global elements ko print ke liye reset karte hain */
+
+                    body, html {
+
+                        margin: 0 !important;
+
+                        padding: 0 !important;
+
+                        background-color: white !important;
+
+                        min-height: 100vh;
+
+                        visibility: hidden; /* Pehle hide karo */
+
+                    }
+
+                    /* sirf content visible rahe */
+
+                    .receiptContent, .receiptContent * {
+
+                        visibility: visible !important;
+
+                    }
+
+                </style>
+
+            </head>
+
+            <body>
+
+                ${printContent.outerHTML} 
+
+            </body>
+
+        </html>
+
+    `;
 
         // 3. Content likhein aur print trigger karein delay ke saath
         printWindow.document.write(htmlContent);
