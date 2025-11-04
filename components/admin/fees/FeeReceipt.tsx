@@ -1,4 +1,4 @@
-// File: FeeReceipt.tsx (FINAL CLEANED CODE)
+// File: FeeReceipt.tsx (FINAL CLEANED CODE - Use this to replace your entire FeeReceipt.tsx file)
 
 import React, { useRef } from 'react';
 import styles from './FeeReceipt.module.scss';
@@ -78,94 +78,56 @@ const formatDate = (dateString: string | undefined): string => {
 };
 // ---
 
-// --- MAIN COMPONENT DECLARATION ---
+// --- MAIN COMPONENT DECLARATION (CORRECTED) ---
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null); 
 
-    // --- FINAL WORKING PRINT HANDLER (Fixes Blank Page & Styles) ---
+    // --- FINAL WORKING PRINT HANDLER ---
     const handlePrint = () => {
+        const printContent = componentRef.current;
+        if (!printContent || !transaction) return;
+        
+        const printWindow = window.open('', '', 'height=800,width=800');
+        if (!printWindow) return; 
 
-    const printContent = componentRef.current;
+        // 1. Original document से saare stylesheets/styles collect karein (Crucial)
+        let cssLinks = '';
+        const links = document.querySelectorAll('link[rel="stylesheet"], style');
+        links.forEach(link => {
+            cssLinks += link.outerHTML; 
+        });
 
-    if (!printContent || !transaction) return;
-
-    
-
-    const printWindow = window.open('', '', 'height=800,width=800');
-
-    if (!printWindow) return; 
-
-
-
-    let cssLinks = '';
-
-    const links = document.querySelectorAll('link[rel="stylesheet"], style');
-
-    links.forEach(link => {
-
-        cssLinks += link.outerHTML; 
-
-    });
-
-
-
-    // --- FINAL JS HTML CONTENT WITH BODY RESET FIX ---
-
-    const htmlContent = `
-
-        <html>
-
-            <head>
-
-                <title>Fee Receipt - ${transaction.receiptId}</title>
-
-                ${cssLinks} 
-
-                <style>
-
-                    @page { size: A4; margin: 15mm; }
-
-                    
-
-                    /* --- INJECTING GLOBAL RESET VIA JAVASCRIPT --- */
-
-                    /* Global elements ko print ke liye reset karte hain */
-
-                    body, html {
-
-                        margin: 0 !important;
-
-                        padding: 0 !important;
-
-                        background-color: white !important;
-
-                        min-height: 100vh;
-
-                        visibility: hidden; /* Pehle hide karo */
-
-                    }
-
-                    /* sirf content visible rahe */
-
-                    .receiptContent, .receiptContent * {
-
-                        visibility: visible !important;
-
-                    }
-
-                </style>
-
-            </head>
-
-            <body>
-
-                ${printContent.outerHTML} 
-
-            </body>
-
-        </html>
-
-    `;
+        // 2. Naye window ke liye HTML construct karein
+        const htmlContent = `
+            <html>
+                <head>
+                    <title>Fee Receipt - ${transaction.receiptId}</title>
+                    ${cssLinks} 
+                    <style>
+                        /* Print CSS rules yahan inject kiye jaate hain */
+                        @page { size: A4; margin: 15mm; }
+                        
+                        /* Injected CSS: Body aur content ko reset karein for 2-page fix */
+                        body { 
+                            margin: 0; padding: 0; 
+                            background-color: white;
+                            overflow: hidden; /* Two pages issue solve karne ke liye */
+                        }
+                        
+                        /* Content ko single page height ke liye constrain karein */
+                        .receiptContent { 
+                             width: 100%;
+                             min-height: auto;
+                             max-height: 290mm; /* A4 height se thoda kam */
+                             box-sizing: border-box;
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${printContent.outerHTML} 
+                </body>
+            </html>
+        `;
 
         // 3. Content likhein aur print trigger karein delay ke saath
         printWindow.document.write(htmlContent);
@@ -232,7 +194,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         return <div className={styles.noData}>No transaction details available.</div>;
     }
 
-    // --- Data Extraction & Calculations (Must be defined inside this function scope) ---
+    // --- Data Extraction & Calculations (CORRECT SCOPE) ---
     const schoolInfo = transaction.schoolInfo || {};
     const studentData = transaction.studentId || {}; 
     const templateData = transaction.templateId || {}; 
@@ -359,7 +321,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     {transaction.notes && <p className={styles.notes}><strong>Remarks:</strong> {transaction.notes}</p>}
                 </section>
 
-                 {/* Balance Summary */}
+                 /* Balance Summary */
                  <section className={styles.balanceSection}>
                      <p><strong>Balance Due:</strong> 
                         <span 
