@@ -1,9 +1,10 @@
-// File: FeeReceipt.tsx (Updated)
+// File: FeeReceipt.tsx (FINAL CLEANED CODE - No duplicate definition or scope error)
 
 import React, { useRef } from 'react';
 import styles from './FeeReceipt.module.scss';
 import { FiPrinter, FiDownload } from 'react-icons/fi';
-// PDF/Canvas imports yahan hain
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 // --- Interface Definitions (No Change) ---
 export interface SchoolInfo {
@@ -28,8 +29,9 @@ export interface CollectorInfo {
 export interface Transaction {
     id: number;
     receiptId: string;
-    studentId?: StudentInfo;
-    templateId?: TemplateInfo;
+    // Keep this robust for nested/non-standard API responses
+    studentId?: StudentInfo | any; 
+    templateId?: TemplateInfo | any;
     feeRecordId?: FeeRecordInfo | string;
     collectedBy?: CollectorInfo;
     schoolInfo?: SchoolInfo;
@@ -77,8 +79,8 @@ const formatDate = (dateString: string | undefined): string => {
 };
 // ---
 
+// --- MAIN COMPONENT DECLARATION (Only Once!) ---
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
-    // componentRef points to the printable area (styles.receiptContent)
     const componentRef = useRef<HTMLDivElement>(null); 
 
     // --- FINAL WORKING PRINT HANDLER ---
@@ -87,13 +89,13 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         if (!printContent || !transaction) return;
         
         const printWindow = window.open('', '', 'height=800,width=800');
-        if (!printWindow) return; // Pop-up blocker check
+        if (!printWindow) return; 
 
-        // 1. Original document se saare stylesheets collect karein (Crucial for styles)
+        // 1. Original document से saare stylesheets/styles collect karein (Crucial for styling fix)
         let cssLinks = '';
         const links = document.querySelectorAll('link[rel="stylesheet"], style');
         links.forEach(link => {
-            cssLinks += link.outerHTML;
+            cssLinks += link.outerHTML; 
         });
 
         // 2. Naye window ke liye HTML construct karein
@@ -101,15 +103,9 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             <html>
                 <head>
                     <title>Fee Receipt - ${transaction.receiptId}</title>
-                    ${cssLinks} <style>
-                        /* Print styles for the new pop-up window */
+                    ${cssLinks} 
+                    <style>
                         @page { size: A4; margin: 15mm; }
-                        body { 
-                            margin: 0; 
-                            padding: 0; 
-                            background-color: #ffffff; 
-                            /* Ensure font imports are handled via the copied links */
-                        }
                     </style>
                 </head>
                 <body>
@@ -129,12 +125,53 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             printWindow.close(); 
         }, 500); 
     };
-    // --- END PRINT FIX ---
     
     // --- Download PDF Function (No Change) ---
-    // ... (handleDownloadPDF function remains the same as provided) ...
     const handleDownloadPDF = () => {
-        // ... (Download PDF logic)
+        const input = componentRef.current;
+        if (!input) {
+            alert("Could not find receipt content to download.");
+            return;
+        }
+
+        input.classList.add(styles.printing);
+
+        html2canvas(input, {
+            scale: 2.5,
+            useCORS: true,
+            backgroundColor: '#ffffff'
+        } as any).then(canvas => {
+            input.classList.remove(styles.printing);
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4'); 
+            
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            
+            const imgProps = (pdf as any).getImageProperties(imgData); 
+            const imgRatio = imgProps.height / imgProps.width;
+
+            const margin = 10; 
+            let imgWidth = pdfWidth - (margin * 2);
+            let imgHeight = imgWidth * imgRatio;
+
+            if (imgHeight > pdfHeight - (margin * 2)) {
+                imgHeight = pdfHeight - (margin * 2);
+                imgWidth = imgHeight / imgRatio;
+            }
+            
+            const x = (pdfWidth - imgWidth) / 2; 
+            const y = margin; 
+
+            pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+            pdf.save(`FeeReceipt_${transaction?.receiptId || 'download'}.pdf`);
+        
+        }).catch(err => {
+            input.classList.remove(styles.printing);
+            console.error("Error downloading PDF:", err);
+            alert("Could not download PDF. Please try printing.");
+        });
     };
     // --- END PDF ---
     
@@ -142,24 +179,30 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         return <div className={styles.noData}>No transaction details available.</div>;
     }
 
-    // --- Data Extraction & Calculations (JSX remains the same as provided) ---
+    // --- DATA EXTRACTION & TYPING FIX (THESE MUST BE INSIDE THE COMPONENT FUNCTION) ---
     const schoolInfo = transaction.schoolInfo || {};
-    const studentInfo = transaction.studentId;
-    const templateInfo = transaction.templateId;
-    const feeRecordInfo = typeof transaction.feeRecordId === 'object' ? transaction.feeRecordId : undefined;
-    const collectedByInfo = transaction.collectedBy;
-
+    // Access nested data safely using optional chaining or local helper variables
+    const studentData = transaction.studentId || {}; 
+    const templateData = transaction.templateId || {}; // <-- templateInfo is now templateData
+    
+    // Derived variables using local data
     const receiptNoDisplay = transaction.receiptId || 'N/A';
     const paymentDateDisplay = formatDate(transaction.paymentDate); 
-    const studentNameDisplay = studentInfo?.name || transaction.studentName || 'N/A';
-    const studentRegIdDisplay = studentInfo?.studentId || transaction.studentRegId || 'N/A';
-    const classDisplay = studentInfo?.class || transaction.className || 'N/A';
-    const rollNoDisplay = studentInfo?.rollNo || 'N/A';
+    
+    const studentNameDisplay = (studentData as any).name || transaction.studentName || 'N/A';
+    const studentRegIdDisplay = (studentData as any).studentId || transaction.studentRegId || 'N/A';
+    const classDisplay = (studentData as any).class || transaction.className || 'N/A';
+    const rollNoDisplay = (studentData as any).rollNo || 'N/A';
+    
+    const collectedByInfo = transaction.collectedBy;
     const collectedByNameDisplay = collectedByInfo?.name || transaction.collectedByName || (transaction.paymentMode === 'Online' ? 'System (Online)' : 'Admin');
-    const feeItems = templateInfo?.items || [];
-    const templateNameDisplay = templateInfo?.name || transaction.templateName || 'Fee Payment';
+    
+    const feeRecordInfo = typeof transaction.feeRecordId === 'object' ? transaction.feeRecordId : undefined;
+    
+    const feeItems = (templateData as any)?.items || [];
+    const templateNameDisplay = (templateData as any)?.name || transaction.templateName || 'Fee Payment';
 
-    const totalDemand = templateInfo?.totalAmount || transaction.totalFeeAmount || 0;
+    const totalDemand = (templateData as any)?.totalAmount || transaction.totalFeeAmount || 0;
     const discount = feeRecordInfo?.discount || transaction.discountGiven || 0;
     const lateFine = feeRecordInfo?.lateFine || transaction.lateFineApplied || 0;
     const netDemand = totalDemand - discount + lateFine;
@@ -219,7 +262,8 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
                 {/* Fee Breakdown Table */}
                 <section className={styles.itemsSection}>
-                    <h3>Fee Particulars {templateInfo?.name && `(${templateInfo.name})`}</h3>
+                    {/* templateData ke name ko safely access karein */}
+                    <h3>Fee Particulars {templateData?.name && `(${(templateData as any).name})`}</h3> 
                     <table className={styles.itemsTable}>
                         <thead>
                             <tr>
@@ -230,7 +274,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                         </thead>
                         <tbody>
                             {feeItems.length > 0 ? (
-                                feeItems.map((item, index) => (
+                                feeItems.map((item: { name: string; amount: number }, index: number) => (
                                     <tr key={index}>
                                         <td style={{textAlign: 'center'}}>{index + 1}</td>
                                         <td>{item.name}</td>
