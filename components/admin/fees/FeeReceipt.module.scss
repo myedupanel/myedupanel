@@ -1,42 +1,22 @@
-/* src/components/admin/fees/FeeReceipt.module.scss */
+/* File: FeeReceipt.module.scss (FINAL PREMIUM OFFICIAL DESIGN & PRINT FIX) */
 
-/* --- COLOR VARIABLES (Official Palette) --- */
-$primary-blue: #0056b3; /* Deep, official blue */
-$success-green: #1e8449; /* Official darker green */
-$danger-red: #dc3545; /* Red for overdue balance */
-$light-bg: #f8f9fa; /* Very light background for distinction */
-$border-light: #dddddd; /* Light border color */
-$dark-text: #212529; /* Main text color */
-
-/* --- BASE & CONTAINER --- */
+/* Base Styles and Fonts */
 .receiptContainer {
-  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  color: $dark-text;
-  background-color: #f4f7f6; /* Off-white for background area */
-  max-height: 90vh; 
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  color: #333;
+  background-color: #f4f7f6;
+  max-height: 85vh; 
   overflow-y: auto;
-  line-height: 1.5;
-  font-size: 10.5pt; /* Base font size for professionalism */
 }
 
-.receiptContent {
-  max-width: 850px; /* Wider paper look */
-  padding: 30px; 
-  background-color: #ffffff; 
-  border-radius: 6px;
-  margin: 20px auto; 
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
-  /* Important for preventing printing issues */
-  box-sizing: border-box; 
-}
-
-/* --- ACTIONS (Buttons) --- */
+/* Action buttons (Print/Download) */
 .actions {
   display: flex;
-  gap: 16px;
-  padding: 15px 30px; 
+  justify-content: flex-end; 
+  gap: 12px;
+  padding: 12px 20px; 
   background-color: #ffffff;
-  border-bottom: 1px solid $border-light;
+  border-bottom: 1px solid #e0e0e0;
   position: sticky; 
   top: 0;
   z-index: 10;
@@ -46,266 +26,164 @@ $dark-text: #212529; /* Main text color */
     padding: 10px 20px;
     font-size: 0.9rem;
     font-weight: 600;
-    border-radius: 4px;
+    border-radius: 6px;
     border: none;
-    background-color: $primary-blue;
-    color: #ffffff;
-    &:hover { background-color: darken($primary-blue, 8%); }
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
   }
 }
 
-/* --- HEADER --- */
+/* --- PRINTABLE RECEIPT AREA: The Official Document Look --- */
+.receiptContent {
+  width: 210mm; /* A4 width standard */
+  margin: 16px auto; 
+  padding: 25px; 
+  background-color: #ffffff; 
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
+  line-height: 1.4; 
+}
+
+/* 1. Header: School Info */
 .header {
   display: flex;
   align-items: center;
-  gap: 20px; 
-  /* Official Double Line Separator */
-  border-bottom: 2px solid $border-light;
-  border-top: 1px solid $border-light;
-  padding: 15px 0;
-  margin-bottom: 20px;
-
-  .logo {
-    max-width: 70px; 
-    border: 1px solid $border-light;
-    padding: 5px;
-    border-radius: 2px;
-  }
+  gap: 15px; 
+  border-bottom: 3px double #333; /* Professional double line */
+  padding-bottom: 10px; 
+  margin-bottom: 15px;
+  
+  .logo { max-width: 65px; max-height: 65px; }
 
   .schoolDetails {
+    text-align: left;
     h1 {
-      font-size: 1.7rem; 
-      font-weight: 800;
-      color: $dark-text;
-      margin: 0 0 4px 0;
+      font-size: 1.6rem; 
+      font-weight: 800; 
+      color: #000;
+      margin: 0 0 2px 0;
     }
     p {
       margin: 0;
       font-size: 0.85rem; 
-      color: #6c757d;
-      line-height: 1.4;
+      color: #555;
+      line-height: 1.2;
     }
   }
 }
 
-/* --- TITLE AND META --- */
+/* 2. Title and Meta (Receipt No, Date) */
 .titleMeta {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 20px; 
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
+  margin-bottom: 12px; 
 
-  h2 {
-    font-size: 1.4rem; 
-    font-weight: 900;
-    margin: 0;
-    text-transform: uppercase;
-    color: $primary-blue;
-  }
+  h2 { font-size: 1.05rem; font-weight: 700; }
 
   .metaInfo {
-    text-align: right;
     font-size: 0.85rem; 
-    color: $dark-text;
-    p { margin: 0 0 4px 0; }
-    strong { font-weight: 700; color: #000; }
+    p { margin: 1px 0; strong {font-weight: 600;} }
   }
 }
 
-/* --- DETAILS SECTION --- */
+/* 3. Details Sections (Student/Payment) */
 .detailsSection {
-  margin-bottom: 20px; 
-  padding-bottom: 15px;
-
+  margin-bottom: 10px; 
+  
   h3 {
-    font-size: 0.9rem; 
+    font-size: 0.95rem; 
     font-weight: 700;
-    color: #4a5568; 
-    margin: 0 0 10px 0;
+    color: #444; 
+    margin-bottom: 5px; 
     text-transform: uppercase;
-    padding-bottom: 5px;
-    border-bottom: 1px solid #eeeeee;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 3px;
   }
-
   .grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px 30px; 
-    font-size: 0.9rem; 
-    p { margin: 0; }
-    strong { font-weight: 600; color: #000; }
-  }
-  
-  .paidAmount strong {
-    font-size: 1rem; 
-    color: $success-green;
-    font-weight: 700;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 20px; 
+    font-size: 0.88rem; 
+    p { margin: 0; strong {font-weight: 600; color: #000;} }
   }
 }
 
-
-/* --- FEE PARTICULARS TABLE --- */
+/* 4. Fee Table */
+.itemsSection {margin-bottom: 12px;}
 .itemsTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem; 
-  border: 1px solid $border-light; /* Main table boundary */
+  margin-top: 10px; 
+  font-size: 0.9rem;
 
-  thead tr {
-    background-color: $light-bg;
-    border-bottom: 2px solid $border-light;
-  }
-  th {
-    padding: 10px 8px; 
-    text-align: left;
-    font-weight: 700;
-    color: $dark-text;
-  }
-  td {
-    padding: 8px; 
-    border-right: 1px solid #f0f0f0;
-  }
+  thead tr { background-color: #f0f0f0; } 
+  th { padding: 8px 10px; font-weight: 700; } 
+  td { padding: 5px 10px; } 
   
-  .amountCol {
-    text-align: right;
-    font-weight: 500;
-  }
-  
-  /* Calculation Rows */
-  .calcRow td {
-    padding-top: 8px; 
-    padding-bottom: 8px;
-    border-top: none;
-  }
-  .subtotal td {
-    border-top: 1px solid $border-light;
-  }
   .grandTotal {
-    background-color: #e9ecef; /* Darker gray background */
-    font-size: 1rem; 
-    font-weight: 800;
-  }
-}
-
-/* --- BALANCE SUMMARY --- */
-.balanceSection {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid $border-light;
-  padding: 15px 20px; 
-  border-radius: 4px;
-  margin-top: 20px; 
-  background-color: #fff; /* Explicitly white background */
-
-  p {
-    margin: 0;
-    font-size: 1rem; 
-    font-weight: 600;
-  }
-
-  .balanceAmount {
-    font-weight: 800;
-    &[data-balance-zero="true"] {
-       color: $success-green; 
-    }
-    &:not([data-balance-zero="true"]) {
-       color: $danger-red;
-    }
-  }
-
-  .paidStamp {
-    font-size: 1.2rem; 
-    font-weight: 700;
-    color: $success-green;
-    border: 3px solid $success-green; 
-    padding: 6px 15px; 
-    border-radius: 4px;
-    text-transform: uppercase;
-    transform: rotate(-3deg); 
-  }
-}
-
-/* --- FOOTER (SIGNATURES) --- */
-.footer {
-  margin-top: 35px; 
-  padding-top: 25px; 
-  border-top: 1px solid $border-light;
-  font-size: 0.85rem; 
-  color: #6c757d;
-  background-color: #ffffff !important; /* FIX: Footer color fix */
-  
-  .collectedBy {
+    background-color: #e6f3ff; 
     font-size: 0.95rem; 
-    font-weight: 600;
-    color: $dark-text;
-    margin-bottom: 40px; /* Space for signature line */
+    td { font-weight: 700; }
   }
+}
+
+/* 5. Payment Details Box */
+.balanceSection {
+  margin-top: 15px;
+  background-color: #f7f7f7; 
+  border: 1px solid #ddd;
+  padding: 12px 15px; 
+  border-radius: 4px;
+}
+.paidStamp { color: #1e7e34; border: 2px solid #1e7e34; }
+
+/* 6. Footer & Signatures */
+.footer {
+  margin-top: 30px; 
+  padding-top: 10px; 
+  border-top: 1px solid #ddd;
+  font-size: 0.85rem;
 
   .signatureArea {
-    display: flex;
-    justify-content: space-around; 
-    margin-top: 10px; /* Already high enough */
-    text-align: center;
+    justify-content: space-around;
+    margin-top: 40px; 
   }
-
-  .signatureBox {
-    border-top: 1px solid #777;
-    width: 35%; 
-    padding-top: 5px;
-    font-weight: 500;
-    text-transform: uppercase;
-  }
-  
-  .footerNote {
-    text-align: center;
-    margin-top: 20px; 
-    font-style: italic;
-    color: #999;
-  }
+  .signatureBox { border-top: 1px solid #000; width: 35%; }
+  .signatureLabels { padding: 5px 0 0 0; }
 }
 
-/* --- PRINT MEDIA QUERIES (Clean Print) --- */
+
+/* --- FINAL PRINT MEDIA QUERY (Single Page & Background Fix) --- */
 @media print {
-  .receiptContainer, :global(body) {
-    background: #ffffff !important;
-    overflow: hidden !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    /* Print quality typography */
-    font-family: 'Times New Roman', serif !important; 
-    color: #000 !important;
-  }
-  
-  .receiptContent {
-    box-shadow: none !important;
-    margin: 0 auto !important;
-    border-radius: 0 !important;
-    padding: 10mm !important; 
-    width: 100% !important;
-    max-width: none !important;
-  }
+    .actions { display: none !important; }
+    
+    /* Global Background Fix for HTML2Canvas */
+    :global(body), :global(html) { 
+        background-color: white !important; 
+    }
+    
+    .receiptContent {
+        /* Screen flow control reset */
+        padding: 15mm !important; /* Official Margin */
+        margin: 0 !important;
+        
+        border: none !important;
+        box-shadow: none !important;
+    }
 
-  .actions {
-    display: none !important; /* Buttons hide */
-  }
-
-  /* Force borders to black/dark gray for clean printouts */
-  .itemsTable, .itemsTable th, .itemsTable td {
-    border-color: #444 !important;
-  }
-  
-  .balanceSection {
-    border-color: #444 !important;
-    background-color: #fff !important;
-  }
-  
-  .paidStamp {
-    border-color: #000 !important;
-    color: #000 !important;
-  }
-  
-  .footer {
-    border-top-color: #000 !important;
-  }
+    /* 2-Page/Layout Fix: Ensure elements avoid breaking across pages */
+    .detailsSection, .itemsSection, .balanceSection, .footer {
+        page-break-inside: avoid !important;
+    }
+    .footer {
+        page-break-before: avoid !important;
+    }
+    
+.balanceSection, .itemsTable thead tr {
+        background-color: #ffffff !important;
+        /* FIX: Standard property ko prefixed property se pehle define karein */
+        print-color-adjust: exact; /* Standard property for compatibility */
+        -webkit-print-color-adjust: exact; /* Webkit prefix */
+    }
 }
