@@ -307,30 +307,37 @@
   background: #ffffff !important;
 }
 @media print {
-    /* 1. Dashboard aur Modal wrapper ko hide karo */
-    body > * {
-        display: none !important;
+    /* 1. Global selectors ko :global() mein wrap karein: */
+    
+    /* Pehle: body > * { display: none !important; } */
+    /* Ab: Is tarah se likhein tak ki build fail na ho */
+    :global(body) :global(> *) {
+        display: none !important; 
     }
-
-    /* 2. Sirf receipt container/content ko dikhao */
-    .receiptContainer,
-    .receiptContent {
+    
+    /* 2. Sirf apne printable content ko show karein */
+    /* .receiptContent aapka local class hai, isko :global() ki zaroorat nahi */
+    .receiptContent { 
         display: block !important;
-        visibility: visible !important;
-        position: absolute;
-        left: 0;
+        position: fixed;
         top: 0;
-        width: 100%;
-        height: auto;
-        padding: 0 !important;
+        left: 0;
+        width: 100% !important;
+        min-height: 100vh !important; /* Screen height ke barabar */
         margin: 0 !important;
-        box-shadow: none !important; /* Print mein shadow nahi chahiye */
-        overflow: visible !important;
-        background-color: #ffffff !important; /* Ensure background is white */
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        z-index: 99999;
     }
 
-    /* 3. Action buttons (Download/Print) bhi print mein nahi aane chahiye */
-    .actions {
-        display: none !important;
+    /* 3. Non-printable local elements ko hide rakhein */
+    .noPrint, .actions, .receiptContainer { 
+        display: none !important; 
+    }
+
+    /* Agar aapko body par koi background style lagana ho: */
+    :global(body) {
+         background-color: white !important;
     }
 }
