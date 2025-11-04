@@ -1,0 +1,77 @@
+/* File: components/admin/fees/TestPrintStyles.module.scss */
+
+/* Is file mein aapke saare non-print CSS styles honge */
+
+.receiptContainer {
+  /* Yeh component ka wrapper hoga jo loading state dikhayega */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #333;
+  background-color: #f4f7f6;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  justify-content: center;
+}
+
+.printButton {
+    /* Styles for the test print button */
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+    &:hover { background-color: #0056b3; }
+}
+
+.receiptContent {
+  /* Yeh woh area hai jise hum print karenge */
+  padding: 20px; 
+  background-color: #ffffff; 
+  border: 1px solid black;
+  border-radius: 8px;
+  margin: 16px auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.header {
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+.header h1 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+/* --- FINAL PRINT STYLES (Print visibility control) --- */
+@media print {
+    /* Print होने पर buttons और actions को hide करें (Local selectors) */
+    .actions { 
+        display: none !important; 
+    }
+    .receiptContainer {
+        /* Screen flow control के लिए settings */
+        max-height: none !important; 
+        overflow: visible !important;
+        box-shadow: none !important;
+    }
+    .receiptContent {
+        padding: 0 !important; 
+        margin: 0 auto !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+}

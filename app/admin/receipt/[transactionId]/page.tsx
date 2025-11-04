@@ -1,48 +1,37 @@
-// File: app/admin/receipt/[transactionId]/page.tsx
+// File: app/admin/receipt/[transactionId]/page.tsx (TEMP TEST MODE)
 "use client";
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import api from '@/backend/utils/api'; 
-// FeeReceipt aur Transaction interface ko import kiya
-import FeeReceipt, { Transaction } from '@/components/admin/fees/FeeReceipt'; 
-import styles from './Receipt.module.scss'; // Use for main page wrapper styling
+// Note: API import aur useEffect ko disabled rakhte hain testing ke liye
+// import api from '@/backend/utils/api'; 
+// import FeeReceipt, { Transaction } from '@/components/admin/fees/FeeReceipt'; 
+import styles from './Receipt.module.scss'; 
+
+// Import the dedicated test component
+import TestFeeReceipt from '@/components/admin/fees/TestPrintReceipt'; 
+
+// Note: Original Transaction interface aur loading state ko hataya gaya hai 
+// kyunki TestFeeReceipt mein hardcoded data hai.
 
 export default function ReceiptPage() {
   const params = useParams();
-  // Ensure transactionId is treated as string, Next.js handles param arrays if needed
-  const transactionId = Array.isArray(params.transactionId) ? params.transactionId[0] : params.transactionId;
+  const { transactionId } = params;
 
-  const [transaction, setTransaction] = useState<Transaction | null>(null); 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  // --- COMPONENT LOGIC HATA DIYA GAYA HAI ---
+  // API fetch logic removed: useEffect, useState, transaction, loading, error
+  // Kyunki hum TestFeeReceipt ko render kar rahe hain.
+  
+  console.log(`Rendering page in Test Mode for ID: ${transactionId}`);
 
-  useEffect(() => {
-    const fetchTransaction = async () => {
-      if (!transactionId) return;
-      setLoading(true);
-      try {
-        const res = await api.get(`/fees/transaction/${transactionId}`); 
-        // Assuming your backend returns transaction details directly in res.data
-        setTransaction(res.data.transaction || res.data as Transaction); 
-      } catch (err) {
-        console.error("Error fetching transaction:", err);
-        setError('Failed to load receipt details. Please check network connection and backend logs.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTransaction();
-  }, [transactionId]);
-
-  // --- JSX Render Logic ---
-  if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading Fee Receipt...</div>; 
-  if (error) return <div className={styles.errorContainer}>{error}</div>; 
-  if (!transaction) return <div className={styles.noData}>Transaction not found.</div>;
-
+  // --- JSX Render Logic (Seedha Test Component) ---
   return (
     <div className={styles.mainWrapper}>
-      {/* Transaction data FeeReceipt component ko pass kiya jayega */}
-      <FeeReceipt transaction={transaction} /> 
+      {/* TestFeeReceipt ko render karein jo hardcoded data use karta hai */}
+      <TestFeeReceipt /> 
+      
+      {/* View Receipt button ke upar click karne par, yeh page load hoga 
+          aur seedha TestPrintReceipt component ka JSX dikhayega.
+      */}
     </div>
   );
 }
