@@ -84,44 +84,26 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const handlePrint = () => {
     const printContent = componentRef.current;
     if (!printContent) return;
-
-    // Nayi window kholein
+    
     const printWindow = window.open('', '', 'height=800,width=800');
     
     if (printWindow) {
-        // 1. Stylesheets ko copy karein (Original document ke <head> se)
-        const styleLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'));
-        let stylesHTML = '';
-        styleLinks.forEach(link => {
-             // Link tags ko directly copy karein
-            if (link.tagName === 'LINK') {
-                stylesHTML += link.outerHTML;
-            } 
-            // Style tags ko bhi copy karein
-            else if (link.tagName === 'STYLE') {
-                stylesHTML += link.outerHTML;
-            }
-        });
+        // Sirf content likhein, styles copy karne ki zarurat nahi agar SCSS mein global print media query sahi se handle ho jaye.
+        printWindow.document.write('<html><head><title>Print Receipt</title></head><body>');
         
-        // 2. Poora HTML content likhein (Note: ab hum stylesHTML ko bhi include kar rahe hain)
-        printWindow.document.write('<html><head><title>Print Receipt</title>');
-        printWindow.document.write(stylesHTML); // Copied styles
-        printWindow.document.write('</head><body>');
-        
-        // Ensure only the content inside componentRef is written
-        // Isse aapka button aur modal wrapper print nahi hoga
+        // **IMPORTANT:** Receipt content ko .receiptContent se wrap karein jismein print styles hain
+        printWindow.document.write('<div class="print-wrapper">'); 
         printWindow.document.write(printContent.innerHTML); 
-        
-        printWindow.document.write('</body></html>');
+        printWindow.document.write('</div></body></html>');
 
         printWindow.document.close(); 
         
-        // 3. Print ko trigger karne ke liye thoda delay (300ms) dein
+        // Increase delay to ensure full rendering before print dialogue opens
         setTimeout(() => {
             printWindow.focus(); 
             printWindow.print(); 
-            // printWindow.close(); // Optional: Print dialog band hone ke baad window close ho jayega
-        }, 300); 
+            printWindow.close(); 
+        }, 500); // Increased delay to 500ms
     }
 };
     // --- Download PDF Function (No Change) ---
