@@ -306,44 +306,33 @@
   background: #ffffff !important;
 }
 
-/* --- FINAL PRINT STYLES FIX (Deployment & Blank Page) --- */
 @media print {
-    /* Print होने पर buttons और actions को hide करें (Local selectors) */
-    .actions, .noPrint { 
-        display: none !important; 
-    }
-
-    /* Print होने पर कंटेनर को reset करें */
-    .receiptContainer {
-        /* Screen flow control के लिए settings */
-        max-height: none !important; 
-        overflow: visible !important;
-        box-shadow: none !important;
-    }
-    
-    /* Content Area को Full Width और Clean Print के लिए तैयार करें */
-    .receiptContent {
-        width: 100% !important; 
-        padding: 20px !important; 
-        margin: 0 auto !important;
-        box-shadow: none !important;
-        border: none !important;
-    } 
-    
-    /* Global fixes (Next.js/Vercel compliant) */
-    :global(body) {
-        visibility: hidden !important;
+    /* 1. Body और HTML reset: Inactivity fixes */
+    body, html {
         margin: 0 !important;
         padding: 0 !important;
         background-color: white !important;
         min-height: 100vh;
     }
-    :global(body *) {
-        visibility: hidden !important; 
+    
+    /* 2. Non-printable elements (Header, Footer, Sidebar, Buttons) को hide करें */
+    body > :not(.receipt-wrapper) {
+        display: none !important;
+        visibility: hidden !important;
     }
 
-    /* Make the components visible again */
-    .receiptContainer, .receiptContent, .receiptContent * {
-        visibility: visible !important;
+    /* 3. सिर्फ Printable Content को show करें */
+    /* FeeReceipt.tsx में हमने content को div.print-wrapper में wrap किया है */
+    .receipt-wrapper { 
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        visibility: visible;
+        display: block;
+        margin: 0;
+    }
+    .receipt-wrapper * {
+        visibility: visible;
     }
 }

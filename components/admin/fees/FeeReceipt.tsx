@@ -97,21 +97,20 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             cssLinks += link.outerHTML; 
         });
 
-        // 2. Naye window ke liye HTML construct karein
         const htmlContent = `
-            <html>
-                <head>
-                    <title>Fee Receipt - ${transaction.receiptId}</title>
-                    ${cssLinks} 
-                    <style>
-                        @page { size: A4; margin: 15mm; }
-                    </style>
-                </head>
-                <body>
-                    ${printContent.outerHTML} 
-                </body>
-            </html>
-        `;
+    <html>
+        <head>
+            <title>Fee Receipt - ${transaction.receiptId}</title>
+            ${cssLinks} 
+            <style>
+                @page { size: A4; margin: 15mm; }
+            </style>
+        </head>
+        <body class="receipt-wrapper">  <-- NEW: body ko hi class de di
+            ${printContent.outerHTML} 
+        </body>
+    </html>
+`;
 
         // 3. Content likhein aur print trigger karein delay ke saath
         printWindow.document.write(htmlContent);
