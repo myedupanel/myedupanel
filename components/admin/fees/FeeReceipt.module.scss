@@ -1,74 +1,61 @@
-/* File: FeeReceipt.module.scss (FINAL PREMIUM OFFICIAL DESIGN & PRINT FIX) */
+/* File: FeeReceipt.module.scss (FINAL PROFESSIONAL DESIGN & PRINT FIX) */
 
-/* Base Styles and Fonts */
+/* Base Styles and Colors */
 .receiptContainer {
   font-family: 'Helvetica Neue', Arial, sans-serif;
   color: #333;
   background-color: #f4f7f6;
   max-height: 85vh; 
   overflow-y: auto;
+  /* Print mein yeh styles override honge */
 }
 
-/* Action buttons (Print/Download) */
+/* Action buttons (Print/Download) - Hide in Print media */
 .actions {
   display: flex;
-  justify-content: flex-end; 
+  justify-content: flex-end; /* Buttons right align kiye */
   gap: 12px;
   padding: 12px 20px; 
   background-color: #ffffff;
   border-bottom: 1px solid #e0e0e0;
-  position: sticky; 
-  top: 0;
-  z-index: 10;
-  
-  .downloadButton,
-  .printButton {
-    padding: 10px 20px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    background-color: #007bff;
-    color: white;
-  }
 }
+/* ... (Button styles remain the same) ... */
 
 /* --- PRINTABLE RECEIPT AREA: The Official Document Look --- */
 .receiptContent {
   width: 210mm; /* A4 width standard */
   margin: 16px auto; 
-  padding: 25px; 
+  padding: 30px; /* Thodi zyada padding for premium feel */
   background-color: #ffffff; 
+  border: 1px solid #c0c0c0; /* Subtle border */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
-  line-height: 1.4; 
 }
 
 /* 1. Header: School Info */
 .header {
   display: flex;
   align-items: center;
-  gap: 15px; 
-  border-bottom: 3px double #333; /* Professional double line */
-  padding-bottom: 10px; 
-  margin-bottom: 15px;
+  gap: 20px; /* Zyada gap for professional spacing */
+  border-bottom: 3px double #333; /* Double line for professional look */
+  padding-bottom: 15px; 
+  margin-bottom: 15px; /* Gap kam kiya */
   
-  .logo { max-width: 65px; max-height: 65px; }
+  .logo { max-width: 70px; max-height: 70px; }
 
   .schoolDetails {
     text-align: left;
     h1 {
-      font-size: 1.6rem; 
-      font-weight: 800; 
+      font-size: 1.8rem; /* Premium size */
+      font-weight: 800; /* Bold */
       color: #000;
-      margin: 0 0 2px 0;
+      margin: 0 0 4px 0;
     }
     p {
       margin: 0;
-      font-size: 0.85rem; 
+      font-size: 0.9rem; 
       color: #555;
-      line-height: 1.2;
+      line-height: 1.3;
     }
   }
 }
@@ -78,112 +65,135 @@
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid #ddd;
-  padding-bottom: 8px;
-  margin-bottom: 12px; 
+  padding-bottom: 10px;
+  margin-bottom: 20px;
 
-  h2 { font-size: 1.05rem; font-weight: 700; }
+  h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #111;
+  }
 
   .metaInfo {
-    font-size: 0.85rem; 
-    p { margin: 1px 0; strong {font-weight: 600;} }
+    font-size: 0.9rem;
+    text-align: right;
+    p { margin: 2px 0; strong {font-weight: 600;} }
   }
 }
 
 /* 3. Details Sections (Student/Payment) */
 .detailsSection {
-  margin-bottom: 10px; 
+  margin-bottom: 20px; /* Slightly bigger gap */
   
   h3 {
-    font-size: 0.95rem; 
+    font-size: 1rem; 
     font-weight: 700;
     color: #444; 
-    margin-bottom: 5px; 
+    margin-bottom: 8px;
     text-transform: uppercase;
     border-bottom: 1px solid #eee;
-    padding-bottom: 3px;
+    padding-bottom: 4px;
   }
   .grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px 20px; 
-    font-size: 0.88rem; 
+    grid-template-columns: 1fr 1fr; /* Equal columns */
+    gap: 8px 25px; /* Vertical space for clean look */
+    font-size: 0.95rem; 
     p { margin: 0; strong {font-weight: 600; color: #000;} }
   }
 }
 
 /* 4. Fee Table */
-.itemsSection {margin-bottom: 12px;}
 .itemsTable {
-  margin-top: 10px; 
-  font-size: 0.9rem;
-
-  thead tr { background-color: #f0f0f0; } 
-  th { padding: 8px 10px; font-weight: 700; } 
-  td { padding: 5px 10px; } 
-  
+  margin-top: 15px;
+  thead tr { background-color: #e9ecef; } /* Light grey header */
+  th { padding: 10px; font-weight: 700; }
+  td { padding: 8px 10px; }
   .grandTotal {
-    background-color: #e6f3ff; 
-    font-size: 0.95rem; 
+    background-color: #ddeffc; /* Light blue/premium background for total */
+    font-size: 1.05rem; 
     td { font-weight: 700; }
   }
 }
 
-/* 5. Payment Details Box */
+/* 5. Payment Details Box (Grey background) */
 .balanceSection {
-  margin-top: 15px;
-  background-color: #f7f7f7; 
+  margin-top: 20px;
+  background-color: #f7f7f7; /* Very light grey for contrast */
   border: 1px solid #ddd;
-  padding: 12px 15px; 
+  padding: 15px;
   border-radius: 4px;
 }
 .paidStamp { color: #1e7e34; border: 2px solid #1e7e34; }
 
 /* 6. Footer & Signatures */
 .footer {
-  margin-top: 30px; 
+  margin-top: 40px; /* Big spacing for clarity */
   padding-top: 10px; 
   border-top: 1px solid #ddd;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 
   .signatureArea {
+    display: flex;
     justify-content: space-around;
-    margin-top: 40px; 
+    margin-top: 50px; /* Signature space */
   }
-  .signatureBox { border-top: 1px solid #000; width: 35%; }
-  .signatureLabels { padding: 5px 0 0 0; }
+
+  .signatureBox {
+    border-top: 1px solid #000;
+    width: 35%;
+  }
+  .signatureLabels {
+    padding: 5px 0 0 0;
+    text-align: center;
+  }
+  .footerNote {
+    text-align: center;
+    margin-top: 20px; 
+    font-style: italic;
+    font-size: 0.85rem;
+  }
 }
 
 
-/* --- FINAL PRINT MEDIA QUERY (Single Page & Background Fix) --- */
+/* --- FINAL PRINT MEDIA QUERY (Page Break Fix) --- */
 @media print {
-    .actions { display: none !important; }
+    /* 1. Global Reset (JS handles body, but hide buttons here) */
+    .actions { 
+        display: none !important; 
+    }
     
-    /* Global Background Fix for HTML2Canvas */
-    :global(body), :global(html) { 
-        background-color: white !important; 
+    /* 2. Container reset for full page fit */
+    .receiptContainer {
+        /* Print media mein scroll hatao aur margins reset karo */
+        max-height: none !important; 
+        overflow: visible !important;
+        box-shadow: none !important;
+        
+        width: 100% !important;
+        min-height: 100vh !important;
+        padding: 0;
+        margin: 0;
     }
     
     .receiptContent {
-        /* Screen flow control reset */
-        padding: 15mm !important; /* Official Margin */
-        margin: 0 !important;
-        
+        /* Print hone par A4 size aur margins set honge (JS se) */
         border: none !important;
         box-shadow: none !important;
+        /* Yahan hum content ko compact karne ke liye padding kam karenge */
+        padding: 15mm !important; /* A4 margin control */
+        height: auto !important;
     }
 
-    /* 2-Page/Layout Fix: Ensure elements avoid breaking across pages */
-    .detailsSection, .itemsSection, .balanceSection, .footer {
+    /* 3. Force page break avoid karne ke liye: */
+    /* Agar content cut raha hai, toh table ya section par ye laga sakte hain */
+    .itemsTable, .detailsSection {
         page-break-inside: avoid !important;
     }
-    .footer {
-        page-break-before: avoid !important;
-    }
-    
-.balanceSection, .itemsTable thead tr {
-        background-color: #ffffff !important;
-        /* FIX: Standard property ko prefixed property se pehle define karein */
-        print-color-adjust: exact; /* Standard property for compatibility */
-        -webkit-print-color-adjust: exact; /* Webkit prefix */
+
+    /* 4. Footer ko bottom mein rakhega (optional) */
+    .certFooter {
+        page-break-after: avoid !important;
     }
 }
