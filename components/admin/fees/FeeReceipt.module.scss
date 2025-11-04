@@ -52,7 +52,7 @@
 /* Asli receipt paper */
 .receiptContent {
   padding: 20px; /* Padding kam ki */
-  background-color: #ffffff; /* --- DARK FOOTER FIX --- */
+  background-color: #ffffff; 
   border-radius: 8px;
   margin: 16px; 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -62,26 +62,26 @@
 .header {
   display: flex;
   align-items: center;
-  gap: 16px; /* Gap kam kiya */
+  gap: 16px; 
   border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 12px; /* Padding kam ki */
+  padding-bottom: 12px; 
 
   .logo {
-    max-width: 60px; /* Logo thoda chhota */
+    max-width: 60px; 
     max-height: 60px;
     object-fit: contain;
   }
 
   .schoolDetails {
     h1 {
-      font-size: 1.5rem; /* Font size adjust kiya */
+      font-size: 1.5rem; 
       font-weight: 700;
       color: #000;
-      margin: 0 0 2px 0; /* Gap kam kiya */
+      margin: 0 0 2px 0; 
     }
     p {
       margin: 0;
-      font-size: 0.85rem; /* Font size adjust kiya */
+      font-size: 0.85rem; 
       color: #555;
       line-height: 1.4;
     }
@@ -93,10 +93,10 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin: 16px 0; /* Gap kam kiya */
+  margin: 16px 0; 
 
   h2 {
-    font-size: 1.15rem; /* Font size adjust kiya */
+    font-size: 1.15rem; 
     font-weight: 600;
     margin: 0;
     text-transform: uppercase;
@@ -105,7 +105,7 @@
 
   .metaInfo {
     text-align: right;
-    font-size: 0.85rem; /* Font size adjust kiya */
+    font-size: 0.85rem; 
     color: #444;
     p { margin: 0 0 4px 0; }
   }
@@ -113,14 +113,14 @@
 
 /* Student Info / Payment Details */
 .detailsSection {
-  margin-bottom: 16px; /* Gap kam kiya */
+  margin-bottom: 16px; 
   border-bottom: 1px solid #f0f0f0;
-  padding-bottom: 12px; /* Gap kam kiya */
+  padding-bottom: 12px; 
 
   h3 {
-    font-size: 0.9rem; /* Font size adjust kiya */
+    font-size: 0.9rem; 
     font-weight: 700;
-    color: #333; /* Color ko professional dark kiya */
+    color: #333; 
     margin: 0 0 10px 0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -131,19 +131,19 @@
   .grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 6px 16px; /* Gap kam kiya */
-    font-size: 0.9rem; /* Font size adjust kiya */
+    gap: 6px 16px; 
+    font-size: 0.9rem; 
     p { margin: 0; }
     strong { color: #000; }
   }
 
   .paidAmount {
-    font-size: 1rem; /* Font size adjust kiya */
+    font-size: 1rem; 
     color: #28a745;
   }
 
   .notes {
-    font-size: 0.85rem; /* Font size adjust kiya */
+    font-size: 0.85rem; 
     color: #555;
     margin-top: 10px;
   }
@@ -151,8 +151,8 @@
 
 /* Fee Particulars Table */
 .itemsSection {
-  margin-bottom: 16px; /* Gap kam kiya */
-  h3 { /* Style ko .detailsSection h3 jaisa rakha */
+  margin-bottom: 16px; 
+  h3 { 
     font-size: 0.9rem;
     font-weight: 700;
     color: #333;
@@ -167,14 +167,14 @@
 .itemsTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem; /* Font size adjust kiya */
+  font-size: 0.9rem; 
 
   thead tr {
     background-color: #f8f9fa;
     border-bottom: 2px solid #dee2e6;
   }
   th {
-    padding: 8px; /* Padding kam ki */
+    padding: 8px; 
     text-align: left;
     font-weight: 600;
   }
@@ -182,7 +182,7 @@
     border-bottom: 1px solid #f0f0f0;
   }
   td {
-    padding: 8px; /* Padding kam ki */
+    padding: 8px; 
     vertical-align: top;
   }
   .amountCol {
@@ -190,7 +190,7 @@
     font-weight: 500;
   }
   .calcRow td {
-    padding-top: 6px; /* Padding kam ki */
+    padding-top: 6px; 
     padding-bottom: 6px;
     font-weight: 600;
     border: none;
@@ -200,7 +200,7 @@
   }
   .grandTotal {
     background-color: #f8f9fa;
-    font-size: 1rem; /* Font size adjust kiya */
+    font-size: 1rem; 
     color: #000;
   }
 }
@@ -212,13 +212,13 @@
   align-items: center;
   background-color: #f8f9fa;
   border: 1px solid #e0e0e0;
-  padding: 12px 16px; /* Padding kam ki */
+  padding: 12px 16px; 
   border-radius: 8px;
-  margin-top: 16px; /* Gap kam kiya */
+  margin-top: 16px; 
 
   p {
     margin: 0;
-    font-size: 1rem; /* Font size adjust kiya */
+    font-size: 1rem; 
     font-weight: 600;
   }
 
@@ -234,19 +234,19 @@
 
   /* PAID Stamp ko professional banaya */
   .paidStamp {
-    font-size: 1.1rem; /* Font size adjust kiya */
+    font-size: 1.1rem; 
     font-weight: 700;
     color: #28a745;
-    border: 2px solid #28a745; /* Border thoda patla */
-    padding: 4px 10px; /* Padding kam ki */
+    border: 2px solid #28a745; 
+    padding: 4px 10px; 
     border-radius: 6px;
     text-transform: uppercase;
   }
 
   .statusBadge {
-    font-size: 0.85rem; /* Font size adjust kiya */
+    font-size: 0.85rem; 
     font-weight: 700;
-    padding: 5px 10px; /* Padding kam ki */
+    padding: 5px 10px; 
     border-radius: 15px;
     text-transform: uppercase;
   }
@@ -262,24 +262,24 @@
 
 /* Footer (Signatures) */
 .footer {
-  margin-top: 20px; /* Gap kam kiya */
-  padding-top: 16px; /* Gap kam kiya */
+  margin-top: 20px; 
+  padding-top: 16px; 
   border-top: 1px solid #e0e0e0;
-  font-size: 0.8rem; /* Font size adjust kiya */
+  font-size: 0.8rem; 
   color: #555;
-  background-color: #ffffff !important; /* --- DARK FOOTER FIX --- */
+  background-color: #ffffff !important; 
   
   .collectedBy {
-    font-size: 0.9rem; /* Font size adjust kiya */
+    font-size: 0.9rem; 
     font-weight: 500;
     color: #333;
-    margin-bottom: 25px; /* Gap kam kiya */
+    margin-bottom: 25px; 
   }
 
   .signatureArea {
     display: flex;
     justify-content: space-between;
-    margin-top: 30px; /* Gap kam kiya */
+    margin-top: 30px; 
   }
 
   .signatureBox {
@@ -292,62 +292,71 @@
     justify-content: space-between;
     padding: 0 5%; 
     p { 
-      margin: 4px 0 0 0; /* Gap kam kiya */
+      margin: 4px 0 0 0; 
       font-weight: 600;
     }
   }
 
   .footerNote {
     text-align: center;
-    margin-top: 20px; /* Gap kam kiya */
+    margin-top: 20px; 
     font-style: italic;
   }
 }
 .receiptContent.printing {
   background: #ffffff !important;
 }
+
+/* --- FINAL PRINT STYLES FIX (Deployment & Blank Page) --- */
 @media print {
-    /* 1. LOCAL CLASS ko target karte hue, uske bahar ke DOM ko modify karne ke liye :global use karein */
-    /* Hum .receiptContainer ko ek local class jante hain */
-
-    /* Sabse pehle, modal wrapper ko full screen par extend karein */
-    .receiptContainer {
-        display: block !important;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100% !important;
-        max-height: none !important; 
-        overflow-y: visible !important;
-        background-color: white; /* Print background white */
-    }
-
-    /* 2. Non-Printable Elements ko hide karein (local selectors) */
-    .actions, .noPrint {
-        display: none !important;
-    }
-
-    /* 3. Global HTML tags ko target karne ke liye :global block ka use karein */
-    /* Yeh block deploy ho payega kyunki iske andar koi local selector nahi hai */
     
+    /* Global Styles ko target karne ke liye :global block ka use karein */
     :global {
-        /* Body ke saare children ko hide karo (jo aapka modal nahi hai) */
-        /* Kyunki humne .receiptContainer ko fixed position di hai, yeh uske content ko top par rakhega */
-        body > * {
-            display: none !important;
+        /* Hide everything on the main page */
+        body * {
+            visibility: hidden !important; 
         }
-
-        /* Sirf hamare component ko visible rakho (jo mount hua hai) */
-        /* Aapka main component ya modal wrapper ka root class */
-        .FeeReceiptRootClass { /* Agar aapka root component mount hota hai, toh yeh use karein */
-            display: block !important;
-        }
-
-        body, html {
-            background-color: white !important;
+        body {
             margin: 0 !important;
             padding: 0 !important;
+            background-color: white !important;
             min-height: 100vh;
         }
+    }
+    
+    /* Make the entire receipt container visible and full screen */
+    .receiptContainer { 
+        visibility: visible !important;
+        /* Absolute position denge taki woh viewport ko cover karle aur scrollable content print ho jaye */
+        position: absolute !important; 
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        max-height: none !important; 
+        overflow: visible !important;
+        background-color: white !important;
+        box-shadow: none !important;
+        z-index: 99999;
+    }
+
+    /* Make the actual content visible */
+    .receiptContent { 
+        visibility: visible !important;
+        width: 100% !important; 
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 20px !important; 
+    }
+
+    /* Ensure all child elements are visible */
+    .receiptContent *, .receiptContainer * {
+        visibility: visible !important;
+    }
+
+    /* Hide the print buttons/actions again */
+    .actions { 
+        display: none !important; 
+        visibility: hidden !important;
     }
 }
