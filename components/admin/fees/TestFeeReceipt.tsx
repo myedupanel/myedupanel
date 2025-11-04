@@ -1,7 +1,7 @@
-// File: components/admin/fees/TestFeeReceipt.tsx (FINAL FIX FOR BLANK PREVIEW)
+// File: components/admin/fees/TestFeeReceipt.tsx (FINAL CLEANED CODE)
+
 "use client";
 import React, { useRef } from 'react';
-// SCSS file import
 import styles from './TestPrintStyles.module.scss'; 
 import { FiPrinter, FiDownload } from 'react-icons/fi';
 
@@ -43,79 +43,67 @@ const TestFeeReceipt = () => {
     const handlePrint = () => {
         const printContent = componentRef.current;
         if (!printContent) return;
-        
-        const printWindow = window.open('', '', 'height=800,width=800');
+
+        // 1. Content ko clone karo aur style attribute inject karo
+        const contentClone = printContent.cloneNode(true) as HTMLElement;
+        // Print preview mein visibility ensure karne ke liye inline style lagao
+        contentClone.style.cssText = 'width: 100%; box-sizing: border-box; visibility: visible !important;'; 
+
+        const printWindow = window.open('', '_blank', 'height=800,width=800');
         if (!printWindow) return; 
 
-        // 1. Original document se saare stylesheets/styles collect karein (CRUCIAL FIX)
+        // 2. Original document se saare stylesheets/styles collect karein
         let stylesToInject = '';
         const links = document.querySelectorAll('link[rel="stylesheet"], style');
         links.forEach(link => {
             stylesToInject += link.outerHTML; 
         });
 
-        // 2. Naye window ke liye HTML construct karein (Blank page aur 2-page fix)
+        // 3. Naye window ke liye HTML construct karein
         const htmlContent = `
             <html>
                 <head>
                     <title>Fee Receipt - ${dummyTransaction.receiptId}</title>
                     ${stylesToInject} 
                     <style>
-                        /* --- INJECTED STYLES: AGGRESSIVE RESET --- */
+                        /* Print CSS rules: Aggressive Reset */
                         @page { size: A4; margin: 15mm; }
                         
                         body, html { 
                             margin: 0 !important; 
                             padding: 0 !important; 
                             width: 100vw;
+                            /* 2-page fix: height ko constrain karte hain */
                             height: 100vh;
                             overflow: hidden; 
                             background-color: white !important;
+                            visibility: hidden;
                         }
-
-                        /* Hide everything in the popup window initially */
-                        body * {
-                             visibility: hidden;
-                             display: none;
-                        }
-                        
-                        /* Force visibility of the main printable content area and its children */
-                        .receiptContent {
-                            visibility: visible !important;
-                            display: block !important;
-                            position: absolute !important;
-                            top: 0 !important;
-                            left: 0 !important;
-                            min-height: auto !important;
-                            max-height: 290mm; /* A4 constraint */
-                            box-shadow: none !important;
-                            color: black !important; /* Ensure text is visible */
-                        }
-                        .receiptContent * {
+                        /* Content aur uske sabhi children ko visible karo */
+                        .receiptContent, .receiptContent * {
                            visibility: visible !important;
-                           display: block !important;
-                           color: inherit !important;
                         }
                     </style>
                 </head>
                 <body>
-                    ${printContent.outerHTML} 
+                    ${contentClone.outerHTML} 
                 </body>
             </html>
         `;
 
-        // 3. Content likhein aur print trigger karein delay ke saath
+        // 4. Content likhein aur print trigger karein delay ke saath
         printWindow.document.write(htmlContent);
         printWindow.document.close(); 
         
-        // 4. 500ms delay styles ko load hone ka time dene ke liye
         setTimeout(() => {
             printWindow.focus(); 
             printWindow.print(); 
             printWindow.close(); 
         }, 500); 
     };
-    
+    // --- END FINAL PRINT HANDLER ---
+
+
     // --- JSX RENDER ---
     return (
         <div className={styles.receiptContainer}>
