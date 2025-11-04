@@ -51,20 +51,29 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             admissionsDataRaw,
             classCountsRaw
         ] = await Promise.all([
-            // Total Counts (Session-Free)
+            // Total Counts (No Change)
             prisma.students.count({ where: { schoolId: schoolId } }), 
-            prisma.teachers.count({ where: { schoolId: schoolId } }), // Teachers model use kiya
+            prisma.teachers.count({ where: { schoolId: schoolId } }),
             prisma.parent.count({ where: { schoolId: schoolId } }),   
             prisma.user.count({ where: { role: { in: staffRoles }, schoolId: schoolId } }),
 
-            // --- RECENT LISTS (FIXED: Select -> Include) ---
+            // --- RECENT LISTS (FIXED QUERY STRUCTURE) ---
             prisma.students.findMany({ 
                 where: { schoolId }, 
                 orderBy: { studentid: 'desc' }, 
                 take: 5, 
-                // FIX 1: class relation को include करें
-                include: { class: { select: { class_name: true } } },
-                select: { studentid: true, first_name: true, father_name: true, last_name: true, admission_date: true, classid: true }
+                // FIX 1: select और include को merge किया
+                include: { 
+                    class: { select: { class_name: true } } // Class relation को include करें
+                },
+                select: { // बाकी fields को select करें
+                    studentid: true, 
+                    first_name: true, 
+                    father_name: true, 
+                    last_name: true, 
+                    admission_date: true
+                    // classid अब include के साथ automatically आ जाएगा
+                }
             }), 
             
             prisma.teachers.findMany({ 
@@ -90,7 +99,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             }),
             // --- END RECENT LISTS ---
 
-            // Admission Chart Aggregation (No Change)
+            // Aggregations (No Change)
              prisma.students.groupBy({
                  by: ['admission_date'], 
                  where: { schoolId: schoolId, admission_date: { not: null } },
@@ -98,7 +107,6 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                  orderBy: { admission_date: 'asc'}
              }),
              
-            // Class Counts Aggregation (No Change)
             prisma.students.groupBy({
                 by: ['classid'],
                 where: { schoolId: schoolId },
@@ -109,7 +117,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             console.error("[GET /dashboard-data] Error during Promise.all:\n", err);
             // P1001 या अन्य fatal error को 500 के रूप में फेंकें
             res.status(500).send('Server Error fetching dashboard data');
-            throw err; // Stop further execution
+            throw err; 
         });
 
         // --- Process Admissions Data (No Change) ---
@@ -183,7 +191,6 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
 
     } catch (err) {
         // यह कैच ब्लॉक अब केवल Promise.all के बाद के errors को संभालेगा
-        // Promise.all error पहले ही हैंडल हो चुका है
     }
 });
 

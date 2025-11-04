@@ -1,10 +1,17 @@
-// File: backend/controllers/feeController.js
+// backend/controllers/feeController.js
 
 // --- 1. IMPORTS (No Change)
-const prisma = require('../config/prisma'); 
+const prisma = require('../config/prisma'); // Sirf Prisma client
 const xlsx = require('xlsx');
 const Razorpay = require('razorpay');
-const crypto = require('crypto');
+const crypto = require('crypto'); // Webhook ke liye zaroori
+
+// --- FIX: Razorpay initialization ko yahaan se COMMENT OUT ya REMOVE kar dein ---
+// const razorpay = new Razorpay({
+//     key_id: process.env.RAZORPAY_KEY_ID,
+//     key_secret: process.env.RAZORPAY_KEY_SECRET,
+// });
+// --- END FIX ---
 
 // Helper function student ka poora naam jodne ke liye
 const getFullName = (student) => {
@@ -12,11 +19,9 @@ const getFullName = (student) => {
   return [student.first_name, student.father_name, student.last_name].filter(Boolean).join(' ');
 }
 
-// FIX: getActiveSessionId helper function हटा दिया गया
-
 // --- 2. CONTROLLER FUNCTIONS (Session Logic Removed) ---
 
-// 1. Get Dashboard Overview (FIXED)
+// 1. Get Dashboard Overview (FIXED - Session-Free)
 const getDashboardOverview = async (req, res) => { 
     try {
         const schoolId = req.user.schoolId; 
@@ -42,7 +47,7 @@ const getDashboardOverview = async (req, res) => {
         // Deposit Stats
         const depositStats = await prisma.feeRecord.aggregate({
             where: { schoolId: schoolId, isDeposit: true },
-            _sum: { amount: true },
+            _sum: { amount: true }, 
             _count: { id: true }
         });
 
@@ -55,17 +60,17 @@ const getDashboardOverview = async (req, res) => {
           lateCollection: { amount: lateFeeStats._sum.lateFine || 0, studentCount: lateFeeStats._count.id || 0 },
           onlinePayment: { transactionCount: onlineTransactionCount || 0, totalStudents: totalStudentCount || 0 },
           depositCollection: { amount: depositStats._sum.amount || 0, studentCount: depositStats._count.id || 0 },
-          schoolCollection: { collected: collectionStats._sum.amountPaid || 0, goal: 5000000 } // Example goal
+          schoolCollection: { collected: collectionStats._sum.amountPaid || 0, goal: 5000000 } 
         };
         res.status(200).json(overviewData);
       } catch (error) { console.error("Error in getDashboardOverview:", error); res.status(500).send("Server Error"); }
 };
 
-// 2. Get All Fee Templates (FIXED)
+// 2. Get All Fee Templates (FIXED - Session-Free)
 const getFeeTemplates = async (req, res) => { 
     try {
         const schoolId = req.user.schoolId;
-        // FIX: sessionId check हटा दिया गया
+        // FIX 1: Session filter हटा दिया गया
         const templates = await prisma.feeTemplate.findMany({ 
             where: { schoolId: schoolId }
         });
@@ -73,7 +78,7 @@ const getFeeTemplates = async (req, res) => {
       } catch (error) { console.error("Error in getFeeTemplates:", error); res.status(500).send("Server Error"); }
 };
 
-// 3. Get Single Template Details (No Change)
+// 3. Get Single Template Details (FIXED - Session-Free)
 const getTemplateDetails = async (req, res) => { 
     try {
         const schoolId = req.user.schoolId;
@@ -146,8 +151,12 @@ const getLatePayments = async (req, res) => {
         const records = await prisma.feeRecord.findMany({
           where: query,
           include: {
-            student: { select: { first_name: true, father_name: true, last_name: true, class: { select: { class_name: true }} } }, 
-            template: { select: { name: true } }
+            student: { 
+              select: { first_name: true, father_name: true, last_name: true, class: { select: { class_name: true }} }
+            }, 
+            template: { 
+              select: { name: true }
+            }
           },
           orderBy: { dueDate: 'asc' },
           take: parseInt(limit, 10),
@@ -169,7 +178,7 @@ const getLatePayments = async (req, res) => {
       } catch (error) { console.error("Error in getLatePayments:", error); res.status(500).send("Server Error"); }
 };
 
-// 5. Calculate Late Fees (FIXED)
+// 5. Calculate Late Fees (FIXED - Session-Free)
 const calculateLateFees = async (req, res) => { 
      try {
         const schoolId = req.user.schoolId;
@@ -196,9 +205,8 @@ const calculateLateFees = async (req, res) => {
           }
         });
         
-        // Kadam 2: Jin records ko 'Late' mark kiya, unka balanceDue update karein
+        // Session filter हटा दिया गया
         if (result.count > 0) {
-            // Session filter हटा दिया गया
             await prisma.$executeRawUnsafe(
              `UPDATE "FeeRecord" 
               SET "balanceDue" = "amount" + "lateFine" - "amountPaid" 
@@ -210,10 +218,10 @@ const calculateLateFees = async (req, res) => {
             );
         }
 
+        // Session ID payload हटा दिया गया
         if (req.io && result.count > 0) { 
             req.io.emit('updateDashboard');
-            // Session ID payload हटा दिया गया
-            req.io.emit('fee_records_updated');
+            req.io.emit('fee_records_updated'); 
         }
         res.status(200).json({ message: `${result.count} records marked as 'Late' and fine applied.` });
       } catch (error) { console.error("Error in calculateLateFees:", error); res.status(500).send("Server Error"); }
@@ -223,7 +231,6 @@ const calculateLateFees = async (req, res) => {
 const sendLateFeeReminders = async (req, res) => { 
      try {
         const schoolId = req.user.schoolId;
-        // Session filter हटा दिया गया
         const lateRecords = await prisma.feeRecord.findMany({
             where: { schoolId, status: 'Late' },
             include: { 
@@ -264,9 +271,7 @@ const getStudentFeeRecords = async (req, res) => {
         
         if (status) {
              const statusArray = status.split(',').map(s => s.trim()).filter(s => s);
-             if (statusArray.length > 0) {
-                query.status = { in: statusArray };
-             }
+             if (statusArray.length > 0) { query.status = { in: statusArray }; }
         }
         if (classId) query.classId = parseInt(classId);
         if (templateId) query.templateId = parseInt(templateId);
@@ -322,7 +327,7 @@ const getStudentFeeRecords = async (req, res) => {
     }
 };
 
-// 8. Get Processing Payments
+// 8. Get Processing Payments (No Change)
 const getProcessingPayments = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
      try {
         const schoolId = req.user.schoolId;
@@ -484,6 +489,7 @@ const assignAndCollectFee = async (req, res) => { /* ... (Poora function code wa
       if (isPayingNow && numericAmountPaid > templateTotalAmount + 0.01) throw new Error(`Amount paid (${numericAmountPaid}) cannot exceed template total (${templateTotalAmount}).`);
       const balanceDue = templateTotalAmount - numericAmountPaid;
       const feeStatus = balanceDue <= 0.01 ? 'Paid' : (isPayingNow ? 'Partial' : 'Pending');
+      // FIX 17: sessionId data से हटा दिया गया
       savedFeeRecord = await tx.feeRecord.create({
         data: { studentId: studentIdInt, templateId: templateIdInt, schoolId: schoolId, classId: foundClassId, amount: templateTotalAmount, discount: 0, amountPaid: numericAmountPaid, balanceDue: balanceDue < 0 ? 0 : balanceDue, status: feeStatus, dueDate: new Date(dueDate) }
       });
@@ -491,6 +497,7 @@ const assignAndCollectFee = async (req, res) => { /* ... (Poora function code wa
       if (isPayingNow) {
         const receiptId = `TXN-${Date.now()}`;
         const transactionStatus = (paymentMode === 'Cheque') ? 'Pending' : 'Success';
+        // FIX 17: sessionId data से हटा दिया गया
         savedTransaction = await tx.transaction.create({
           data: { receiptId, feeRecordId: savedFeeRecord.id, studentId: studentIdInt, classId: foundClassId, schoolId: schoolId, templateId: templateIdInt, amountPaid: numericAmountPaid, paymentDate: paymentDateObj, paymentMode: paymentMode, status: transactionStatus, collectedById: collectedByUserId, notes, chequeNumber: (paymentMode === 'Cheque') ? notes : null }
         });
@@ -500,6 +507,7 @@ const assignAndCollectFee = async (req, res) => { /* ... (Poora function code wa
     });
     console.log("[assignAndCollectFee] Database transaction committed successfully.");
     const io = req.app.get('socketio');
+    // FIX 17: Session ID payload हटा दिया गया
     if (io) {
       console.log("[assignAndCollectFee] Emitting Socket events...");
       io.emit('updateDashboard');
@@ -531,10 +539,8 @@ const createFeeTemplate = async (req, res) => { /* ... (Poora function code wais
         // FIX 5: Session Aware Unique Check हटा दिया गया
         const existingTemplate = await prisma.feeTemplate.findUnique({ where: { schoolId_name: { schoolId, name: trimmedName } } });
         if (existingTemplate) return res.status(400).json({ message: `A fee template with the name "${trimmedName}" already exists.` });
-        
         // FIX 6: sessionId data से हटा दिया गया
         const newTemplate = await prisma.feeTemplate.create({ data: { name: trimmedName, description, items, totalAmount, schoolId } });
-        
         if (req.io) { req.io.emit('fee_template_added', newTemplate); } else { console.warn('Socket.IO instance not found.'); }
         res.status(201).json({ message: 'Fee Template created successfully!', template: newTemplate });
       } catch (error) { console.error("Error in createFeeTemplate:", error); if (error.code === 'P2002') { return res.status(400).json({ message: `A fee template with the name "${name.trim()}" already exists.` }); } res.status(500).send("Server Error"); }
@@ -801,8 +807,21 @@ const getStudentReportByClass = async (req, res) => { /* ... (Poora function cod
 // 24. Create Payment Order (Razorpay)
 const createPaymentOrder = async (req, res) => { 
      try {
-        let razorpay; if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) { razorpay = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET, }); } 
-        else { console.warn("RAZORPAY KEYS NOT SET. Online payments will fail. Server will start."); }
+let razorpay;if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+
+    razorpay = new Razorpay({
+
+        key_id: process.env.RAZORPAY_KEY_ID,
+
+        key_secret: process.env.RAZORPAY_KEY_SECRET,
+
+    });
+
+   } else {
+
+    console.warn("RAZORPAY KEYS NOT SET. Online payments will fail. Server will start.");
+
+}
 
         const { amount, feeRecordId } = req.body;
         const schoolId = req.user.schoolId;
@@ -878,6 +897,7 @@ const verifyPaymentWebhook = async (req, res) => {
     const studentIdInt = parseInt(payment.notes?.studentId);
     const classIdInt = parseInt(payment.notes?.classId);
     const schoolId = payment.notes?.schoolId; // Yeh string hai
+
     // FIX 23: sessionId note से हटा दिया गया
     // const sessionIdInt = parseInt(payment.notes?.sessionId); 
 
@@ -958,10 +978,10 @@ const verifyPaymentWebhook = async (req, res) => {
          };
 
         const io = req.app.get('socketio');
+        // FIX 27: Session ID payload हटा दिया गया
         if (io) {
             console.log("Webhook: Emitting Socket.IO events.");
             io.emit('updateDashboard');
-            // FIX 27: Session ID payload हटा दिया गया
             io.emit('fee_record_updated', result.updatedFeeRecord);
             io.emit('transaction_added', populatedTransactionForEmit);
             io.emit('new_transaction_feed', {
