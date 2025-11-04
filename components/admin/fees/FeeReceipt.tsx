@@ -121,7 +121,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         });
     };
     
-    // --- Download PDF Function (Logic is correct) ---
+    // --- Download PDF Function (No Change) ---
     const handleDownloadPDF = () => {
         const input = componentRef.current;
         if (!input) { alert("Could not find receipt content to download."); return; }
@@ -132,8 +132,8 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             input.classList.remove(styles.printing);
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4'); 
-            // ... (PDF dimension and save logic remains the same) ...
             
+            // ... (PDF dimension and save logic remains the same) ...
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
             const imgProps = (pdf as any).getImageProperties(imgData); 
@@ -141,12 +141,10 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             const margin = 10; 
             let imgWidth = pdfWidth - (margin * 2);
             let imgHeight = imgWidth * imgRatio;
-
             if (imgHeight > pdfHeight - (margin * 2)) {
                 imgHeight = pdfHeight - (margin * 2);
                 imgWidth = imgHeight / imgRatio;
             }
-            
             const x = (pdfWidth - imgWidth) / 2; 
             const y = margin; 
 
@@ -208,7 +206,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             {/* --- END --- */}
 
 
-            {/* --- Receipt Content JSX (Premium Structure) --- */}
+            {/* --- Receipt Content JSX (FINAL PREMIUM STRUCTURE) --- */}
             <div id="printable-receipt" className={styles.receiptContent} ref={componentRef}>
                 
                 {/* 1. HEADER (School Name + Metadata on the right) */}
@@ -218,12 +216,10 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     <div className={styles.schoolDetails}>
                         {schoolInfo.logo && (<img src={schoolInfo.logo} alt={`${schoolInfo.name || 'School'} Logo`} className={styles.logo} />)}
                         <h1>{schoolInfo.name || 'My EduPanel'}</h1>
-                        <p>{schoolInfo.address || 'Pune'}</p> {/* Address/City yahan dikhaya (for local branding) */}
                     </div>
 
                     {/* Right: Metadata Grid (Receipt No, Date, Session) */}
                     <div className={styles.metaHeader}>
-                         {/* Receipt metadata ko ek block mein rakha */}
                         <p><strong>Receipt No:</strong> {receiptNoDisplay}</p>
                         <p><strong>Date:</strong> {paymentDateDisplay}</p>
                         <p><strong>Session:</strong> {schoolInfo.session || 'N/A'}</p>
@@ -331,4 +327,4 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     );
 };
 
-export default FeeReceipt;
+export default FeeReceipt; 
