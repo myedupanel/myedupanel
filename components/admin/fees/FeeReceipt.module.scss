@@ -309,25 +309,19 @@
 
 /* --- FINAL PRINT STYLES FIX (Deployment & Blank Page) --- */
 @media print {
-    
-    /* Global Styles ko target karne ke liye :global block ka use karein */
-    :global {
-        /* Hide everything on the main page */
-        body * {
-            visibility: hidden !important; 
-        }
-        body {
-            margin: 0 !important;
-            padding: 0 !important;
-            background-color: white !important;
-            min-height: 100vh;
-        }
+    /* 1. Global visibility: Body par invisibility toggle apply karein */
+    :global(body) {
+        /* Print hone par body ke sabhi non-printable content ko hide karein */
+        visibility: hidden !important; 
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: white !important;
     }
     
-    /* Make the entire receipt container visible and full screen */
+    /* 2. Local Container (.receiptContainer) ko VISIBLE karein */
     .receiptContainer { 
         visibility: visible !important;
-        /* Absolute position denge taki woh viewport ko cover karle aur scrollable content print ho jaye */
+        /* Position settings jinko print hone par chahiye: */
         position: absolute !important; 
         top: 0 !important;
         left: 0 !important;
@@ -339,23 +333,13 @@
         z-index: 99999;
     }
 
-    /* Make the actual content visible */
-    .receiptContent { 
-        visibility: visible !important;
-        width: 100% !important; 
-        box-shadow: none !important;
-        border: none !important;
-        margin: 0 !important;
-        padding: 20px !important; 
-    }
-
-    /* Ensure all child elements are visible */
-    .receiptContent *, .receiptContainer * {
+    /* 3. Ensure all child elements are visible (kyunki body par hidden tha) */
+    .receiptContent, .receiptContainer * {
         visibility: visible !important;
     }
-
-    /* Hide the print buttons/actions again */
-    .actions { 
+    
+    /* 4. Print buttons/actions ko hamesha hide rakhein */
+    .actions, .noPrint { 
         display: none !important; 
         visibility: hidden !important;
     }
