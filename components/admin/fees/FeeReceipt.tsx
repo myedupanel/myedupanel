@@ -87,6 +87,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         const input = componentRef.current;
         if (!input || !transaction) { alert("Details missing."); return; }
         
+        // Canvas Logic (Bonafide)
         html2canvas(input, { scale: 2.5, useCORS: true, backgroundColor: '#ffffff', width: input.offsetWidth, height: input.offsetHeight } as any).then((canvas) => {
             const imgData = canvas.toDataURL('image/png');
             const printWindow = window.open('', '_blank');
@@ -208,9 +209,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     {/* Left: School Name Only */}
                     <div className={styles.schoolDetails}>
                         {schoolInfo.logo && (<img src={schoolInfo.logo} alt={`${schoolInfo.name || 'School'} Logo`} className={styles.logo} />)}
-                        {/* School name only as per request */}
                         <h1>{schoolInfo.name || 'My EduPanel'}</h1>
-                        {/* City name for local branding */}
                         <p>{schoolInfo.address || 'Pune'}</p> 
                     </div>
 

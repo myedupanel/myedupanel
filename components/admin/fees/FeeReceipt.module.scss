@@ -36,7 +36,7 @@
 
 /* --- PRINTABLE RECEIPT AREA: Official Look --- */
 .receiptContent {
-  width: 210mm; /* A4 width standard */
+  width: 210mm; 
   margin: 16px auto; 
   padding: 25px; 
   background-color: #ffffff; 
@@ -55,7 +55,7 @@
   margin-bottom: 15px;
   
   .schoolDetails {
-    /* LEFT SIDE: School Name Only (Logo, Name, City) */
+    /* LEFT SIDE: School Name Only */
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -77,7 +77,7 @@
 
   /* RIGHT SIDE: Receipt Metadata */
   .metaHeader {
-    text-align: left; /* Key-value alignment */
+    text-align: left; 
     font-size: 0.85rem;
     margin-top: 5px;
     padding-left: 20px; 
@@ -163,7 +163,7 @@
         padding-top: 10px; 
         
         .balanceSection {
-            background-color: #ffffff;
+            background-color: #f7f7f7; /* Keep light gray for screen */
             border: 1px solid #ddd;
             padding: 8px 12px; 
             font-size: 0.9rem;
@@ -218,14 +218,14 @@
   .footerNote { text-align: center; margin-top: 15px; font-style: italic; font-weight: 400;}
 }
 
-/* --- FINAL PRINT MEDIA QUERY (Single Page Guarantee) --- */
+/* --- FINAL PRINT MEDIA QUERY (Single Page Guarantee & White Background) --- */
 @media print {
     .actions { display: none !important; }
     
     /* Vercel Compliance Fix */
     :global(body), :global(html) { 
         background-color: white !important; 
-        color: black !important; /* Text color safety */
+        color: black !important; 
     }
     
     .receiptContent {
@@ -250,7 +250,7 @@
     /* Ensure no dark backgrounds are captured in print */
     .balanceSection, .itemsTable thead tr {
         background-color: #ffffff !important;
-        print-color-adjust: exact;
+        print-color-adjust: exact; /* Standard fix for background graphics issue */
         -webkit-print-color-adjust: exact;
     }
 }
