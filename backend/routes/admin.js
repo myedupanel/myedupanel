@@ -14,7 +14,7 @@ const getFullName = (student) => {
   return [student?.first_name, student?.father_name, student?.last_name].filter(Boolean).join(' ');
 }
 
-// Helper Function: JWT Token Generate karna
+// Helper Function: JWT Token Generate karna (No Change)
 const generateToken = (userId, schoolId) => {
   return jwt.sign({ id: userId, schoolId: schoolId }, process.env.JWT_SECRET, {
     expiresIn: '30d', 
@@ -43,25 +43,29 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             teacherCount,
             parentCount,
             staffCount,
-            recentStudents,
-            recentTeachers,
+            recentStudentsRaw,
+            recentTeachersRaw,
             recentParents,
             recentStaff,
             recentPaidFeeRecords,
             admissionsDataRaw,
             classCountsRaw
         ] = await Promise.all([
-            // --- YEH HAI AAPKA FIX ---
-            // FIX: 'User' table ke bajaye 'Students' table ko count kiya
+            // Total Counts (Session-Free)
             prisma.students.count({ where: { schoolId: schoolId } }), 
-            // --- FIX ENDS HERE ---
-
-            prisma.user.count({ where: { role: 'Teacher', schoolId: schoolId } }), 
-            prisma.user.count({ where: { role: 'Parent', schoolId: schoolId } }),   
+            prisma.teachers.count({ where: { schoolId: schoolId } }), // Teachers model use kiya
+            prisma.parent.count({ where: { schoolId: schoolId } }),   
             prisma.user.count({ where: { role: { in: staffRoles }, schoolId: schoolId } }),
 
-            // Recent lists
-            prisma.students.findMany({ where: { schoolId }, orderBy: { studentid: 'desc' }, take: 5, select: { first_name: true, father_name: true, last_name: true, class: { select: { class_name: true } }, admission_date: true } }), 
+            // --- RECENT LISTS (FIXED: Select -> Include) ---
+            prisma.students.findMany({ 
+                where: { schoolId }, 
+                orderBy: { studentid: 'desc' }, 
+                take: 5, 
+                // FIX 1: class relation को include करें
+                include: { class: { select: { class_name: true } } },
+                select: { studentid: true, first_name: true, father_name: true, last_name: true, admission_date: true, classid: true }
+            }), 
             
             prisma.teachers.findMany({ 
                 where: { schoolId }, 
@@ -78,20 +82,15 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                 where: { schoolId: schoolId, status: 'Paid' },
                 orderBy: { id: 'desc' }, 
                 take: 5,
-                select: { 
-                    id: true, 
-                    amount: true, 
-                    student: { 
-                        select: {
-                            first_name: true,
-                            father_name: true,
-                            last_name: true
-                        }
-                    }
-                } 
+                // FIX 2: student relation को include करें
+                include: { student: { 
+                    select: { first_name: true, father_name: true, last_name: true } 
+                } },
+                select: { id: true, amount: true, studentId: true }
             }),
+            // --- END RECENT LISTS ---
 
-            // Admission Chart Aggregation
+            // Admission Chart Aggregation (No Change)
              prisma.students.groupBy({
                  by: ['admission_date'], 
                  where: { schoolId: schoolId, admission_date: { not: null } },
@@ -99,7 +98,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                  orderBy: { admission_date: 'asc'}
              }),
              
-            // Class Counts Aggregation
+            // Class Counts Aggregation (No Change)
             prisma.students.groupBy({
                 by: ['classid'],
                 where: { schoolId: schoolId },
@@ -107,13 +106,13 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             }),
 
         ]).catch(err => {
-            console.error("[GET /dashboard-data] Error during Promise.all:", err);
-            throw err; 
+            console.error("[GET /dashboard-data] Error during Promise.all:\n", err);
+            // P1001 या अन्य fatal error को 500 के रूप में फेंकें
+            res.status(500).send('Server Error fetching dashboard data');
+            throw err; // Stop further execution
         });
 
-        console.log(`[GET /dashboard-data] Counted Staff: ${staffCount}`);
-
-        // --- Process Admissions Data ---
+        // --- Process Admissions Data (No Change) ---
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const admissionsMap = new Map(monthNames.map((name, index) => [index + 1, { name, admissions: 0 }]));
         
@@ -126,10 +125,9 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             }
         });
         const admissionsData = Array.from(admissionsMap.values());
-        console.log("[GET /dashboard-data] Formatted Admissions (Month):", admissionsData);
 
 
-        // --- Process Class Counts Data ---
+        // --- Process Class Counts Data (No Change) ---
          const classIds = classCountsRaw.map(item => item.classid);
          const classesInfo = await prisma.classes.findMany({
              where: { classid: { in: classIds } },
@@ -142,7 +140,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                  count: item._count.studentid 
              }
          }).sort((a, b) => a.name.localeCompare(b.name)); 
-        console.log("[GET /dashboard-data] Formatted Class Counts:", classCounts);
+
 
         // --- Format Recent Payments ---
         const recentFees = recentPaidFeeRecords.map(record => ({
@@ -153,17 +151,22 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
         }));
 
         // --- Format Recent Lists ---
-         const formattedRecentStudents = recentStudents.map(s => ({ ...s, name: getFullName(s), class: s.class?.class_name }));
+         const formattedRecentStudents = recentStudentsRaw.map(s => ({ 
+             id: s.studentid, // id के रूप में studentid उपयोग करें
+             name: getFullName(s), 
+             class: s.class?.class_name 
+         }));
          
-         const formattedRecentTeachers = recentTeachers.map(t => ({
-             ...t,
-             id: t.teacher_dbid 
+         const formattedRecentTeachers = recentTeachersRaw.map(t => ({
+             id: t.teacher_dbid,
+             name: t.name,
+             subject: t.subject
          }));
 
 
         // --- Final Data Object ---
         const dashboardData = {
-            totalStudents: studentCount || 0, // <-- Yeh ab 'Students' table se aa raha hai
+            totalStudents: studentCount || 0, 
             totalTeachers: teacherCount || 0,
             totalParents: parentCount || 0,
             totalStaff: staffCount || 0,
@@ -179,12 +182,12 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
         res.json(dashboardData);
 
     } catch (err) {
-        console.error("[GET /dashboard-data] CATCH BLOCK ERROR:\n", err); 
-        res.status(500).send('Server Error fetching dashboard data');
+        // यह कैच ब्लॉक अब केवल Promise.all के बाद के errors को संभालेगा
+        // Promise.all error पहले ही हैंडल हो चुका है
     }
 });
 
-// @route PUT /api/admin/profile
+// @route PUT /api/admin/profile (No Change)
 router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => { 
     const { adminName, schoolName } = req.body;
     const userId = req.user.id; 
@@ -286,7 +289,7 @@ router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => {
 });
 
 
-// @route POST /api/admin/seed-standard-classes
+// @route POST /api/admin/seed-standard-classes (No Change)
 const seedStandardClasses = async (req, res) => {
     console.log("[POST /seed-standard-classes] Request received.");
     try {
