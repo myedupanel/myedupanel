@@ -81,43 +81,49 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null);
 
-    // --- YEH RAHA AAPKA FIX ---
     const handlePrint = () => {
-        const printContent = componentRef.current;
-        if (!printContent) return;
+    const printContent = componentRef.current;
+    if (!printContent) return;
 
-        // 1. Styles ko copy karein (No Change)
-        const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-                           .map(el => el.outerHTML)
-                           .join('');
-
-        // 2. Nayi window kholein (No Change)
-        const printWindow = window.open('', '', 'height=800,width=800');
+    // Nayi window kholein
+    const printWindow = window.open('', '', 'height=800,width=800');
+    
+    if (printWindow) {
+        // 1. Stylesheets ko copy karein (Original document ke <head> se)
+        const styleLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'));
+        let stylesHTML = '';
+        styleLinks.forEach(link => {
+             // Link tags ko directly copy karein
+            if (link.tagName === 'LINK') {
+                stylesHTML += link.outerHTML;
+            } 
+            // Style tags ko bhi copy karein
+            else if (link.tagName === 'STYLE') {
+                stylesHTML += link.outerHTML;
+            }
+        });
         
-        if (printWindow) {
-            // 3. Poora HTML content likhein (No Change)
-            printWindow.document.write('<html><head><title>Print Receipt</title>');
-            printWindow.document.write(styles); 
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(printContent.innerHTML); 
-            printWindow.document.write('</body></html>');
+        // 2. Poora HTML content likhein (Note: ab hum stylesHTML ko bhi include kar rahe hain)
+        printWindow.document.write('<html><head><title>Print Receipt</title>');
+        printWindow.document.write(stylesHTML); // Copied styles
+        printWindow.document.write('</head><body>');
+        
+        // Ensure only the content inside componentRef is written
+        // Isse aapka button aur modal wrapper print nahi hoga
+        printWindow.document.write(printContent.innerHTML); 
+        
+        printWindow.document.write('</body></html>');
 
-            // --- YEH BADLAAV HAI (Timeout Fix) ---
-            // 'onload' kaam nahi kar raha tha, isliye hum 'setTimeout' ka istemaal karenge.
-            printWindow.document.close(); // Pehle document ko close karein
-
-            setTimeout(() => {
-                printWindow.focus(); // Nayi window par focus karein
-                printWindow.print(); // Ab print dialog kholein
-                
-                // Print ke baad window ko band kar dein
-                printWindow.close(); 
-            }, 300); // 300ms ka delay, ise 500 kar sakte hain agar yeh abhi bhi fail ho.
-            // --- END BADLAAV ---
-        }
-    };
-    // --- END PRINT FIX ---
-
+        printWindow.document.close(); 
+        
+        // 3. Print ko trigger karne ke liye thoda delay (300ms) dein
+        setTimeout(() => {
+            printWindow.focus(); 
+            printWindow.print(); 
+            // printWindow.close(); // Optional: Print dialog band hone ke baad window close ho jayega
+        }, 300); 
+    }
+};
     // --- Download PDF Function (No Change) ---
     const handleDownloadPDF = () => {
         const input = componentRef.current;

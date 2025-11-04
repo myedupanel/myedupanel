@@ -306,3 +306,31 @@
 .receiptContent.printing {
   background: #ffffff !important;
 }
+@media print {
+    /* 1. Dashboard aur Modal wrapper ko hide karo */
+    body > * {
+        display: none !important;
+    }
+
+    /* 2. Sirf receipt container/content ko dikhao */
+    .receiptContainer,
+    .receiptContent {
+        display: block !important;
+        visibility: visible !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important; /* Print mein shadow nahi chahiye */
+        overflow: visible !important;
+        background-color: #ffffff !important; /* Ensure background is white */
+    }
+
+    /* 3. Action buttons (Download/Print) bhi print mein nahi aane chahiye */
+    .actions {
+        display: none !important;
+    }
+}

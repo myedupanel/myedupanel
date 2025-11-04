@@ -2,9 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import api from '@/backend/utils/api'; 
-import styles from './Receipt.module.scss'; // Hum yeh file AAGE banayenge
+import styles from './Receipt.module.scss';
 import { FiPrinter } from 'react-icons/fi';
-// import LoadingTemplates from '@/components/LoadingTemplates'; // <-- YEH LINE HATA DI GAYI HAI
 
 // Data types (example, aapke models ke hisaab se)
 interface Transaction {
@@ -32,7 +31,9 @@ export default function ReceiptPage() {
       setLoading(true);
       try {
         const res = await api.get(`/fees/transaction/${transactionId}`); 
-        setTransaction(res.data);
+        // Assuming your backend returns data in a structure where transaction details are directly accessible
+        // Use res.data directly if it contains the Transaction interface structure
+        setTransaction(res.data); 
       } catch (err) {
         console.error("Error fetching transaction:", err);
         setError('Failed to load receipt details.');
@@ -43,16 +44,77 @@ export default function ReceiptPage() {
     fetchTransaction();
   }, [transactionId]);
 
+  // --- UPDATED PRINT HANDLER FUNCTION ---
   const handlePrint = () => {
-    window.print();
-  };
+    // 1. Get the content that needs to be printed
+    const printableElement = document.querySelector(`.${styles.printableArea}`);
+    
+    if (!printableElement) {
+        console.error("Printable area element not found.");
+        return;
+    }
 
-  // --- YAHAN BADLAAV KIYA GAYA HAI ---
-  if (loading) return <div style={{ padding: '2rem' }}>Loading Receipt...</div>; // Simple loading text
+    const receiptContent = printableElement.outerHTML;
+
+    // 2. Open a new window
+    const printWindow = window.open('', '', 'height=600,width=800');
+    if (!printWindow) return; // Prevent if pop-up is blocked
+
+    // 3. Collect all CSS <link> tags from the current document
+    let cssLinks = '';
+    const links = document.querySelectorAll('link[rel="stylesheet"], style');
+    links.forEach(link => {
+        // Only copy external stylesheets and inline styles if present
+        cssLinks += link.outerHTML;
+    });
+
+    // 4. Construct the HTML for the new window
+    const htmlContent = `
+      <html>
+        <head>
+          <title>Fee Receipt - ${transactionId}</title>
+          ${cssLinks}
+          <style>
+            /* Custom print style for the new window to ensure proper layout */
+            @page { size: A4; margin: 15mm; }
+            body { font-family: Arial, sans-serif; }
+            /* Hide the non-printable container if any external styles carry over */
+            .receiptContainer { display: block; }
+            .printableArea {
+                /* Ensure it takes full width for printing */
+                width: 100%;
+                box-shadow: none;
+                border: none;
+            }
+          </style>
+        </head>
+        <body>
+          ${receiptContent}
+        </body>
+      </html>
+    `;
+
+    // 5. Write content and execute print after a short delay (Crucial for image/style loading)
+    printWindow.document.write(htmlContent);
+    printWindow.document.close(); // Important for loading external resources
+
+    // Add a small delay for content to render and images/styles to load before printing
+    setTimeout(() => {
+      try {
+        printWindow.print();
+        printWindow.close();
+      } catch (e) {
+        console.error("Print failed:", e);
+      }
+    }, 300); // 300ms delay: usually safe and fast enough.
+  };
+  // --- END UPDATED PRINT HANDLER FUNCTION ---
+
+  if (loading) return <div style={{ padding: '2rem' }}>Loading Receipt...</div>; 
   if (error) return <div className="error">{error}</div>; 
   if (!transaction) return <div>Transaction not found.</div>;
 
-  // --- YEH HAI AAPKA RECEIPT JSX ---
+  // Yahan apka JSX same rahega
   return (
     <div className={styles.receiptContainer}>
       
@@ -63,6 +125,7 @@ export default function ReceiptPage() {
       </div>
 
       <div className={styles.printableArea}>
+        {/* ... Rest of your receipt content JSX ... */}
         <header className={styles.receiptHeader}>
           <h1>Payment Receipt</h1>
           <p><strong>Transaction ID:</strong> {transaction.id}</p>
