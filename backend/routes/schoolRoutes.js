@@ -1,4 +1,3 @@
-// backend/routes/schoolRoutes.js
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, authorize } = require('../middleware/authMiddleware');
@@ -9,12 +8,13 @@ const prisma = require('../config/prisma');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
-require('../config/cloudinaryConfig'); 
+require('../config/cloudinaryConfig'); // Aapka Cloudinary config
 
 // --- Multer setup ---
 const storage = multer.memoryStorage();
 const upload = multer({ 
     storage: storage,
+    // --- FIX 1: Limit ko 2MB kar diya hai ---
     limits: { fileSize: 2 * 1024 * 1024 } // 2MB limit
 });
 
@@ -66,7 +66,7 @@ router.get('/profile', [authMiddleware], async (req, res) => {
 
 /*
  * @route   GET /api/school/info
- * (FIXED: Ensure correct fields are selected)
+ * (No change)
  */
 router.get('/info', [authMiddleware], async (req, res) => {
     try {
@@ -74,30 +74,23 @@ router.get('/info', [authMiddleware], async (req, res) => {
         if (!schoolId) { 
             return res.status(400).json({ msg: 'Invalid or missing school ID.' });
         }
-        
-        // FIX 1: 'logo' field को 'logoUrl' से बदल दिया गया (आपके schema के अनुसार)
-        // FIX 2: 'session' field को 'genRegNo' से बदल दिया गया (आपके schema के अनुसार)
         const school = await prisma.school.findUnique({
             where: { id: schoolId },
             select: {
                 name: true,
                 address: true,
-                logoUrl: true, // सही field
-                genRegNo: true  // 'session' के बजाय general register number
+                logo: true, 
+                session: true
             }
         });
         if (!school) {
             return res.status(404).json({ msg: 'School information not found.' });
         }
-        
-        // FIX 3: Output objects को 'session' और 'logoChar' के लिए ठीक किया
         const schoolInfo = {
             name: school.name,
             address: school.address,
-            // logoUrl को logoChar/logo के रूप में उपयोग करें
-            logo: school.logoUrl, 
-            // school.session अब उपलब्ध नहीं है, genRegNo का उपयोग करें (या एक default session string)
-            session: school.genRegNo || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
+            logoChar: school.logo || school.name?.charAt(0) || 'S',
+            session: school.session || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
         };
         res.json(schoolInfo);
     } catch (err) {
@@ -109,7 +102,7 @@ router.get('/info', [authMiddleware], async (req, res) => {
 
 /*
  * @route   PUT /api/school/profile
- * (FIXED: Session logic हटा दिया गया)
+ * (Yeh route ab fully updated hai)
  */
 router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo')], async (req, res) => {
   console.log("[PUT /profile] Request received (multipart/form-data).");
@@ -124,27 +117,31 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
       return res.status(404).json({ msg: 'School profile not found' });
     }
 
-    // FIX 4: Request body fields (session field हटा दिया गया)
+    // --- FIX 2: 'genRegNo' ko req.body se nikaal rahe hain ---
+    // (Yeh line 128 thi, ab yeh 'genRegNo' ko bhi include karegi)
     const {
       name, name2, place, address, contactNumber, email,
-      recognitionNumber, udiseNo, genRegNo 
+      recognitionNumber, udiseNo, session, genRegNo 
     } = req.body; 
 
+    // Ab 'req.body' undefined nahi hona chahiye kyunki 'multer' isse parse kar raha hai
     if (name === undefined) {
+        // Agar 'name' undefined hai, iska matlab 'multer' ne body ko parse nahi kiya
         console.error("[PUT /profile] Error: req.body is not being populated by multer.");
         return res.status(500).json({ msg: 'Server error: Failed to parse form data.' });
     }
 
     const updateFields = {};
     if (name !== undefined) updateFields.name = name;
-    if (name2 !== undefined) updateFields.name2 = name22;
+    if (name2 !== undefined) updateFields.name2 = name2;
     if (place !== undefined) updateFields.place = place;
     if (address !== undefined) updateFields.address = address;
     if (contactNumber !== undefined) updateFields.contactNumber = contactNumber;
     if (email !== undefined) updateFields.email = email;
     if (recognitionNumber !== undefined) updateFields.recognitionNumber = recognitionNumber;
     if (udiseNo !== undefined) updateFields.udiseNo = udiseNo;
-    // FIX 5: genRegNo field update
+    if (session !== undefined) updateFields.session = session;
+    // --- FIX 2: 'genRegNo' ko update query mein add kar rahe hain ---
     if (genRegNo !== undefined) updateFields.genRegNo = genRegNo;
 
 
@@ -156,8 +153,11 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
         console.log(`[PUT /profile] Upload successful. URL: ${imageUrl}`);
       } catch (uploadError) {
         console.error("[PUT /profile] Cloudinary upload failed:", uploadError);
+        // Hum fail hone par bhi profile update jaari rakhenge, logo ke bina
       }
-    } 
+    } else {
+      console.log("[PUT /profile] No new logo file detected.");
+    }
 
     const updatedSchool = await prisma.school.update({
       where: { id: schoolId },
@@ -167,6 +167,13 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
     if (req.io) {
        req.io.emit('school_profile_updated', updatedSchool);
     }
+
+    // Naye token ki zaroorat nahi hai jab tak hum 'name' context mein update na karein
+    // (Lekin humne 'name' update kiya hai, isliye token bhejte hain)
+    // NOTE: Aapko frontend par new token handle karna hoga (jo aapka code pehle se kar raha hai)
+    
+    // --- Yahan hum naya token generate kar sakte hain agar zaroori ho ---
+    // (Abhi ke liye, hum sirf profile update kar rahe hain)
     
     res.json({ msg: 'School profile updated successfully', school: updatedSchool });
 
@@ -181,6 +188,7 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
         return res.status(400).json({ message: `Error: This UDISE No. is already in use.` });
     }
     
+    // --- FIX 1: Error message ko 2MB ke hisaab se update kiya ---
     if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
          return res.status(413).json({ message: 'File is too large. Max 2MB allowed.' });
     }
