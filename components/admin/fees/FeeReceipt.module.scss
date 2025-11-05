@@ -136,12 +136,12 @@
 
 /*
   ======================================================================
-  === YEH HAI SIDE-BY-SIDE LAYOUT KA FIX ===
+  === YEH HAI SIDE-BY-SIDE LAYOUT KA FIX (Using Flexbox) ===
   ======================================================================
 */
 .mainContentWrapper {
-    display: grid; /* Grid ka istemaal karein */
-    grid-template-columns: 1.5fr 1fr; /* Left (1.5) aur Right (1) column */
+    display: flex; /* Flexbox ka istemaal */
+    flex-direction: row; /* Horizontal line mein */
     align-items: flex-start; /* Dono top se align honge */
     gap: 25px; /* Dono columns ke beech gap */
     margin-top: 15px;
@@ -149,12 +149,12 @@
     border-bottom: 1px solid #f0f0f0;
 }
 .mainContentLeft {
-    /* Yeh .itemsSection par lagega (JSX mein hai) */
-    width: 100%;
+    flex: 1.5; /* Fee table ko zyada jagah (60%) */
+    min-width: 0; /* Flexbox shrink fix */
 }
 .mainContentRight {
-    /* Yeh .paymentBlock par lagega (JSX mein hai) */
-    width: 100%;
+    flex: 1; /* Payment details ko kam jagah (40%) */
+    min-width: 0; /* Flexbox shrink fix */
 }
 
 /* Payment Block (ab right column hai) */
