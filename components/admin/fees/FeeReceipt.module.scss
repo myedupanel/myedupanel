@@ -1,10 +1,9 @@
-/* File: FeeReceipt.module.scss (50/50 Split Fix) */
+/* File: FeeReceipt.module.scss (Professional 50/50 Split) */
 
 /* Base Styles and Fonts */
 .receiptContainer {
   font-family: 'Helvetica Neue', Arial, sans-serif;
   color: #333;
-  /* Screen display */
   background-color: #f4f7f6;
   max-height: 85vh; 
   overflow-y: auto;
@@ -32,145 +31,202 @@
     cursor: pointer;
     background-color: #007bff;
     color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 }
 
-/* --- PRINTABLE RECEIPT AREA --- */
+/* --- PRINTABLE RECEIPT AREA (Landscape Layout) --- */
 .receiptContent {
-  width: 210mm; 
+  width: 297mm; /* A4 Landscape width */
+  height: 210mm; /* A4 Landscape height */
   margin: 16px auto; 
-  padding: 25px; 
   background-color: #ffffff; 
   box-sizing: border-box;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
   line-height: 1.4; 
+  display: flex; /* Do hisson mein baantne ke liye */
+  position: relative; /* Separator ke liye */
+  overflow: hidden; /* Content overflow hide karne ke liye */
 }
 
-/* 1. HEADER (No Change) */
+.receiptHalf {
+  flex: 1; /* Har hissa adhi jagah lega */
+  padding: 20px; /* Andar ki padding */
+  box-sizing: border-box;
+  font-size: 0.85rem; /* Overall font size chhota kiya */
+  display: flex; /* Inner content ko flex dega */
+  flex-direction: column; /* Inner content ko column mein rakhega */
+  justify-content: space-between; /* Footer bottom par jayega */
+  position: relative;
+
+  .copyLabel {
+      position: absolute;
+      top: 50%;
+      left: 0; /* Left side se bahar ki taraf */
+      transform: translateY(-50%) rotate(-90deg); /* Text ko rotate karega */
+      transform-origin: left center;
+      white-space: nowrap;
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: #999;
+      opacity: 0.7;
+      letter-spacing: 1px;
+  }
+  &.schoolCopy .copyLabel {
+      right: 0; /* Right side se bahar ki taraf */
+      left: auto;
+      transform: translateY(-50%) rotate(90deg); /* Text ko rotate karega */
+      transform-origin: right center;
+  }
+}
+
+.separator {
+    width: 1px;
+    background-color: #ccc;
+    position: absolute;
+    top: 10mm; /* Header ke baad se shuru */
+    bottom: 10mm; /* Footer ke upar tak */
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 1px dashed #ccc; /* Cutting line */
+    z-index: 5;
+}
+
+
+/* 1. HEADER */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  border-bottom: 3px double #333; 
-  padding-bottom: 10px; 
-  margin-bottom: 15px;
+  border-bottom: 2px solid #333; /* Double se single kiya */
+  padding-bottom: 8px; /* Thoda kam kiya */
+  margin-bottom: 10px; /* Thoda kam kiya */
   
   .schoolDetails {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    h1 { font-size: 1.6rem; font-weight: 800; color: #000; margin: 0; }
-    p { display: none; }
-    .logo { max-width: 65px; max-height: 65px; margin: 0;}
+    flex-direction: column; /* Naam aur address column mein aayenge */
+    align-items: flex-start;
+    gap: 2px;
+    h1 { font-size: 1.3rem; font-weight: 800; color: #000; margin: 0; line-height: 1.2;}
+    .schoolAddress, .schoolContact, .schoolSession {
+        font-size: 0.75rem; /* Font size kam kiya */
+        margin: 0;
+        line-height: 1.1;
+    }
+    .logo { max-width: 50px; max-height: 50px; margin-bottom: 5px;}
   }
   .metaHeader {
-    text-align: left;
-    font-size: 0.85rem;
+    text-align: right; /* Right align kiya */
+    font-size: 0.75rem; /* Font size kam kiya */
     margin-top: 5px;
-    padding-left: 20px;
-    border-left: 1px solid #eee;
+    padding-left: 10px;
+    /* Border remove kiya, side by side achha nahi lagega */
+    border-left: none; 
     p {
         margin: 1px 0;
-        line-height: 1.3;
+        line-height: 1.2;
         white-space: nowrap;
-        strong { font-weight: 600; color: #000; display: inline-block; min-width: 60px; } 
+        strong { font-weight: 600; color: #000; display: inline-block; min-width: 50px; } 
     }
   }
 }
 
-/* 2. Central Title (No Change) */
+/* 2. Central Title */
 .titleMeta {
   text-align: center;
   border-bottom: 1px solid #ddd;
-  padding-bottom: 8px;
-  margin-bottom: 12px; 
-  h2 { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; color: #111; }
+  padding-bottom: 5px; /* Thoda kam kiya */
+  margin-bottom: 10px; /* Thoda kam kiya */
+  h2 { font-size: 1rem; font-weight: 800; text-transform: uppercase; color: #111; margin: 0; }
 }
 
-/* 3. Student Details (3-column grid, Roll No removed) */
+/* 3. Student Details */
 .detailsSection {
-  margin-bottom: 20px; 
+  margin-bottom: 15px; /* Thoda kam kiya */
   
   h3 {
-    font-size: 0.95rem; 
+    font-size: 0.8rem; /* Thoda kam kiya */
     font-weight: 700;
     color: #444; 
-    margin-bottom: 5px; 
+    margin-bottom: 3px; 
     text-transform: uppercase;
     border-bottom: 1px solid #eee;
-    padding-bottom: 3px;
+    padding-bottom: 2px;
   }
   .grid {
     display: grid;
-    /* 3 columns: Name (zyada space), ID, Class */
-    grid-template-columns: 1.5fr 1fr 1fr;
-    gap: 6px 20px; 
-    font-size: 0.88rem; 
+    grid-template-columns: 1.2fr 1fr 1fr; /* Name ko thoda zyada space */
+    gap: 4px 10px; /* Gap kam kiya */
+    font-size: 0.8rem; /* Font size kam kiya */
     p { margin: 0; strong {font-weight: 600; color: #000;} }
   }
 }
 
-/* 4. Fee Table (No major change) */
+/* 4. Main Content Wrapper (Left: Table, Right: Payment) */
+.mainContentWrapper {
+    display: flex; 
+    flex-direction: column; /* Ab yeh ek ke neeche ek aayenge */
+    gap: 15px; /* Gap kam kiya */
+    margin-top: 10px;
+    padding-bottom: 8px; /* Thoda kam kiya */
+    border-bottom: 1px solid #f0f0f0;
+}
+.mainContentLeft {
+    flex: none; /* Ab flex use nahi hoga, poori width lega */
+    width: 100%;
+}
+.mainContentRight {
+    flex: none; /* Ab flex use nahi hoga, poori width lega */
+    width: 100%;
+}
+
+/* Fee Table */
 .itemsSection {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  h3 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #444;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 2px;
+  }
 }
 .itemsTable {
-  margin-top: 10px; 
-  font-size: 0.9rem;
-  width: 100%; /* Ensure table takes full width of its column */
+  margin-top: 8px; /* Thoda kam kiya */
+  font-size: 0.8rem; /* Thoda kam kiya */
+  width: 100%; 
+  border-collapse: collapse; /* Collapsing borders */
 
   thead tr { background-color: #f0f0f0; } 
-  th { padding: 6px 10px; font-weight: 700; } 
-  td { padding: 4px 10px; } 
+  th, td { padding: 4px 8px; } /* Padding kam kiya */
+  th { font-weight: 700; text-align: left; } /* Default text-align set */
   
   .grandTotal {
     background-color: #e6f3ff; 
-    font-size: 0.95rem; 
+    font-size: 0.85rem; 
     td { font-weight: 700; }
   }
   
-  /* Ye styles table ke andar text alignment ke liye hain */
   .calcRow td:nth-child(2) { text-align: right; font-weight: 600; }
   .amountCol { text-align: right; }
 }
 
-/*
-  ======================================================================
-  === YEH HAI SIDE-BY-SIDE LAYOUT KA 50/50 FIX ===
-  ======================================================================
-*/
-.mainContentWrapper {
-    display: flex; /* Flexbox ka istemaal */
-    flex-direction: row; /* Horizontal line mein */
-    align-items: flex-start; /* Dono top se align honge */
-    gap: 25px; /* Dono columns ke beech gap */
-    margin-top: 15px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0f0f0;
-}
-.mainContentLeft {
-    /* === YAHAN CHANGE KIYA GAYA HAI === */
-    flex: 1; /* Pehle 1.5 tha, ab 1 hai (50%) */
-    min-width: 0; /* Flexbox shrink fix */
-}
-.mainContentRight {
-    /* === YAHAN CHANGE KIYA GAYA HAI === */
-    flex: 1; /* Pehle bhi 1 tha (50%) */
-    min-width: 0; /* Flexbox shrink fix */
-}
-
-/* Payment Block (ab right column hai) */
+/* Payment Block */
 .paymentBlock {
-    h3 { font-size: 0.95rem; margin-bottom: 5px; text-transform: uppercase; }
+    h3 { font-size: 0.8rem; margin-bottom: 3px; text-transform: uppercase; }
     .grid { 
-        gap: 4px 10px; 
+        gap: 3px 10px; /* Gap kam kiya */
         display: grid;
         grid-template-columns: 1fr;
-        font-size: 0.88rem; 
+        font-size: 0.8rem; /* Font size kam kiya */
         p { margin: 0; strong {font-weight: 600; color: #000;} }
     }
     .paidAmount {
-        font-size: 1rem;
+        font-size: 0.9rem;
         color: #007bff;
     }
     .notes {
@@ -178,12 +234,12 @@
     }
 }
 
-/* 6. BALANCE LAYOUT (Centered) */
+/* 5. BALANCE LAYOUT */
 .balanceWrapper {
     display: flex;
-    justify-content: center; /* Poore block ko center mein rakhega */
+    justify-content: center; 
     align-items: center;
-    margin-top: 20px;
+    margin-top: 15px; /* Thoda kam kiya */
 }
 
 .balanceBlock {
@@ -191,39 +247,38 @@
 }
 
 .balanceSection {
-    /* Teeno items (Label, Amount, Status) ko ek line mein layega */
     display: flex; 
-    align-items: center; /* Vertically center karega */
-    gap: 20px; /* Har item ke beech gap */
+    align-items: center; 
+    gap: 15px; /* Gap kam kiya */
     
-    background-color: #ffffff; /* Print safety */
+    background-color: #ffffff; 
     border: 1px solid #ddd;
-    padding: 10px 20px; /* Thodi padding */
-    font-size: 0.95rem;
+    padding: 8px 15px; /* Padding kam kiya */
+    font-size: 0.85rem;
 
-    p { margin: 0; } /* Extra margins hataye */
+    p { margin: 0; } 
     strong { font-weight: 700; }
 }
 
 .balanceAmount {
   font-weight: 700;
-  font-size: 1.05rem; /* Thoda bada */
-  &[data-balance-zero="true"] { color: #28a745; } /* Green if zero */
-  &:not([data-balance-zero="true"]) { color: #dc3545; } /* Red if not zero */
+  font-size: 0.95rem; /* Thoda kam kiya */
+  &[data-balance-zero="true"] { color: #28a745; } 
+  &:not([data-balance-zero="true"]) { color: #dc3545; } 
 }
 
-/* Status Badges (PAID/PARTIAL) */
+/* Status Badges */
 .paidStamp {
-  font-size: 1.1rem;
+  font-size: 1rem; /* Thoda kam kiya */
   font-weight: 800;
   color: #28a745;
   text-transform: uppercase;
 }
 .statusBadge {
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  padding: 2px 6px; /* Padding kam kiya */
+  border-radius: 3px; /* Radius kam kiya */
+  font-size: 0.7rem; /* Thoda kam kiya */
   color: #fff;
   text-transform: uppercase;
   
@@ -233,24 +288,24 @@
 }
 
 
-/* 7. Footer & Signatures (Signature Space Fix) */
+/* 6. Footer & Signatures */
 .footer {
-  margin-top: 30px; 
-  padding-top: 10px; 
+  margin-top: 25px; /* Thoda kam kiya */
+  padding-top: 8px; /* Thoda kam kiya */
   border-top: 1px solid #ddd;
-  font-size: 0.85rem;
+  font-size: 0.75rem; /* Thoda kam kiya */
   font-weight: 600; 
   background-color: #ffffff;
   color: #000; 
+  flex-shrink: 0; /* Footer ko shrink nahi hone dega */
 
   .receivedBy {
-    margin-bottom: 30px; /* Line ke upar space */
+    margin-bottom: 25px; /* Thoda kam kiya */
   }
   
   .signatureArea {
     display: flex;
     justify-content: space-between;
-    /* margin-top: 30px; (redundant) */
   }
   
   .signatureBox {
@@ -267,39 +322,125 @@
         width: 35%; 
         text-align: center; 
         font-weight: 600;
-        /* === YAHAN CHANGE KIYA GAYA HAI === */
-        margin: 15px 0 0 0; /* 5px se 15px kiya, labels ko neeche khiskaya */
+        margin: 10px 0 0 0; /* Thoda kam kiya */
     }
   }
 
   .footerNote { 
     text-align: center; 
-    margin-top: 15px; 
+    margin-top: 10px; /* Thoda kam kiya */
     font-style: normal;
     font-weight: 600; 
     color: #000; 
     background-color: #ffffff;
-    padding: 10px 0; 
+    padding: 5px 0; /* Padding kam kiya */
   }
 }
 
 /* --- FINAL PRINT MEDIA QUERY --- */
 @media print {
-    /* 1. Action buttons को hide करें */
     .actions { display: none !important; }
     
-    /* 2. Content Area को print ke liye optimize करें */
-    .receiptContent {
-        padding: 10mm !important; 
-        width: 210mm !important; 
-        box-shadow: none !important;
-        border: none !important;
-        height: auto !important;
-        background-color: #ffffff !important; 
+    body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
     }
 
-    /* 3. Page Break Avoidance */
-    .detailsSection, .itemsSection, .mainContentWrapper, .balanceWrapper, .footer, .itemsTable {
+    .receiptContent {
+        padding: 0 !important; /* No padding on the main container */
+        width: 297mm !important; /* A4 Landscape width */
+        height: 210mm !important; /* A4 Landscape height */
+        box-shadow: none !important;
+        border: none !important;
+        background-color: #ffffff !important; 
+        overflow: hidden !important; /* Make sure nothing overflows */
+    }
+
+    .receiptHalf {
+        padding: 10mm; /* Har copy ki andar ki padding */
+        font-size: 0.75rem !important; /* Print mein font size aur kam kiya */
+        justify-content: space-between; /* Footer ko bottom mein rakhega */
+    }
+
+    /* School Copy ko ulta print karein */
+    .schoolCopy {
+        -webkit-transform: rotate(180deg);
+        -moz-transform: rotate(180deg);
+        -o-transform: rotate(180deg);
+        -ms-transform: rotate(180deg);
+        transform: rotate(180deg);
+        
+        /* Rotation ke baad content ko sahi se adjust karne ke liye */
+        .schoolCopyContent {
+             display: flex;
+             flex-direction: column;
+             justify-content: space-between;
+             height: 100%; /* Ensure content takes full height after rotation */
+        }
+
+        /* Upar ke text ko sahi direction mein laane ke liye */
+        h1, h2, h3, p, strong, th, td, span, a, div {
+             -webkit-transform: rotate(180deg);
+             -moz-transform: rotate(180deg);
+             -o-transform: rotate(180deg);
+             -ms-transform: rotate(180deg);
+             transform: rotate(180deg);
+             display: block; /* Important for rotation */
+             position: relative;
+             /* Rotation ke baad positioning ko handle karein */
+             margin: 0 auto;
+             width: fit-content;
+             line-height: 1.2 !important; /* Line height fix */
+        }
+        .header .schoolDetails { align-items: flex-end !important; } /* School details right align */
+        .header .schoolDetails p { text-align: right; } /* Text align right */
+        .header .schoolDetails h1 { text-align: right; } /* Text align right */
+        .header .metaHeader { text-align: left !important; } /* Meta header left align */
+        .header .metaHeader p { text-align: left; } /* Text align left */
+        .detailsSection .grid { 
+          grid-template-columns: 1fr 1fr 1.2fr !important; /* Grid order reverse */
+          p:nth-child(1) { order: 3; } /* Name ko last mein */
+          p:nth-child(2) { order: 2; } /* ID ko beech mein */
+          p:nth-child(3) { order: 1; } /* Class ko first mein */
+        }
+        .detailsSection .grid p strong { float: right; } /* Labels right align */
+        .itemsTable thead th, .itemsTable tbody td { text-align: right !important; }
+        .itemsTable th:nth-child(2) { text-align: right !important; } /* Description right align */
+        .itemsTable td:nth-child(2) { text-align: right !important; } /* Description right align */
+        .itemsTable .calcRow td:nth-child(2) { text-align: left !important; } /* Subtotal text left align */
+        .mainContentWrapper { 
+          flex-direction: column-reverse !important; /* Order reverse kiya */
+          text-align: right; /* Content ko right align */
+        }
+        .mainContentRight .grid p strong { float: right; } /* Payment details labels right align */
+        .balanceWrapper { justify-content: center !important; } /* Center align */
+        .balanceSection { flex-direction: row-reverse !important; } /* Balance order reverse */
+        .balanceSection p strong { float: right; } /* Balance label right align */
+        .paidStamp { -webkit-transform: rotate(180deg); transform: rotate(180deg); }
+        .statusBadge { -webkit-transform: rotate(180deg); transform: rotate(180deg); }
+        .footer .receivedBy { text-align: right; }
+        .footer .signatureArea { flex-direction: row-reverse; } /* Signature boxes order reverse */
+        .footer .signatureLabels { flex-direction: row-reverse; } /* Signature labels order reverse */
+        .footer .cashierLabel { order: 2; } /* Accountant / Cashier last */
+        .footer .signatoryLabel { order: 1; } /* Authorised Signatory first */
+        .footer .footerNote { text-align: center; } /* Note center align */
+        .copyLabel {
+            transform: translateY(-50%) rotate(-90deg) !important; /* School copy label ko bhi ulta karein */
+            left: 0 !important;
+            right: auto !important;
+            transform-origin: left center !important;
+        }
+    }
+
+    .separator {
+      height: calc(100% - 20mm) !important; /* Separator height fix */
+      top: 10mm !important;
+      bottom: 10mm !important;
+    }
+    
+    /* Page Break Avoidance */
+    section, .mainContentWrapper, .balanceWrapper, .footer, .itemsTable {
         page-break-inside: avoid !important;
         page-break-after: auto;
     }
@@ -307,17 +448,17 @@
         page-break-before: avoid !important;
     }
     
-    /* 4. ✅ CRUCIAL FIX: Background Colors को Forcefully White करें */
+    /* CRUCIAL FIX: Background Colors को Forcefully White करें */
     .receiptContainer,
     .receiptContent, 
     .footer,        
     .footerNote,
     .balanceSection, 
     .itemsTable thead tr,
-    .statusBadge { /* Status badge ko bhi fix kiya */
+    .statusBadge { 
         background-color: #ffffff !important;
         color: #000 !important; 
-        border: 1px solid #ddd; /* Print mein border add kiya */
+        border: none !important; /* Print mein borders hata di */
         -webkit-print-color-adjust: exact !important; 
         print-color-adjust: exact !important;
     }
@@ -325,7 +466,7 @@
     .balanceAmount:not([data-balance-zero="true"]) { color: #000 !important; }
     .paidStamp { color: #000 !important; }
     
-    /* 5. Footer labels को center align रखें */
+    /* Footer labels को center align रखें */
     .signatureLabels .cashierLabel, .signatoryLabel {
         text-align: center !important;
     }
