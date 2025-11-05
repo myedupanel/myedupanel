@@ -1,4 +1,3 @@
-// app/admin/dashboard/page.tsx
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
@@ -93,9 +92,7 @@ const AdminDashboardPage = () => {
   const { user, token } = useAuth() as { user: User | null; token: string | null; login: (token: string) => Promise<any> };
   const [dashboardData, setDashboardData] = useState<FormattedDashboardData | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
-  // FIX: isDataLoaded state हटा दिया गया
-  // const [isDataLoaded, setIsDataLoaded] = useState(false); 
-
+  
   // --- fetchDashboardData (No Change in core logic) ---
   const fetchDashboardData = useCallback(async () => {
     if (!token) {
@@ -104,7 +101,6 @@ const AdminDashboardPage = () => {
     }
     console.log("fetchDashboardData: Fetching data...");
     try {
-      // FIX: Session param हटा दिया गया
       const response = await api.get<BackendDashboardData>('/admin/dashboard-data');
       const data = response.data;
       console.log("fetchDashboardData: Data received from backend:", data);
@@ -164,7 +160,6 @@ const AdminDashboardPage = () => {
 
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
-      // On error, set empty data to prevent crashes, but keep loading state true
       setDashboardData({ stats: [], monthlyAdmissions: [], classCounts: [], recentPayments: [] });
     }
   }, [token]);
@@ -177,7 +172,7 @@ const AdminDashboardPage = () => {
         id: user.id,
         email: user.email,
         adminName: user.name,
-        schoolName: user.schoolName || 'Your School',
+        schoolName: user.schoolName || 'Your School', // Yeh fallback (Trust Name) hai
         profileImageUrl: ''
       };
       const savedProfile = localStorage.getItem(`adminProfile_${user.id}`);
@@ -194,12 +189,44 @@ const AdminDashboardPage = () => {
     } else { setAdminProfile(null); }
   }, [user]);
 
-  // --- useEffect (Original Logic) ---
+  // --- useEffect (UPDATED) ---
   useEffect(() => {
     if (token) {
         fetchDashboardData();
     }
     loadProfileData(); 
+
+    // --- YAHAN FIX KIYA GAYA HAI ---
+    // School profile ko fetch karke Header ke title ko update kiya
+    const fetchSchoolProfileForHeader = async () => {
+      try {
+        const res = await api.get('/api/school/profile');
+        if (res.data && res.data.name2) {
+          // Admin profile state ko 'name2' (Certificate Name) se update kiya
+          setAdminProfile(prevProfile => {
+            if (prevProfile) {
+              return { ...prevProfile, schoolName: res.data.name2 };
+            }
+            // Agar profile state abhi set nahi hua hai, toh use user data se banaya
+            return {
+              id: user!.id,
+              email: user!.email,
+              adminName: user!.name,
+              schoolName: res.data.name2, // The correct name
+              profileImageUrl: res.data.logoUrl || ''
+            };
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch school profile for header:", error);
+        // Agar yeh fail hota hai, toh token waala (Trust Name) hi dikhega
+      }
+    };
+
+    if (user) { // User load hone ke baad hi profile fetch karein
+      fetchSchoolProfileForHeader();
+    }
+    // --- FIX ENDS HERE ---
 
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "https://myedupanel.onrender.com";
     const socket = io(socketUrl);
@@ -212,7 +239,6 @@ const AdminDashboardPage = () => {
       console.log('Socket.IO: Update event received! Refreshing dashboard data...');
       fetchDashboardData();
     });
-    // FIX: fetchDashboardData में Promise.catch को हटा दिया गया है, इसलिए socket logic simple रखा गया है
     socket.on('connect_error', (err) => console.error('Socket.IO: Connection Error!', err.message, err.cause));
     window.addEventListener('focus', loadProfileData);
 
@@ -221,16 +247,14 @@ const AdminDashboardPage = () => {
       socket.disconnect();
       console.log('Socket.IO: Disconnected');
     };
-  }, [fetchDashboardData, loadProfileData, token]);
+  }, [fetchDashboardData, loadProfileData, token, user]); // 'user' ko dependency mein add kiya
 
-  // --- Loading state (Original Check) ---
-  // यह तब तक Loading... दिखाएगा जब तक adminProfile और dashboardData दोनों सेट नहीं हो जाते।
+  // --- Loading state (No Change) ---
   if (!adminProfile || !dashboardData) {
-    // FIX: Empty state पर भी Loading spinner दिखाता रहेगा
     return <div className={styles.loading}>Loading Dashboard...</div>;
   }
   
-  // FIX: Error Handling/Empty State (Dashboard crash होने पर empty data दिखाता है)
+  // --- Error Handling/Empty State (No Change) ---
   if (dashboardData.stats.length === 0) {
       return (
           <div className={styles.dashboardContainer}>
@@ -244,7 +268,7 @@ const AdminDashboardPage = () => {
   }
 
 
-  // --- JSX (UPDATED for Dynamic Title) ---
+  // --- JSX (No Change) ---
   return (
     <div className={styles.dashboardContainer}>
       <Header admin={adminProfile} />
