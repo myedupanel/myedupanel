@@ -231,26 +231,21 @@
     margin-top: 5px !important; /* 10px se 5px kiya */
   }
 
-.certHeader { margin-bottom: 5px !important; }
-  .titleRow { 
-    margin-top: 4px !important; 
-    padding: 3px 0 !important; /* Print mein title box ki padding kam ki */
+  /* Neeche waale text ka margin kam kiya */
+  .certText {
+    margin-top: 10px !important; /* 15px se 10px kiya */
+    font-size: 10pt !important; /* Text thoda chhota kiya */
   }
-  .certificateGrid { margin-top: 0 !important; } /* Top margin remove kiya */
-  
-  /* --- YAHAN FIX KIYA (Thoda aur space kam kiya) --- */
-  .certText { 
-    margin-top: 8px !important; 
-    line-height: 1 !important; /* Line height kam ki */
+
+  /* Footer ka poora space kam kiya */
+  .certFooterWrapper {
+    margin-top: 10px !important; /* 'auto' se 10px kiya */
+    padding-top: 10px !important; /* 20px se 10px kiya */
   }
-  .certFooterWrapper { 
-    padding-top: 5px !important; /* 10px se 8px kiya */
-    margin-top: 5px !important; /* 10px se 8px kiya */
+  .datePlace {
+    margin-bottom: 15px !important; /* 25px se 15px kiya */
   }
-  .datePlace { 
-    margin-bottom: 8px !important; /* 15px se 12px kiya */
-  }
-  .sigBox { 
-    padding-top: 9px !important; /* 20px se 15px kiya */
+  .sigBox {
+    padding-top: 20px !important; /* 30px se 20px kiya */
   }
 }
