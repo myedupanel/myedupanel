@@ -2,12 +2,13 @@
 .receiptContainer {
   font-family: 'Helvetica Neue', Arial, sans-serif;
   color: #333;
+  /* Screen display */
   background-color: #f4f7f6;
   max-height: 85vh; 
   overflow-y: auto;
 }
 
-/* Action buttons (Koi badlaav nahi) */
+/* Action buttons (No Change) */
 .actions {
   display: flex;
   justify-content: flex-end; 
@@ -32,48 +33,48 @@
   }
 }
 
-/* --- PRINTABLE RECEIPT AREA (POORA BADLA GAYA) --- */
+/* ======================================================================
+=== YEH HAI NAYA A4 SHEET LAYOUT ===
+======================================================================
+*/
 
-/* Yeh A4 page hai */
-.a4Page {
-  width: 210mm; 
-  min-height: 297mm; /* A4 Height */
+/* Yeh A4 Page hai jo print hoga */
+.receiptSheetA4 {
+  width: 210mm; /* A4 width */
+  height: 297mm; /* A4 height */
   margin: 16px auto; 
   background-color: #ffffff; 
-  box-sizing: border-box;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  
-  /* Dono hisson ko stack karne ke liye */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Ensure it holds the A4 shape */
 }
 
-/* Yeh page ka ek hissa hai (ek receipt) */
-.receiptHalf {
-  /* A4 height (297mm) / 2 = 148.5mm */
-  flex-basis: 148.5mm; 
-  flex-shrink: 0;
-  flex-grow: 0;
-  padding: 20px 25px; /* Padding inside the half */
-  box-sizing: border-box;
-  position: relative; /* copyType text ke liye */
-  
-  /* Har receipt apne andar content ko stack karega */
-  display: flex;
-  flex-direction: column;
-  background-color: #ffffff; /* Print safety */
-}
-
-/* Dono hisson ke beech ki line */
+/* Dono copies ke beech ka separator */
 .separator {
-  border-bottom: 2px dashed #999;
-  margin: 0 25px; /* Padding se match karega */
+  border: none;
+  border-top: 2px dotted #aaa;
+  width: 95%;
+  margin: 0 auto;
+  padding: 0;
 }
 
-/* === STYLES FOR *ONE* RECEIPT (within .receiptHalf) === */
-/* Yeh naye styles hain jo image se match karte hain */
+/* Yeh ek receipt ki copy hai (School/Student) */
+.receiptCopy {
+  /* Dono copies ko barabar height dega */
+  flex: 1; 
+  min-height: 0; /* Flexbox fix */
+  padding: 15px 25px; 
+  background-color: #ffffff; 
+  box-sizing: border-box;
+  line-height: 1.4; 
+  display: flex;
+  flex-direction: column; /* Content top-to-bottom */
+}
 
-/* 1. HEADER (Image ke jaisa) */
+/* --- (A-la-carte styles for receipt content) --- */
+
+/* 1. HEADER (Blueprint ke jaisa) */
 .header {
   display: flex;
   justify-content: space-between;
@@ -81,239 +82,278 @@
   border-bottom: 3px double #333; 
   padding-bottom: 10px; 
   margin-bottom: 10px;
-
+  
   .schoolDetails {
     display: flex;
     align-items: center;
     gap: 10px;
-    h1 { font-size: 1.4rem; font-weight: 700; color: #000; margin: 0; }
-    .logo { max-width: 50px; max-height: 50px; }
+    h1 { font-size: 1.5rem; font-weight: 800; color: #000; margin: 0 0 2px 0; }
+    p { font-size: 0.85rem; margin: 0; } /* Address added */
+    .logo { max-width: 60px; max-height: 60px; margin: 0;}
   }
-  
-  .copyType {
-    position: absolute;
-    top: 25px; /* Thoda neeche */
-    left: 45%; /* Thoda left */
-    font-size: 1rem;
-    font-weight: 600;
-    color: #555;
-    text-transform: uppercase;
-  }
-  
   .metaHeader {
     text-align: left;
-    font-size: 0.8rem;
-    padding-left: 10px;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    padding-left: 15px;
     border-left: 1px solid #eee;
     p {
-      margin: 1px 0;
-      white-space: nowrap;
-      strong { font-weight: 600; } 
+        margin: 1px 0;
+        line-height: 1.3;
+        white-space: nowrap;
+        strong { font-weight: 600; color: #000; display: inline-block; min-width: 60px; } 
     }
   }
 }
 
-/* 2. Central Title (Image ke jaisa) */
+/* 2. Central Title (Blueprint ke jaisa) */
 .titleMeta {
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
   margin-bottom: 15px; 
+  text-align: center;
+
   h2 { 
     font-size: 1.2rem; 
     font-weight: 800; 
+    text-transform: uppercase; 
     color: #111;
-    display: inline-block;
-    padding: 0 10px;
-    position: relative;
-    /* Image jaisi lines */
-    &::before, &::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 50px;
-      height: 2px;
-      background-color: #555;
-    }
-    &::before { right: 100%; margin-right: 10px; }
-    &::after { left: 100%; margin-left: 10px; }
+    margin: 0;
+    flex: 1; /* Center mein rakhega */
+  }
+
+  .copyType {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #555;
+  }
+  .scissorLine {
+    font-size: 1.2rem;
+    color: #aaa;
   }
 }
 
-/* Common Section Heading */
-.sectionHeading {
-  font-size: 0.9rem; 
-  font-weight: 700;
-  color: #000; 
-  margin: 0 0 8px 0; 
-  text-transform: uppercase;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 4px;
-}
+/* 3. Student Details (REMOVED) */
+/* .detailsSection { ... } */
 
-/* 3. Main Content Wrapper (Left/Right Split) */
-.mainContentWrapper {
-  display: flex; 
-  flex-direction: row; 
-  gap: 20px; 
-  flex-grow: 1; /* Yeh footer ko bottom mein push karega */
-  
-  .mainContentLeft {
-    flex: 1.5; /* 60% Width */
-    min-width: 0;
-  }
-  .mainContentRight {
-    flex: 1; /* 40% Width */
-    min-width: 0;
-  }
-}
+/* 4. Main 50/50 Split (REMOVED) */
+/* .mainContentWrapper { ... } */
 
-/* Student Info Grid (Left column mein) */
-.studentGrid {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr; /* 2 columns */
-  gap: 6px 15px; 
-  font-size: 0.85rem; 
-  margin-bottom: 15px; /* Fee table se pehle space */
-  p { margin: 0; strong {font-weight: 600; color: #000;} }
-}
 
-/* Fee Table */
+/* 5. Fee Table (NEW LAYOUT) */
+.itemsSection {
+  margin-bottom: 12px;
+}
 .itemsTable {
-  font-size: 0.85rem;
+  margin-top: 5px; 
+  font-size: 0.9rem;
   width: 100%;
-  border-collapse: collapse;
 
   thead tr { background-color: #f0f0f0; } 
-  th { padding: 6px 8px; font-weight: 700; text-align: left; } 
-  td { padding: 4px 8px; border-bottom: 1px solid #f0f0f0; } 
+  th { padding: 6px 10px; font-weight: 700; text-align: left; } 
+  td { padding: 4px 10px; vertical-align: top; } 
+
+  .studentNameRow td {
+    font-weight: 600;
+    color: #000;
+  }
   
   .grandTotal {
-    background-color: #f0f0f0; 
-    font-size: 0.9rem; 
-    td { font-weight: 700; border-bottom: none; }
+    background-color: #e6f3ff; 
+    font-size: 0.95rem; 
+    td { font-weight: 700; }
   }
-  .subtotal td { border-bottom: 1px solid #ddd; }
-  .calcRow td { border-bottom: none; }
-  .calcRow td:nth-child(2) { text-align: right; font-weight: 600; }
+  
+  /* Calculation rows alignment */
+  .calcRow td:nth-child(3) { text-align: right; font-weight: 600; }
   .amountCol { text-align: right; }
 }
 
-/* Payment Details (Right column mein) */
-.mainContentRight .grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px; 
-  font-size: 0.85rem; 
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  border: 1px solid #eee;
-  
-  p { margin: 0; strong {font-weight: 600; color: #000;} }
-  .paidAmount {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #007bff;
-  }
-  .notes { font-style: italic; }
-}
-        
-/* 4. Footer (Naya 3-part layout) */
-.footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end; /* Sabko neeche align karega */
-  margin-top: 20px; 
-  padding-top: 10px; 
-  border-top: 1px solid #ddd;
-  font-size: 0.8rem;
-  
-  .footerReceivedBy {
-    flex: 1;
-    p { margin: 0; font-weight: 600; }
-  }
-  
-  .footerBalance {
-    flex: 1;
-    text-align: center;
-    p { margin: 0 0 5px 0; font-weight: 600; }
-    .balanceAmount {
-      font-weight: 700;
-      font-size: 1rem; 
-      &[data-balance-zero="true"] { color: #28a745; }
-      &:not([data-balance-zero="true"]) { color: #dc3545; }
+/* 6. Payment Block (Ab 50/50 split mein nahi hai) */
+.paymentBlock {
+    margin-top: 10px;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 10px;
+
+    .grid { 
+        gap: 4px 20px; 
+        display: grid;
+        /* Columns: Paid, Mode, Remarks */
+        grid-template-columns: 1fr 1fr 1.5fr; 
+        font-size: 0.88rem; 
+        p { margin: 0; strong {font-weight: 600; color: #000;} }
     }
-    .paidStamp {
-      font-size: 1rem;
-      font-weight: 800;
-      color: #28a745;
-      text-transform: uppercase;
+    .paidAmount {
+        font-size: 1rem;
+        color: #007bff;
     }
-    .statusBadge {
-      font-weight: 700; padding: 3px 8px; border-radius: 4px;
-      font-size: 0.75rem; color: #fff; text-transform: uppercase;
-      &.partial { background-color: #fd7e14; }
-      &.pending { background-color: #ffc107; }
-      &.failed { background-color: #dc3545; }
+    .notes {
+      font-style: italic;
     }
-  }
-  
-  .footerSignature {
-    flex: 1;
-    text-align: center;
-    .signatureLine {
-      display: block;
-      border-top: 1px solid #000;
-      margin: 0 auto 5px auto;
-      width: 80%;
-      padding-top: 25px; /* Signature ke liye space */
-    }
-    p { margin: 0; font-weight: 600; }
-  }
 }
 
-.footerNote { 
-  text-align: center; 
-  margin-top: 10px; 
-  font-size: 0.75rem;
+/* 7. BALANCE LAYOUT (Blueprint ke jaisa) */
+.balanceWrapper {
+    display: flex;
+    justify-content: flex-end; /* Right side mein rakhega */
+    align-items: center;
+    margin-top: 15px;
+}
+
+.balanceBlock {
+    text-align: left; 
+}
+
+.balanceSection {
+    display: flex; 
+    align-items: center;
+    gap: 20px; 
+    
+    background-color: #ffffff; /* Print safety */
+    border: 1px solid #ddd;
+    padding: 10px 20px; 
+    font-size: 0.95rem;
+
+    p { margin: 0; }
+    strong { font-weight: 700; }
+}
+
+.balanceAmount {
+  font-weight: 700;
+  font-size: 1.05rem; 
+  &[data-balance-zero="true"] { color: #28a745; } 
+  &:not([data-balance-zero="true"]) { color: #dc3545; } 
+}
+
+/* Status Badges (No Change) */
+.paidStamp {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #28a745;
+  text-transform: uppercase;
+}
+.statusBadge {
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #fff;
+  text-transform: uppercase;
+  
+  &.partial { background-color: #fd7e14; }
+  &.pending { background-color: #ffc107; }
+  &.failed { background-color: #dc3545; }
+}
+
+
+/* 8. Footer & Signatures (Updated) */
+.footer {
+  margin-top: auto; /* Footer ko neeche push karega */
+  padding-top: 10px; 
+  border-top: 1px solid #ddd;
+  font-size: 0.85rem;
   font-weight: 600; 
+  background-color: #ffffff;
+  color: #000; 
+
+  .receivedBy {
+    margin-bottom: 25px; /* Line ke upar space */
+  }
+  
+  .signatureArea {
+    display: flex;
+    justify-content: flex-end; /* Sirf right side par line */
+  }
+  
+  .signatureBox {
+    border-top: 1px solid #000;
+    width: 35%; 
+  }
+  
+  .signatureLabels {
+    display: flex;
+    justify-content: flex-end; /* Sirf right side par label */
+    padding: 0;
+    
+    .signatoryLabel { 
+        width: 35%; 
+        text-align: center; 
+        font-weight: 600;
+        margin: 5px 0 0 0;
+    }
+  }
+
+  .footerNote { 
+    text-align: center; 
+    margin-top: 10px; 
+    font-style: normal;
+    font-weight: 600; 
+    color: #000; 
+    background-color: #ffffff;
+    padding: 5px 0; 
+  }
 }
 
 /* --- FINAL PRINT MEDIA QUERY --- */
 @media print {
-  .actions { display: none !important; }
-  
-  .a4Page {
-    width: 100% !important;
-    min-height: auto !important;
-    margin: 0 !important; 
-    box-shadow: none !important;
-    background-color: #ffffff !important;
-  }
-  
-  .receiptHalf {
-    height: 148.5mm !important; /* A4 ka aadha */
-    padding: 10mm !important; 
-    box-sizing: border-box !important;
-    page-break-after: avoid !important;
-    page-break-inside: avoid !important;
-    background-color: #ffffff !important;
-  }
-  
-  .separator {
-    display: none; /* Print mein line nahi dikhegi */
-  }
-  
-  /* Force colors */
-  .balanceAmount, .paidStamp, .statusBadge, .paidAmount {
-    -webkit-print-color-adjust: exact !important; 
-    print-color-adjust: exact !important;
-  }
-  /* Backgrounds ko print mein transparent karein */
-  .mainContentRight .grid {
-    background-color: #ffffff !important;
-    border: 1px solid #ddd !important;
-  }
-  .itemsTable thead tr, .grandTotal {
-    background-color: #f0f0f0 !important;
-  }
+    /* 1. Action buttons ko hide karen */
+    .actions { display: none !important; }
+    
+    /* 2. Container se scrollbar hatayein */
+    .receiptContainer {
+        overflow: visible !important;
+        max-height: none !important;
+        background-color: #ffffff !important;
+    }
+
+    /* 3. A4 Sheet ko print ke liye optimize karen */
+    .receiptSheetA4 {
+        width: 100% !important; 
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    .receiptCopy {
+        padding: 10mm !important; /* Print mein margin */
+        height: 50vh; /* Har copy ko adha page dega */
+        box-sizing: border-box;
+    }
+
+    .separator {
+        margin: 0 10mm !important;
+        width: auto !important;
+    }
+
+    /* 4. Page Break Avoidance */
+    .header, .titleMeta, .itemsSection, .paymentBlock, .balanceWrapper, .footer, .itemsTable {
+        page-break-inside: avoid !important;
+    }
+    .footer {
+        page-break-before: avoid !important;
+    }
+    
+    /* 5. Background Colors ko Forcefully White karen */
+    .receiptContainer,
+    .receiptSheetA4,
+    .receiptCopy, 
+    .footer, 
+    .footerNote,
+    .balanceSection, 
+    .itemsTable thead tr,
+    .statusBadge {
+        background-color: #ffffff !important;
+        color: #000 !important; 
+        border: 1px solid #ddd;
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important;
+    }
+    
+    .balanceAmount:not([data-balance-zero="true"]) { color: #000 !important; }
+    .paidStamp { color: #000 !important; }
 }
