@@ -63,7 +63,6 @@ router.get('/search', authMiddleware, async (req, res) => {
             where: {
                 schoolId: schoolId,
                 // --- FIX: 'mode: "insensitive"' ko hata diya gaya hai ---
-                // (MySQL/SQLite yeh default mein handle kar lete hain)
                 OR: [
                   { first_name: { contains: studentName } }, 
                   { father_name: { contains: studentName } },
@@ -88,20 +87,9 @@ router.get('/search', authMiddleware, async (req, res) => {
                 birth_place: true,    // Point 6
                 previous_school: true, // Point 9
                 admission_date: true, // Point 10
-                // --- YAHAN BHI 'dob_in_words' ADD KAR RAHA HOON ---
-                dob_in_words: true,
-                mother_tongue: true,
-                religion: true,
-                taluka: true,
-                district: true,
-                state: true,
-                standard_admitted: true,
             },
             take: 10
         });
-        
-        // Helper function date format karne ke liye
-        const formatDate = (date) => date ? new Date(date).toISOString().split('T')[0] : undefined;
 
         // Format waala part bhi bilkul sahi hai
         const formattedStudents = students.map(s => ({
@@ -110,7 +98,7 @@ router.get('/search', authMiddleware, async (req, res) => {
             class: s.class?.class_name || 'N/A',
             
             // Auto-fill data (Student interface se match karta hua)
-            dob: formatDate(s.dob),
+            dob: s.dob ? s.dob.toISOString().split('T')[0] : undefined,
             studentId: s.roll_number || '',
             aadhaarNo: s.uid_number || '',
             motherName: s.mother_name || '',
@@ -118,14 +106,7 @@ router.get('/search', authMiddleware, async (req, res) => {
             caste: s.caste || '',
             birthPlace: s.birth_place || '',
             previousSchool: s.previous_school || '',
-            dateOfAdmission: formatDate(s.admission_date),
-            dobInWords: s.dob_in_words || '', // <-- YAHAN ADD KIYA
-            motherTongue: s.mother_tongue || '',
-            religion: s.religion || '',
-            birthTaluka: s.taluka || '',
-            birthDistrict: s.district || '',
-            birthState: s.state || '',
-            standardAdmitted: s.standard_admitted || '',
+            dateOfAdmission: s.admission_date ? s.admission_date.toISOString().split('T')[0] : undefined,
         }));
 
         res.json(formattedStudents);
@@ -147,67 +128,26 @@ router.get('/:id', authMiddleware, async (req, res) => {
              return res.status(400).json({ msg: 'Invalid student ID format.' });
         }
         
-        // --- YAHAN BHI 'dob_in_words' ADD KAR RAHA HOON (Consistency ke liye) ---
         const student = await prisma.students.findUnique({
             where: { 
                 studentid: studentIdInt,
                 schoolId: req.user.schoolId 
             },
-            select: {
-                studentid: true,
-                first_name: true,
-                father_name: true,
-                last_name: true,
-                class: { select: { class_name: true } },
-                dob: true,
-                address: true,
-                roll_number: true,
-                uid_number: true,
-                mother_name: true,
-                nationality: true,
-                mother_tongue: true,
-                religion: true,
-                caste: true,
-                birth_place: true,
-                taluka: true,
-                district: true,
-                state: true,
-                dob_in_words: true, // <-- FIX
-                admission_date: true,
-                standard_admitted: true,
-                previous_school: true,
+            include: { 
+                class: true 
             }
         });
         
         if (!student) return res.status(404).json({ msg: 'Student not found or access denied.' });
         
-        // Helper function date format karne ke liye
-        const formatDate = (date) => date ? new Date(date).toISOString().split('T')[0] : undefined;
-
-        // 'formattedStudent' ko naye data se banaya
         const formattedStudent = {
-            id: student.studentid.toString(),
+            ...student,
+            id: student.studentid,
             name: getFullName(student),
-            class: student.class?.class_name || 'N/A',
-            dob: formatDate(student.dob),
-            address: student.address || '',
-            
-            // Fields for LC
-            studentId: student.roll_number || '',
-            aadhaarNo: student.uid_number || '',
-            motherName: student.mother_name || '',
-            nationality: student.nationality || 'Indian',
-            motherTongue: student.mother_tongue || '',
-            religion: student.religion || '',
-            caste: student.caste || '',
-            birthPlace: student.birth_place || '',
-            birthTaluka: student.taluka || '',
-            birthDistrict: student.district || '',
-            birthState: student.state || '',
-            dobInWords: student.dob_in_words || '', // <-- FIX
-            dateOfAdmission: formatDate(student.admission_date),
-            standardAdmitted: student.standard_admitted || '',
-            previousSchool: student.previous_school || '',
+            class: student.class?.class_name || 'N/A', 
+            rollNo: student.roll_number,
+            parentName: student.father_name,
+            parentContact: student.guardian_contact
         };
 
         res.json(formattedStudent);
@@ -330,7 +270,7 @@ router.delete('/:id', [authMiddleware, authorize('Admin')], async (req, res) => 
         const student = await prisma.students.findUnique({
             where: { studentid: studentIdInt, schoolId: req.user.schoolId }
         });
-        if (!student) return res.status(4404).json({ message: 'Student not found or access denied.' });
+        if (!student) return res.status(404).json({ message: 'Student not found or access denied.' });
 
         const linkedUserId = student.userId;
 
