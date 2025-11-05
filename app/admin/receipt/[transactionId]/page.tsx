@@ -22,7 +22,15 @@ interface Transaction {
   templateId: TemplateDetails; 
   feeRecordId: string;
 }
-// ---
+
+// --- YAHAN FIX KIYA: School Details ke liye Interface ---
+interface SchoolDetails {
+  name: string;
+  name2: string;
+  address: string;
+  udiseNo: string;
+}
+// --- FIX ENDS ---
 
 export default function ReceiptPage() {
   const params = useParams();
@@ -31,26 +39,37 @@ export default function ReceiptPage() {
   const printableRef = useRef<HTMLDivElement>(null); // Ref for the printable area
 
   const [transaction, setTransaction] = useState<Transaction | null>(null);
+  // --- YAHAN FIX KIYA: School Details ke liye state ---
+  const [schoolDetails, setSchoolDetails] = useState<SchoolDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // --- API Fetch Logic (Re-enabled) ---
+  // --- YAHAN FIX KIYA: Ab yeh Transaction aur School Profile dono fetch karega ---
   useEffect(() => {
-    const fetchTransaction = async () => {
+    const fetchReceiptData = async () => {
       if (!transactionId) return;
       setLoading(true);
       try {
-        const res = await api.get(`/fees/transaction/${transactionId}`); 
-        setTransaction(res.data);
+        // Ek hi baar mein dono cheezein fetch karein
+        const [transactionRes, schoolRes] = await Promise.all([
+          api.get(`/fees/transaction/${transactionId}`),
+          api.get('/api/school/profile') 
+        ]);
+        
+        setTransaction(transactionRes.data);
+        setSchoolDetails(schoolRes.data);
+
       } catch (err) {
-        console.error("Error fetching transaction:", err);
+        console.error("Error fetching receipt data:", err);
         setError('Failed to load receipt details. Check backend logs.');
       } finally {
         setLoading(false);
       }
     };
-    fetchTransaction();
+    fetchReceiptData();
   }, [transactionId]);
+  // --- FIX ENDS ---
+
 
   // --- FINAL WORKING PRINT HANDLER (Canvas Logic) ---
   const handlePrint = () => {
@@ -117,9 +136,12 @@ export default function ReceiptPage() {
 
 
   // --- JSX Render Logic ---
+  // --- YAHAN FIX KIYA: Loading state ko update kiya ---
   if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading Receipt...</div>; 
   if (error) return <div className={styles.errorContainer}>{error}</div>; 
-  if (!transaction) return <div>Transaction not found.</div>;
+  // Ab check karein ki dono cheezein loaded hain
+  if (!transaction || !schoolDetails) return <div>Transaction or School Details not found.</div>;
+  // --- FIX ENDS ---
 
   return (
     <div className={styles.receiptContainer}>
@@ -136,10 +158,19 @@ export default function ReceiptPage() {
       
       {/* --- PRINTABLE AREA (Ref added for html2canvas) --- */}
       <div className={styles.printableArea} ref={printableRef}>
+        
+        {/* --- YAHAN FIX KIYA: Header ko School Details se update kiya --- */}
         <header className={styles.receiptHeader}>
-          <h1>Payment Receipt</h1>
+          {/* 'name2' (Certificate Name) ko main title banaya */}
+          <h1>{schoolDetails.name2 || schoolDetails.name}</h1>
+          <p>{schoolDetails.address}</p>
+          <p>UDISE: {schoolDetails.udiseNo}</p>
+          <hr />
+          <h2>Payment Receipt</h2>
           <p><strong>Transaction ID:</strong> {transaction.id}</p>
         </header>
+        {/* --- FIX ENDS --- */}
+
 
         <section className={styles.detailsGrid}>
           <div className={styles.studentDetails}>
