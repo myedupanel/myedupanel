@@ -116,20 +116,26 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             </div>
           </div>
           
+
+          {/* === YAHAN BADLAAV KIYA GAYA (1/2) === */}
+          {/* Title ko titleRow se bahar nikal kar upar move kiya */}
+          <h2 className={styles.mainTitle}>LEAVING CERTIFICATE</h2>
+
           <div className={styles.titleRow}>
             {/* Sr. No. on the left */}
             <div className={styles.headerSrNo}>
               Sr. No: {fill(formData.genRegNo, '100px')}
             </div>
             
-            {/* LEAVING CERTIFICATE - This will be centered */}
-            <h2 className={styles.mainTitle}>LEAVING CERTIFICATE</h2>
+            {/* LEAVING CERTIFICATE - Yahan se move kar diya gaya hai */}
             
             {/* Reg. No. on the right */}
             <div className={styles.headerRegNo}>
               Reg. No: {fill(formData.regNo, '100px')}
             </div>
           </div>
+          {/* === BADLAAV KHATM === */}
+
         </header>
 
         {/* Student Info Table (REST OF THE BODY REMAINS UNCHANGED) */}
