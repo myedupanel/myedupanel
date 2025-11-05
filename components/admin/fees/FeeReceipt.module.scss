@@ -1,4 +1,4 @@
-/* File: FeeReceipt.module.scss (FINAL LAYOUT - As per your plan) */
+/* File: FeeReceipt.module.scss (FINAL LAYOUT - Side-by-Side & Centered Balance) */
 
 /* Base Styles and Fonts */
 .receiptContainer {
@@ -87,7 +87,7 @@
   h2 { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; color: #111; }
 }
 
-/* 3. Student Details (CHANGED: 3-column grid for Name, ID, Class) */
+/* 3. Student Details (CHANGED: 3-column grid, Roll No removed) */
 .detailsSection {
   margin-bottom: 20px; 
   
@@ -134,30 +134,27 @@
   .amountCol { text-align: right; }
 }
 
-/* 5. NEW LAYOUT STYLES (Fee/Payment Side-by-Side) */
+/* 5. LAYOUT FIX (Side-by-Side) */
 .mainContentWrapper {
-    display: flex;
-    align-items: flex-start; /* Table aur payment details top se align */
+    display: grid; /* Grid ka istemaal flex se behtar hai yahan */
+    grid-template-columns: 1.5fr 1fr; /* Left (1.5) aur Right (1) column */
+    align-items: flex-start; /* Dono top se align honge */
     gap: 25px; /* Dono columns ke beech gap */
     margin-top: 15px;
     padding-bottom: 10px;
     border-bottom: 1px solid #f0f0f0;
 }
 .mainContentLeft {
-    flex: 1.5; /* Fee table ko zyada jagah (60%) */
-    min-width: 0; 
+    /* Yeh .itemsSection par lagega (JSX mein hai) */
+    width: 100%;
 }
 .mainContentRight {
-    flex: 1; /* Payment details ko kam jagah (40%) */
-    min-width: 0; 
+    /* Yeh .paymentBlock par lagega (JSX mein hai) */
+    width: 100%;
 }
 
 /* Payment Block (ab right column hai) */
 .paymentBlock {
-    /* Isse border/background add kar sakte hain agar zaroorat ho */
-    /* border: 1px solid #eee; */
-    /* padding: 10px; */
-
     h3 { font-size: 0.95rem; margin-bottom: 5px; text-transform: uppercase; }
     .grid { 
         gap: 4px 10px; 
@@ -175,40 +172,39 @@
     }
 }
 
-/* Balance Wrapper (NEW - Niche, alag section) */
+/* 6. BALANCE LAYOUT (NEW - Centered) */
 .balanceWrapper {
     display: flex;
-    justify-content: flex-end; /* Balance ko right side push karega */
-    margin-top: 15px;
+    justify-content: center; /* Poore block ko center mein rakhega */
+    align-items: center;
+    margin-top: 20px;
 }
 
-/* Balance Block (ab right side mein hai) */
 .balanceBlock {
-    text-align: left; /* Text ko left align rakhega box ke andar */
+    /* Is wrapper ki ab zaroorat nahi, lekin rakhte hain */
+    text-align: left; 
+}
+
+.balanceSection {
+    /* Yeh hai important part */
+    display: flex; /* Teeno items (Label, Amount, Status) ko ek line mein layega */
+    align-items: center; /* Vertically center karega */
+    gap: 20px; /* Har item ke beech gap */
     
-    .balanceSection {
-        /* === YEH SABSE ZAROORI CHANGE HAI === */
-        display: flex; /* Balance aur Status ko ek line mein layega */
-        justify-content: space-between; /* Dono ke beech space dega */
-        align-items: center; /* Vertically center karega */
-        gap: 20px; /* Dono ke beech thoda gap */
-        
-        background-color: #ffffff; /* Print safety */
-        border: 1px solid #ddd;
-        padding: 8px 12px; 
-        font-size: 0.9rem;
-        min-width: 280px; /* Ek minimum width taaki hamesha sahi dikhe */
+    background-color: #ffffff; /* Print safety */
+    border: 1px solid #ddd;
+    padding: 10px 20px; /* Thodi padding */
+    font-size: 0.95rem;
 
-        p { margin: 0; }
-        strong { font-weight: 700; }
-    }
+    p { margin: 0; } /* Extra margins hataye */
+    strong { font-weight: 700; }
+}
 
-    .balanceAmount {
-      font-weight: 700;
-      font-size: 1rem;
-      &[data-balance-zero="true"] { color: #28a745; } /* Green if zero */
-      &:not([data-balance-zero="true"]) { color: #dc3545; } /* Red if not zero */
-    }
+.balanceAmount {
+  font-weight: 700;
+  font-size: 1.05rem; /* Thoda bada */
+  &[data-balance-zero="true"] { color: #28a745; } /* Green if zero */
+  &:not([data-balance-zero="true"]) { color: #dc3545; } /* Red if not zero */
 }
 
 /* Status Badges (PAID/PARTIAL) */
@@ -232,7 +228,7 @@
 }
 
 
-/* 6. Footer & Signatures (No Change) */
+/* 7. Footer & Signatures (No Change) */
 .footer {
   margin-top: 30px; 
   padding-top: 10px; 
