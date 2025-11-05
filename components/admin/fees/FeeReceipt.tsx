@@ -260,12 +260,6 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     <span className={styles.scissorLine}>&#x2702;</span>
                 </div>
 
-                {/* 3. Student Details (AB YEH NAHI RAHA - REMOVED) */}
-                {/* <section className={styles.detailsSection}> ... </section> */}
-
-                {/* 4. Main Content Wrapper (BHI HATA DIYA GAYA) */}
-                {/* <div className={styles.mainContentWrapper}> ... </div> */}
-
                 {/* 5. Items Table (NEW LAYOUT) */}
                 <section className={`${styles.itemsSection}`}>
                     <table className={styles.itemsTable}>
@@ -280,7 +274,6 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {/* === YAHAN BADLAAV KIYA GAYA HAI === */}
                             {/* Student ka naam ab table ke andar hai */}
                             <tr className={styles.studentNameRow}>
                                 <td style={{ textAlign: 'center' }}>1</td>
@@ -290,8 +283,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                                 <td className={styles.amountCol}></td>
                             </tr>
                             
-                            {/* Baaki fee items (Blueprint mein yeh design clear nahi hai,
-                                 isliye humne purana logic rakha hai) */}
+                            {/* Baaki fee items */}
                             {feeItems.length > 0 ? (
                                 feeItems.map((item: { name: string; amount: number }, index: number) => (
                                     <tr key={index}>
@@ -345,36 +337,39 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     </table>
                 </section>
 
-                {/* // ========================================================
-                // === YAHAN BADLAAV KIYA GAYA HAI (REVERT) ===
-                // Balance Due ko waapas neeche laaya gaya hai
-                // ========================================================
-                */}
-
-                {/* 6. Payment Details (Blueprint ke jaisa - Sirf Payment Details) */}
+                {/* 6. Payment Details & Balance (MERGED) */}
                 <div className={`${styles.paymentBlock}`}>
                     <div className={styles.grid}>
+                        {/* Item 1 */}
                         <p><strong>Amount Paid:</strong> <strong className={styles.paidAmount}>{formatCurrency(amountPaid)}</strong></p>
+                        
+                        {/* Item 2 */}
                         <p><strong>Payment Mode:</strong> {transaction.paymentMode || 'N/A'}</p>
-                        {transaction.notes && <p className={styles.notes}><strong>Remarks:</strong> {transaction.notes}</p>}
-                    </div>
-                </div>
+                        
+                        {/* Item 3 (MOVED HERE) */}
+                        <div className={styles.balanceWrapper}> {/* Wrapper for alignment */}
+                            <div className={styles.balanceBlock}>
+                                <section className={styles.balanceSection}>
+                                    <p><strong>Balance Due:</strong> 
+                                        <span className={styles.balanceAmount} data-balance-zero={balanceDue < 0.01}>{formatCurrency(balanceDue)}</span>
+                                    </p>
+                                    {paymentStatus === 'PAID' ? ( <div className={styles.paidStamp}>PAID</div> ) :
+                                        (<div className={`${styles.statusBadge} ${styles[paymentStatus.toLowerCase()]}`}>{paymentStatus}</div>)
+                                    }
+                                </section>
+                            </div>
+                        </div>
 
-                {/* 7. Balance Due Wrapper (Waapas aa gaya hai) */}
-                <div className={styles.balanceWrapper}>
-                    <div className={styles.balanceBlock}>
-                        <section className={styles.balanceSection}>
-                            <p><strong>Balance Due:</strong> 
-                                <span className={styles.balanceAmount} data-balance-zero={balanceDue < 0.01}>{formatCurrency(balanceDue)}</span>
+                        {/* Item 4 (Conditional, ab full width lega) */}
+                        {transaction.notes && (
+                            <p className={`${styles.notes} ${styles.fullWidth}`}>
+                                <strong>Remarks:</strong> {transaction.notes}
                             </p>
-                            {paymentStatus === 'PAID' ? ( <div className={styles.paidStamp}>PAID</div> ) :
-                                (<div className={`${styles.statusBadge} ${styles[paymentStatus.toLowerCase()]}`}>{paymentStatus}</div>)
-                            }
-                        </section>
+                        )}
                     </div>
                 </div>
-                {/* === REVERT ENDS === */}
 
+                {/* 7. Balance Due Wrapper (YAHAN SE HATA DIYA GAYA) */}
                 
                 {/* // ========================================================
                 // === YAHAN BADLAAV KIYA GAYA HAI (Footer) ===
@@ -382,24 +377,26 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                 // ========================================================
                 */}
                 <footer className={styles.footer}>
-                    {/* Main footer content with Received By (left) and Signature (right) */}
+                    {/* Yeh naya div 'Received By' aur 'Signature' ko ek line mein rakhega */}
                     <div className={styles.footerMain}>
                         <p className={styles.receivedBy}>Received By: {collectedByNameDisplay}</p>
                         
+                        {/* Yeh right-side ka block hai */}
                         <div className={styles.signatureBlock}>
                             <div className={styles.signatureBox}>
-                                {/* Aap yahan <img> tag daal sakte hain agar image ho */}
-                            </div> 
+                                {/* Blueprint wala signature stamp/image yahan aa sakta hai */}
+                            </div>
                             <p className={styles.signatoryLabel}>Authorised Signatory</p>
                         </div>
                     </div>
-                    
-                    {/* Bottom-most note */}
+
+                    {/* Yeh neeche wali computer-generated line hai */}
                     <p className={styles.footerNote}>
                         This is a computer-generated receipt {transaction.paymentMode !== 'Online' ? 'and requires a signature.' : 'and does not require a signature if paid online.'}
                     </p>
                 </footer>
                 {/* === FOOTER FIX ENDS === */}
+
             </div>
         );
     };
