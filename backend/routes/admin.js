@@ -36,13 +36,11 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
         }
         console.log(`[GET /dashboard-data] Fetching data for schoolId: ${schoolId}`);
         
-        // --- YAHAN FIX KIYA (Part 1) ---
         // Current month ka revenue calculate karne ke liye dates set ki
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
         const currentMonthName = now.toLocaleString('default', { month: 'long' }); // Jaise "November"
-        // --- FIX ENDS ---
 
         const staffRoles = ['Accountant', 'Office Admin', 'Librarian', 'Security', 'Transport Staff', 'Other', 'Staff']; 
 
@@ -58,7 +56,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             recentPaidFeeRecords,
             admissionsDataRaw,
             classCountsRaw,
-            monthlyRevenueRaw // --- YAHAN FIX KIYA (Part 2) ---
+            monthlyRevenueRaw // Nayi query yahan aayegi
         ] = await Promise.all([
             // Total Counts (No Change)
             prisma.students.count({ where: { schoolId: schoolId } }), 
@@ -66,7 +64,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             prisma.parent.count({ where: { schoolId: schoolId } }),   
             prisma.user.count({ where: { role: { in: staffRoles }, schoolId: schoolId } }),
 
-            // --- 1. RECENT STUDENTS (FIXED QUERY STRUCTURE) ---
+            // --- RECENT STUDENTS (No Change) ---
             prisma.students.findMany({ 
                 where: { schoolId }, 
                 orderBy: { studentid: 'desc' }, 
@@ -77,7 +75,6 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                     father_name: true, 
                     last_name: true, 
                     admission_date: true,
-                    // FIX: class relation को select के अंदर ही object के रूप में पास किया
                     class: { select: { class_name: true } } 
                 }
             }), 
@@ -92,7 +89,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             prisma.parent.findMany({ where: { schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, id: true } }), 
             prisma.user.findMany({ where: { role: { in: staffRoles }, schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, role: true, id: true } }), 
 
-            // --- 2. RECENT FEE RECORDS (FIXED QUERY STRUCTURE) ---
+            // --- RECENT FEE RECORDS (No Change) ---
             prisma.feeRecord.findMany({
                 where: { schoolId: schoolId, status: 'Paid' },
                 orderBy: { id: 'desc' }, 
@@ -100,12 +97,11 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                 select: { 
                     id: true, 
                     amount: true, 
-                    student: { // FIX: student relation को select के अंदर ही object के रूप में पास किया
+                    student: {
                         select: { first_name: true, father_name: true, last_name: true } 
                     }
                 }
             }),
-            // --- END RECENT LISTS FIXES ---
 
             // Aggregations (No Change)
              prisma.students.groupBy({
@@ -121,16 +117,14 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                 _count: { studentid: true }, 
             }),
             
-            // --- YAHAN FIX KIYA (Part 3) ---
-            // Current month ka revenue calculate karne ke liye nayi query
-            prisma.feeRecord.aggregate({
-                _sum: { amount: true },
+            // --- YAHAN FIX KIYA GAYA HAI ---
+            // 'FeeRecord' ki jagah 'Transaction' table ko aggregate kiya
+            prisma.transaction.aggregate({
+                _sum: { amountPaid: true }, // 'amount' ki jagah 'amountPaid' ko sum kiya
                 where: {
                     schoolId: schoolId,
-                    status: 'Paid',
-                    // 'createdAt' ko 'paymentDate' se badal diya
-                    // (Hum assume kar rahe hain ki field ka naam 'paymentDate' hai)
-                    paymentDate: { 
+                    status: 'Success', // 'Paid' ki jagah 'Success' use kiya (transaction status)
+                    paymentDate: { // Ab yeh field 'Transaction' table mein valid hai
                         gte: startOfMonth,
                         lt: nextMonthStart
                     }
@@ -140,7 +134,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
 
         ]).catch(err => {
             console.error("[GET /dashboard-data] Error during Promise.all:\n", err);
-            // Fatal error को 500 के रूप में फेंकें
+            // Fatal error ko 500 ke roop mein phenkein
             res.status(500).send('Server Error fetching dashboard data');
             throw err; 
         });
@@ -175,20 +169,18 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
          }).sort((a, b) => a.name.localeCompare(b.name)); 
 
 
-        // --- Format Recent Payments ---
+        // --- Format Recent Payments (No Change) ---
         const recentFees = recentPaidFeeRecords.map(record => ({
             id: record.id, 
-            // FIX: record.student अब सीधा select object है
             student: getFullName(record.student) || 'Unknown Student', 
             amount: `₹${record.amount?.toLocaleString('en-IN') || 0}`,
             date: `ID: ${record.id}` 
         }));
 
-        // --- Format Recent Lists ---
+        // --- Format Recent Lists (No Change) ---
          const formattedRecentStudents = recentStudentsRaw.map(s => ({ 
              id: s.studentid, 
              name: getFullName(s), 
-             // FIX: s.class अब nested object है
              class: s.class?.class_name 
          }));
          
@@ -198,9 +190,9 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
              subject: t.subject
          }));
 
-        // --- YAHAN FIX KIYA (Part 4) ---
-        // Revenue data ko process kiya
-        const currentMonthRevenue = monthlyRevenueRaw._sum.amount || 0;
+        // --- YAHAN FIX KIYA GAYA HAI ---
+        // Revenue data ko process kiya (amount -> amountPaid)
+        const currentMonthRevenue = monthlyRevenueRaw._sum.amountPaid || 0;
         // --- FIX ENDS ---
 
 
@@ -217,17 +209,19 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             recentParents: recentParents || [],
             recentStaff: recentStaff || [],
             recentFees,
-            // --- YAHAN FIX KIYA (Part 5) ---
+            // --- YAHAN FIX KIYA GAYA HAI ---
             // Final data ko response mein add kiya
             currentMonthRevenue: currentMonthRevenue,
             currentMonthName: currentMonthName
             // --- FIX ENDS ---
         };
-        console.log(`[GET /dashboard-data] Sending final data. Staff: ${dashboardData.totalStaff}`);
+        console.log(`[GET /dashboard-data] Sending final data. Revenue: ${currentMonthRevenue}`);
         res.json(dashboardData);
 
     } catch (err) {
-        // यह कैच ब्लॉक अब केवल Promise.all के बाद के errors को संभालेगा
+        // Agar Promise.all ke bahar koi error aaye (jo ki ab nahi aana chahiye)
+        console.error("[GET /dashboard-data] Outer CATCH BLOCK Error:", err);
+        res.status(500).send('Server Error');
     }
 });
 
