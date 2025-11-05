@@ -173,6 +173,10 @@
   border-top: 1px solid #ddd;
   font-size: 0.85rem;
   font-weight: 600; 
+  
+  /* === CHANGE 1: Poore footer ko white kiya === */
+  background-color: #ffffff;
+  color: #000; /* Saare footer text ko black kar diya */
 
   .receivedBy {
     margin-bottom: 30px;
@@ -207,11 +211,13 @@
   .footerNote { 
     text-align: center; 
     margin-top: 15px; 
-    font-style: italic; 
-    font-weight: 400;
     
-    /* === YAHAN CHANGE KIYA GAYA HAI (Change 1) === */
-    /* Screen par bhi background white kar diya hai */
+    /* === CHANGE 2: Text ko bold aur non-italic kiya === */
+    font-style: normal;
+    font-weight: 600; /* 400 se 600 (bold) kiya */
+    color: #000; /* Force black color */
+    
+    /* Screen par bhi background white kar diya hai (ye pehle se tha) */
     background-color: #ffffff;
     padding: 10px 0; /* Thodi padding add kar di */
   }
@@ -235,8 +241,6 @@
 
     /* 3. Page Break Avoidance */
     .detailsSection, .itemsSection, .paymentAndBalance, .footer, .itemsTable {
-        /* === YAHAN CHANGE KIYA GAYA HAI (Change 2) === */
-        /* Typo theek kiya: !importa -> !important */
         page-break-inside: avoid !important;
         page-break-after: auto;
     }
@@ -252,7 +256,8 @@
     .balanceSection, 
     .itemsTable thead tr {
         background-color: #ffffff !important;
-        /* यह property browser को force करती है कि वह exact color प्रिंट करे */
+        /* === CHANGE 3: Print mein bhi text ko black force kiya === */
+        color: #000 !important; 
         -webkit-print-color-adjust: exact !important; 
         print-color-adjust: exact !important;
     }
