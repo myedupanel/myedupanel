@@ -46,7 +46,8 @@
   gap: 8px;
   border-bottom: 1.5px solid #000;
   padding-bottom: 8px;
-  margin-bottom: 8px; /* YAHAN CHANGE KIYA: 10px se 8px kiya */
+  /* YAHAN CHANGE KIYA: Wapas 10px kar diya */
+  margin-bottom: 10px; 
 
   .logo { display: none; }
   
@@ -65,7 +66,8 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-top: 5px; /* YAHAN CHANGE KIYA: 8px se 5px kiya */
+  /* YAHAN CHANGE KIYA: 5px se 7px kiya */
+  margin-top: 7px; 
 
   h2 { /* Title */
     font-size: 15pt;
@@ -97,10 +99,10 @@
   margin-top: 10px;
   
   tbody tr td {
-    /* YAHAN CHANGE KIYA: padding 7px se 4px ki, taaki rows patli hon */
-    padding: 4px 5px; 
+    /* YAHAN CHANGE KIYA: padding 4px se 6px ki, taaki rows thodi badi hon */
+    padding: 6px 5px; 
     vertical-align: top;
-    line-height: 1.3; /* Line height bhi thodi kam ki */
+    line-height: 1.4; /* Line height wapas 1.4 ki */
     border-bottom: 1px solid #eee;
   }
   tbody tr td:nth-child(1) { width: 35px; text-align: center; font-weight: normal; }
@@ -161,14 +163,16 @@
 .certText {
   font-size: 11pt;
   text-align: left;
-  margin-top: 10px; /* YAHAN CHANGE KIYA: 15px se 10px kiya */
+  /* YAHAN CHANGE KIYA: 10px se 15px kiya */
+  margin-top: 15px; 
   line-height: 1.6;
 }
 
 /* --- Footer Layout --- */
 .certFooterWrapper {
   margin-top: auto;
-  padding-top: 15px; /* YAHAN CHANGE KIYA: 20px se 15px kiya */
+  /* YAHAN CHANGE KIYA: 15px se 20px kiya */
+  padding-top: 20px; 
   font-size: 12pt;
   font-weight: bold;
   background: #fff !important;
@@ -177,7 +181,8 @@
 
 .datePlace {
   text-align: left;
-  margin-bottom: 20px; /* YAHAN CHANGE KIYA: 30px se 20px kiya */
+  /* YAHAN CHANGE KIYA: 20px se 25px kiya */
+  margin-bottom: 25px; 
 }
 
 .signatures {
