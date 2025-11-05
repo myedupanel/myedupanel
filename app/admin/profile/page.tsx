@@ -293,7 +293,7 @@ const SchoolProfilePage = () => {
           
           {/* School Name 2 (For Certificates) - YEH AB PEHLE AAYEGA */}
           <div className={styles.formGroup}>
-            <label htmlFor="name2">School Name Line 2 (For Certificates) *</label>
+            <label htmlFor="name2">School Name (For Certificates) *</label>
             <input type="text" id="name2" name="name2" value={formData.name2} onChange={handleInputChange} required disabled={isSubmitting} placeholder="e.x., MyEduPanel Sec. & Higher Sec. School" />
             <small>This will be the main name shown on certificates.</small>
           </div>

@@ -1,4 +1,4 @@
-// File: FeeReceipt.tsx (FINAL LAYOUT - 50/50 Fix)
+// File: FeeReceipt.tsx (FINAL LAYOUT - School Name Fix)
 
 import React, { useRef } from 'react';
 import styles from './FeeReceipt.module.scss';
@@ -6,10 +6,15 @@ import { FiPrinter, FiDownload } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-// --- Interface Definitions (No Change) ---
+// --- Interface Definitions ---
 export interface SchoolInfo {
-    name?: string; address?: string; logo?: string;
-    session?: string; phone?: string; email?: string;
+    name?: string;
+    name2?: string; // <-- YAHAN FIX KIYA (1/2): name2 ko interface mein add kiya
+    address?: string; 
+    logo?: string;
+    session?: string; 
+    phone?: string; 
+    email?: string;
 }
 export interface StudentInfo {
     id: number; name: string; studentId?: string;
@@ -33,7 +38,7 @@ export interface Transaction {
     templateId?: TemplateInfo | any;
     feeRecordId?: FeeRecordInfo | string;
     collectedBy?: CollectorInfo;
-    schoolInfo?: SchoolInfo;
+    schoolInfo?: SchoolInfo; // <-- Yeh SchoolInfo upar waale interface ko use karta hai
     amountPaid: number;
     paymentMode: string;
     paymentDate: string;
@@ -210,7 +215,10 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                 <div className={styles.header}>
                     <div className={styles.schoolDetails}>
                         {schoolInfo.logo && (<img src={schoolInfo.logo} alt={`${schoolInfo.name || 'School'} Logo`} className={styles.logo} />)}
-                        <h1>{schoolInfo.name || 'My EduPanel'}</h1>
+                        
+                        {/* --- YAHAN FIX KIYA (2/2) --- */}
+                        {/* Ab yeh 'name2' (Certificate Name) ko pehle dikhayega */}
+                        <h1>{schoolInfo.name2 || schoolInfo.name || 'My EduPanel'}</h1>
                     </div>
                     <div className={styles.metaHeader}>
                         <p><strong>Receipt No:</strong> {receiptNoDisplay}</p>
