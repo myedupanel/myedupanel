@@ -34,8 +34,8 @@ interface StudentFullProfile {
   birthTaluka?: string; 
   birthDistrict?: string; 
   birthState?: string; 
-  dobInWords?: string; 
-  dateOfAdmission?: string; // <-- Sabse zaroori
+  dobInWords?: string; // <-- Yeh hai zaroori
+  dateOfAdmission?: string; 
   standardAdmitted?: string; 
   previousSchool?: string; 
 }
@@ -114,7 +114,7 @@ const StudentSearch: React.FC<StudentSearchProps> = ({ onStudentSelect }) => {
         motherName: res.data.mother_name,
 
         // --- YEH SAB NAAYA ADD KIYA ---
-        dateOfAdmission: res.data.admission_date, // <-- Sabse zaroori
+        dateOfAdmission: res.data.admission_date, 
         nationality: res.data.nationality,
         motherTongue: res.data.mother_tongue,
         religion: res.data.religion,
@@ -123,7 +123,7 @@ const StudentSearch: React.FC<StudentSearchProps> = ({ onStudentSelect }) => {
         birthTaluka: res.data.taluka,
         birthDistrict: res.data.district,
         birthState: res.data.state,
-        dobInWords: res.data.dob_in_words,
+        dobInWords: res.data.dob_in_words, // <-- YEH HAI AAPKA FIX
         standardAdmitted: res.data.standard_admitted,
         previousSchool: res.data.previous_school,
       };
