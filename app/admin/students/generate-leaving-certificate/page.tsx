@@ -39,7 +39,7 @@ export interface Student {
 }
 // --- END ---
 
-// --- SchoolDetails interface (FIX 1) ---
+// --- SchoolDetails interface (No Change) ---
 export interface SchoolDetails {
   name: string;
   name2?: string;
@@ -52,12 +52,11 @@ export interface SchoolDetails {
   place?: string;
   affiliationIndex?: string;
   affiliationDetails?: string;
-  // --- FIX 1: 'genRegNo' ko interface mein add kiya ---
   genRegNo?: string; 
 }
 // --- END ---
 
-// --- LeavingFormData interface (FIX 2) ---
+// --- LeavingFormData interface (No Change) ---
 export interface LeavingFormData {
   genRegNo?: string; // Yeh School ka General Register No. hai (Footer)
   regNo?: string; // Yeh School ka Reg. No. hai (Header)
@@ -84,7 +83,6 @@ export interface LeavingFormData {
   remarks?: string;           
   issueDate?: string;         
   signatoryRole?: string;
-  // --- FIX 2: 'motherName' ko interface mein add kiya ---
   motherName?: string;
 }
 // --- END ---
@@ -167,7 +165,7 @@ const LeavingCertificateBuilderPage = () => {
   // --- END ---
 
 
-   // --- Student data se form pre-fill karna (No Change - Yeh perfect tha) ---
+   // --- Student data se form pre-fill karna (UPDATED) ---
    useEffect(() => {
     
     const formatDate = (dateStr?: string) => {
@@ -189,7 +187,12 @@ const LeavingCertificateBuilderPage = () => {
           birthTaluka: selectedStudent.birthTaluka || '',
           birthDistrict: selectedStudent.birthDistrict || '',
           birthState: selectedStudent.birthState || '',
-          dobWords: selectedStudent.dobInWords || '',
+          
+          // --- YAHAN FIX KIYA HAI ---
+          // 'dobWords' ko 'selectedStudent' se 'formData' mein add kiya
+          dobWords: selectedStudent.dobInWords || '', 
+          // --- END FIX ---
+
           previousSchool: selectedStudent.previousSchool || '',
           dateOfAdmission: formatDate(selectedStudent.dateOfAdmission),
           standardAdmitted: selectedStudent.standardAdmitted || '',
@@ -214,7 +217,7 @@ const LeavingCertificateBuilderPage = () => {
            birthTaluka: '',
            birthDistrict: '',
            birthState: '',
-           dobWords: '',
+           dobWords: '', // Reset karte waqt bhi clear kiya
            previousSchool: '',
            dateOfAdmission: '',
            standardAdmitted: '',
@@ -223,7 +226,7 @@ const LeavingCertificateBuilderPage = () => {
    }, [selectedStudent]);
    // --- END ---
 
-  // --- FIX 3: School Profile Fetch karna (Updated) ---
+  // --- School Profile Fetch karna (No Change) ---
   useEffect(() => {
     const fetchSchoolProfile = async () => { 
       console.log("Fetching school profile for LC...");
@@ -243,7 +246,6 @@ const LeavingCertificateBuilderPage = () => {
             place: res.data.place || "N/A",
             affiliationIndex: res.data.affiliationIndex || "N/A",
             affiliationDetails: res.data.affiliationDetails || "N/A",
-            // --- FIX 3: 'genRegNo' ko state mein save kiya ---
             genRegNo: res.data.genRegNo || "N/A" // Footer Sr. No
           });
 
@@ -252,7 +254,7 @@ const LeavingCertificateBuilderPage = () => {
             ...prev,
             // Header Reg. No.
             regNo: res.data.recognitionNumber || '', 
-            // --- FIX 3: Footer General Reg. No. ko form mein set kiya ---
+            // Footer General Reg. No. ko form mein set kiya
             genRegNo: res.data.genRegNo || '' 
           }));
 
@@ -272,7 +274,7 @@ const LeavingCertificateBuilderPage = () => {
       fetchSchoolProfile();
     }
   }, [user]);
-  // --- END FIX ---
+  // --- END ---
 
 
   // --- Print/Download functions (No Change) ---
