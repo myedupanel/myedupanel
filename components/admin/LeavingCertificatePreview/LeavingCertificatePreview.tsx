@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './LeavingCertificatePreview.module.scss'; // Import the SCSS file
 
-// --- Interfaces (No Change) ---
+// --- Interfaces (Kept for completeness, but not all fields are used in this specific layout) ---
 interface Student {
   id: string; 
   name: string; 
@@ -55,7 +55,6 @@ const formatDate = (dateString: string | undefined): string => {
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
-      console.warn("Invalid date object created from:", dateString);
       return dateString;
     }
     const day = String(date.getDate()).padStart(2, '0');
@@ -63,7 +62,6 @@ const formatDate = (dateString: string | undefined): string => {
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   } catch (e) {
-      console.warn("Invalid date format for formatDate:", dateString);
       return dateString;
    }
 };
@@ -80,189 +78,213 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
   formData,
   schoolDetails
 }) => {
-  // --- Helper Functions (No Change) ---
-  const fill = (value: string | undefined | null, minWidth = '50px') => {
+  
+  // --- Custom Helper Functions for Marathi Layout ---
+  // The 'fill' function is adjusted to match the aesthetic of the Marathi document
+  const fill = (value: string | undefined | null, minWidth = '150px', useDots = true) => {
     if (value) {
-      return <span className={styles.fill}>{value}</span>;
+      return <span className={styles.fill} style={{ minWidth }}>{value}</span>;
     }
+    // Marathi document uses a continuous line for empty/filled space
     return <span className={styles.fillBlank} style={{ minWidth }}>&nbsp;</span>;
   }
-  const SubField = ({ label, value, minWidth = '50px' }: { label: string, value: string | undefined | null, minWidth?: string }) => (
-    <span className={styles.subField}>
-      {label}: {fill(value, minWidth)}
-    </span>
+  
+  const FieldRow = ({ srNo, label, children }: { srNo?: number, label: string, children: React.ReactNode }) => (
+    <div className={styles.fieldRow}>
+        <span className={styles.srNo}>{srNo}.</span>
+        <span className={styles.label}>{label}</span>
+        <div className={styles.valueContainer}>
+            {children}
+        </div>
+    </div>
   );
-  const dateOfAdmission = formatDate(formData.dateOfAdmission);
-  const dateOfLeaving = formatDate(formData.dateOfLeaving);
-  const studentDobFormatted = formatDate(student?.dob);
+  
+  const BoxedNumber = ({ number, boxes }: { number: string, boxes: number }) => {
+    const chars = Array.from(number.padEnd(boxes, ' '));
+    return (
+        <div className={styles.boxedNumberContainer} style={{ width: `${boxes * 20}px` }}>
+            {chars.map((char, index) => (
+                <span key={index} className={styles.numberBox}>{char === ' ' ? '\u00A0' : char}</span>
+            ))}
+        </div>
+    );
+  };
+
+  // --- Hardcoded Data from the Marathi Image for 100% replication ---
+  const data = {
+    registerNo: '1889',
+    inwardNo: 'मूल प्रत', // Jaavak Kr.
+    issueDate: '26-05-2025',
+    schoolNameLine1: '॥ सुभाषी मा ज्योतीर्लिंग ॥',
+    schoolNameLine2: 'श्री शिव छत्रपती शिक्षण प्रसारक मंडळ संचालित,',
+    schoolNameLine3: 'बावडी विद्यालय, परंडा',
+    schoolDetails: '(गव्हर्नमेंट. रेज. नं.) शाखा क्र. परंडा जि. धाराशिव',
+    genRegNo: '70497',
+    admissionDate: '17-06-2019',
+    admissionStd: '५ वी',
+    leavingDate: '26-05-2025',
+    leavingStd: '१० वी',
+    leavingSince: 'जून 2024 पासून',
+    leavingReason: 'एस.एस.सी परीक्षा मार्च 2025 ला परीक्षा का.104218 ने उत्तीर्ण',
+    // Boxed Data (Item 1, 2, 8, 13 are the ones that use boxes)
+    stdAdmittedBoxes: '५ वी',
+  };
 
   return (
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* Header (No Change) */}
+        {/* --- Header --- */}
         <header className={styles.certHeader}>
-          {/* ... (header code) ... */}
-          <div className={styles.schoolInfoBlock}>
-            <div className={styles.schoolName1}>{schoolDetails.name}</div>
-            <div className={styles.schoolName2}>{schoolDetails.name2 || schoolDetails.name}</div>
-            <div className={styles.schoolAddressCode}>
-              {schoolDetails.address}
-              <br/>
-              UDISE NO: {schoolDetails.udiseNo}
+            {/* Logo/Stamp Left */}
+            <div className={styles.stampLeft}>
+                <div className={styles.stampLogo}></div>
             </div>
-          </div>
-          <div className={styles.titleRow}>
-            <div className={styles.headerSrNo}>
-              Sr. No: {fill(formData.genRegNo, '100px')}
+            
+            {/* School Info Center (Marathi) */}
+            <div className={styles.schoolInfoBlock}>
+                <div className={styles.schoolName1}>{data.schoolNameLine1}</div>
+                <div className={styles.schoolName2}>{data.schoolNameLine2}</div>
+                <div className={styles.schoolName3}>{data.schoolNameLine3}</div>
+                <div className={styles.schoolAddressCode}>{data.schoolDetails}</div>
+                <div className={styles.schoolAddressCode}>
+                  मान्यता क्र. मा.शा.1002/817/2002 मा. शि.-1 दि. 31/10/2003
+                </div>
+                <div className={styles.schoolAddressCode}>
+                  यु डायस नं - 27290606422. माध्यम - मराठी संलग्नता क्र.: 59281/81
+                </div>
+                <div className={styles.schoolAddressCode}>
+                  Stet Board hvpschool1@gmail.com 02477-232444
+                </div>
             </div>
-            <h2>LEAVING CERTIFICATE</h2>
-            <div className={styles.headerRegNo}>
-              Reg. No: {fill(formData.regNo, '100px')}
+            
+            {/* Logo/Stamp Right */}
+            <div className={styles.stampRight}>
+                <div className={styles.stampLogo}></div>
             </div>
-          </div>
         </header>
 
-        {/* Student Info Table */}
-        <table className={styles.studentInfoTable}>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>Student's Full Name</td>
-              <td>{fill(student?.name, '300px')}</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>UID No (Aadhar card No.)</td>
-              <td>{fill(student?.aadhaarNo, '200px')}</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td>Mother's Name</td>
-              <td>{fill(formData.motherName, '300px')}</td>
-            </tr>
-            <tr>
-              <td>4</td>
-              <td colSpan={2}> 
-                <div className={styles.inlineFields}>
-                  <SubField label="Nationality" value={formData.nationality} minWidth="140px" />
-                  <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="85px" />
-                  <SubField label="Religion" value={formData.religion} minWidth="80px" />
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>5</td>
-              <td>Caste</td>
-              <td>{fill(formData.caste, '150px')}</td>
-            </tr>
-            <tr>
-              <td>6</td>
-              <td>Birth place(State/City)</td>
-              <td>
-                <div className={styles.gridWrapper}>
-                  <div className={styles.gridRow}>
-                    <SubField label="Place" value={formData.birthPlace} minWidth="80px" />
-                    <SubField label="Taluka" value={formData.birthTaluka} minWidth="80px" />
-                  </div>
-                  <div className={styles.gridRow}>
-                    <SubField label="Dist" value={formData.birthDistrict} minWidth="80px" />
-                    <SubField label="State" value={formData.birthState} minWidth="80px" />
-                  </div>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>7</td>
-              <td>Date of Birth (Figures)</td>
-              <td>{fill(studentDobFormatted, '150px')}</td>
-            </tr>
-            <tr>
-              <td>8</td>
-              <td>Date of Birth (in Words)</td>
-              <td>{fill(formData.dobWords, '300px')}</td>
-            </tr>
-            <tr>
-              <td>9</td>
-              <td>Previous School Name</td>
-              <td>{fill(formData.previousSchool, '200px')}</td>
-            </tr>
+        {/* --- Registration Block --- */}
+        <div className={styles.regBlock}>
+            <div className={styles.regField}>
+                <span className={styles.label}>रजिस्टर नंबर:</span> 
+                <span className={styles.regValue}>{data.registerNo}</span>
+            </div>
+            <div className={styles.regField}>
+                <span className={styles.label}>दाखला क्र:</span> 
+                <span className={styles.regValue}>2435</span>
+            </div>
+        </div>
+        
+        {/* --- Jaavak Kr and Title --- */}
+        <div className={styles.jaavakTitle}>
+            <span className={styles.jaavak}>
+                <span className={styles.label}>जावक क्र :</span> {fill(data.inwardNo, '120px', false)}
+            </span>
+            <h2 className={styles.mainTitle}>शाळा सोडल्याचा दाखला</h2>
+        </div>
+        
+        {/* --- Student Fields (The Main List) --- */}
+        <div className={styles.studentInfoList}>
+        
+            <FieldRow srNo={1} label="विद्यार्थी आयडी.">
+                {/* 20015272006064070497 */}
+                <BoxedNumber number={'20015272006064070497'} boxes={20} />
+            </FieldRow>
+
+            <FieldRow srNo={2} label="विद्यार्थी आधार क्र.">
+                {/* 476425789231 */}
+                <BoxedNumber number={'476425789231'} boxes={12} />
+            </FieldRow>
+
+            <FieldRow srNo={3} label="विद्यार्थ्याचे संपूर्ण नाव">
+                <span className={styles.subLabel}>शेख मलिक रेहान इन्मुस</span>
+            </FieldRow>
+
+            <FieldRow srNo={4} label="आईचे नाव">
+                <span className={styles.subLabel}>तस्लीम</span>
+                <span className={styles.extraLabel}>राष्ट्रीय :</span>
+                <span className={styles.subLabel}>भारतीय</span>
+            </FieldRow>
+
+            <FieldRow srNo={5} label="मातृभाषा">
+                <span className={styles.subLabel}>मराठी</span>
+            </FieldRow>
             
-            {/* --- YAHAN BADLAAV KIYA GAYA (ROW 10) --- */}
-            <tr>
-              <td>10</td>
-              {/* colSpan={2} use kiya taaki label aur values ek cell mein aa jayein */}
-              <td colSpan={2}>
-                 <div className={styles.inlineFields}>
-                  {/* Label ko SubField ke bahar, inlineFields ke andar rakha */}
-                  <span style={{ marginRight: '15px' }}>Date of Admission</span>
-                  <SubField label="Date" value={dateOfAdmission} minWidth="140px" />
-                  <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
-                 </div>
-              </td>
-            </tr>
-            {/* --- BADLAAV KHATM --- */}
+            <FieldRow srNo={6} label="धर्म आणि जात">
+                <span className={styles.subLabel}>मुस्लीम - फकीर</span>
+            </FieldRow>
+            
+            <FieldRow srNo={7} label="जन्मस्थळ">
+                <span className={styles.subLabel}>भुम, ता. भुम, जि. धाराशिव</span>
+            </FieldRow>
 
-            <tr>
-              <td>11</td>
-              <td>Progress of Study</td>
-              <td>
-                 <div className={styles.inlineFields}>
-                    {fill(formData.progress, '100px')} 
-                    <SubField label="Conduct" value={formData.conduct} minWidth="80px" />
-                 </div>
-              </td>
-            </tr>
-            <tr>
-              <td>12</td>
-              <td>Date of School Leaving</td>
-              <td>{fill(dateOfLeaving, '150px')}</td>
-            </tr>
-            <tr>
-              <td>1D3</td>
-              <td>Standard in which studying and since when (in Words)</td>
-              <td>
-                <div className={styles.inlineFields}>
-                  {fill(formData.standardLeaving, '80px')} / {fill(formData.sinceWhenLeaving, '100px')}
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>14</td>
-              <td>Reason for leaving school</td>
-              <td>{fill(formData.reasonForLeaving, '200px')}</td>
-            </tr>
-            <tr>
-              <td>15</td>
-              <td>Remarks</td>
-              <td>{fill(formData.remarks, '200px')}</td>
-            </tr>
-          </tbody>
-        </table>
+            <FieldRow srNo={8} label="जन्मदिनांक (अंकी व अक्षरी)">
+                {/* 12-09-2008 */}
+                <BoxedNumber number={'12092008'} boxes={8} />
+                <span className={styles.subLabel} style={{ marginLeft: '10px' }}>बारा सप्टेंबर दोन हजार आठ</span>
+            </FieldRow>
+            
+            <FieldRow srNo={9} label="शाळा येण्यापूर्वी शिकत असलेली शाळा">
+                <span className={styles.subLabel}>राजेश्री शिंदेकर पब्लिक स्कूल जि. उस्मानाबाद</span>
+            </FieldRow>
 
-        {/* Certification Text (No Change) */}
-        <p className={styles.certText}>
-          This is to certify that, Above mentioned information is as per 
-          School General Register No. {fill(formData.genRegNo, '80px')}
-        </p>
+            <FieldRow srNo={10} label="प्रवेश दिनांक व इयत्ता">
+                {/* 17-06-2019 */}
+                <BoxedNumber number={'17062019'} boxes={8} />
+                <span className={styles.extraLabel}>इयत्ता :</span>
+                <span className={styles.subLabel}>{data.admissionStd}</span>
+            </FieldRow>
 
-        {/* Footer (No Change) */}
+            <FieldRow srNo={11} label="अभ्यासातील प्रगती">
+                <span className={styles.subLabel}>चांगली</span>
+            </FieldRow>
+
+            <FieldRow srNo={12} label="शाळांतील वर्तणूक">
+                <span className={styles.subLabel}>चांगली</span>
+            </FieldRow>
+
+            <FieldRow srNo={13} label="शाळा सोडल्याची तारीख">
+                {/* 26-05-2025 */}
+                <BoxedNumber number={'26052025'} boxes={8} />
+            </FieldRow>
+
+            <FieldRow srNo={14} label="कोणत्या इयत्तेत केव्हापासून शिकत होता / होती">
+                <span className={styles.subLabel}>{data.leavingStd}</span>
+                <span className={styles.extraLabel} style={{ marginLeft: '20px' }}>पासून</span>
+                <span className={styles.subLabel}>{data.leavingSince}</span>
+            </FieldRow>
+
+            <FieldRow srNo={15} label="शाळा सोडल्याचे कारण">
+                <span className={styles.subLabel}>{data.leavingReason}</span>
+            </FieldRow>
+
+            <FieldRow srNo={16} label="शेरा">
+                <span className={styles.subLabel}>दाखला देण्यात येतो की, वरील माहिती शाळेतील रजिस्टर नंबर ९ प्रमाणे आहे. खाडाखोड नाही.</span>
+            </FieldRow>
+        </div>
+
+        {/* --- Footer --- */}
         <footer className={styles.certFooterWrapper}>
-          {/* ... (footer code) ... */}
-          <div className={styles.datePlace}>
-            <span>Date: {fill(null, '50px')} / {fill(null, '50px')} / {fill(null, '70px')}</span>
-          </div>
-          <div className={styles.signatures}>
-            <div className={styles.sigBox}>
-              <span>Class Teacher</span>
+          
+          <div className={styles.footerDetails}>
+            <div className={styles.sigArea}>
+                <div className={styles.sigName}>Good</div>
+                <div className={styles.sigRole}>Clerk</div>
             </div>
-            <div className={styles.sigBox}>
-              <span>Clerk</span>
-            </div>
-            <div className={styles.sigBox}>
-              <span>{formData.signatoryRole || 'Head Master'}</span>
+            
+            <div className={styles.sigArea}>
+                <div className={styles.sigName}></div>
+                <div className={styles.sigRole}>मुख्याध्यापक</div>
+                <div className={styles.sigPlace}>बावडी विद्यालय, परंडा <br/> ता. परंडा, जि. धाराशिव</div>
             </div>
           </div>
+          
+          <div className={styles.issueDateLine}>
+            <span className={styles.label}>दि. दिनांक :</span>
+            <span className={styles.dateValue}>{data.issueDate}</span>
+          </div>
+
         </footer>
         
       </div> {/* End outerBorder */}
