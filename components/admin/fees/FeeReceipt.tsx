@@ -237,8 +237,8 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
                 {/*
                     ======================================================================
-                    === YEH HAI SABSE ZAROORI STRUCTURE ===
-                    Yeh wrapper `div` hi layout ko fix karega.
+                    === YEH HAI WOH WRAPPER JISKI HUMEIN ZAROORAT THI ===
+                    Iske bina 50-50 layout kaam nahi karega.
                     ======================================================================
                 */}
                 
