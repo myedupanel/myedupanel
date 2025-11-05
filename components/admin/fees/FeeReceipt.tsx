@@ -327,4 +327,4 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     );
 };
 
-export default FeeReceipt; 
+export default FeeReceipt;
