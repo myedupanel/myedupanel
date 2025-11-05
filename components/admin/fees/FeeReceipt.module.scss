@@ -341,7 +341,10 @@
 @media print {
     .actions { display: none !important; }
     
-    body {
+    /* === YAHAN FIX KIYA HAI === */
+    /* 'body' global selector ko hata diya hai */
+    .receiptContainer {
+      /* Yeh styles ab .receiptContainer par apply honge */
       margin: 0;
       padding: 0;
       background: #ffffff;
