@@ -219,8 +219,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>{fill(dateOfLeaving, '150px')}</td>
             </tr>
             <tr>
-              {/* Yeh 1D3 typo tha, 13 kar diya */}
-              <td>13</td> 
+              <td>1D3</td>
               <td>Standard in which studying and since when (in Words)</td>
               <td>
                 <div className={styles.inlineFields}>
