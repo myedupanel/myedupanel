@@ -1,4 +1,3 @@
-// app/admin/students/generate-leaving-certificate/page.tsx
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './LeavingCertificate.module.scss';
@@ -165,7 +164,7 @@ const LeavingCertificateBuilderPage = () => {
   // --- END ---
 
 
-   // --- Student data se form pre-fill karna (UPDATED) ---
+   // --- Student data se form pre-fill karna (No Change) ---
    useEffect(() => {
     
     const formatDate = (dateStr?: string) => {
@@ -187,12 +186,7 @@ const LeavingCertificateBuilderPage = () => {
           birthTaluka: selectedStudent.birthTaluka || '',
           birthDistrict: selectedStudent.birthDistrict || '',
           birthState: selectedStudent.birthState || '',
-          
-          // --- YAHAN FIX KIYA HAI ---
-          // 'dobWords' ko 'selectedStudent' se 'formData' mein add kiya
           dobWords: selectedStudent.dobInWords || '', 
-          // --- END FIX ---
-
           previousSchool: selectedStudent.previousSchool || '',
           dateOfAdmission: formatDate(selectedStudent.dateOfAdmission),
           standardAdmitted: selectedStudent.standardAdmitted || '',
@@ -201,14 +195,12 @@ const LeavingCertificateBuilderPage = () => {
        }));
     } else {
        // Student clear karne par form data clear karo
-       // (Hum 'regNo' aur 'genRegNo' ko clear nahi karenge kyunki woh school se related hain)
        setFormData(prev => ({ 
            ...prev, 
            motherName: '', 
            studentAadharNo: '', 
            standardLeaving: '',
            standardLeavingWords: '',
-           // ... baaki student-specific fields
            nationality: 'Indian',
            motherTongue: '',
            religion: '',
@@ -217,7 +209,7 @@ const LeavingCertificateBuilderPage = () => {
            birthTaluka: '',
            birthDistrict: '',
            birthState: '',
-           dobWords: '', // Reset karte waqt bhi clear kiya
+           dobWords: '', 
            previousSchool: '',
            dateOfAdmission: '',
            standardAdmitted: '',
@@ -311,7 +303,7 @@ const LeavingCertificateBuilderPage = () => {
   };
   // --- END ---
 
-  // --- JSX Return (No Change) ---
+  // --- JSX Return (UPDATED) ---
   return (
     <div className={styles.pageContainer}>
       <header className={styles.header}>
@@ -339,14 +331,9 @@ const LeavingCertificateBuilderPage = () => {
                   setFormData={setFormData}
                 />
               </div>
-              <div className={styles.actionsWrapper}>
-                  <button onClick={handleDownloadPDF} type="button" className={`${styles.actionButton} ${styles.download}`}>
-                      <FiDownload /> Download PDF
-                  </button>
-                  <button onClick={handlePrint} type="button" className={`${styles.actionButton} ${styles.print}`}>
-                      <FiPrinter /> Print
-                  </button>
-              </div>
+              
+              {/* --- YAHAN SE BUTTONS HATA DIYE GAYE --- */}
+
             </>
           )}
         </div>
@@ -354,6 +341,20 @@ const LeavingCertificateBuilderPage = () => {
         {/* Preview Column */}
         <div className={styles.previewColumn}>
           <h2>Live Preview</h2>
+          
+          {/* --- YAHAN BUTTONS ADD KIYE GAYE --- */}
+          {selectedStudent && (
+            <div className={styles.actionsWrapper}>
+                <button onClick={handleDownloadPDF} type="button" className={`${styles.actionButton} ${styles.download}`}>
+                    <FiDownload /> Download PDF
+                </button>
+                <button onClick={handlePrint} type="button" className={`${styles.actionButton} ${styles.print}`}>
+                    <FiPrinter /> Print
+                </button>
+            </div>
+          )}
+          {/* --- FIX ENDS HERE --- */}
+
           <div className={styles.previewWrapper}>
              <div ref={certificateRef}>
                <LeavingCertificatePreview
