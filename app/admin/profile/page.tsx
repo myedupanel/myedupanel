@@ -18,7 +18,6 @@ interface SchoolFormData {
   govtReg: string; 
   place: string; 
   logoUrl: string;
-  // --- FIX 1: Naya field add kiya ---
   genRegNo: string; // General Register No.
 }
 
@@ -36,7 +35,6 @@ const SchoolProfilePage = () => {
     govtReg: '',
     place: '',
     logoUrl: '',
-    // --- FIX 1: Naye field ko initialize kiya ---
     genRegNo: '' 
   });
 
@@ -72,7 +70,7 @@ const SchoolProfilePage = () => {
     }
   }, [user]);
 
-  // useEffect fetches school profile
+  // useEffect fetches school profile (No Change)
   useEffect(() => {
     const fetchSchoolProfile = async () => {
       if (!user) {
@@ -94,7 +92,6 @@ const SchoolProfilePage = () => {
           govtReg: res.data.recognitionNumber || '', 
           place: res.data.place || '',
           logoUrl: res.data.logoUrl || '',
-          // --- FIX 1: Naya field fetch kiya ---
           genRegNo: res.data.genRegNo || '' 
         });
 
@@ -116,7 +113,7 @@ const SchoolProfilePage = () => {
     fetchSchoolProfile();
   }, [user]); 
 
-  // Input handlers
+  // Input handlers (No Change)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setError('');
     setSuccessMessage('');
@@ -128,7 +125,6 @@ const SchoolProfilePage = () => {
     setSuccessMessage('');
     const file = e.target.files?.[0];
     if (file) {
-      // --- FIX 2: Limit ko 2MB kiya ---
       if (file.size > 2 * 1024 * 1024) { // 2MB limit
           setError("File is too large. Please select an image under 2MB.");
           setImageFile(null); // File ko clear karein
@@ -151,6 +147,7 @@ const SchoolProfilePage = () => {
 
   const handleInputClick = (e: React.MouseEvent<HTMLInputElement>) => { (e.target as HTMLInputElement).value = ''; };
 
+  // Form Submit (No Change)
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(''); 
@@ -159,7 +156,7 @@ const SchoolProfilePage = () => {
 
     // Validations
     if (!formData.name) {
-        setError('School Name (Main/Trust) is required.');
+        setError('School/Trust Name (Main) is required.');
         setIsSubmitting(false);
         return;
     }
@@ -178,7 +175,6 @@ const SchoolProfilePage = () => {
         setIsSubmitting(false);
         return;
     }
-    // --- FIX 1: Naye field ke liye validation add kiya ---
      if (!formData.genRegNo) {
         setError('General Register No. is required.');
         setIsSubmitting(false);
@@ -197,7 +193,6 @@ const SchoolProfilePage = () => {
       data.append('udiseNo', formData.udiseNo);
       data.append('recognitionNumber', formData.govtReg);
       data.append('place', formData.place);
-      // --- FIX 1: Naya field submit data mein add kiya ---
       data.append('genRegNo', formData.genRegNo);
       
       if (imageFile) {
@@ -223,7 +218,6 @@ const SchoolProfilePage = () => {
             govtReg: savedData.recognitionNumber || '', 
             place: savedData.place || '',
             logoUrl: savedData.logoUrl || '',
-            // --- FIX 1: Naya field response se update kiya ---
             genRegNo: savedData.genRegNo || ''
         });
         if(savedData.logoUrl) {
@@ -249,6 +243,7 @@ const SchoolProfilePage = () => {
     }
   };
 
+  // handleCancel (No Change)
   const handleCancel = () => {
     if (!isSubmitting) {
       router.back(); 
@@ -270,6 +265,7 @@ const SchoolProfilePage = () => {
       <div className={styles.profileCard}>
         <form className={styles.profileForm} onSubmit={handleFormSubmit}>
 
+          {/* Profile Header (No Change) */}
           <div className={styles.profileHeader}>
             {imagePreview ? (
               <Image src={imagePreview} alt="School Logo" width={100} height={100} className={styles.profileImage} />
@@ -279,42 +275,52 @@ const SchoolProfilePage = () => {
             <div className={styles.imageUploadWrapper}>
               <label htmlFor="imageUpload" className={styles.uploadButton}>Change Logo</label>
               <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/webp" onChange={handleImageChange} onClick={handleInputClick} style={{ display: 'none' }} disabled={isSubmitting} />
-               {/* --- FIX 2: Hint text ko 2MB kiya --- */}
                <small className={styles.uploadHint}>Max 2MB (PNG, JPG, WEBP)</small>
             </div>
           </div>
 
-          {/* Messages Area */}
+          {/* Messages Area (No Change) */}
           {error && <p className={styles.errorMessage}><FiAlertCircle /> {error}</p>}
           {successMessage && <p className={styles.successMessage}><FiCheckCircle /> {successMessage}</p>}
 
-          {/* School Name (Trust Name) */}
-          <div className={styles.formGroup}>
-            <label htmlFor="name">School/Trust Name (Main) *</label>
-            <input type="text" id="name" name="name" value={formData.name} onChange={handleInputChange} required disabled={!canUpdateSchoolName || isSubmitting} className={!canUpdateSchoolName ? styles.disabledInput : ''} />
-            {!canUpdateSchoolName && daysRemaining !== null && (<p className={styles.infoMessage}> You can change school name again in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}. </p> )}
-          </div>
-
-          {/* School Name 2 (Tagline) */}
+          {/*
+            ======================================================================
+            === YEH HAI AAPKA FIX ===
+            Maine 'name2' (Certificate Name) waale block ko upar
+            aur 'name' (Trust Name) waale block ko neeche kar diya hai.
+            ======================================================================
+          */}
+          
+          {/* School Name 2 (For Certificates) - YEH AB PEHLE AAYEGA */}
           <div className={styles.formGroup}>
             <label htmlFor="name2">School Name Line 2 (For Certificates) *</label>
             <input type="text" id="name2" name="name2" value={formData.name2} onChange={handleInputChange} required disabled={isSubmitting} placeholder="e.x., MyEduPanel Sec. & Higher Sec. School" />
             <small>This will be the main name shown on certificates.</small>
           </div>
+          
+          {/* School Name (Trust Name) - YEH AB DOOSRA AAYEGA */}
+          <div className={styles.formGroup}>
+            <label htmlFor="name">School/Trust Name (Main) *</label>
+            <input type="text" id="name" name="name" value={formData.name} onChange={handleInputChange} required disabled={!canUpdateSchoolName || isSubmitting} className={!canUpdateSchoolName ? styles.disabledInput : ''} />
+            {!canUpdateSchoolName && daysRemaining !== null && (<p className={styles.infoMessage}> You can change school name again in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}. </p> )}
+          </div>
+          
+          {/* === FIX ENDS HERE === */}
 
-          {/* Address */}
+
+          {/* Address (No Change) */}
           <div className={styles.formGroup}>
             <label htmlFor="address">School Address *</label>
             <textarea id="address" name="address" value={formData.address} onChange={handleInputChange} rows={3} required disabled={isSubmitting} placeholder="e.x., Pune, Pune, Dist. Pune" />
           </div>
 
-          {/* Place (for Footer) */}
+          {/* Place (for Footer) (No Change) */}
           <div className={styles.formGroup}>
             <label htmlFor="place">Place (For Certificate Footer) *</label>
             <input type="text" id="place" name="place" value={formData.place} onChange={handleInputChange} required disabled={isSubmitting} placeholder="e.x., Pune" />
           </div>
 
-          {/* Login Email (Read-Only) */}
+          {/* Login Email (Read-Only) (No Change) */}
           <div className={styles.formGroup}>
             <label htmlFor="loginEmail">Login Email (Cannot be changed)</label>
             <input
@@ -328,7 +334,7 @@ const SchoolProfilePage = () => {
             />
           </div>
 
-          {/* Form Grid for Contact / Public Email */}
+          {/* Form Grid for Contact / Public Email (No Change) */}
           <div className={styles.formGrid}>
             <div className={styles.formGroup}>
               <label htmlFor="mobNo">Contact Number</label>
@@ -341,7 +347,7 @@ const SchoolProfilePage = () => {
             </div>
           </div>
 
-          {/* Form Grid for Reg Numbers */}
+          {/* Form Grid for Reg Numbers (No Change) */}
           <div className={styles.formGrid}>
             <div className={styles.formGroup}>
               <label htmlFor="udiseNo">UDISE No.</label>
@@ -354,16 +360,15 @@ const SchoolProfilePage = () => {
             </div>
           </div>
           
-          {/* --- FIX 1: Naya field add kiya --- */}
+          {/* General Register No. (No Change) */}
           <div className={styles.formGroup}>
             <label htmlFor="genRegNo">General Register No. (For L.C. Footer) *</label>
             <input type="text" id="genRegNo" name="genRegNo" value={formData.genRegNo} onChange={handleInputChange} required disabled={isSubmitting} placeholder="e.g., 44434" />
             <small>This will auto-fill the 'General Register No.' on certificates.</small>
           </div>
-          {/* --- FIX ENDS HERE --- */}
 
 
-          {/* Buttons */}
+          {/* Buttons (No Change) */}
           <div className={styles.buttonGroup}>
             <button type="button" className={styles.cancelButton} onClick={handleCancel} disabled={isSubmitting}>Cancel</button>
             <button type="submit" className={styles.saveButton} disabled={isSubmitting || isLoading}>

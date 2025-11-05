@@ -35,6 +35,14 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             return res.status(400).json({ msg: 'Admin school information missing.' });
         }
         console.log(`[GET /dashboard-data] Fetching data for schoolId: ${schoolId}`);
+        
+        // --- YAHAN FIX KIYA (Part 1) ---
+        // Current month ka revenue calculate karne ke liye dates set ki
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        const currentMonthName = now.toLocaleString('default', { month: 'long' }); // Jaise "November"
+        // --- FIX ENDS ---
 
         const staffRoles = ['Accountant', 'Office Admin', 'Librarian', 'Security', 'Transport Staff', 'Other', 'Staff']; 
 
@@ -49,7 +57,8 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             recentStaff,
             recentPaidFeeRecords,
             admissionsDataRaw,
-            classCountsRaw
+            classCountsRaw,
+            monthlyRevenueRaw // --- YAHAN FIX KIYA (Part 2) ---
         ] = await Promise.all([
             // Total Counts (No Change)
             prisma.students.count({ where: { schoolId: schoolId } }), 
@@ -111,6 +120,23 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                 where: { schoolId: schoolId },
                 _count: { studentid: true }, 
             }),
+            
+            // --- YAHAN FIX KIYA (Part 3) ---
+            // Current month ka revenue calculate karne ke liye nayi query
+            prisma.feeRecord.aggregate({
+                _sum: { amount: true },
+                where: {
+                    schoolId: schoolId,
+                    status: 'Paid',
+                    // Hum assume kar rahe hain ki payment date 'createdAt' ya 'paymentDate' field mein hai
+                    // Agar aapka field alag hai (jaise 'paidOn'), toh yahan change karein
+                    createdAt: { 
+                        gte: startOfMonth,
+                        lt: nextMonthStart
+                    }
+                }
+            })
+            // --- FIX ENDS ---
 
         ]).catch(err => {
             console.error("[GET /dashboard-data] Error during Promise.all:\n", err);
@@ -172,6 +198,11 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
              subject: t.subject
          }));
 
+        // --- YAHAN FIX KIYA (Part 4) ---
+        // Revenue data ko process kiya
+        const currentMonthRevenue = monthlyRevenueRaw._sum.amount || 0;
+        // --- FIX ENDS ---
+
 
         // --- Final Data Object ---
         const dashboardData = {
@@ -185,7 +216,12 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             recentTeachers: formattedRecentTeachers || [], 
             recentParents: recentParents || [],
             recentStaff: recentStaff || [],
-            recentFees
+            recentFees,
+            // --- YAHAN FIX KIYA (Part 5) ---
+            // Final data ko response mein add kiya
+            currentMonthRevenue: currentMonthRevenue,
+            currentMonthName: currentMonthName
+            // --- FIX ENDS ---
         };
         console.log(`[GET /dashboard-data] Sending final data. Staff: ${dashboardData.totalStaff}`);
         res.json(dashboardData);
