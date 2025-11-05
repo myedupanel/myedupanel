@@ -128,9 +128,9 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                 where: {
                     schoolId: schoolId,
                     status: 'Paid',
-                    // Hum assume kar rahe hain ki payment date 'createdAt' ya 'paymentDate' field mein hai
-                    // Agar aapka field alag hai (jaise 'paidOn'), toh yahan change karein
-                    createdAt: { 
+                    // 'createdAt' ko 'paymentDate' se badal diya
+                    // (Hum assume kar rahe hain ki field ka naam 'paymentDate' hai)
+                    paymentDate: { 
                         gte: startOfMonth,
                         lt: nextMonthStart
                     }
