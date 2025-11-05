@@ -115,7 +115,6 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
 
     // --- Print & Download Handlers (No Change) ---
-    // Aapke yeh functions bilkul sahi hain. Yeh ab naye A4 sheet ko handle kar lenge.
     const handlePrint = () => {
         const input = componentRef.current;
         if (!input || !transaction) { alert("Details missing."); return; }
@@ -346,28 +345,45 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     </table>
                 </section>
 
-                {/* 6. Payment Details (Ab table ke neeche) */}
+                {/* // ========================================================
+                // === YAHAN BADLAAV KIYA GAYA HAI ===
+                // Balance Due ko Payment Block ke grid ke andar move kar diya hai
+                // ========================================================
+                */}
+
+                {/* 6. Payment Details & Balance (MERGED) */}
                 <div className={`${styles.paymentBlock}`}>
                     <div className={styles.grid}>
+                        {/* Item 1 */}
                         <p><strong>Amount Paid:</strong> <strong className={styles.paidAmount}>{formatCurrency(amountPaid)}</strong></p>
+                        
+                        {/* Item 2 */}
                         <p><strong>Payment Mode:</strong> {transaction.paymentMode || 'N/A'}</p>
-                        {transaction.notes && <p className={styles.notes}><strong>Remarks:</strong> {transaction.notes}</p>}
+                        
+                        {/* Item 3 (MOVED HERE) */}
+                        <div className={styles.balanceWrapper}> {/* Wrapper for alignment */}
+                            <div className={styles.balanceBlock}>
+                                <section className={styles.balanceSection}>
+                                    <p><strong>Balance Due:</strong> 
+                                        <span className={styles.balanceAmount} data-balance-zero={balanceDue < 0.01}>{formatCurrency(balanceDue)}</span>
+                                    </p>
+                                    {paymentStatus === 'PAID' ? ( <div className={styles.paidStamp}>PAID</div> ) :
+                                        (<div className={`${styles.statusBadge} ${styles[paymentStatus.toLowerCase()]}`}>{paymentStatus}</div>)
+                                    }
+                                </section>
+                            </div>
+                        </div>
+
+                        {/* Item 4 (Conditional, ab full width lega) */}
+                        {transaction.notes && (
+                            <p className={`${styles.notes} ${styles.fullWidth}`}>
+                                <strong>Remarks:</strong> {transaction.notes}
+                            </p>
+                        )}
                     </div>
                 </div>
 
-                {/* 7. Balance Due Wrapper (Blueprint ke jaisa) */}
-                <div className={styles.balanceWrapper}>
-                    <div className={styles.balanceBlock}>
-                        <section className={styles.balanceSection}>
-                            <p><strong>Balance Due:</strong> 
-                                <span className={styles.balanceAmount} data-balance-zero={balanceDue < 0.01}>{formatCurrency(balanceDue)}</span>
-                            </p>
-                            {paymentStatus === 'PAID' ? ( <div className={styles.paidStamp}>PAID</div> ) :
-                                (<div className={`${styles.statusBadge} ${styles[paymentStatus.toLowerCase()]}`}>{paymentStatus}</div>)
-                            }
-                        </section>
-                    </div>
-                </div>
+                {/* 7. Balance Due Wrapper (YAHAN SE HATA DIYA GAYA) */}
                 
                 {/* 8. Footer (Updated) */}
                 <footer className={styles.footer}>

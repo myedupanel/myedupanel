@@ -172,7 +172,13 @@
   .amountCol { text-align: right; }
 }
 
-/* 6. Payment Block (Ab 50/50 split mein nahi hai) */
+
+/* // ========================================================
+// === YAHAN BADLAAV KIYA GAYA HAI ===
+// ========================================================
+*/
+
+/* 6. Payment Block (MERGED WITH BALANCE) */
 .paymentBlock {
     margin-top: 10px;
     border-top: 1px solid #f0f0f0;
@@ -181,8 +187,9 @@
     .grid { 
         gap: 4px 20px; 
         display: grid;
-        /* Columns: Paid, Mode, Remarks */
-        grid-template-columns: 1fr 1fr 1.5fr; 
+        /* 3 columns: Paid (auto), Mode (auto), Balance (remaining space) */
+        grid-template-columns: auto auto 1fr; 
+        align-items: center; /* Sabko vertically center karega */
         font-size: 0.88rem; 
         p { margin: 0; strong {font-weight: 600; color: #000;} }
     }
@@ -192,15 +199,21 @@
     }
     .notes {
       font-style: italic;
+      /* Yeh class notes ko full width degi */
+      &.fullWidth {
+        grid-column: 1 / -1; /* Sabhi 3 columns ko span karega */
+        margin-top: 5px; /* Thoda space */
+      }
     }
 }
 
-/* 7. BALANCE LAYOUT (Blueprint ke jaisa) */
+/* 7. BALANCE LAYOUT (NOW MOVED) */
 .balanceWrapper {
+    /* Ab yeh grid item hai. Iske andar content ko right push karenge */
     display: flex;
-    justify-content: flex-end; /* Right side mein rakhega */
+    justify-content: flex-end;
     align-items: center;
-    margin-top: 15px;
+    /* margin-top: 15px; (REMOVED) */
 }
 
 .balanceBlock {
@@ -211,15 +224,18 @@
     display: flex; 
     align-items: center;
     gap: 20px; 
-    
     background-color: #ffffff; /* Print safety */
-    border: 1px solid #ddd;
-    padding: 10px 20px; 
+    
+    /* Border aur padding hataya taaki inline lage */
+    border: none;
+    padding: 0; 
     font-size: 0.95rem;
 
     p { margin: 0; }
     strong { font-weight: 700; }
 }
+/* === FIX ENDS HERE === */
+
 
 .balanceAmount {
   font-weight: 700;
@@ -328,6 +344,11 @@
     .separator {
         margin: 0 10mm !important;
         width: auto !important;
+    }
+    
+    /* Scissor line ko print mein hide karein */
+    .titleMeta .scissorLine {
+        display: none !important;
     }
 
     /* 4. Page Break Avoidance */
