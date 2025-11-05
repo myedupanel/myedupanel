@@ -38,12 +38,12 @@
 /* --- End Base Styles --- */
 
 
-/* --- Header Style --- */
+/* --- Header Style (MODIFIED) --- */
 .certHeader {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 3px; /* Reduced gap */
   border-bottom: 1.5px solid #000;
   padding-bottom: 8px;
   margin-bottom: 10px; 
@@ -54,9 +54,12 @@
     flex-grow: 0;
     text-align: center;
     padding: 0;
-    .schoolName1 { font-size: 12pt; font-weight: bold; margin: 0; }
-    .schoolName2 { font-size: 18pt; font-weight: bold; margin: 2px 0; }
-    .schoolAddressCode { font-size: 10pt; margin: 0; line-height: 1.4; }
+    line-height: 1.2;
+    
+    .schoolNameMyEdu { font-size: 8pt; margin-bottom: 2px; } /* New line for My EduPanel */
+    .schoolName1 { font-size: 14pt; font-weight: bold; margin: 0; } /* Main School Name */
+    .schoolName2 { display: none; } /* Assuming this is redundant or handled by schoolName1 */
+    .schoolAddressCode { font-size: 9pt; margin: 0; line-height: 1.4; }
   }
 }
 
@@ -65,33 +68,36 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-top: 7px; 
+  margin-top: 10px; /* Increased top margin for separation */
 
-  h2 { /* Title */
-    font-size: 15pt;
+  h2 { /* Title - LEAVING CERTIFICATE */
+    font-size: 14pt; /* Adjusted size */
     font-weight: bold;
     margin: 0;
     padding: 0 10px; 
     text-align: center;
-    flex-grow: 1;
+    flex-grow: 1; /* Allows it to take up available space */
     flex-shrink: 1;
   }
 
   .headerSrNo, .headerRegNo {
     font-size: 11pt;
-    font-weight: bold;
+    font-weight: normal; /* Normal font weight for Sr/Reg no value */
     white-space: nowrap;
-    flex-basis: auto;
+    /* Using flex-basis to ensure the remaining space is perfectly centered */
+    flex-basis: auto; 
     flex-shrink: 0;
+    padding: 0 5px;
   }
-  .headerSrNo { text-align: left; margin-right: 15px; }
-  .headerRegNo { text-align: right; margin-left: 15px; }
+  .headerSrNo { text-align: left; }
+  .headerRegNo { text-align: right; }
 }
 /* --- End Header Style --- */
 
 
-/* --- Student Info Table (Main Fixes) --- */
+/* --- Student Info Table (No Change) --- */
 .studentInfoTable {
+// ... (Rest of the SCSS remains unchanged)
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;

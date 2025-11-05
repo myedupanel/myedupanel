@@ -3,6 +3,7 @@ import styles from './LeavingCertificatePreview.module.scss'; // Import the SCSS
 
 // --- Interfaces (No Change) ---
 interface Student {
+// ... (Interfaces remain unchanged)
   id: string; 
   name: string; 
   dob?: string; 
@@ -22,6 +23,7 @@ interface SchoolDetails {
 }
 
 export interface LeavingFormData {
+// ... (Interfaces remain unchanged)
   regNo?: string; 
   nationality?: string;
   motherTongue?: string;
@@ -51,6 +53,7 @@ export interface LeavingFormData {
 
 // --- formatDate Function (No Change) ---
 const formatDate = (dateString: string | undefined): string => {
+// ... (formatDate remains unchanged)
   if (!dateString) return '';
   try {
     const date = new Date(dateString);
@@ -100,32 +103,39 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* Header (No Change) */}
+        {/* Header - MODIFIED TO MATCH SCREENSHOT ALIGNMENT */}
         <header className={styles.certHeader}>
-          {/* ... (header code) ... */}
           <div className={styles.schoolInfoBlock}>
-            <div className={styles.schoolName1}>{schoolDetails.name}</div>
-            <div className={styles.schoolName2}>{schoolDetails.name2 || schoolDetails.name}</div>
+            {/* Added a placeholder line for 'My EduPanel' like in the screenshot */}
+            <div className={styles.schoolNameMyEdu}>My EduPanel</div> 
+            <div className={styles.schoolName1}>{schoolDetails.name || 'Prime International School'}</div>
             <div className={styles.schoolAddressCode}>
-              {schoolDetails.address}
+              {schoolDetails.address || 'Pune'}
               <br/>
-              UDISE NO: {schoolDetails.udiseNo}
+              UDISE NO: {schoolDetails.udiseNo || '987654321012'}
             </div>
           </div>
+          
           <div className={styles.titleRow}>
+            {/* Sr. No. on the left */}
             <div className={styles.headerSrNo}>
               Sr. No: {fill(formData.genRegNo, '100px')}
             </div>
-            <h2>LEAVING CERTIFICATE</h2>
+            
+            {/* LEAVING CERTIFICATE - This will be centered */}
+            <h2 className={styles.mainTitle}>LEAVING CERTIFICATE</h2>
+            
+            {/* Reg. No. on the right */}
             <div className={styles.headerRegNo}>
               Reg. No: {fill(formData.regNo, '100px')}
             </div>
           </div>
         </header>
 
-        {/* Student Info Table */}
+        {/* Student Info Table (REST OF THE BODY REMAINS UNCHANGED) */}
         <table className={styles.studentInfoTable}>
-          <tbody>
+            {/* ... table content remains here ... */}
+             <tbody>
             <tr>
               <td>1</td>
               <td>Student's Full Name</td>
@@ -145,7 +155,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>4</td>
               <td colSpan={2}> 
                 <div className={styles.inlineFields}>
-                  <SubField label="Nationality" value={formData.nationality} minWidth="140px" />
+                  <SubField label="Nationality" value={formData.nationality || 'Indian'} minWidth="140px" />
                   <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="85px" />
                   <SubField label="Religion" value={formData.religion} minWidth="80px" />
                 </div>
