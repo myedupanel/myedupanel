@@ -1,4 +1,4 @@
-// File: FeeReceipt.tsx (FINAL LAYOUT - Fee/Payment side-by-side, Balance below)
+// File: FeeReceipt.tsx (FINAL LAYOUT - Side-by-Side Fix)
 
 import React, { useRef } from 'react';
 import styles from './FeeReceipt.module.scss';
@@ -224,7 +224,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     <h2>FEE RECEIPT</h2>
                 </div>
 
-                {/* 3. Student Details (CHANGED: Roll No removed) */}
+                {/* 3. Student Details (Roll No removed) */}
                 <section className={styles.detailsSection}>
                     <h3>Student Information</h3>
                     <div className={styles.grid}>
@@ -238,6 +238,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                 {/* === START MAJOR LAYOUT CHANGE === */}
                 
                 {/* 4. Main Content Wrapper (Left: Table, Right: Payment) */}
+                {/* YEH WRAPPER ADD KARNA ZAROORI HAI */}
                 <div className={styles.mainContentWrapper}>
 
                     {/* Left Column (Fee Table) */}
@@ -286,10 +287,9 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     </div>
                 </div>
 
-                {/* 5. Balance Due Wrapper (Now separate and below) */}
+                {/* 5. Balance Due Wrapper (Centered) */}
                 <div className={styles.balanceWrapper}>
                     <div className={styles.balanceBlock}>
-                        {/* .balanceSection ab "Balance" aur "Status" ko ek line mein rakhega */}
                         <section className={styles.balanceSection}>
                             <p><strong>Balance Due:</strong> 
                                 <span className={styles.balanceAmount} data-balance-zero={balanceDue < 0.01}>{formatCurrency(balanceDue)}</span>
@@ -304,7 +304,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                 {/* === END MAJOR LAYOUT CHANGE === */}
 
 
-                {/* 6. Footer (No Change) */}
+                {/* 6. Footer (No Change in structure) */}
                 <footer className={styles.footer}>
                      <p className={styles.receivedBy}>Received By: {collectedByNameDisplay}</p>
                     

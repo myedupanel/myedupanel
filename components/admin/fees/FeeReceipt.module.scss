@@ -1,4 +1,4 @@
-/* File: FeeReceipt.module.scss (FINAL LAYOUT - Side-by-Side & Centered Balance) */
+/* File: FeeReceipt.module.scss (Side-by-Side & Signature Space Fix) */
 
 /* Base Styles and Fonts */
 .receiptContainer {
@@ -87,7 +87,7 @@
   h2 { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; color: #111; }
 }
 
-/* 3. Student Details (CHANGED: 3-column grid, Roll No removed) */
+/* 3. Student Details (3-column grid, Roll No removed) */
 .detailsSection {
   margin-bottom: 20px; 
   
@@ -136,7 +136,7 @@
 
 /* 5. LAYOUT FIX (Side-by-Side) */
 .mainContentWrapper {
-    display: grid; /* Grid ka istemaal flex se behtar hai yahan */
+    display: grid; /* Grid ka istemaal karein */
     grid-template-columns: 1.5fr 1fr; /* Left (1.5) aur Right (1) column */
     align-items: flex-start; /* Dono top se align honge */
     gap: 25px; /* Dono columns ke beech gap */
@@ -172,7 +172,7 @@
     }
 }
 
-/* 6. BALANCE LAYOUT (NEW - Centered) */
+/* 6. BALANCE LAYOUT (Centered) */
 .balanceWrapper {
     display: flex;
     justify-content: center; /* Poore block ko center mein rakhega */
@@ -181,13 +181,12 @@
 }
 
 .balanceBlock {
-    /* Is wrapper ki ab zaroorat nahi, lekin rakhte hain */
     text-align: left; 
 }
 
 .balanceSection {
-    /* Yeh hai important part */
-    display: flex; /* Teeno items (Label, Amount, Status) ko ek line mein layega */
+    /* Teeno items (Label, Amount, Status) ko ek line mein layega */
+    display: flex; 
     align-items: center; /* Vertically center karega */
     gap: 20px; /* Har item ke beech gap */
     
@@ -228,7 +227,7 @@
 }
 
 
-/* 7. Footer & Signatures (No Change) */
+/* 7. Footer & Signatures (Signature Space Fix) */
 .footer {
   margin-top: 30px; 
   padding-top: 10px; 
@@ -239,13 +238,13 @@
   color: #000; 
 
   .receivedBy {
-    margin-bottom: 30px;
+    margin-bottom: 30px; /* Line ke upar space */
   }
   
   .signatureArea {
     display: flex;
     justify-content: space-between;
-    margin-top: 30px; 
+    /* margin-top: 30px; (redundant) */
   }
   
   .signatureBox {
@@ -262,7 +261,8 @@
         width: 35%; 
         text-align: center; 
         font-weight: 600;
-        margin: 5px 0 0 0;
+        /* === YAHAN CHANGE KIYA GAYA HAI === */
+        margin: 15px 0 0 0; /* 5px se 15px kiya, labels ko neeche khiskaya */
     }
   }
 
