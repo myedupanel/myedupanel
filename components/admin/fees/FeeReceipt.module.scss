@@ -204,7 +204,17 @@
     }
   }
 
-  .footerNote { text-align: center; margin-top: 15px; font-style: italic; font-weight: 400;}
+  .footerNote { 
+    text-align: center; 
+    margin-top: 15px; 
+    font-style: italic; 
+    font-weight: 400;
+    
+    /* === YAHAN CHANGE KIYA GAYA HAI (Change 1) === */
+    /* Screen par bhi background white kar diya hai */
+    background-color: #ffffff;
+    padding: 10px 0; /* Thodi padding add kar di */
+  }
 }
 
 /* --- FINAL PRINT MEDIA QUERY (Single Page Guarantee) --- */
@@ -225,6 +235,8 @@
 
     /* 3. Page Break Avoidance */
     .detailsSection, .itemsSection, .paymentAndBalance, .footer, .itemsTable {
+        /* === YAHAN CHANGE KIYA GAYA HAI (Change 2) === */
+        /* Typo theek kiya: !importa -> !important */
         page-break-inside: avoid !important;
         page-break-after: auto;
     }
