@@ -1,20 +1,25 @@
 // File: FeeReceipt.tsx (FINAL LAYOUT - School Name Fix)
 
-import React, { useRef } from 'react';
+// --- YAHAN FIX KIYA (1/4): useEffect aur useState ko import kiya ---
+import React, { useRef, useState, useEffect } from 'react';
 import styles from './FeeReceipt.module.scss';
 import { FiPrinter, FiDownload } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+// --- YAHAN FIX KIYA (2/4): api ko import kiya ---
+import api from '@/backend/utils/api'; 
 
 // --- Interface Definitions ---
 export interface SchoolInfo {
     name?: string;
-    name2?: string; // <-- YAHAN FIX KIYA (1/2): name2 ko interface mein add kiya
+    name2?: string; // <-- Yeh pehle se tha (sahi hai)
     address?: string; 
     logo?: string;
     session?: string; 
     phone?: string; 
     email?: string;
+    // --- YEH BHI ADD KAR RAHA HOON (Consistency ke liye) ---
+    udiseNo?: string;
 }
 export interface StudentInfo {
     id: number; name: string; studentId?: string;
@@ -86,6 +91,30 @@ const formatDate = (dateString: string | undefined): string => {
 // --- MAIN COMPONENT DECLARATION (CORRECTED) ---
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null); 
+    
+    // --- YAHAN FIX KIYA (3/4): School details ko fetch karne ke liye state banaya ---
+    const [schoolDetails, setSchoolDetails] = useState<SchoolInfo | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchSchoolProfile = async () => {
+            setIsLoading(true);
+            try {
+                const res = await api.get('/api/school/profile');
+                setSchoolDetails(res.data);
+            } catch (err) {
+                console.error("Failed to fetch school profile for receipt", err);
+                // Agar fetch fail ho, toh prop se fallback karein
+                setSchoolDetails(transaction?.schoolInfo || {});
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        fetchSchoolProfile();
+    }, [transaction?.schoolInfo]); // 'transaction' par depend karein
+    // --- FIX ENDS HERE ---
+
 
     // --- Print & Download Handlers (No Change) ---
     const handlePrint = () => {
@@ -161,12 +190,13 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     };
     // --- END ---
     
-    if (!transaction) {
-        return <div className={styles.noData}>No transaction details available.</div>;
+    // --- Loading states updated ---
+    if (!transaction || isLoading) {
+        return <div className={styles.noData}>Loading Receipt Data...</div>;
     }
 
-    // --- Data Extraction (No Change) ---
-    const schoolInfo = transaction.schoolInfo || {};
+    // --- Data Extraction (Ab iski zaroorat nahi, hum 'schoolDetails' state use karenge) ---
+    // const schoolInfo = transaction.schoolInfo || {}; // <-- Is line ki ab zaroorat nahi
     const studentData = transaction.studentId || {}; 
     const templateData = transaction.templateId || {}; 
     
@@ -211,21 +241,23 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             {/* --- Receipt Content JSX (NEW LAYOUT) --- */}
             <div id="printable-receipt" className={styles.receiptContent} ref={componentRef}>
                 
-                {/* 1. HEADER (No Change) */}
+                {/* --- YAHAN FIX KIYA (4/4): Ab yeh 'schoolDetails' state se data lega --- */}
                 <div className={styles.header}>
                     <div className={styles.schoolDetails}>
-                        {schoolInfo.logo && (<img src={schoolInfo.logo} alt={`${schoolInfo.name || 'School'} Logo`} className={styles.logo} />)}
+                        {schoolDetails?.logo && (<img src={schoolDetails.logo} alt={`${schoolDetails.name || 'School'} Logo`} className={styles.logo} />)}
                         
-                        {/* --- YAHAN FIX KIYA (2/2) --- */}
-                        {/* Ab yeh 'name2' (Certificate Name) ko pehle dikhayega */}
-                        <h1>{schoolInfo.name2 || schoolInfo.name || 'My EduPanel'}</h1>
+                        {/* Ab yeh 'name2' (Certificate Name) ko state se dikhayega */}
+                        <h1>{schoolDetails?.name2 || schoolDetails?.name || 'My EduPanel'}</h1>
                     </div>
                     <div className={styles.metaHeader}>
                         <p><strong>Receipt No:</strong> {receiptNoDisplay}</p>
                         <p><strong>Date:</strong> {paymentDateDisplay}</p>
-                        <p><strong>Session:</strong> {schoolInfo.session || 'N/A'}</p>
+                        {/* Session ko bhi state se liya */}
+                        <p><strong>Session:</strong> {schoolDetails?.session || 'N/A'}</p>
                     </div>
                 </div>
+                {/* --- FIX ENDS HERE --- */}
+
 
                 {/* 2. Central Title (No Change) */}
                 <div className={styles.titleMeta}>
@@ -243,13 +275,6 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     </div>
                 </section>
 
-                {/*
-                    ======================================================================
-                    === YEH HAI WOH WRAPPER JISKI HUMEIN ZAROORAT THI ===
-                    Iske bina 50-50 layout kaam nahi karega.
-                    ======================================================================
-                */}
-                
                 {/* 4. Main Content Wrapper (Left: Table, Right: Payment) */}
                 <div className={styles.mainContentWrapper}>
 
