@@ -346,59 +346,60 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                 </section>
 
                 {/* // ========================================================
-                // === YAHAN BADLAAV KIYA GAYA HAI ===
-                // Balance Due ko Payment Block ke grid ke andar move kar diya hai
+                // === YAHAN BADLAAV KIYA GAYA HAI (REVERT) ===
+                // Balance Due ko waapas neeche laaya gaya hai
                 // ========================================================
                 */}
 
-                {/* 6. Payment Details & Balance (MERGED) */}
+                {/* 6. Payment Details (Blueprint ke jaisa - Sirf Payment Details) */}
                 <div className={`${styles.paymentBlock}`}>
                     <div className={styles.grid}>
-                        {/* Item 1 */}
                         <p><strong>Amount Paid:</strong> <strong className={styles.paidAmount}>{formatCurrency(amountPaid)}</strong></p>
-                        
-                        {/* Item 2 */}
                         <p><strong>Payment Mode:</strong> {transaction.paymentMode || 'N/A'}</p>
-                        
-                        {/* Item 3 (MOVED HERE) */}
-                        <div className={styles.balanceWrapper}> {/* Wrapper for alignment */}
-                            <div className={styles.balanceBlock}>
-                                <section className={styles.balanceSection}>
-                                    <p><strong>Balance Due:</strong> 
-                                        <span className={styles.balanceAmount} data-balance-zero={balanceDue < 0.01}>{formatCurrency(balanceDue)}</span>
-                                    </p>
-                                    {paymentStatus === 'PAID' ? ( <div className={styles.paidStamp}>PAID</div> ) :
-                                        (<div className={`${styles.statusBadge} ${styles[paymentStatus.toLowerCase()]}`}>{paymentStatus}</div>)
-                                    }
-                                </section>
-                            </div>
-                        </div>
-
-                        {/* Item 4 (Conditional, ab full width lega) */}
-                        {transaction.notes && (
-                            <p className={`${styles.notes} ${styles.fullWidth}`}>
-                                <strong>Remarks:</strong> {transaction.notes}
-                            </p>
-                        )}
+                        {transaction.notes && <p className={styles.notes}><strong>Remarks:</strong> {transaction.notes}</p>}
                     </div>
                 </div>
 
-                {/* 7. Balance Due Wrapper (YAHAN SE HATA DIYA GAYA) */}
+                {/* 7. Balance Due Wrapper (Waapas aa gaya hai) */}
+                <div className={styles.balanceWrapper}>
+                    <div className={styles.balanceBlock}>
+                        <section className={styles.balanceSection}>
+                            <p><strong>Balance Due:</strong> 
+                                <span className={styles.balanceAmount} data-balance-zero={balanceDue < 0.01}>{formatCurrency(balanceDue)}</span>
+                            </p>
+                            {paymentStatus === 'PAID' ? ( <div className={styles.paidStamp}>PAID</div> ) :
+                                (<div className={`${styles.statusBadge} ${styles[paymentStatus.toLowerCase()]}`}>{paymentStatus}</div>)
+                            }
+                        </section>
+                    </div>
+                </div>
+                {/* === REVERT ENDS === */}
+
                 
-                {/* 8. Footer (Updated) */}
+                {/* // ========================================================
+                // === YAHAN BADLAAV KIYA GAYA HAI (Footer) ===
+                // Footer ko blueprint ('image_61051c.jpg') jaisa banaya hai
+                // ========================================================
+                */}
                 <footer className={styles.footer}>
-                    <p className={styles.receivedBy}>Received By: {collectedByNameDisplay}</p>
-                    <div className={styles.signatureArea}>
-                        {/* Blueprint ke hisaab se ek hi signature hai */}
-                        <span className={styles.signatureBox}></span>
+                    {/* Main footer content with Received By (left) and Signature (right) */}
+                    <div className={styles.footerMain}>
+                        <p className={styles.receivedBy}>Received By: {collectedByNameDisplay}</p>
+                        
+                        <div className={styles.signatureBlock}>
+                            <div className={styles.signatureBox}>
+                                {/* Aap yahan <img> tag daal sakte hain agar image ho */}
+                            </div> 
+                            <p className={styles.signatoryLabel}>Authorised Signatory</p>
+                        </div>
                     </div>
-                    <div className={styles.signatureLabels}>
-                        <p className={styles.signatoryLabel}>Authorised Signatory</p>
-                    </div>
+                    
+                    {/* Bottom-most note */}
                     <p className={styles.footerNote}>
                         This is a computer-generated receipt {transaction.paymentMode !== 'Online' ? 'and requires a signature.' : 'and does not require a signature if paid online.'}
                     </p>
                 </footer>
+                {/* === FOOTER FIX ENDS === */}
             </div>
         );
     };

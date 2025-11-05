@@ -136,12 +136,6 @@
   }
 }
 
-/* 3. Student Details (REMOVED) */
-/* .detailsSection { ... } */
-
-/* 4. Main 50/50 Split (REMOVED) */
-/* .mainContentWrapper { ... } */
-
 
 /* 5. Fee Table (NEW LAYOUT) */
 .itemsSection {
@@ -174,22 +168,26 @@
 
 
 /* // ========================================================
-// === YAHAN BADLAAV KIYA GAYA HAI ===
+// === YAHAN BADLAAV KIYA GAYA HAI (REVERT) ===
 // ========================================================
 */
 
-/* 6. Payment Block (MERGED WITH BALANCE) */
+/* 6. Payment Block (Ab 50/50 split mein nahi hai) */
 .paymentBlock {
     margin-top: 10px;
     border-top: 1px solid #f0f0f0;
     padding-top: 10px;
+    /* Blueprint ke hisaab se yeh right mein tha,
+       lekin humara table full-width hai,
+       isliye hum grid use karke isko right-align karenge */
+    display: flex;
+    justify-content: flex-end; /* Poore block ko right-align karega */
 
     .grid { 
-        gap: 4px 20px; 
+        gap: 4px 10px; 
         display: grid;
-        /* 3 columns: Paid (auto), Mode (auto), Balance (remaining space) */
-        grid-template-columns: auto auto 1fr; 
-        align-items: center; /* Sabko vertically center karega */
+        /* Ab 3 columns ki zaroorat nahi */
+        grid-template-columns: 1fr; 
         font-size: 0.88rem; 
         p { margin: 0; strong {font-weight: 600; color: #000;} }
     }
@@ -199,21 +197,15 @@
     }
     .notes {
       font-style: italic;
-      /* Yeh class notes ko full width degi */
-      &.fullWidth {
-        grid-column: 1 / -1; /* Sabhi 3 columns ko span karega */
-        margin-top: 5px; /* Thoda space */
-      }
     }
 }
 
-/* 7. BALANCE LAYOUT (NOW MOVED) */
+/* 7. BALANCE LAYOUT (Blueprint ke jaisa - CENTERED) */
 .balanceWrapper {
-    /* Ab yeh grid item hai. Iske andar content ko right push karenge */
     display: flex;
-    justify-content: flex-end;
+    justify-content: center; /* Poore block ko center mein rakhega */
     align-items: center;
-    /* margin-top: 15px; (REMOVED) */
+    margin-top: 20px; /* Thoda space */
 }
 
 .balanceBlock {
@@ -226,15 +218,15 @@
     gap: 20px; 
     background-color: #ffffff; /* Print safety */
     
-    /* Border aur padding hataya taaki inline lage */
-    border: none;
-    padding: 0; 
+    /* Border aur padding waapas add kiya */
+    border: 1px solid #ddd;
+    padding: 10px 20px; 
     font-size: 0.95rem;
 
     p { margin: 0; }
     strong { font-weight: 700; }
 }
-/* === FIX ENDS HERE === */
+/* === REVERT ENDS HERE === */
 
 
 .balanceAmount {
@@ -265,53 +257,64 @@
 }
 
 
-/* 8. Footer & Signatures (Updated) */
+/* // ========================================================
+// === YAHAN BADLAAV KIYA GAYA HAI (Footer Fix) ===
+// ========================================================
+*/
 .footer {
   margin-top: auto; /* Footer ko neeche push karega */
-  padding-top: 10px; 
+  padding-top: 20px; /* Thoda space upar */
   border-top: 1px solid #ddd;
   font-size: 0.85rem;
   font-weight: 600; 
   background-color: #ffffff;
   color: #000; 
-
-  .receivedBy {
-    margin-bottom: 25px; /* Line ke upar space */
-  }
-  
-  .signatureArea {
-    display: flex;
-    justify-content: flex-end; /* Sirf right side par line */
-  }
-  
-  .signatureBox {
-    border-top: 1px solid #000;
-    width: 35%; 
-  }
-  
-  .signatureLabels {
-    display: flex;
-    justify-content: flex-end; /* Sirf right side par label */
-    padding: 0;
-    
-    .signatoryLabel { 
-        width: 35%; 
-        text-align: center; 
-        font-weight: 600;
-        margin: 5px 0 0 0;
-    }
-  }
-
-  .footerNote { 
-    text-align: center; 
-    margin-top: 10px; 
-    font-style: normal;
-    font-weight: 600; 
-    color: #000; 
-    background-color: #ffffff;
-    padding: 5px 0; 
-  }
 }
+
+/* Yeh 'Received By' aur 'Signature' ko hold karega */
+.footerMain {
+  display: flex;
+  justify-content: space-between; /* Left aur Right mein baant dega */
+  align-items: flex-end; /* Neeche se align karega */
+  min-height: 60px; /* Signature ke liye jagah */
+}
+
+.receivedBy {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.signatureBlock {
+  text-align: center;
+  width: 35%; /* Signature ke liye jagah */
+}
+
+.signatureBox {
+  height: 40px; /* Signature image/space ke liye */
+  border-bottom: 1px solid #555; /* Blueprint jaisi line */
+  margin-bottom: 5px;
+  /* Agar image hai, toh line hata dein aur height set karein */
+}
+
+.signatoryLabel { 
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Yeh neeche waali line hai */
+.footerNote { 
+  text-align: center; 
+  margin-top: 15px; 
+  font-style: italic;
+  font-weight: 500; 
+  font-size: 0.8rem;
+  color: #333; 
+  padding: 5px 0; 
+}
+/* === FOOTER FIX ENDS === */
+
 
 /* --- FINAL PRINT MEDIA QUERY --- */
 @media print {
