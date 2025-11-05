@@ -62,11 +62,11 @@ router.get('/search', authMiddleware, async (req, res) => {
         const students = await prisma.students.findMany({
             where: {
                 schoolId: schoolId,
-                // --- FIX: 'mode: "insensitive"' ko waapas add kar diya hai ---
+                // --- FIX: 'mode: "insensitive"' ko hata diya gaya hai ---
                 OR: [
-                  { first_name: { contains: studentName, mode: 'insensitive' } }, 
-                  { father_name: { contains: studentName, mode: 'insensitive' } },
-                  { last_name: { contains: studentName, mode: 'insensitive' } },
+                  { first_name: { contains: studentName } }, 
+                  { father_name: { contains: studentName } },
+                  { last_name: { contains: studentName } },
                 ]
             },
             // Select waala part bilkul perfect hai
@@ -88,7 +88,6 @@ router.get('/search', authMiddleware, async (req, res) => {
                 previous_school: true,
                 admission_date: true,
                 dob_in_words: true,
-                // --- YEH FIELDS BHI ADD KAR RAHA HOON (Just in case) ---
                 mother_tongue: true,
                 religion: true,
                 taluka: true,
@@ -118,7 +117,6 @@ router.get('/search', authMiddleware, async (req, res) => {
             previousSchool: s.previous_school || '',
             dateOfAdmission: formatDate(s.admission_date),
             dobInWords: s.dob_in_words || '',
-            // --- YEH FIELDS BHI ADD KAR RAHA HOON ---
             motherTongue: s.mother_tongue || '',
             religion: s.religion || '',
             birthTaluka: s.taluka || '',
