@@ -50,7 +50,7 @@ router.get('/classes', [authMiddleware], async (req, res) => {
 
 
 // @route   GET /api/students/search
-// (Yeh search route hai, yeh bhi LC fields bhej raha hai)
+// --- YAHAN FIX KIYA GAYA HAI ---
 router.get('/search', authMiddleware, async (req, res) => {
      try {
         const schoolId = req.user.schoolId;
@@ -87,8 +87,6 @@ router.get('/search', authMiddleware, async (req, res) => {
                 birth_place: true,    // Point 6
                 previous_school: true, // Point 9
                 admission_date: true, // Point 10
-                // --- YAHAN BHI 'dob_in_words' ADD KAR RAHA HOON ---
-                dob_in_words: true,
             },
             take: 10
         });
@@ -109,19 +107,20 @@ router.get('/search', authMiddleware, async (req, res) => {
             birthPlace: s.birth_place || '',
             previousSchool: s.previous_school || '',
             dateOfAdmission: s.admission_date ? s.admission_date.toISOString().split('T')[0] : undefined,
-            dobInWords: s.dob_in_words || '', // <-- YAHAN ADD KIYA
         }));
 
         res.json(formattedStudents);
     } catch (error) {
+        // --- FIX: Ab yeh error nahi aana chahiye ---
         console.error("Error searching students:", error.message);
         res.status(500).send("Server Error");
     }
 });
+// --- FIX YAHAN KHATAM HUA ---
 
 
 // @route   GET /api/students/:id
-// --- YAHAN AAPKA ASLI FIX HAI ---
+// (Yeh code pehle se sahi tha)
 router.get('/:id', authMiddleware, async (req, res) => {
     try {
         const studentIdInt = parseInt(req.params.id);
@@ -134,66 +133,21 @@ router.get('/:id', authMiddleware, async (req, res) => {
                 studentid: studentIdInt,
                 schoolId: req.user.schoolId 
             },
-            // --- CHANGE 1: 'include' ko 'select' se badal diya ---
-            // Taaki hum zaroori fields hi fetch karein
-            select: {
-                studentid: true,
-                first_name: true,
-                father_name: true,
-                last_name: true,
-                class: { select: { class_name: true } },
-                dob: true,
-                address: true,
-                roll_number: true,
-                uid_number: true,
-                mother_name: true,
-                
-                // --- YEH SAB FIELDS ADD KIYE HAIN ---
-                nationality: true,
-                mother_tongue: true,
-                religion: true,
-                caste: true,
-                birth_place: true,
-                taluka: true,
-                district: true,
-                state: true,
-                dob_in_words: true, // <-- YEH HAI AAPKA FIX
-                admission_date: true,
-                standard_admitted: true,
-                previous_school: true,
+            include: { 
+                class: true 
             }
         });
         
         if (!student) return res.status(404).json({ msg: 'Student not found or access denied.' });
         
-        // Helper function date format karne ke liye
-        const formatDate = (date) => date ? new Date(date).toISOString().split('T')[0] : undefined;
-
-        // --- CHANGE 2: 'formattedStudent' ko naye data se banaya ---
-        // Taaki yeh frontend 'StudentFullProfile' interface se match kare
         const formattedStudent = {
-            id: student.studentid.toString(),
+            ...student,
+            id: student.studentid,
             name: getFullName(student),
-            class: student.class?.class_name || 'N/A',
-            dob: formatDate(student.dob),
-            address: student.address || '',
-            
-            // Fields for LC
-            studentId: student.roll_number || '',
-            aadhaarNo: student.uid_number || '',
-            motherName: student.mother_name || '',
-            nationality: student.nationality || 'Indian',
-            motherTongue: student.mother_tongue || '',
-            religion: student.religion || '',
-            caste: student.caste || '',
-            birthPlace: student.birth_place || '',
-            birthTaluka: student.taluka || '',
-            birthDistrict: student.district || '',
-            birthState: student.state || '',
-            dobInWords: student.dob_in_words || '', // <-- YEH HAI AAPKA FIX
-            dateOfAdmission: formatDate(student.admission_date),
-            standardAdmitted: student.standard_admitted || '',
-            previousSchool: student.previous_school || '',
+            class: student.class?.class_name || 'N/A', 
+            rollNo: student.roll_number,
+            parentName: student.father_name,
+            parentContact: student.guardian_contact
         };
 
         res.json(formattedStudent);
@@ -202,8 +156,6 @@ router.get('/:id', authMiddleware, async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
-// --- FIX YAHAN KHATAM HUA ---
-
 
 // @route   PUT /api/students/:id
 // (Yeh code pehle se sahi tha)
