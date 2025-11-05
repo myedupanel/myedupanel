@@ -100,6 +100,8 @@
     padding: 6px 5px; 
     vertical-align: top;
     line-height: 1.4;
+    /* === YAHAN CHANGE KIYA GAYA HAI === */
+    /* "blur lines" ko hatane ke liye border 'none' kar diya */
     border-bottom: none; 
   }
   tbody tr td:nth-child(1) { width: 35px; text-align: center; font-weight: normal; }
@@ -192,52 +194,22 @@
   border-top: 1px solid #000;
 }
 
-/* --- Print Fix (VERY IMPORTANT CHANGES HERE) --- */
+/* --- Print Fix (No Change) --- */
 @media print {
   .certificatePaper {
     box-shadow: none;
     border: none;
-    margin: 0 !important; /* YAHAN CHANGE KIYA: Margin ko 0 kiya */
-    padding: 0 !important; /* YAHAN CHANGE KIYA: Padding ko 0 kiya */
+    margin: 0;
+    padding: 0;
     height: 100%;
   }
   .outerBorder {
     border: 1px solid #000;
-    /* YAHAN CHANGE KIYA: Padding ko thoda adjust kiya, 
-       aur min-height ko bhi adjust kiya */
-    padding: 8mm 6mm !important; 
-    min-height: 270mm !important; /* A4 height se thoda kam, for content to fit */
-    height: auto !important; /* Height auto rakhi taaki content ke hisaab se adjust ho */
+    padding: 10mm 8mm;
+    min-height: 0;
+    height: 100%;
   }
   .studentInfoTable tbody tr td {
     border-bottom: none;
-    /* YAHAN CHANGE KIYA: Print mein padding ko aur kam kiya */
-    padding: 3px 5px !important; 
   }
-
-  /* === NEW ADDITIONS FOR PRINT OPTIMIZATION === */
-  .certHeader, .studentInfoTable, .certText, .certFooterWrapper, .datePlace, .signatures, .sigBox {
-      page-break-inside: avoid !important; /* In elements ko page break se bachao */
-      page-break-after: auto !important;
-  }
-  
-  /* Har element ke bottom margin/padding ko override kiya print mein */
-  .certHeader { margin-bottom: 5px !important; padding-bottom: 5px !important; }
-  .titleRow { margin-top: 3px !important; }
-  .studentInfoTable { margin-top: 5px !important; }
-  .certText { margin-top: 8px !important; }
-  .certFooterWrapper { padding-top: 10px !important; margin-top: 10px !important; }
-  .datePlace { margin-bottom: 15px !important; }
-  .signatures .sigBox { padding-top: 20px !important; }
-  
-  /* Force all font sizes to be consistent in print */
-  body, .certificatePaper, .studentInfoTable, .certText, .certFooterWrapper {
-      font-size: 11pt !important; 
-  }
-  .certHeader .schoolName1 { font-size: 11pt !important; }
-  .certHeader .schoolName2 { font-size: 16pt !important; }
-  .certHeader .schoolAddressCode { font-size: 9pt !important; }
-  .titleRow h2 { font-size: 14pt !important; }
-  .headerSrNo, .headerRegNo { font-size: 10pt !important; }
-
 }
