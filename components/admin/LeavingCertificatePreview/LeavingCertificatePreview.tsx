@@ -145,8 +145,8 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>4</td>
               <td colSpan={2}> 
                 <div className={styles.inlineFields}>
-                  <SubField label="Nationality" value={formData.nationality} minWidth="80px" />
-                  <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="80px" />
+                  <SubField label="Nationality" value={formData.nationality} minWidth="90px" />
+                  <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="85px" />
                   <SubField label="Religion" value={formData.religion} minWidth="80px" />
                 </div>
               </td>
@@ -196,7 +196,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                  <div className={styles.inlineFields}>
                   {/* Label ko SubField ke bahar, inlineFields ke andar rakha */}
                   <span style={{ marginRight: '15px' }}>Date of Admission</span>
-                  <SubField label="Date" value={dateOfAdmission} minWidth="100px" />
+                  <SubField label="Date" value={dateOfAdmission} minWidth="140px" />
                   <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
                  </div>
               </td>
