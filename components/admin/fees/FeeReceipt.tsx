@@ -1,4 +1,4 @@
-// File: FeeReceipt.tsx (FINAL LAYOUT - Side-by-Side Fix)
+// File: FeeReceipt.tsx (FINAL LAYOUT - 50/50 Fix)
 
 import React, { useRef } from 'react';
 import styles from './FeeReceipt.module.scss';
@@ -221,8 +221,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
                 {/* 2. Central Title (No Change) */}
                 <div className={styles.titleMeta}>
-                    {/* Yahan se "TEST 123" hata raha hoon */}
-                    <h2>FEE RECEIPT</h2> 
+                    <h2>FEE RECEIPT</h2>
                 </div>
 
                 {/* 3. Student Details (Roll No removed) */}

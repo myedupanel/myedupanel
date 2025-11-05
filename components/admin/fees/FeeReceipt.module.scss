@@ -1,4 +1,4 @@
-/* File: FeeReceipt.module.scss (Side-by-Side & Signature Space Fix) */
+/* File: FeeReceipt.module.scss (50/50 Split Fix) */
 
 /* Base Styles and Fonts */
 .receiptContainer {
@@ -136,7 +136,7 @@
 
 /*
   ======================================================================
-  === YEH HAI SIDE-BY-SIDE LAYOUT KA FIX (Using Flexbox) ===
+  === YEH HAI SIDE-BY-SIDE LAYOUT KA 50/50 FIX ===
   ======================================================================
 */
 .mainContentWrapper {
@@ -149,11 +149,13 @@
     border-bottom: 1px solid #f0f0f0;
 }
 .mainContentLeft {
-    flex: 1.5; /* Fee table ko zyada jagah (60%) */
+    /* === YAHAN CHANGE KIYA GAYA HAI === */
+    flex: 1; /* Pehle 1.5 tha, ab 1 hai (50%) */
     min-width: 0; /* Flexbox shrink fix */
 }
 .mainContentRight {
-    flex: 1; /* Payment details ko kam jagah (40%) */
+    /* === YAHAN CHANGE KIYA GAYA HAI === */
+    flex: 1; /* Pehle bhi 1 tha (50%) */
     min-width: 0; /* Flexbox shrink fix */
 }
 
