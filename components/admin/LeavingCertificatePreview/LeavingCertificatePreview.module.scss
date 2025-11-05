@@ -38,7 +38,7 @@
 /* --- End Base Styles --- */
 
 
-/* --- Header Style (No Change) --- */
+/* --- Header Style --- */
 .certHeader {
   display: flex;
   flex-direction: column;
@@ -46,7 +46,7 @@
   gap: 8px;
   border-bottom: 1.5px solid #000;
   padding-bottom: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 8px; /* YAHAN CHANGE KIYA: 10px se 8px kiya */
 
   .logo { display: none; }
   
@@ -65,7 +65,7 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-top: 8px;
+  margin-top: 5px; /* YAHAN CHANGE KIYA: 8px se 5px kiya */
 
   h2 { /* Title */
     font-size: 15pt;
@@ -97,9 +97,10 @@
   margin-top: 10px;
   
   tbody tr td {
-    padding: 7px 5px;
+    /* YAHAN CHANGE KIYA: padding 7px se 4px ki, taaki rows patli hon */
+    padding: 4px 5px; 
     vertical-align: top;
-    line-height: 1.4;
+    line-height: 1.3; /* Line height bhi thodi kam ki */
     border-bottom: 1px solid #eee;
   }
   tbody tr td:nth-child(1) { width: 35px; text-align: center; font-weight: normal; }
@@ -108,29 +109,17 @@
   tbody tr td:nth-child(3) {
     width: 60%;
     font-weight: bold;
-    /* === YAHAN SE STYLES HATA DIYE GAYE === 
-      Yeh styles ab .inlineFields mein chale gaye hain,
-      taaki woh Row 4 aur Row 10 par bhi aasaani se lag sakein.
-    */
   }
   
-  /* ======================================================================
-    === YEH HAI AAPKA MAIN FIX ===
-    Humne .inlineFields class ko yahan define kiya hai,
-    jaisa ki aapki .tsx file mein istemaal ho raha hai.
-    ======================================================================
-  */
   .inlineFields {
     display: flex;
     flex-wrap: wrap; 
     align-items: center;
-    justify-content: flex-start; /* Sabko left se shuru karega */
+    justify-content: flex-start; 
     width: 100%;
-    /* Aapke request ke mutabik gap 20px se badha kar 40px kar diya hai */
     gap: 5px 40px; 
   }
   
-  /* --- FIX 2: 2x2 Grid for Birth Place (Row 6) --- */
   .gridWrapper {
     display: flex;
     flex-direction: column;
@@ -138,12 +127,12 @@
     
     .gridRow {
       display: flex;
-      justify-content: space-between; // Fields ke beech space
+      justify-content: space-between; 
       width: 100%;
       margin-bottom: 5px;
       
       .subField {
-        flex-basis: 48%; // Do fields ko 2x2 mein fit karne ke liye
+        flex-basis: 48%; 
         display: flex;
         align-items: baseline;
       }
@@ -168,18 +157,18 @@
   }
 }
 
-/* --- Certification Text (No Change) --- */
+/* --- Certification Text --- */
 .certText {
   font-size: 11pt;
   text-align: left;
-  margin-top: 15px;
+  margin-top: 10px; /* YAHAN CHANGE KIYA: 15px se 10px kiya */
   line-height: 1.6;
 }
 
-/* --- Footer Layout (No Change) --- */
+/* --- Footer Layout --- */
 .certFooterWrapper {
   margin-top: auto;
-  padding-top: 20px;
+  padding-top: 15px; /* YAHAN CHANGE KIYA: 20px se 15px kiya */
   font-size: 12pt;
   font-weight: bold;
   background: #fff !important;
@@ -188,7 +177,7 @@
 
 .datePlace {
   text-align: left;
-  margin-bottom: 30px;
+  margin-bottom: 20px; /* YAHAN CHANGE KIYA: 30px se 20px kiya */
 }
 
 .signatures {
