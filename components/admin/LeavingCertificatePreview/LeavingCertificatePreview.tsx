@@ -145,7 +145,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>4</td>
               <td colSpan={2}> 
                 <div className={styles.inlineFields}>
-                  <SubField label="Nationality" value={formData.nationality} minWidth="90px" />
+                  <SubField label="Nationality" value={formData.nationality} minWidth="140px" />
                   <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="85px" />
                   <SubField label="Religion" value={formData.religion} minWidth="80px" />
                 </div>
