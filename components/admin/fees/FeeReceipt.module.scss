@@ -230,7 +230,7 @@
     }
     
     /* Ensure no dark backgrounds are captured in print (For white page print) */
-    .balanceSection, .itemsTable thead tr {
+    .balanceSection, .itemsTable thead tr, .footer {
         background-color: #ffffff !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
