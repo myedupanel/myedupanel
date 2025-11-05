@@ -6,6 +6,7 @@ import styles from './StudentSearch.module.scss';
 import { FiSearch, FiLoader } from 'react-icons/fi'; // Import Loader icon
 
 // --- INTERFACES ---
+
 // Interface for initial search results
 interface StudentSearchResult {
   id: string; // Prisma's studentid
@@ -14,17 +15,29 @@ interface StudentSearchResult {
 }
 
 // Interface for the full student profile (passed to parent)
-// --- FIX 1: Missing fields ko interface mein add kiya ---
+// --- FIX 1: Saare missing fields ko interface mein add kiya ---
 interface StudentFullProfile {
   id: string;
   name: string;
   class: string;
-  dob?: string;       // Date of Birth
-  address?: string;    // Address
-  studentId?: string;  // Yeh aapka Roll No / Sr. No hai
-  aadhaarNo?: string;  // Aadhaar Number
-  motherName?: string; // Mother's Name
-  // ... baaki fields jo aapko baad mein chahiye
+  dob?: string;
+  address?: string;
+  studentId?: string; 
+  aadhaarNo?: string; 
+  motherName?: string; 
+  // --- YEH SAB ADD KIYA ---
+  nationality?: string; 
+  motherTongue?: string; 
+  religion?: string; 
+  caste?: string; 
+  birthPlace?: string; 
+  birthTaluka?: string; 
+  birthDistrict?: string; 
+  birthState?: string; 
+  dobInWords?: string; 
+  dateOfAdmission?: string; // <-- Sabse zaroori
+  standardAdmitted?: string; 
+  previousSchool?: string; 
 }
 
 interface StudentSearchProps {
@@ -79,7 +92,6 @@ const StudentSearch: React.FC<StudentSearchProps> = ({ onStudentSelect }) => {
 
     try {
       // 2. Fetch FULL details using the ID
-      // 🚨 IMPORTANT: Hum maan rahe hain ki /students/:id endpoint yeh sab data bhej raha hai
       console.log(`Fetching full details for student ID: ${selectedResult.id}`);
       const res = await api.get(`/students/${selectedResult.id}`);
 
@@ -87,8 +99,8 @@ const StudentSearch: React.FC<StudentSearchProps> = ({ onStudentSelect }) => {
           throw new Error("Student data not found.");
       }
 
-      // --- FIX 2: 'fullProfile' object mein missing data ko map kiya ---
-      // (Aapko check karna hoga ki API se yeh fields aa rahi hain ya nahi)
+      // --- FIX 2: 'fullProfile' object mein saare data ko map kiya ---
+      // (Yeh API response names aapke Network tab se match hone chahiye)
       const fullProfile: StudentFullProfile = {
         id: res.data.id,
         name: res.data.name,
@@ -96,11 +108,24 @@ const StudentSearch: React.FC<StudentSearchProps> = ({ onStudentSelect }) => {
         dob: res.data.dob,
         address: res.data.address,
         
-        // YEH HAIN NAAYE ADDITIONS
-        // (Yeh 'res.data' ke names aapke API response se match hone chahiye)
-        studentId: res.data.roll_number, // Maan rahe hain ki 'roll_number' hi 'studentId' hai
-        aadhaarNo: res.data.uid_number, // Maan rahe hain ki 'uid_number' hi 'aadhaarNo' hai
-        motherName: res.data.mother_name, // Maan rahe hain ki 'mother_name' hi 'motherName' hai
+        // Purane fields
+        studentId: res.data.roll_number,
+        aadhaarNo: res.data.uid_number,
+        motherName: res.data.mother_name,
+
+        // --- YEH SAB NAAYA ADD KIYA ---
+        dateOfAdmission: res.data.admission_date, // <-- Sabse zaroori
+        nationality: res.data.nationality,
+        motherTongue: res.data.mother_tongue,
+        religion: res.data.religion,
+        caste: res.data.caste,
+        birthPlace: res.data.birth_place,
+        birthTaluka: res.data.taluka,
+        birthDistrict: res.data.district,
+        birthState: res.data.state,
+        dobInWords: res.data.dob_in_words,
+        standardAdmitted: res.data.standard_admitted,
+        previousSchool: res.data.previous_school,
       };
       console.log("Full details fetched:", fullProfile);
       // --- END FIX ---
