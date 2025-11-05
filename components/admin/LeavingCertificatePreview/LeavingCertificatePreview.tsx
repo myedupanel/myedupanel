@@ -75,7 +75,7 @@ interface LeavingCertificatePreviewProps {
   schoolDetails: SchoolDetails;
 }
 
-// --- Helper Components (No Change) ---
+// --- Helper Components (Yahi hai naya structure) ---
 const fill = (value: string | undefined | null, minWidth = '50px') => {
   if (value) {
     return <span className={styles.fill}>{value}</span>;
@@ -89,7 +89,7 @@ const SubField = ({ label, value, minWidth = '50px' }: { label: string, value: s
   </span>
 );
 
-// Yeh GridRow component blueprint banayega
+// Yeh naya GridRow component blueprint banayega
 const GridRow: React.FC<{ num: string, label: string, children: React.ReactNode }> = ({ num, label, children }) => {
   return (
     <div className={styles.gridRow}>
@@ -127,20 +127,15 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               UDISE NO: {schoolDetails.udiseNo}
             </div>
           </div>
-          
-          {/* --- YAHAN FIX KIYA: TitleRow ko box banane ke liye --- */}
           <div className={styles.titleRow}>
             <div className={styles.headerSrNo}>
               Sr. No: {fill(formData.genRegNo, '100px')}
             </div>
-            {/* H2 tag ko flex-grow: 1 diya gaya hai SCSS mein */}
-            <h2>LEAVING CERTIFICATE</h2> 
+            <h2>LEAVING CERTIFICATE</h2>
             <div className={styles.headerRegNo}>
               Reg. No: {fill(formData.regNo, '100px')}
             </div>
           </div>
-          {/* --- FIX ENDS --- */}
-
         </header>
 
         {/* === YEH HAI NAYA BLUEPRINT === */}
