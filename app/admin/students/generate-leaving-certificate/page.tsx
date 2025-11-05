@@ -176,7 +176,7 @@ const LeavingCertificateBuilderPage = () => {
     };
 
     if (selectedStudent) {
-      // Student select hone par form data update karo
+      console.log("STUDENT DATA RECEIVED:", selectedStudent);
       setFormData(prev => ({
           ...prev,
           motherName: selectedStudent.motherName || '', 
