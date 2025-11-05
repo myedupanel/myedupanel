@@ -219,8 +219,10 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     </div>
                 </div>
 
+                {/* 2. Central Title (No Change) */}
                 <div className={styles.titleMeta}>
-                <h2>FEE RECEIPT - TEST 123</h2>
+                    {/* Yahan se "TEST 123" hata raha hoon */}
+                    <h2>FEE RECEIPT</h2> 
                 </div>
 
                 {/* 3. Student Details (Roll No removed) */}
@@ -236,9 +238,8 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
                 {/*
                     ======================================================================
-                    === YEH HAI SABSE ZAROORI CHANGE ===
-                    Niche diya gaya `.mainContentWrapper` div hi 'Fee' aur 'Payment' ko
-                    side-by-side rakhega. Iske bina layout toot jayega.
+                    === YEH HAI SABSE ZAROORI STRUCTURE ===
+                    Yeh wrapper `div` hi layout ko fix karega.
                     ======================================================================
                 */}
                 
