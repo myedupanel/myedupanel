@@ -1,4 +1,4 @@
-// File: FeeReceipt.tsx (FINAL CLEANED CODE - Use this to replace your entire FeeReceipt.tsx file)
+// File: FeeReceipt.tsx (NEW LAYOUT - As per your plan)
 
 import React, { useRef } from 'react';
 import styles from './FeeReceipt.module.scss';
@@ -82,12 +82,11 @@ const formatDate = (dateString: string | undefined): string => {
 const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const componentRef = useRef<HTMLDivElement>(null); 
 
-    // --- FINAL WORKING PRINT HANDLER (HTML2Canvas based on Bonafide Logic) ---
+    // --- Print & Download Handlers (No Change) ---
     const handlePrint = () => {
         const input = componentRef.current;
         if (!input || !transaction) { alert("Details missing."); return; }
         
-        // Step 1: HTML2Canvas से स्क्रीनशॉट कैप्चर करें
         html2canvas(input, { scale: 2.5, useCORS: true, backgroundColor: '#ffffff', width: input.offsetWidth, height: input.offsetHeight } as any).then((canvas) => {
             const imgData = canvas.toDataURL('image/png');
             const printWindow = window.open('', '_blank');
@@ -121,7 +120,6 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         });
     };
     
-    // --- Download PDF Function (No Change) ---
     const handleDownloadPDF = () => {
         const input = componentRef.current;
         if (!input) { alert("Could not find receipt content to download."); return; }
@@ -133,7 +131,6 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4'); 
             
-            // ... (PDF dimension and save logic remains the same) ...
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
             const imgProps = (pdf as any).getImageProperties(imgData); 
@@ -157,13 +154,13 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             alert("Could not download PDF. Please try printing.");
         });
     };
-    // --- END PDF ---
+    // --- END ---
     
     if (!transaction) {
         return <div className={styles.noData}>No transaction details available.</div>;
     }
 
-    // --- Data Extraction & Calculations (CORRECT SCOPE) ---
+    // --- Data Extraction (No Change) ---
     const schoolInfo = transaction.schoolInfo || {};
     const studentData = transaction.studentId || {}; 
     const templateData = transaction.templateId || {}; 
@@ -206,19 +203,15 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
             {/* --- END --- */}
 
 
-            {/* --- Receipt Content JSX (FINAL PREMIUM STRUCTURE) --- */}
+            {/* --- Receipt Content JSX (NEW LAYOUT) --- */}
             <div id="printable-receipt" className={styles.receiptContent} ref={componentRef}>
                 
-                {/* 1. HEADER (School Name + Metadata on the right) */}
+                {/* 1. HEADER (No Change) */}
                 <div className={styles.header}>
-                    
-                    {/* Left: School Name Only */}
                     <div className={styles.schoolDetails}>
                         {schoolInfo.logo && (<img src={schoolInfo.logo} alt={`${schoolInfo.name || 'School'} Logo`} className={styles.logo} />)}
                         <h1>{schoolInfo.name || 'My EduPanel'}</h1>
                     </div>
-
-                    {/* Right: Metadata Grid (Receipt No, Date, Session) */}
                     <div className={styles.metaHeader}>
                         <p><strong>Receipt No:</strong> {receiptNoDisplay}</p>
                         <p><strong>Date:</strong> {paymentDateDisplay}</p>
@@ -226,62 +219,64 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     </div>
                 </div>
 
-                {/* 2. Central Title */}
+                {/* 2. Central Title (No Change) */}
                 <div className={styles.titleMeta}>
                     <h2>FEE RECEIPT</h2>
                 </div>
 
-                {/* 3. Student Details (Compact Grid) */}
+                {/* 3. Student Details (CHANGED as per your plan) */}
                 <section className={styles.detailsSection}>
                     <h3>Student Information</h3>
                     <div className={styles.grid}>
                         <p><strong>Name:</strong> {studentNameDisplay}</p>
-                        <p><strong>Class:</strong> {classDisplay}</p>
                         <p><strong>Student ID:</strong> {studentRegIdDisplay}</p>
+                        <p><strong>Class:</strong> {classDisplay}</p>
                         <p><strong>Roll No:</strong> {rollNoDisplay}</p>
                     </div>
                 </section>
 
-                {/* 4. Fee Breakdown Table */}
-                <section className={styles.itemsSection}>
-                    <h3>Fee Particulars {templateNameDisplay && `(${templateNameDisplay})`}</h3> 
-                    <table className={styles.itemsTable}>
-                        <thead>
-                            <tr>
-                                <th style={{width: '40px'}}>#</th>
-                                <th>Description</th>
-                                <th className={styles.amountCol}>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {feeItems.length > 0 ? (
-                                feeItems.map((item: { name: string; amount: number }, index: number) => (
-                                    <tr key={index}>
-                                        <td style={{textAlign: 'center'}}>{index + 1}</td>
-                                        <td>{item.name}</td>
-                                        <td className={styles.amountCol}>{formatCurrency(item.amount)}</td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td style={{textAlign: 'center'}}>1</td>
-                                    <td>{templateNameDisplay}</td>
-                                    <td className={styles.amountCol}>{formatCurrency(totalDemand)}</td>
-                                </tr>
-                            )}
-                            <tr className={`${styles.calcRow} ${styles.subtotal}`}><td></td><td>Sub Total</td><td className={styles.amountCol}>{formatCurrency(totalDemand)}</td></tr>
-                            {discount > 0 && <tr className={styles.calcRow}><td></td><td>Discount (-)</td><td className={styles.amountCol}>{formatCurrency(discount)}</td></tr>}
-                            {lateFine > 0 && <tr className={styles.calcRow}><td></td><td>Late Fine (+)</td><td className={styles.amountCol}>{formatCurrency(lateFine)}</td></tr>}
-                            <tr className={`${styles.calcRow} ${styles.grandTotal}`}><td></td><td>Net Payable</td><td className={styles.amountCol}>{formatCurrency(netDemand)}</td></tr>
-                        </tbody>
-                    </table>
-                </section>
+                {/* === START MAJOR LAYOUT CHANGE === */}
+                
+                {/* 4. NEW Main Content Wrapper (Left: Table, Right: Payment) */}
+                <div className={styles.mainContentWrapper}>
 
-                {/* 5. Payment Details, Balance Due (Compact Two-Column Layout) */}
-                <div className={styles.paymentAndBalance}>
-                    
-                    {/* Left Block: Payment Details */}
-                    <div className={styles.paymentBlock}>
+                    {/* Left Column (Fee Table) */}
+                    <section className={`${styles.itemsSection} ${styles.mainContentLeft}`}>
+                        <h3>Fee Particulars {templateNameDisplay && `(${templateNameDisplay})`}</h3> 
+                        <table className={styles.itemsTable}>
+                            <thead>
+                                <tr>
+                                    <th style={{width: '40px'}}>#</th>
+                                    <th>Description</th>
+                                    <th className={styles.amountCol}>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {feeItems.length > 0 ? (
+                                    feeItems.map((item: { name: string; amount: number }, index: number) => (
+                                        <tr key={index}>
+                                            <td style={{textAlign: 'center'}}>{index + 1}</td>
+                                            <td>{item.name}</td>
+                                            <td className={styles.amountCol}>{formatCurrency(item.amount)}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td style={{textAlign: 'center'}}>1</td>
+                                        <td>{templateNameDisplay}</td>
+                                        <td className={styles.amountCol}>{formatCurrency(totalDemand)}</td>
+                                    </tr>
+                                )}
+                                <tr className={`${styles.calcRow} ${styles.subtotal}`}><td></td><td>Sub Total</td><td className={styles.amountCol}>{formatCurrency(totalDemand)}</td></tr>
+                                {discount > 0 && <tr className={styles.calcRow}><td></td><td>Discount (-)</td><td className={styles.amountCol}>{formatCurrency(discount)}</td></tr>}
+                                {lateFine > 0 && <tr className={styles.calcRow}><td></td><td>Late Fine (+)</td><td className={styles.amountCol}>{formatCurrency(lateFine)}</td></tr>}
+                                <tr className={`${styles.calcRow} ${styles.grandTotal}`}><td></td><td>Net Payable</td><td className={styles.amountCol}>{formatCurrency(netDemand)}</td></tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    {/* Right Column (Payment Details) */}
+                    <div className={`${styles.paymentBlock} ${styles.mainContentRight}`}>
                         <h3>Payment Details</h3>
                         <div className={styles.grid}>
                             <p><strong>Amount Paid:</strong> <strong className={styles.paidAmount}>{formatCurrency(amountPaid)}</strong></p>
@@ -289,8 +284,10 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                             {transaction.notes && <p className={styles.notes}><strong>Remarks:</strong> {transaction.notes}</p>}
                         </div>
                     </div>
+                </div>
 
-                    {/* Right Block: Balance Due & Status */}
+                {/* 5. NEW Centered Balance Due Wrapper */}
+                <div className={styles.balanceWrapper}>
                     <div className={styles.balanceBlock}>
                         <section className={styles.balanceSection}>
                             <p><strong>Balance Due:</strong> 
@@ -302,8 +299,11 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                         </section>
                     </div>
                 </div>
+                
+                {/* === END MAJOR LAYOUT CHANGE === */}
 
-                {/* 6. Footer (Signatures) */}
+
+                {/* 6. Footer (No Change) */}
                 <footer className={styles.footer}>
                      <p className={styles.receivedBy}>Received By: {collectedByNameDisplay}</p>
                     

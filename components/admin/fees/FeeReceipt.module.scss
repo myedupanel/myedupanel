@@ -1,4 +1,4 @@
-/* File: FeeReceipt.module.scss (FINAL PREMIUM OFFICIAL DESIGN & PRINT FIX) */
+/* File: FeeReceipt.module.scss (NEW LAYOUT - As per your plan) */
 
 /* Base Styles and Fonts */
 .receiptContainer {
@@ -10,7 +10,7 @@
   overflow-y: auto;
 }
 
-/* Action buttons (Print/Download) */
+/* Action buttons (No Change) */
 .actions {
   display: flex;
   justify-content: flex-end; 
@@ -35,7 +35,7 @@
   }
 }
 
-/* --- PRINTABLE RECEIPT AREA: Official Look --- */
+/* --- PRINTABLE RECEIPT AREA --- */
 .receiptContent {
   width: 210mm; 
   margin: 16px auto; 
@@ -46,61 +46,50 @@
   line-height: 1.4; 
 }
 
-/* 1. HEADER (School Name + Metadata Alignment) */
+/* 1. HEADER (No Change) */
 .header {
   display: flex;
-  justify-content: space-between; /* Align content to sides */
+  justify-content: space-between;
   align-items: flex-start;
   border-bottom: 3px double #333; 
   padding-bottom: 10px; 
   margin-bottom: 15px;
   
   .schoolDetails {
-    /* LEFT SIDE: School Name (Logo/Name) */
     display: flex;
     align-items: center;
     gap: 10px;
-    
-    h1 {
-      font-size: 1.6rem; 
-      font-weight: 800; 
-      color: #000;
-      margin: 0;
-    }
-    p { display: none; } /* Address and contact hidden as per request */
+    h1 { font-size: 1.6rem; font-weight: 800; color: #000; margin: 0; }
+    p { display: none; }
     .logo { max-width: 65px; max-height: 65px; margin: 0;}
   }
-
-  /* RIGHT SIDE: Receipt Metadata */
   .metaHeader {
-    text-align: left; /* Metadata labels left align */
+    text-align: left;
     font-size: 0.85rem;
     margin-top: 5px;
-    padding-left: 20px; /* Separator space */
+    padding-left: 20px;
     border-left: 1px solid #eee;
     p {
         margin: 1px 0;
         line-height: 1.3;
         white-space: nowrap;
-        /* Custom formatting for cleaner look (Optional) */
         strong { font-weight: 600; color: #000; display: inline-block; min-width: 60px; } 
     }
   }
 }
 
-/* 2. Central Title */
+/* 2. Central Title (No Change) */
 .titleMeta {
   text-align: center;
   border-bottom: 1px solid #ddd;
   padding-bottom: 8px;
   margin-bottom: 12px; 
-
   h2 { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; color: #111; }
 }
 
-/* 3. Student Details / Compact View */
+/* 3. Student Details (CHANGED as per your plan) */
 .detailsSection {
-  margin-bottom: 10px; 
+  margin-bottom: 20px; /* Thoda gap badhaya */
   
   h3 {
     font-size: 0.95rem; 
@@ -113,18 +102,24 @@
   }
   .grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* YEH BADLA HAI: 3 columns, Name ko zyada jagah */
+    grid-template-columns: 1.5fr 1fr 1fr;
     gap: 6px 20px; 
     font-size: 0.88rem; 
     p { margin: 0; strong {font-weight: 600; color: #000;} }
+    
+    /* 4th item (Roll No) automatic neeche wrap hoga */
   }
 }
 
-/* 4. Fee Table */
-.itemsSection {margin-bottom: 12px;}
+/* 4. Fee Table (No major change, bas margin set kiya) */
+.itemsSection {
+  margin-bottom: 12px;
+}
 .itemsTable {
   margin-top: 10px; 
   font-size: 0.9rem;
+  width: 100%; /* Ensure table takes full width of its column */
 
   thead tr { background-color: #f0f0f0; } 
   th { padding: 6px 10px; font-weight: 700; } 
@@ -137,56 +132,75 @@
   }
 }
 
-/* 5. Payment Details, Balance Due (Two-Column Layout) */
-/* === YAHAN CHANGE KIYA GAYA HAI (Plan ke mutabik) === */
-.paymentAndBalance {
-    display: flex; /* Grid se Flex kiya */
-    justify-content: space-between; /* Yeh add kiya taaki dono kinaron par chale jaaye */
-    align-items: flex-start; /* Yeh add kiya taaki dono upar se align ho */
-    gap: 20px;
+/* 5. (OLD) PaymentAndBalance - AB ISKI ZAROORAT NAHI */
+/* .paymentAndBalance {
+    ... (Purana code delete kar diya)
+}
+*/
+
+/* 5. NEW LAYOUT STYLES (As per your plan) */
+.mainContentWrapper {
+    display: flex;
+    align-items: flex-start; /* Taaki table aur payment details top se align hon */
+    gap: 25px; /* Dono columns ke beech gap */
     margin-top: 15px;
     padding-bottom: 10px;
     border-bottom: 1px solid #f0f0f0;
+}
+.mainContentLeft {
+    flex: 1.5; /* Fee table ko zyada jagah (60%) */
+    min-width: 0; /* Flexbox shrink fix */
+}
+.mainContentRight {
+    flex: 1; /* Payment details ko kam jagah (40%) */
+    min-width: 0; /* Flexbox shrink fix */
+}
 
-    .paymentBlock {
-        flex: 1; /* Taaki yeh bachi hui jagah le le */
-        h3 { font-size: 0.95rem; margin-bottom: 5px; text-transform: uppercase; }
-        .grid { gap: 4px 10px; }
-    }
-    
-    .balanceBlock {
-        flex-shrink: 0; /* Taaki yeh block sikude nahi */
-        text-align: right;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-
-        .balanceSection {
-            background-color: #ffffff; /* Print safety */
-            border: 1px solid #ddd;
-            padding: 8px 12px; 
-            font-size: 0.9rem;
-        }
+/* Payment Block (ab right column hai) */
+.paymentBlock {
+    h3 { font-size: 0.95rem; margin-bottom: 5px; text-transform: uppercase; }
+    .grid { 
+        gap: 4px 10px; 
+        /* Ek column layout payment details ke liye */
+        display: grid;
+        grid-template-columns: 1fr;
     }
 }
 
-/* 6. Footer & Signatures (Official Alignment) */
+/* Balance Wrapper (NEW - Centered) */
+.balanceWrapper {
+    display: flex;
+    justify-content: center; /* Center align karega */
+    margin-top: 15px;
+}
+
+/* Balance Block (ab centered hai) */
+.balanceBlock {
+    text-align: right;
+    
+    .balanceSection {
+        background-color: #ffffff; /* Print safety */
+        border: 1px solid #ddd;
+        padding: 8px 12px; 
+        font-size: 0.9rem;
+    }
+}
+
+
+/* 6. Footer & Signatures (No Change) */
 .footer {
   margin-top: 30px; 
   padding-top: 10px; 
   border-top: 1px solid #ddd;
   font-size: 0.85rem;
   font-weight: 600; 
-  
-  /* === CHANGE 1: Poore footer ko white kiya === */
   background-color: #ffffff;
-  color: #000; /* Saare footer text ko black kar diya */
+  color: #000; 
 
   .receivedBy {
     margin-bottom: 30px;
   }
   
-  /* Signature lines and labels ko ek hi line mein align kiya */
   .signatureArea {
     display: flex;
     justify-content: space-between;
@@ -195,10 +209,9 @@
   
   .signatureBox {
     border-top: 1px solid #000;
-    width: 35%; /* Signature line width */
+    width: 35%; 
   }
   
-  /* Labels ko signatures ke niche alag alag columns mein align karna */
   .signatureLabels {
     display: flex;
     justify-content: space-between;
@@ -215,19 +228,15 @@
   .footerNote { 
     text-align: center; 
     margin-top: 15px; 
-    
-    /* === CHANGE 2: Text ko bold aur non-italic kiya === */
     font-style: normal;
-    font-weight: 600; /* 400 se 600 (bold) kiya */
-    color: #000; /* Force black color */
-    
-    /* Screen par bhi background white kar diya hai (ye pehle se tha) */
+    font-weight: 600; 
+    color: #000; 
     background-color: #ffffff;
-    padding: 10px 0; /* Thodi padding add kar di */
+    padding: 10px 0; 
   }
 }
 
-/* --- FINAL PRINT MEDIA QUERY (Single Page Guarantee) --- */
+/* --- FINAL PRINT MEDIA QUERY --- */
 @media print {
     /* 1. Action buttons को hide करें */
     .actions { display: none !important; }
@@ -239,12 +248,11 @@
         box-shadow: none !important;
         border: none !important;
         height: auto !important;
-        /* सुनिश्चित करें कि पूरा पेपर सफेद हो */
         background-color: #ffffff !important; 
     }
 
     /* 3. Page Break Avoidance */
-    .detailsSection, .itemsSection, .paymentAndBalance, .footer, .itemsTable {
+    .detailsSection, .itemsSection, .mainContentWrapper, .balanceWrapper, .footer, .itemsTable {
         page-break-inside: avoid !important;
         page-break-after: auto;
     }
@@ -252,15 +260,14 @@
         page-break-before: avoid !important;
     }
     
-    /* 4. ✅ CRUCIAL FIX: Background Colors को Forcefully White करें (Ultimate Safety) */
-    .receiptContainer, /* Add this to ensure the very outer container is white */
+    /* 4. ✅ CRUCIAL FIX: Background Colors को Forcefully White करें */
+    .receiptContainer,
     .receiptContent, 
     .footer,        
-    .footerNote,    /* यह सबसे महत्वपूर्ण target है! */
+    .footerNote,
     .balanceSection, 
     .itemsTable thead tr {
         background-color: #ffffff !important;
-        /* === CHANGE 3: Print mein bhi text ko black force kiya === */
         color: #000 !important; 
         -webkit-print-color-adjust: exact !important; 
         print-color-adjust: exact !important;
