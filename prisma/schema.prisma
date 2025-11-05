@@ -134,6 +134,7 @@ model Students {
   leaving_date      DateTime? @db.Date
   leaving_reason    String?   @db.Text
   remarks           String?   @db.Text
+  dob_in_words      String?  @db.VarChar(255)
 
   // Relations
   schoolId String
