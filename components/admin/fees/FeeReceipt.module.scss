@@ -209,18 +209,21 @@
 
 /* --- FINAL PRINT MEDIA QUERY (Single Page Guarantee) --- */
 @media print {
+    /* 1. Action buttons को hide करें */
     .actions { display: none !important; }
     
-    /* Content Area ko single page par fit karne ke liye padding kam karna */
+    /* 2. Content Area को print के लिए optimize करें */
     .receiptContent {
-        padding: 10mm !important; /* Minimal A4 margin for single page */
+        padding: 10mm !important; 
         width: 210mm !important; 
         box-shadow: none !important;
         border: none !important;
         height: auto !important;
+        /* सुनिश्चित करें कि पूरा पेपर सफेद हो */
+        background-color: #ffffff !important; 
     }
 
-    /* CRUCIAL: Page Break Avoidance (Single Page Fix) */
+    /* 3. Page Break Avoidance */
     .detailsSection, .itemsSection, .paymentAndBalance, .footer, .itemsTable {
         page-break-inside: avoid !important;
         page-break-after: auto;
@@ -229,18 +232,19 @@
         page-break-before: avoid !important;
     }
     
-    /* Ensure no dark backgrounds are captured in print (For white page print) */
-    .receiptContent,
-    .footer,
-    .footerNote,
-    .balanceSection,
+    /* 4. ✅ CRUCIAL FIX: Background Colors को Forcefully White करें (Ultimate Safety) */
+    .receiptContent, 
+    .footer,        
+    .footerNote,    /* यह सबसे महत्वपूर्ण target है! */
+    .balanceSection, 
     .itemsTable thead tr {
         background-color: #ffffff !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+        /* यह property browser को force करती है कि वह exact color प्रिंट करे */
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important;
     }
     
-    /* Footer labels ko center align rakhe */
+    /* 5. Footer labels को center align रखें */
     .signatureLabels .cashierLabel, .signatureLabels .signatoryLabel {
         text-align: center !important;
     }
