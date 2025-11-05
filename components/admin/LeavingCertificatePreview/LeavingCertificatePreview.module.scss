@@ -38,7 +38,7 @@
 /* --- End Base Styles --- */
 
 
-/* --- Header Style (No Change) --- */
+/* --- Header Style --- */
 .certHeader {
   display: flex;
   flex-direction: column;
@@ -46,7 +46,7 @@
   gap: 8px;
   border-bottom: 1.5px solid #000;
   padding-bottom: 8px;
-  margin-bottom: 10px; 
+  margin-bottom: 0; /* --- YAHAN FIX KIYA: Margin hata diya --- */
 
   .logo { display: none; }
   
@@ -66,6 +66,13 @@
   align-items: center;
   width: 100%;
   margin-top: 7px; 
+  /* --- YAHAN FIX KIYA: TitleRow ko box banaya --- */
+  border: 1.5px solid #000; 
+  border-bottom: none; /* Neeche ki line grid se merge hogi */
+  padding: 5px 0; 
+  margin-top: 10px; /* Header ke baad thoda gap */
+  /* --- FIX ENDS --- */
+
 
   h2 { /* Title */
     font-size: 15pt;
@@ -73,8 +80,10 @@
     margin: 0;
     padding: 0 10px; 
     text-align: center;
-    flex-grow: 1;
+    flex-grow: 1; /* Center title ko available space dene ke liye */
     flex-shrink: 1;
+    border-left: 1.5px solid #000; /* Sr.No se alag karne ke liye */
+    border-right: 1.5px solid #000; /* Reg.No se alag karne ke liye */
   }
 
   .headerSrNo, .headerRegNo {
@@ -83,21 +92,28 @@
     white-space: nowrap;
     flex-basis: auto;
     flex-shrink: 0;
+    padding: 0 15px; /* Text ke liye padding */
   }
-  .headerSrNo { text-align: left; margin-right: 15px; }
-  .headerRegNo { text-align: right; margin-left: 15px; }
+  .headerSrNo { text-align: left; }
+  .headerRegNo { text-align: right; }
 }
 /* --- End Header Style --- */
 
 
 /*
   ======================================================================
-  === YEH HAI NAYA BLUEPRINT STYLE ===
+  === NAYA BLUEPRINT STYLE ===
   ======================================================================
 */
 .certificateGrid {
   width: 100%;
-  border: 1.5px solid #000; /* Main grid border */
+  /* --- YAHAN FIX KIYA: Grid ko main outer border se chipkaya --- */
+  /* Top border titleRow mein chala gaya hai, toh yahan top border nahi */
+  border-left: 1.5px solid #000; 
+  border-right: 1.5px solid #000;
+  border-bottom: 1.5px solid #000;
+  margin-top: 0; /* --- YAHAN FIX KIYA: Margin hata diya --- */
+  /* --- FIX ENDS --- */
 }
 
 .gridRow {
@@ -142,7 +158,7 @@
 .inlineFields {
   display: flex;
   flex-wrap: wrap; /* Agar jagah na ho toh wrap karega */
-  align-items: center;
+  align-items: baseline; /* --- YAHAN FIX KIYA: labels ko bottom line par align kiya --- */
   justify-content: flex-start; 
   width: 100%;
   gap: 5px 20px; /* Vertical gap 5px, Horizontal gap 20px */
@@ -238,8 +254,11 @@
 
   /* Baki extra space bhi kam kiya */
   .certHeader { margin-bottom: 5px !important; }
-  .titleRow { margin-top: 4px !important; }
-  .certificateGrid { margin-top: 5px !important; }
+  .titleRow { 
+    margin-top: 4px !important; 
+    padding: 3px 0 !important; /* Print mein title box ki padding kam ki */
+  }
+  .certificateGrid { margin-top: 0 !important; } /* Top margin remove kiya */
   .certText { margin-top: 10px !important; }
   .certFooterWrapper { padding-top: 10px !important; margin-top: 10px !important; }
   .datePlace { margin-bottom: 15px !important; }
