@@ -1,33 +1,38 @@
-/* --- Base Styles for Marathi Certificate --- */
+/* --- Base Styles --- */
 .certificatePaper {
   width: 210mm;
   padding: 10mm;
   margin: 20px auto;
   font-family: 'Times New Roman', Times, serif;
-  font-size: 11pt; /* Smaller font to match the density */
+  font-size: 10.5pt; /* Smaller font to match the dense layout */
   color: #000;
-  // Faded green/off-white background for replication
-  background: #f7fff7; 
-  border: 1px solid #ccc;
+  background: #fff;
+  border: 1px solid #000;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
   display: flex;
 }
 
 .outerBorder {
-  border: 1px solid #c0c0c0; /* Very light border */
-  padding: 8mm 8mm;
+  border: none; /* No outer border in the new image style */
+  padding: 0;
   display: flex;
   flex-direction: column;
   width: 100%;
   flex-grow: 1;
 }
 
-// Helper for the dotted/filled line
 .fill {
   font-weight: bold;
-  padding: 0 2px;
-  border-bottom: 1px solid #000;
+  padding: 0 4px;
+  border-bottom: 1px solid #000; 
+  display: inline-block;
+  white-space: nowrap;
+}
+.fillNormal {
+  font-weight: normal;
+  padding: 0 4px;
+  border-bottom: 1px solid #000; 
   display: inline-block;
   white-space: nowrap;
 }
@@ -35,105 +40,99 @@
   display: inline-block;
   border-bottom: 1px solid #000;
   vertical-align: bottom;
-  padding: 0 2px;
-}
-.label {
-    font-weight: normal;
-    margin-right: 5px;
-    white-space: nowrap;
+  padding: 0 4px;
+  min-width: 50px;
 }
 /* --- End Base Styles --- */
 
 
 /* --- Header Style --- */
 .certHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  text-align: center;
   margin-bottom: 10px; 
-  padding: 0 5px;
   
-  // Placeholder for the custom logos/stamps
-  .stampLeft, .stampRight {
-    width: 60px;
-    height: 60px;
-    background-color: #f0fff0;
-    border: 1px solid #ccc;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    top: -10px;
+  .schoolMandalText {
+    font-size: 8pt; 
+    margin-bottom: 5px;
   }
   
-  .schoolInfoBlock {
-    flex-grow: 1;
-    text-align: center;
-    font-size: 9pt;
-    line-height: 1.3;
-    
-    .schoolName1 { font-size: 10pt; font-weight: bold; margin: 0; }
-    .schoolName2 { font-size: 9pt; margin: 0; }
-    .schoolName3 { font-size: 12pt; font-weight: bold; margin: 2px 0; }
-    .schoolAddressCode { font-size: 8pt; margin: 0; line-height: 1.2; }
+  .schoolMainTitle {
+      // This section covers the address, logo, and title lines
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 5px;
+      
+      .schoolName { font-size: 14pt; font-weight: bold; margin: 2px 0; }
+      .schoolAddress { font-size: 8.5pt; margin-top: -3px; }
+  }
+
+  .certTitleBlock {
+      display: flex;
+      flex-wrap: wrap; 
+      justify-content: center;
+      align-items: flex-end;
+      position: relative;
+      margin-top: 10px;
+      
+      .registerNo, .issueNo {
+          font-size: 9pt;
+          position: absolute;
+          top: -15px; // Move up to align with the main title
+      }
+      .registerNo { left: 0; }
+      .issueNo { right: 0; }
+      
+      .mainTitle { 
+          font-size: 14pt; 
+          font-weight: bold;
+          text-decoration: underline;
+          margin: 0;
+      }
+      .subtitle {
+          font-size: 8pt;
+          font-style: italic;
+          width: 100%;
+          margin-top: -3px;
+      }
+  }
+
+  .headerLine {
+    border-top: 1px solid #000;
+    margin-top: 10px;
   }
 }
 /* --- End Header Style --- */
 
-/* --- Registration Block --- */
-.regBlock {
+
+/* --- Info Grid (Main Content) --- */
+.infoGrid {
     display: flex;
     justify-content: space-between;
-    font-size: 10pt;
-    font-weight: bold;
-    margin-bottom: 5px;
+    width: 100%;
     
-    .regValue {
-        border-bottom: 1px solid #000;
-        padding: 0 5px;
-        font-weight: normal;
+    .infoLeft {
+        flex-basis: 75%;
+        display: flex;
+        flex-direction: column;
     }
-}
-
-.jaavakTitle {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    border-bottom: 1px solid #000;
-    padding-bottom: 5px;
-    margin-bottom: 10px;
-    
-    .jaavak {
-        font-size: 9pt;
-        .fillBlank { border-bottom: 1px dotted #000; }
+    .infoRight {
+        flex-basis: 25%;
+        padding-left: 10px;
+        border-left: 1px solid #000; // Vertical dividing line
     }
-    
-    .mainTitle {
-        font-size: 14pt;
-        font-weight: bold;
-        margin: 0;
-        text-align: center;
-        flex-grow: 1;
-    }
-}
-/* --- End Registration Block --- */
-
-/* --- Student Fields (Main List) --- */
-.studentInfoList {
-    display: flex;
-    flex-direction: column;
-    gap: 4px; /* Tight spacing to match the image */
 }
 
 .fieldRow {
     display: flex;
-    align-items: flex-start;
+    align-items: baseline;
+    margin-bottom: 4px; /* Tight spacing like in the image */
     line-height: 1.4;
     font-size: 10pt;
 
     .srNo {
         font-weight: bold;
-        width: 20px;
+        width: 25px;
         flex-shrink: 0;
     }
 
@@ -142,108 +141,93 @@
         margin-right: 5px;
         white-space: nowrap;
         flex-shrink: 0;
-        // Adjust width for alignment
-        width: 30%; 
     }
     
-    .valueContainer {
-        display: flex;
-        flex-wrap: wrap; 
-        align-items: baseline;
-        gap: 0 10px; 
+    .dataDigits .fill {
+        font-weight: normal; /* Digits are usually not bold */
+        letter-spacing: 2px; // Space out the digits to match the look
+    }
+    
+    .dataValue {
         flex-grow: 1;
         font-weight: bold;
-        
-        .subLabel {
-            font-weight: bold;
-            display: inline-block;
-            border-bottom: 1px solid #000;
-            padding: 0 4px;
-        }
-        
-        .extraLabel {
-            font-weight: normal;
-            margin-right: 5px;
-        }
     }
 }
 
-/* --- Boxed Number Style --- */
-.boxedNumberContainer {
-    display: flex;
-    flex-shrink: 0;
-    margin-right: 10px;
-}
-
-.numberBox {
-    width: 18px; /* Width of each box */
-    height: 18px; 
-    border: 1px solid #000;
-    margin-left: -1px; /* Overlap borders */
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.rightField {
     font-size: 10pt;
-    font-weight: bold;
-    flex-shrink: 0;
+    margin-bottom: 4px;
+    .rightLabel {
+        font-weight: normal;
+        margin-right: 5px;
+    }
 }
-/* --- End Boxed Number Style --- */
 
 
 /* --- Footer Layout --- */
 .certFooterWrapper {
-  margin-top: auto;
-  padding-top: 20px; 
+  margin-top: 20px;
   font-size: 10pt;
-  font-weight: bold;
+  
+  .certNote {
+      font-size: 9pt;
+      margin-bottom: 15px;
+  }
 }
 
-.footerDetails {
+.signatureBlock {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-}
-
-.sigArea {
-  text-align: center;
-  width: 30%;
-  
-  &:nth-child(1) { /* Clerk/Teacher section */
-    text-align: left;
-    margin-left: 20px;
-  }
-  &:nth-child(2) { /* Headmaster section */
-    text-align: right;
-    margin-right: 20px;
-  }
-  
-  .sigName {
-    font-weight: bold;
-    border-bottom: 1px solid #000;
-    padding-bottom: 5px;
-  }
-  
-  .sigRole {
-    font-size: 10pt;
-    font-weight: normal;
-    margin-top: 5px;
-  }
-  
-  .sigPlace {
-    font-size: 8pt;
-    font-weight: normal;
-    line-height: 1.2;
-    margin-top: 2px;
-  }
-}
-
-.issueDateLine {
-    font-size: 9pt;
-    margin-top: 15px;
+    flex-direction: column;
+    width: 100%;
     
-    .dateValue {
-        font-weight: bold;
-        border-bottom: 1px solid #000;
-        padding: 0 5px;
+    .dateInfo {
+        text-align: left;
+        margin-bottom: 20px;
+        font-size: 10pt;
     }
+    
+    .signatures {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding-top: 10px; 
+    }
+
+    .sigBox {
+        text-align: center;
+        width: 30%;
+        padding-top: 40px; // Space for signature
+        
+        span {
+            font-size: 9pt;
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            display: inline-block;
+            font-weight: bold;
+        }
+    }
+}
+
+/* Print Specific Adjustments for A4 Black & White */
+@media print {
+  .certificatePaper {
+    box-shadow: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+    font-size: 9pt; // Slightly smaller for print
+  }
+  .outerBorder {
+    padding: 10mm 8mm; 
+    min-height: 277mm; // Full A4 height simulation
+  }
+  
+  .fieldRow, .rightField {
+    margin-bottom: 2px !important; // Even tighter spacing
+  }
+  
+  .certHeader { margin-bottom: 5px !important; }
+  
+  .signatureBlock { margin-top: 10px !important; }
+
 }
