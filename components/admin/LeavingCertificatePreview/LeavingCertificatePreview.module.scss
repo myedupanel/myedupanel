@@ -108,16 +108,26 @@
   tbody tr td:nth-child(3) {
     width: 60%;
     font-weight: bold;
-    // Default display flex rakhte hain, jisse inlineFields kaam kare
-    display: flex; 
-    flex-wrap: wrap; 
-    align-items: center;
-    gap: 5px 20px; 
+    /* === YAHAN SE STYLES HATA DIYE GAYE === 
+      Yeh styles ab .inlineFields mein chale gaye hain,
+      taaki woh Row 4 aur Row 10 par bhi aasaani se lag sakein.
+    */
   }
   
-  /* --- FIX 1: Increased gap for inline fields (Row 4) --- */
-  .row4Spacing {
-    gap: 5px 40px !important; // Default 20px se badha diya
+  /* ======================================================================
+    === YEH HAI AAPKA MAIN FIX ===
+    Humne .inlineFields class ko yahan define kiya hai,
+    jaisa ki aapki .tsx file mein istemaal ho raha hai.
+    ======================================================================
+  */
+  .inlineFields {
+    display: flex;
+    flex-wrap: wrap; 
+    align-items: center;
+    justify-content: flex-start; /* Sabko left se shuru karega */
+    width: 100%;
+    /* Aapke request ke mutabik gap 20px se badha kar 40px kar diya hai */
+    gap: 5px 40px; 
   }
   
   /* --- FIX 2: 2x2 Grid for Birth Place (Row 6) --- */
