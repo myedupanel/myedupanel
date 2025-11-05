@@ -249,11 +249,4 @@
     .signatureLabels .cashierLabel, .signatureLabels .signatoryLabel {
         text-align: center !important;
     }
-
-    /* Remove any potential lingering shadows or borders that might cause dark lines */
-    body, html {
-        background-color: #ffffff !important;
-        -webkit-print-color-adjust: exact !important; 
-        print-color-adjust: exact !important;
-    }
 }
