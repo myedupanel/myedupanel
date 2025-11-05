@@ -233,6 +233,7 @@
     }
     
     /* 4. ✅ CRUCIAL FIX: Background Colors को Forcefully White करें (Ultimate Safety) */
+    .receiptContainer, /* Add this to ensure the very outer container is white */
     .receiptContent, 
     .footer,        
     .footerNote,    /* यह सबसे महत्वपूर्ण target है! */
@@ -247,5 +248,12 @@
     /* 5. Footer labels को center align रखें */
     .signatureLabels .cashierLabel, .signatureLabels .signatoryLabel {
         text-align: center !important;
+    }
+
+    /* Remove any potential lingering shadows or borders that might cause dark lines */
+    body, html {
+        background-color: #ffffff !important;
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important;
     }
 }
