@@ -55,7 +55,6 @@ const formatDate = (dateString: string | undefined): string => {
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
-      console.warn("Invalid date object created from:", dateString);
       return dateString;
     }
     const day = String(date.getDate()).padStart(2, '0');
@@ -63,7 +62,6 @@ const formatDate = (dateString: string | undefined): string => {
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   } catch (e) {
-      console.warn("Invalid date format for formatDate:", dateString);
       return dateString;
    }
 };
@@ -80,187 +78,150 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
   formData,
   schoolDetails
 }) => {
-  // --- Helper Functions (No Change) ---
-  const fill = (value: string | undefined | null, minWidth = '50px') => {
+  // --- Helper Functions ---
+  const fill = (value: string | undefined | null, minWidth = '100px', isBold = true) => {
     if (value) {
-      return <span className={styles.fill}>{value}</span>;
+      return <span className={isBold ? styles.fill : styles.fillNormal}>{value}</span>;
     }
     return <span className={styles.fillBlank} style={{ minWidth }}>&nbsp;</span>;
   }
-  const SubField = ({ label, value, minWidth = '50px' }: { label: string, value: string | undefined | null, minWidth?: string }) => (
-    <span className={styles.subField}>
-      {label}: {fill(value, minWidth)}
-    </span>
+  
+  const FieldRow = ({ srNo, label, children }: { srNo?: number, label?: string, children: React.ReactNode }) => (
+    <div className={styles.fieldRow}>
+        {srNo && <span className={styles.srNo}>{srNo}.</span>}
+        {label && <span className={styles.label}>{label}:</span>}
+        <div className={styles.valueContainer}>
+            {children}
+        </div>
+    </div>
   );
+
+  // --- Data Formatting ---
   const dateOfAdmission = formatDate(formData.dateOfAdmission);
-  const dateOfLeaving = formatDate(formData.dateOfLeaving);
   const studentDobFormatted = formatDate(student?.dob);
+
+  // Image data based on the provided photo
+  const photoSrNo = '10XXXXXXHSFGBFCH';
+  const photoRegNo = '10XXXXXXHSFGBFCH';
+  const photoGenRegNo = '7867';
+  const photoStudentName = 'Shaurya Guutam Ghodage';
+  const photoMotherName = 'Sindhu';
+  const photoNationality = 'Indimu'; // Assuming Indian is intended
+  const photoMotherTongue = 'Marathi';
+  const photoBirthPlace = 'Barshi, Tulashi, Dist: Satara, State: Maharashtra';
+  const photoCaste = 'Maratha';
+  const photoDob = '08/10/2002';
+  const photoPreviousSchool = 'Shree Ram High School';
+  const photoProgress = 'Good';
+  const photoConduct = 'Good';
+  const photoStandard = 'Ist / ...'; // For line 12
+  const photoReason = "Parent's Application";
+
 
   return (
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* Header (No Change) */}
+        {/* Header */}
         <header className={styles.certHeader}>
-          {/* ... (header code) ... */}
-          <div className={styles.schoolInfoBlock}>
-            <div className={styles.schoolName1}>{schoolDetails.name}</div>
-            <div className={styles.schoolName2}>{schoolDetails.name2 || schoolDetails.name}</div>
-            <div className={styles.schoolAddressCode}>
-              {schoolDetails.address}
-              <br/>
-              UDISE NO: {schoolDetails.udiseNo}
+            <div className={styles.headerTitle}>
+                <div className={styles.titleLine1}>PRIME INTERNATIONAL SCHOOL</div>
+                <div className={styles.titleLine2}>LEAVING CERTIFICATE</div>
             </div>
-          </div>
-          <div className={styles.titleRow}>
-            <div className={styles.headerSrNo}>
-              Sr. No: {fill(formData.genRegNo, '100px')}
+            <div className={styles.logoPlaceholder}>
+              <div className={styles.logoIcon}></div>
             </div>
-            <h2>LEAVING CERTIFICATE</h2>
-            <div className={styles.headerRegNo}>
-              Reg. No: {fill(formData.regNo, '100px')}
-            </div>
-          </div>
         </header>
 
-        {/* Student Info Table */}
-        <table className={styles.studentInfoTable}>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>Student's Full Name</td>
-              <td>{fill(student?.name, '300px')}</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>UID No (Aadhar card No.)</td>
-              <td>{fill(student?.aadhaarNo, '200px')}</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td>Mother's Name</td>
-              <td>{fill(formData.motherName, '300px')}</td>
-            </tr>
-            <tr>
-              <td>4</td>
-              <td colSpan={2}> 
-                <div className={styles.inlineFields}>
-                  <SubField label="Nationality" value={formData.nationality} minWidth="140px" />
-                  <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="85px" />
-                  <SubField label="Religion" value={formData.religion} minWidth="80px" />
+        {/* --- SCHOOL INFORMATION --- */}
+        <div className={styles.infoSection}>
+            <h3 className={styles.sectionHeading}>SCHOOL INFORMATION</h3>
+            <div className={styles.schoolInfoGrid}>
+                <div className={styles.leftCol}>
+                    <div className={styles.schoolField}>
+                        <span className={styles.label}>SR. NO.</span> {fill(photoSrNo, '150px')}
+                    </div>
+                    <div className={styles.schoolField}>
+                        <span className={styles.label}>REG. NO.</span> {fill(photoRegNo, '150px')}
+                    </div>
                 </div>
-              </td>
-            </tr>
-            <tr>
-              <td>5</td>
-              <td>Caste</td>
-              <td>{fill(formData.caste, '150px')}</td>
-            </tr>
-            <tr>
-              <td>6</td>
-              <td>Birth place(State/City)</td>
-              <td>
-                <div className={styles.gridWrapper}>
-                  <div className={styles.gridRow}>
-                    <SubField label="Place" value={formData.birthPlace} minWidth="80px" />
-                    <SubField label="Taluka" value={formData.birthTaluka} minWidth="80px" />
-                  </div>
-                  <div className={styles.gridRow}>
-                    <SubField label="Dist" value={formData.birthDistrict} minWidth="80px" />
-                    <SubField label="State" value={formData.birthState} minWidth="80px" />
-                  </div>
+                <div className={styles.rightCol}>
+                    <div className={styles.schoolField}>
+                        <span className={styles.label}>GENERAL REGISTER NO.</span> {fill(photoGenRegNo, '80px')}
+                    </div>
+                    <div className={styles.photoBox}>
+                        PASSPORT <br/> PHOTO
+                    </div>
                 </div>
-              </td>
-            </tr>
-            <tr>
-              <td>7</td>
-              <td>Date of Birth (Figures)</td>
-              <td>{fill(studentDobFormatted, '150px')}</td>
-            </tr>
-            <tr>
-              <td>8</td>
-              <td>Date of Birth (in Words)</td>
-              <td>{fill(formData.dobWords, '300px')}</td>
-            </tr>
-            <tr>
-              <td>9</td>
-              <td>Previous School Name</td>
-              <td>{fill(formData.previousSchool, '200px')}</td>
-            </tr>
+            </div>
+        </div>
+
+        {/* --- STUDENT'S PERSONAL INFORMATION --- */}
+        <div className={styles.infoSection}>
+            <h3 className={styles.sectionHeading}>STUDENT'S PERSONAL INFORMATION</h3>
             
-            {/* --- YAHAN BADLAAV KIYA GAYA (ROW 10) --- */}
-            <tr>
-              <td>10</td>
-              {/* colSpan={2} use kiya taaki label aur values ek cell mein aa jayein */}
-              <td colSpan={2}>
-                 <div className={styles.inlineFields}>
-                  {/* Label ko SubField ke bahar, inlineFields ke andar rakha */}
-                  <span style={{ marginRight: '15px' }}>Date of Admission</span>
-                  <SubField label="Date" value={dateOfAdmission} minWidth="140px" />
-                  <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
-                 </div>
-              </td>
-            </tr>
-            {/* --- BADLAAV KHATM --- */}
+            <FieldRow srNo={1} label="FULL NAME (AADHAR CARD NO.)">
+                {fill(photoStudentName, '300px')}
+            </FieldRow>
+            <FieldRow srNo={3} label="MOTHER'S NAME">
+                {fill(photoMotherName, '300px')}
+            </FieldRow>
+            <FieldRow srNo={4} label="NATIONALITY MOTHER TOUGE">
+                {fill(photoNationality, '80px')}
+                <span className={styles.label}>Marathi:</span>
+                {fill(photoMotherTongue, '150px')}
+            </FieldRow>
+            <FieldRow srNo={6} label="BIRTH PLACE (STATE/CITY), Dist">
+                 <span className={styles.valueLarge}>{fill(photoBirthPlace, '400px')}</span>
+            </FieldRow>
+             <FieldRow srNo={5} label="CASTE">
+                {fill(photoCaste, '150px')}
+            </FieldRow>
+            <FieldRow srNo={7} label="DATE OF BIRTH (FIGURES)">
+                {fill(photoDob, '150px')}
+            </FieldRow>
+        </div>
 
-            <tr>
-              <td>11</td>
-              <td>Progress of Study</td>
-              <td>
-                 <div className={styles.inlineFields}>
-                    {fill(formData.progress, '100px')} 
-                    <SubField label="Conduct" value={formData.conduct} minWidth="80px" />
-                 </div>
-              </td>
-            </tr>
-            <tr>
-              <td>12</td>
-              <td>Date of School Leaving</td>
-              <td>{fill(dateOfLeaving, '150px')}</td>
-            </tr>
-            <tr>
-              <td>1D3</td>
-              <td>Standard in which studying and since when (in Words)</td>
-              <td>
-                <div className={styles.inlineFields}>
-                  {fill(formData.standardLeaving, '80px')} / {fill(formData.sinceWhenLeaving, '100px')}
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>14</td>
-              <td>Reason for leaving school</td>
-              <td>{fill(formData.reasonForLeaving, '200px')}</td>
-            </tr>
-            <tr>
-              <td>15</td>
-              <td>Remarks</td>
-              <td>{fill(formData.remarks, '200px')}</td>
-            </tr>
-          </tbody>
-        </table>
+        {/* --- ACADEMIC & ADMISSION DETAILS --- */}
+        <div className={styles.infoSection}>
+            <h3 className={styles.sectionHeading}>ACADEMIC & ADMISSION DETAILS</h3>
 
-        {/* Certification Text (No Change) */}
-        <p className={styles.certText}>
-          This is to certify that, Above mentioned information is as per 
-          School General Register No. {fill(formData.genRegNo, '80px')}
-        </p>
+            <FieldRow srNo={9} label="PREVIOUS SCHOOL NAME">
+                {fill(photoPreviousSchool, '300px')}
+            </FieldRow>
+            <FieldRow srNo={10} label="DATE OF ADMISSION">
+                {fill(dateOfAdmission || "N/A", '150px')}
+            </FieldRow>
+            <FieldRow srNo={11} label="PROGRESS OF STUDY">
+                {fill(photoProgress, '100px')} 
+                <span className={styles.label}>CONDUCT</span>
+                {fill(photoConduct, '100px')}
+            </FieldRow>
+            <FieldRow srNo={12} label="STANDARD (कक्षा) IN WHICH STUDYING">
+                {fill(photoStandard, '150px')}
+            </FieldRow>
+            <FieldRow srNo={14} label="REASON FOR LEAVING SCHOOL">
+                {fill(photoReason, '350px')}
+            </FieldRow>
+        </div>
 
-        {/* Footer (No Change) */}
+
+        {/* --- Footer --- */}
         <footer className={styles.certFooterWrapper}>
-          {/* ... (footer code) ... */}
-          <div className={styles.datePlace}>
-            <span>Date: {fill(null, '50px')} / {fill(null, '50px')} / {fill(null, '70px')}</span>
+          <div className={styles.genRegLine}>
+            <span className={styles.label}>GENERAL REGISTER NO:</span> 
+            {fill(photoGenRegNo, '100px')}
           </div>
           <div className={styles.signatures}>
             <div className={styles.sigBox}>
-              <span>Class Teacher</span>
+              <div className={styles.sigText}>हस्ताक्षर</div>
+              <div className={styles.sigRole}>SIGNATURES</div>
             </div>
             <div className={styles.sigBox}>
-              <span>Clerk</span>
+              <div className={styles.sigRole}>CLASS <br/> TEACHER</div>
             </div>
             <div className={styles.sigBox}>
-              <span>{formData.signatoryRole || 'Head Master'}</span>
+              <div className={styles.sigRole}>CLERK <br/> HEAD MASTER</div>
             </div>
           </div>
         </footer>
