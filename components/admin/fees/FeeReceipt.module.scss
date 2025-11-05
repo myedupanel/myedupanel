@@ -1,4 +1,4 @@
-/* File: FeeReceipt.module.scss (NEW LAYOUT - As per your plan) */
+/* File: FeeReceipt.module.scss (FINAL LAYOUT - As per your plan) */
 
 /* Base Styles and Fonts */
 .receiptContainer {
@@ -87,9 +87,9 @@
   h2 { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; color: #111; }
 }
 
-/* 3. Student Details (CHANGED as per your plan) */
+/* 3. Student Details (CHANGED: 3-column grid for Name, ID, Class) */
 .detailsSection {
-  margin-bottom: 20px; /* Thoda gap badhaya */
+  margin-bottom: 20px; 
   
   h3 {
     font-size: 0.95rem; 
@@ -102,17 +102,15 @@
   }
   .grid {
     display: grid;
-    /* YEH BADLA HAI: 3 columns, Name ko zyada jagah */
+    /* 3 columns: Name (zyada space), ID, Class */
     grid-template-columns: 1.5fr 1fr 1fr;
     gap: 6px 20px; 
     font-size: 0.88rem; 
     p { margin: 0; strong {font-weight: 600; color: #000;} }
-    
-    /* 4th item (Roll No) automatic neeche wrap hoga */
   }
 }
 
-/* 4. Fee Table (No major change, bas margin set kiya) */
+/* 4. Fee Table (No major change) */
 .itemsSection {
   margin-bottom: 12px;
 }
@@ -130,18 +128,16 @@
     font-size: 0.95rem; 
     td { font-weight: 700; }
   }
+  
+  /* Ye styles table ke andar text alignment ke liye hain */
+  .calcRow td:nth-child(2) { text-align: right; font-weight: 600; }
+  .amountCol { text-align: right; }
 }
 
-/* 5. (OLD) PaymentAndBalance - AB ISKI ZAROORAT NAHI */
-/* .paymentAndBalance {
-    ... (Purana code delete kar diya)
-}
-*/
-
-/* 5. NEW LAYOUT STYLES (As per your plan) */
+/* 5. NEW LAYOUT STYLES (Fee/Payment Side-by-Side) */
 .mainContentWrapper {
     display: flex;
-    align-items: flex-start; /* Taaki table aur payment details top se align hon */
+    align-items: flex-start; /* Table aur payment details top se align */
     gap: 25px; /* Dono columns ke beech gap */
     margin-top: 15px;
     padding-bottom: 10px;
@@ -149,41 +145,90 @@
 }
 .mainContentLeft {
     flex: 1.5; /* Fee table ko zyada jagah (60%) */
-    min-width: 0; /* Flexbox shrink fix */
+    min-width: 0; 
 }
 .mainContentRight {
     flex: 1; /* Payment details ko kam jagah (40%) */
-    min-width: 0; /* Flexbox shrink fix */
+    min-width: 0; 
 }
 
 /* Payment Block (ab right column hai) */
 .paymentBlock {
+    /* Isse border/background add kar sakte hain agar zaroorat ho */
+    /* border: 1px solid #eee; */
+    /* padding: 10px; */
+
     h3 { font-size: 0.95rem; margin-bottom: 5px; text-transform: uppercase; }
     .grid { 
         gap: 4px 10px; 
-        /* Ek column layout payment details ke liye */
         display: grid;
         grid-template-columns: 1fr;
+        font-size: 0.88rem; 
+        p { margin: 0; strong {font-weight: 600; color: #000;} }
+    }
+    .paidAmount {
+        font-size: 1rem;
+        color: #007bff;
+    }
+    .notes {
+      font-style: italic;
     }
 }
 
-/* Balance Wrapper (NEW - Centered) */
+/* Balance Wrapper (NEW - Niche, alag section) */
 .balanceWrapper {
     display: flex;
-    justify-content: center; /* Center align karega */
+    justify-content: flex-end; /* Balance ko right side push karega */
     margin-top: 15px;
 }
 
-/* Balance Block (ab centered hai) */
+/* Balance Block (ab right side mein hai) */
 .balanceBlock {
-    text-align: right;
+    text-align: left; /* Text ko left align rakhega box ke andar */
     
     .balanceSection {
+        /* === YEH SABSE ZAROORI CHANGE HAI === */
+        display: flex; /* Balance aur Status ko ek line mein layega */
+        justify-content: space-between; /* Dono ke beech space dega */
+        align-items: center; /* Vertically center karega */
+        gap: 20px; /* Dono ke beech thoda gap */
+        
         background-color: #ffffff; /* Print safety */
         border: 1px solid #ddd;
         padding: 8px 12px; 
         font-size: 0.9rem;
+        min-width: 280px; /* Ek minimum width taaki hamesha sahi dikhe */
+
+        p { margin: 0; }
+        strong { font-weight: 700; }
     }
+
+    .balanceAmount {
+      font-weight: 700;
+      font-size: 1rem;
+      &[data-balance-zero="true"] { color: #28a745; } /* Green if zero */
+      &:not([data-balance-zero="true"]) { color: #dc3545; } /* Red if not zero */
+    }
+}
+
+/* Status Badges (PAID/PARTIAL) */
+.paidStamp {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #28a745;
+  text-transform: uppercase;
+}
+.statusBadge {
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #fff;
+  text-transform: uppercase;
+  
+  &.partial { background-color: #fd7e14; }
+  &.pending { background-color: #ffc107; }
+  &.failed { background-color: #dc3545; }
 }
 
 
@@ -266,12 +311,17 @@
     .footer,        
     .footerNote,
     .balanceSection, 
-    .itemsTable thead tr {
+    .itemsTable thead tr,
+    .statusBadge { /* Status badge ko bhi fix kiya */
         background-color: #ffffff !important;
         color: #000 !important; 
+        border: 1px solid #ddd; /* Print mein border add kiya */
         -webkit-print-color-adjust: exact !important; 
         print-color-adjust: exact !important;
     }
+    /* Print mein colors ko override kiya */
+    .balanceAmount:not([data-balance-zero="true"]) { color: #000 !important; }
+    .paidStamp { color: #000 !important; }
     
     /* 5. Footer labels को center align रखें */
     .signatureLabels .cashierLabel, .signatoryLabel {

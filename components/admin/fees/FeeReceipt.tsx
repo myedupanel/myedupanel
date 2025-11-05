@@ -1,4 +1,4 @@
-// File: FeeReceipt.tsx (NEW LAYOUT - As per your plan)
+// File: FeeReceipt.tsx (FINAL LAYOUT - Fee/Payment side-by-side, Balance below)
 
 import React, { useRef } from 'react';
 import styles from './FeeReceipt.module.scss';
@@ -171,7 +171,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const studentNameDisplay = (studentData as any).name || transaction.studentName || 'N/A';
     const studentRegIdDisplay = (studentData as any).studentId || transaction.studentRegId || 'N/A';
     const classDisplay = (studentData as any).class || transaction.className || 'N/A';
-    const rollNoDisplay = (studentData as any).rollNo || 'N/A';
+    // Roll No is removed
     
     const collectedByInfo = transaction.collectedBy;
     const collectedByNameDisplay = collectedByInfo?.name || transaction.collectedByName || (transaction.paymentMode === 'Online' ? 'System (Online)' : 'Admin');
@@ -224,20 +224,20 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     <h2>FEE RECEIPT</h2>
                 </div>
 
-                {/* 3. Student Details (CHANGED as per your plan) */}
+                {/* 3. Student Details (CHANGED: Roll No removed) */}
                 <section className={styles.detailsSection}>
                     <h3>Student Information</h3>
                     <div className={styles.grid}>
                         <p><strong>Name:</strong> {studentNameDisplay}</p>
                         <p><strong>Student ID:</strong> {studentRegIdDisplay}</p>
                         <p><strong>Class:</strong> {classDisplay}</p>
-                        <p><strong>Roll No:</strong> {rollNoDisplay}</p>
+                        {/* Roll No <p> tag has been removed */}
                     </div>
                 </section>
 
                 {/* === START MAJOR LAYOUT CHANGE === */}
                 
-                {/* 4. NEW Main Content Wrapper (Left: Table, Right: Payment) */}
+                {/* 4. Main Content Wrapper (Left: Table, Right: Payment) */}
                 <div className={styles.mainContentWrapper}>
 
                     {/* Left Column (Fee Table) */}
@@ -286,9 +286,10 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     </div>
                 </div>
 
-                {/* 5. NEW Centered Balance Due Wrapper */}
+                {/* 5. Balance Due Wrapper (Now separate and below) */}
                 <div className={styles.balanceWrapper}>
                     <div className={styles.balanceBlock}>
+                        {/* .balanceSection ab "Balance" aur "Status" ko ek line mein rakhega */}
                         <section className={styles.balanceSection}>
                             <p><strong>Balance Due:</strong> 
                                 <span className={styles.balanceAmount} data-balance-zero={balanceDue < 0.01}>{formatCurrency(balanceDue)}</span>
