@@ -134,7 +134,11 @@
   .amountCol { text-align: right; }
 }
 
-/* 5. LAYOUT FIX (Side-by-Side) */
+/*
+  ======================================================================
+  === YEH HAI SIDE-BY-SIDE LAYOUT KA FIX ===
+  ======================================================================
+*/
 .mainContentWrapper {
     display: grid; /* Grid ka istemaal karein */
     grid-template-columns: 1.5fr 1fr; /* Left (1.5) aur Right (1) column */

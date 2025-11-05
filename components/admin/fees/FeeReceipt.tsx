@@ -235,10 +235,15 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     </div>
                 </section>
 
-                {/* === START MAJOR LAYOUT CHANGE === */}
+                {/*
+                    ======================================================================
+                    === YEH HAI SABSE ZAROORI CHANGE ===
+                    Niche diya gaya `.mainContentWrapper` div hi 'Fee' aur 'Payment' ko
+                    side-by-side rakhega. Iske bina layout toot jayega.
+                    ======================================================================
+                */}
                 
                 {/* 4. Main Content Wrapper (Left: Table, Right: Payment) */}
-                {/* YEH WRAPPER ADD KARNA ZAROORI HAI */}
                 <div className={styles.mainContentWrapper}>
 
                     {/* Left Column (Fee Table) */}
@@ -286,6 +291,8 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                         </div>
                     </div>
                 </div>
+                {/* === END MAIN WRAPPER === */}
+
 
                 {/* 5. Balance Due Wrapper (Centered) */}
                 <div className={styles.balanceWrapper}>
@@ -301,8 +308,6 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     </div>
                 </div>
                 
-                {/* === END MAJOR LAYOUT CHANGE === */}
-
 
                 {/* 6. Footer (No Change in structure) */}
                 <footer className={styles.footer}>
