@@ -1,6 +1,6 @@
 /* src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss */
 
-/* --- Base Styles (No Change) --- */
+/* --- Base Styles --- */
 .certificatePaper {
   width: 210mm;
   padding: 10mm;
@@ -46,7 +46,7 @@
   gap: 8px;
   border-bottom: 1.5px solid #000;
   padding-bottom: 8px;
-  margin-bottom: 10px; 
+  margin-bottom: 0; /* --- YAHAN FIX KIYA: Margin hata diya --- */
 
   .logo { display: none; }
   
@@ -66,6 +66,13 @@
   align-items: center;
   width: 100%;
   margin-top: 7px; 
+  /* --- YAHAN FIX KIYA: TitleRow ko box banaya --- */
+  border: 1.5px solid #000; 
+  border-bottom: none; /* Neeche ki line grid se merge hogi */
+  padding: 5px 0; 
+  margin-top: 10px; /* Header ke baad thoda gap */
+  /* --- FIX ENDS --- */
+
 
   h2 { /* Title */
     font-size: 15pt;
@@ -73,8 +80,10 @@
     margin: 0;
     padding: 0 10px; 
     text-align: center;
-    flex-grow: 1;
+    flex-grow: 1; /* Center title ko available space dene ke liye */
     flex-shrink: 1;
+    border-left: 1.5px solid #000; /* Sr.No se alag karne ke liye */
+    border-right: 1.5px solid #000; /* Reg.No se alag karne ke liye */
   }
 
   .headerSrNo, .headerRegNo {
@@ -83,72 +92,101 @@
     white-space: nowrap;
     flex-basis: auto;
     flex-shrink: 0;
+    padding: 0 15px; /* Text ke liye padding */
   }
-  .headerSrNo { text-align: left; margin-right: 15px; }
-  .headerRegNo { text-align: right; margin-left: 15px; }
+  .headerSrNo { text-align: left; }
+  .headerRegNo { text-align: right; }
 }
 /* --- End Header Style --- */
 
 
-/* --- Student Info Table (Main Fixes) --- */
-.studentInfoTable {
+/*
+  ======================================================================
+  === YEH HAI NAYA BLUEPRINT STYLE ===
+  ======================================================================
+*/
+.certificateGrid {
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-  
-  tbody tr td {
-    padding: 6px 5px; 
-    vertical-align: top;
-    line-height: 1.4;
-    /* === YAHAN CHANGE KIYA GAYA HAI === */
-    /* "blur lines" ko hatane ke liye border 'none' kar diya */
-    border-bottom: none; 
-  }
-  tbody tr td:nth-child(1) { width: 35px; text-align: center; font-weight: normal; }
-  tbody tr td:nth-child(2) { width: 35%; font-weight: normal; }
-  
-  tbody tr td:nth-child(3) {
-    width: 60%;
-    font-weight: bold;
-  }
-  
-  .inlineFields {
-    display: flex;
-    flex-wrap: wrap; 
-    align-items: center;
-    justify-content: flex-start; 
-    width: 100%;
-    gap: 5px 40px; 
-  }
-  
-  .gridWrapper {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    
-    .gridRow {
-      display: flex;
-      justify-content: space-between; 
-      width: 100%;
-      margin-bottom: 5px;
-      
-      .subField {
-        flex-basis: 48%; 
-        display: flex;
-        align-items: baseline;
-      }
-    }
-  }
+  /* --- YAHAN FIX KIYA: Grid ko main outer border se chipkaya --- */
+  /* Top border titleRow mein chala gaya hai, toh yahan top border nahi */
+  border-left: 1.5px solid #000; 
+  border-right: 1.5px solid #000;
+  border-bottom: 1.5px solid #000;
+  margin-top: 0; /* --- YAHAN FIX KIYA: Margin hata diya --- */
+  /* --- FIX ENDS --- */
+}
 
-  // Ensure these rows use display: block to stop wrapping issues
-  tbody tr:nth-child(8) td:nth-child(3),
-  tbody tr:nth-child(9) td:nth-child(3),
-  tbody tr:nth-child(14) td:nth-child(3),
-  tbody tr:nth-child(15) td:nth-child(3) 
-  {
-     display: block;
+.gridRow {
+  display: grid;
+  /* Columns: Sr.No | Label | Value */
+  grid-template-columns: 35px 35% auto; 
+  border-bottom: 1.5px solid #000; /* Har row ke neeche line */
+  min-height: 38px; /* Ek minimum height taaki lines consistent dikhein */
+  
+  /* Sabhi cells (divs) ke liye common style */
+  > div {
+    padding: 8px 5px; /* Thodi padding */
+    line-height: 1.4;
+    word-break: break-word; /* Lambe text ko tod dega */
   }
 }
+/* Yeh aakhri row ki line nahi hatayega */
+.gridRow:last-child {
+  border-bottom: none;
+}
+
+
+.rowNum {
+  text-align: center;
+  border-right: 1.5px solid #000;
+  padding-top: 10px; 
+  font-weight: normal;
+  align-self: start; /* Content ko top par rakhega */
+}
+
+.rowLabel {
+  border-right: 1.5px solid #000;
+  padding-left: 10px;
+  font-weight: normal;
+  align-self: start;
+}
+
+.rowValue {
+  font-weight: bold;
+  padding-left: 10px;
+  align-self: center; /* Data ko vertically center karega */
+}
+
+/* --- STYLING FOR MULTI-FIELD ROWS --- */
+
+/* Yeh Row 4, 10, 11, 13 ke liye hai */
+.inlineFields {
+  display: flex;
+  flex-wrap: wrap; /* Agar jagah na ho toh wrap karega */
+  align-items: baseline; /* --- YAHAN FIX KIYA: labels ko bottom line par align kiya --- */
+  justify-content: flex-start; 
+  width: 100%;
+  gap: 5px 20px; /* Vertical gap 5px, Horizontal gap 20px */
+}
+
+/* Yeh Row 6 (Birthplace) ke liye hai */
+.gridWrapper { 
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2x2 grid */
+  gap: 8px 15px;
+  width: 100%;
+
+  .subField {
+     font-weight: normal; // Label (Place, Taluka...) ko normal rakha
+  }
+}
+
+/* === PURANA TABLE CODE HATA DIYA === */
+.studentInfoTable {
+  display: none; 
+}
+/* --- END BLUEPRINT STYLE --- */
+
 
 .subField {
   font-weight: normal;
@@ -194,6 +232,7 @@
   border-top: 1px solid #000;
 }
 
+/* --- Print Fix (Ek Page par laane ke liye) --- */
 @media print {
   .certificatePaper {
     box-shadow: none;
@@ -204,48 +243,29 @@
   }
   .outerBorder {
     border: 1px solid #000;
-    padding: 10mm 8mm; /* Padding thodi kam ki */
+    padding: 10mm 8mm; /* Padding kam ki */
     min-height: 0;
     height: 100%;
   }
-
-  /* YEH SABSE ZAROORI HAI: Table row ki padding kam ki */
-  .studentInfoTable tbody tr td {
-    padding: 3px 5px !important; /* 6px se 3px kiya */
-    line-height: 1.3 !important; /* Line height bhi kam ki */
-    border-bottom: none; /* Screen waali line ko print mein hataya */
-  }
-
-  /* Header ka margin kam kiya */
-  .certHeader {
-    margin-bottom: 5px !important; /* 10px se 5px kiya */
-  }
   
-  /* Title ka margin kam kiya */
-  .titleRow {
-    margin-top: 4px !important; /* 7px se 4px kiya */
+  /* Print ke liye row padding kam ki */
+  .gridRow > div {
+    padding: 4px 5px !important;
+    line-height: 1.3 !important;
   }
+  .rowNum { padding-top: 6px !important; }
+  .inlineFields { gap: 2px 15px !important; }
+  .gridWrapper { gap: 2px 10px !important; }
 
-  /* Table ka margin kam kiya */
-  .studentInfoTable {
-    margin-top: 5px !important; /* 10px se 5px kiya */
+  /* Baki extra space bhi kam kiya */
+  .certHeader { margin-bottom: 5px !important; }
+  .titleRow { 
+    margin-top: 4px !important; 
+    padding: 3px 0 !important; /* Print mein title box ki padding kam ki */
   }
-
-  /* Neeche waale text ka margin kam kiya */
-  .certText {
-    margin-top: 10px !important; /* 15px se 10px kiya */
-    font-size: 10pt !important; /* Text thoda chhota kiya */
-  }
-
-  /* Footer ka poora space kam kiya */
-  .certFooterWrapper {
-    margin-top: 10px !important; /* 'auto' se 10px kiya */
-    padding-top: 10px !important; /* 20px se 10px kiya */
-  }
-  .datePlace {
-    margin-bottom: 15px !important; /* 25px se 15px kiya */
-  }
-  .sigBox {
-    padding-top: 20px !important; /* 30px se 20px kiya */
-  }
+  .certificateGrid { margin-top: 0 !important; } /* Top margin remove kiya */
+  .certText { margin-top: 10px !important; }
+  .certFooterWrapper { padding-top: 10px !important; margin-top: 10px !important; }
+  .datePlace { margin-bottom: 15px !important; }
+  .sigBox { padding-top: 20px !important; }
 }
