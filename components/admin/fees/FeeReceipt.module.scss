@@ -138,20 +138,24 @@
 }
 
 /* 5. Payment Details, Balance Due (Two-Column Layout) */
+/* === YAHAN CHANGE KIYA GAYA HAI (Plan ke mutabik) === */
 .paymentAndBalance {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr; /* Left (Payment) bada, Right (Balance) chhota */
+    display: flex; /* Grid se Flex kiya */
+    justify-content: space-between; /* Yeh add kiya taaki dono kinaron par chale jaaye */
+    align-items: flex-start; /* Yeh add kiya taaki dono upar se align ho */
     gap: 20px;
     margin-top: 15px;
     padding-bottom: 10px;
     border-bottom: 1px solid #f0f0f0;
 
     .paymentBlock {
+        flex: 1; /* Taaki yeh bachi hui jagah le le */
         h3 { font-size: 0.95rem; margin-bottom: 5px; text-transform: uppercase; }
         .grid { gap: 4px 10px; }
     }
     
     .balanceBlock {
+        flex-shrink: 0; /* Taaki yeh block sikude nahi */
         text-align: right;
         display: flex;
         flex-direction: column;
@@ -228,7 +232,7 @@
     /* 1. Action buttons को hide करें */
     .actions { display: none !important; }
     
-    /* 2. Content Area को print के लिए optimize करें */
+    /* 2. Content Area को print ke liye optimize करें */
     .receiptContent {
         padding: 10mm !important; 
         width: 210mm !important; 
@@ -263,7 +267,7 @@
     }
     
     /* 5. Footer labels को center align रखें */
-    .signatureLabels .cashierLabel, .signatureLabels .signatoryLabel {
+    .signatureLabels .cashierLabel, .signatoryLabel {
         text-align: center !important;
     }
 }
