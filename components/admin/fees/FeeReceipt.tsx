@@ -219,9 +219,8 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     </div>
                 </div>
 
-                {/* 2. Central Title (No Change) */}
                 <div className={styles.titleMeta}>
-                    <h2>FEE RECEIPT</h2>
+                <h2>FEE RECEIPT - TEST 123</h2>
                 </div>
 
                 {/* 3. Student Details (Roll No removed) */}
