@@ -53,10 +53,10 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             recentTeachersRaw,
             recentParents,
             recentStaff,
-            recentPaidFeeRecords,
+            recentPaidTransactions, // <-- YAHAN FIX KIYA: Naam badla
             admissionsDataRaw,
             classCountsRaw,
-            monthlyRevenueRaw // Nayi query yahan aayegi
+            monthlyRevenueRaw 
         ] = await Promise.all([
             // Total Counts (No Change)
             prisma.students.count({ where: { schoolId: schoolId } }), 
@@ -89,19 +89,21 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             prisma.parent.findMany({ where: { schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, id: true } }), 
             prisma.user.findMany({ where: { role: { in: staffRoles }, schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, role: true, id: true } }), 
 
-            // --- RECENT FEE RECORDS (No Change) ---
-            prisma.feeRecord.findMany({
-                where: { schoolId: schoolId, status: 'Paid' },
-                orderBy: { id: 'desc' }, 
+            // --- YAHAN FIX KIYA: 'FeeRecord' ki jagah 'Transaction' se fetch kiya ---
+            prisma.transaction.findMany({
+                where: { schoolId: schoolId, status: 'Success' },
+                orderBy: { paymentDate: 'desc' }, // Asli date se sort kiya
                 take: 5,
                 select: { 
                     id: true, 
-                    amount: true, 
-                    student: {
+                    amountPaid: true, // 'amount' ki jagah 'amountPaid'
+                    paymentDate: true, // <-- Asli date fetch ki
+                    student: { 
                         select: { first_name: true, father_name: true, last_name: true } 
                     }
                 }
             }),
+            // --- FIX ENDS ---
 
             // Aggregations (No Change)
              prisma.students.groupBy({
@@ -117,24 +119,21 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                 _count: { studentid: true }, 
             }),
             
-            // --- YAHAN FIX KIYA GAYA HAI ---
-            // 'FeeRecord' ki jagah 'Transaction' table ko aggregate kiya
+            // Monthly Revenue (No Change from last fix)
             prisma.transaction.aggregate({
-                _sum: { amountPaid: true }, // 'amount' ki jagah 'amountPaid' ko sum kiya
+                _sum: { amountPaid: true }, 
                 where: {
                     schoolId: schoolId,
-                    status: 'Success', // 'Paid' ki jagah 'Success' use kiya (transaction status)
-                    paymentDate: { // Ab yeh field 'Transaction' table mein valid hai
+                    status: 'Success', 
+                    paymentDate: { 
                         gte: startOfMonth,
                         lt: nextMonthStart
                     }
                 }
             })
-            // --- FIX ENDS ---
 
         ]).catch(err => {
             console.error("[GET /dashboard-data] Error during Promise.all:\n", err);
-            // Fatal error ko 500 ke roop mein phenkein
             res.status(500).send('Server Error fetching dashboard data');
             throw err; 
         });
@@ -168,14 +167,23 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
              }
          }).sort((a, b) => a.name.localeCompare(b.name)); 
 
+        // --- YAHAN FIX KIYA: Date ko format karne ke liye helper function ---
+        const formatRecentDate = (date) => {
+            if (!date) return '';
+            return new Date(date).toLocaleDateString('en-GB', {
+                day: 'numeric', month: 'short', year: 'numeric'
+            }); // Jaise "05 Nov 2025"
+        };
+        // --- FIX ENDS ---
 
-        // --- Format Recent Payments (No Change) ---
-        const recentFees = recentPaidFeeRecords.map(record => ({
-            id: record.id, 
-            student: getFullName(record.student) || 'Unknown Student', 
-            amount: `₹${record.amount?.toLocaleString('en-IN') || 0}`,
-            date: `ID: ${record.id}` 
+        // --- YAHAN FIX KIYA: Recent Payments ko format kiya ---
+        const recentFees = recentPaidTransactions.map(tx => ({
+            id: tx.id, 
+            student: getFullName(tx.student) || 'Unknown Student', 
+            amount: `₹${tx.amountPaid?.toLocaleString('en-IN') || 0}`,
+            date: formatRecentDate(tx.paymentDate) // <-- 'ID: ...' ki jagah asli date
         }));
+        // --- FIX ENDS ---
 
         // --- Format Recent Lists (No Change) ---
          const formattedRecentStudents = recentStudentsRaw.map(s => ({ 
@@ -190,13 +198,11 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
              subject: t.subject
          }));
 
-        // --- YAHAN FIX KIYA GAYA HAI ---
-        // Revenue data ko process kiya (amount -> amountPaid)
+        // Revenue data (No Change)
         const currentMonthRevenue = monthlyRevenueRaw._sum.amountPaid || 0;
-        // --- FIX ENDS ---
 
 
-        // --- Final Data Object ---
+        // --- Final Data Object (No Change) ---
         const dashboardData = {
             totalStudents: studentCount || 0, 
             totalTeachers: teacherCount || 0,
@@ -209,17 +215,13 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             recentParents: recentParents || [],
             recentStaff: recentStaff || [],
             recentFees,
-            // --- YAHAN FIX KIYA GAYA HAI ---
-            // Final data ko response mein add kiya
             currentMonthRevenue: currentMonthRevenue,
             currentMonthName: currentMonthName
-            // --- FIX ENDS ---
         };
         console.log(`[GET /dashboard-data] Sending final data. Revenue: ${currentMonthRevenue}`);
         res.json(dashboardData);
 
     } catch (err) {
-        // Agar Promise.all ke bahar koi error aaye (jo ki ab nahi aana chahiye)
         console.error("[GET /dashboard-data] Outer CATCH BLOCK Error:", err);
         res.status(500).send('Server Error');
     }
