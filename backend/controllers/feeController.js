@@ -1,6 +1,6 @@
-// backend/controllers/feeController.js
+// File: backend/controllers/feeController.js
 
-// --- 1. IMPORTS (No Change)
+// 1. IMPORTS (No Change)
 const prisma = require('../config/prisma'); // Sirf Prisma client
 const xlsx = require('xlsx');
 const Razorpay = require('razorpay');
@@ -135,9 +135,9 @@ const getLatePayments = async (req, res) => {
         if (search) {
           studentWhereClause = {
             OR: [
-              { first_name: { contains: search, mode: 'insensitive' } },
-              { father_name: { contains: search, mode: 'insensitive' } },
-              { last_name: { contains: search, mode: 'insensitive' } },
+              { first_name: { contains: search } }, // MySQL default is case-insensitive
+              { father_name: { contains: search } },
+              { last_name: { contains: search } },
             ]
           };
         }
@@ -178,7 +178,7 @@ const getLatePayments = async (req, res) => {
       } catch (error) { console.error("Error in getLatePayments:", error); res.status(500).send("Server Error"); }
 };
 
-// 5. Calculate Late Fees (FIXED - Session-Free)
+// 5. Calculate Late Fees (FIXED - Session-Free AND MySQL Syntax)
 const calculateLateFees = async (req, res) => { 
      try {
         const schoolId = req.user.schoolId;
@@ -207,15 +207,18 @@ const calculateLateFees = async (req, res) => {
         
         // Session filter हटा दिया गया
         if (result.count > 0) {
+            // === YAHAN FIX KIYA GAYA HAI ===
+            // MySQL syntax ke liye backticks (`) ka istemaal kiya (ya kuch bhi nahi)
             await prisma.$executeRawUnsafe(
-             `UPDATE "FeeRecord" 
-              SET "balanceDue" = "amount" + "lateFine" - "amountPaid" 
-              WHERE "schoolId" = $1 
-              AND "status" = 'Late'
-              AND "lateFine" = $2`,
+             `UPDATE FeeRecord 
+              SET balanceDue = amount + lateFine - amountPaid 
+              WHERE schoolId = ? 
+              AND status = 'Late'
+              AND lateFine = ?`,
               schoolId,
               LATE_FINE_AMOUNT
             );
+            // === FIX ENDS HERE ===
         }
 
         // Session ID payload हटा दिया गया
@@ -260,7 +263,7 @@ const sendLateFeeReminders = async (req, res) => {
       } catch (error) { console.error("Error in sendLateFeeReminders:", error); res.status(500).send("Server Error"); }
 };
 
-// 7. Get All Student Fee Records with Filters (No Change)
+// 7. Get All Student Fee Records with Filters (No Change - MySQL mode: 'insensitive' ko ignore karta hai, jo theek hai)
 const getStudentFeeRecords = async (req, res) => { 
     try {
         const schoolId = req.user.schoolId;
@@ -316,7 +319,7 @@ const getStudentFeeRecords = async (req, res) => {
                 studentId: r.student?.roll_number, 
             },
             templateId: r.template
-        }));
+       }));
             
         const totalDocuments = await prisma.feeRecord.count({ where: query });
         
@@ -327,8 +330,10 @@ const getStudentFeeRecords = async (req, res) => {
     }
 };
 
-// 8. Get Processing Payments (No Change)
-const getProcessingPayments = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+// ... (Baaki saare functions 8 se 27 tak poore waise hi copy-paste kar dein, unmein koi galti nahi hai) ...
+
+// 8. Get Processing Payments
+const getProcessingPayments = async (req, res) => {
      try {
         const schoolId = req.user.schoolId;
         const { page = 1, limit = 10, search = "" } = req.query;
@@ -340,12 +345,12 @@ const getProcessingPayments = async (req, res) => { /* ... (Poora function code 
            whereClause.OR = [
                { student: {
                    OR: [
-                     { first_name: { contains: search, mode: 'insensitive' } },
-                     { father_name: { contains: search, mode: 'insensitive' } },
-                     { last_name: { contains: search, mode: 'insensitive' } },
+                     { first_name: { contains: search } },
+                     { father_name: { contains: search } },
+                     { last_name: { contains: search } },
                    ]
                }},
-               { chequeNumber: { contains: search, mode: 'insensitive' } }
+               { chequeNumber: { contains: search } }
            ];
         }
 
@@ -373,7 +378,7 @@ const getProcessingPayments = async (req, res) => { /* ... (Poora function code 
 };
 
 // 9. Get Edited/Discounted Records
-const getEditedRecords = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const getEditedRecords = async (req, res) => {
      try {
         const schoolId = req.user.schoolId;
         const { page = 1, limit = 10, search = "" } = req.query;
@@ -383,9 +388,9 @@ const getEditedRecords = async (req, res) => { /* ... (Poora function code waisa
         if (search) {
           studentWhereClause = {
             OR: [
-              { first_name: { contains: search, mode: 'insensitive' } },
-              { father_name: { contains: search, mode: 'insensitive' } },
-              { last_name: { contains: search, mode: 'insensitive' } },
+              { first_name: { contains: search } },
+              { father_name: { contains: search } },
+              { last_name: { contains: search } },
             ]
           };
         }
@@ -416,7 +421,7 @@ const getEditedRecords = async (req, res) => { /* ... (Poora function code waisa
 };
 
 // 10. Get PDC Records
-const getPdcRecords = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const getPdcRecords = async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
         const { page = 1, limit = 10, search = "" } = req.query;
@@ -426,8 +431,8 @@ const getPdcRecords = async (req, res) => { /* ... (Poora function code waisa hi
 
         if (search) {
              whereClause.OR = [
-               { student: { OR: [ { first_name: { contains: search, mode: 'insensitive' } }, { father_name: { contains: search, mode: 'insensitive' } }, { last_name: { contains: search, mode: 'insensitive' } } ] }},
-               { chequeNumber: { contains: search, mode: 'insensitive' } }
+               { student: { OR: [ { first_name: { contains: search } }, { father_name: { contains: search } }, { last_name: { contains: search } } ] }},
+               { chequeNumber: { contains: search } }
            ];
         }
         
@@ -455,7 +460,7 @@ const getPdcRecords = async (req, res) => { /* ... (Poora function code waisa hi
 };
 
 // 11. Assign And Collect Fee
-const assignAndCollectFee = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const assignAndCollectFee = async (req, res) => {
   console.log("[assignAndCollectFee] Received request body:", req.body);
   const { studentId, templateId, dueDate, amountPaid, paymentMode, paymentDate, notes } = req.body;
   const schoolId = req.user.schoolId;
@@ -489,7 +494,6 @@ const assignAndCollectFee = async (req, res) => { /* ... (Poora function code wa
       if (isPayingNow && numericAmountPaid > templateTotalAmount + 0.01) throw new Error(`Amount paid (${numericAmountPaid}) cannot exceed template total (${templateTotalAmount}).`);
       const balanceDue = templateTotalAmount - numericAmountPaid;
       const feeStatus = balanceDue <= 0.01 ? 'Paid' : (isPayingNow ? 'Partial' : 'Pending');
-      // FIX 17: sessionId data से हटा दिया गया
       savedFeeRecord = await tx.feeRecord.create({
         data: { studentId: studentIdInt, templateId: templateIdInt, schoolId: schoolId, classId: foundClassId, amount: templateTotalAmount, discount: 0, amountPaid: numericAmountPaid, balanceDue: balanceDue < 0 ? 0 : balanceDue, status: feeStatus, dueDate: new Date(dueDate) }
       });
@@ -497,7 +501,6 @@ const assignAndCollectFee = async (req, res) => { /* ... (Poora function code wa
       if (isPayingNow) {
         const receiptId = `TXN-${Date.now()}`;
         const transactionStatus = (paymentMode === 'Cheque') ? 'Pending' : 'Success';
-        // FIX 17: sessionId data से हटा दिया गया
         savedTransaction = await tx.transaction.create({
           data: { receiptId, feeRecordId: savedFeeRecord.id, studentId: studentIdInt, classId: foundClassId, schoolId: schoolId, templateId: templateIdInt, amountPaid: numericAmountPaid, paymentDate: paymentDateObj, paymentMode: paymentMode, status: transactionStatus, collectedById: collectedByUserId, notes, chequeNumber: (paymentMode === 'Cheque') ? notes : null }
         });
@@ -507,7 +510,6 @@ const assignAndCollectFee = async (req, res) => { /* ... (Poora function code wa
     });
     console.log("[assignAndCollectFee] Database transaction committed successfully.");
     const io = req.app.get('socketio');
-    // FIX 17: Session ID payload हटा दिया गया
     if (io) {
       console.log("[assignAndCollectFee] Emitting Socket events...");
       io.emit('updateDashboard');
@@ -528,7 +530,7 @@ const assignAndCollectFee = async (req, res) => { /* ... (Poora function code wa
 };
 
 // 12. Create a New Fee Template
-const createFeeTemplate = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const createFeeTemplate = async (req, res) => {
      try {
         const { name, description, items } = req.body;
         const schoolId = req.user.schoolId;
@@ -536,10 +538,8 @@ const createFeeTemplate = async (req, res) => { /* ... (Poora function code wais
         if (!items.every(item => item && typeof item.name === 'string' && item.name.trim() !== '' && typeof item.amount === 'number' && item.amount >= 0)) return res.status(400).json({ message: 'Each fee item must have a non-empty name and a non-negative amount.' });
         const totalAmount = items.reduce((sum, item) => sum + Number(item.amount || 0), 0);
         const trimmedName = name.trim();
-        // FIX 5: Session Aware Unique Check हटा दिया गया
         const existingTemplate = await prisma.feeTemplate.findUnique({ where: { schoolId_name: { schoolId, name: trimmedName } } });
         if (existingTemplate) return res.status(400).json({ message: `A fee template with the name "${trimmedName}" already exists.` });
-        // FIX 6: sessionId data से हटा दिया गया
         const newTemplate = await prisma.feeTemplate.create({ data: { name: trimmedName, description, items, totalAmount, schoolId } });
         if (req.io) { req.io.emit('fee_template_added', newTemplate); } else { console.warn('Socket.IO instance not found.'); }
         res.status(201).json({ message: 'Fee Template created successfully!', template: newTemplate });
@@ -547,7 +547,7 @@ const createFeeTemplate = async (req, res) => { /* ... (Poora function code wais
 };
 
 // 12.5. Update Fee Template
-const updateFeeTemplate = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const updateFeeTemplate = async (req, res) => {
   const templateIdInt = parseInt(req.params.id);
   const { name, description, items } = req.body;
   const schoolId = req.user.schoolId;
@@ -557,10 +557,8 @@ const updateFeeTemplate = async (req, res) => { /* ... (Poora function code wais
   for (const item of items) { if (!item || typeof item.name !== 'string' || item.name.trim() === '' || typeof item.amount !== 'number' || item.amount < 0) { return res.status(400).json({ message: 'Each fee item must have a valid name and amount.' }); } serverCalculatedTotal += item.amount; }
   
   try {
-    // FIX 7: Session Aware Logic हटा दिया गया
     const templateToEdit = await prisma.feeTemplate.findUnique({ where: { id: templateIdInt, schoolId: schoolId } });
     if (!templateToEdit) { return res.status(404).json({ message: 'Fee template not found.' }); }
-    // FIX 8: Duplicate check को Session-Free बनाया गया
     const trimmedName = name.trim();
     const existingTemplate = await prisma.feeTemplate.findFirst({
         where: {
@@ -579,7 +577,7 @@ const updateFeeTemplate = async (req, res) => { /* ... (Poora function code wais
 };
 
 // 13. Delete Fee Template
-const deleteFeeTemplate = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const deleteFeeTemplate = async (req, res) => {
   const templateIdInt = parseInt(req.params.id);
   const schoolId = req.user.schoolId;
   if (isNaN(templateIdInt)) return res.status(400).json({ message: 'Invalid Template ID.' });
@@ -587,14 +585,13 @@ const deleteFeeTemplate = async (req, res) => { /* ... (Poora function code wais
     const recordInUse = await prisma.feeRecord.findFirst({ where: { templateId: templateIdInt, schoolId: schoolId } });
     if (recordInUse) return res.status(400).json({ message: 'Failed to delete template. It is already assigned to one or more students.' });
     await prisma.feeTemplate.delete({ where: { id: templateIdInt, schoolId: schoolId } });
-    // FIX 9: Session ID payload हटा दिया गया
     if (req.io) { req.io.emit('fee_template_deleted', { id: templateIdInt }); }
     res.status(200).json({ message: 'Template deleted successfully!' });
   } catch (error) { console.error("Error in deleteFeeTemplate:", error); if (error.code === 'P2025') { return res.status(404).json({ message: 'Fee template not found or you do not have permission.' }); } res.status(500).json({ message: `Server error deleting template: ${error.message}` }); }
 };
 
 // 14. Get Sample Sheet
-const getSampleSheet = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const getSampleSheet = async (req, res) => {
      try {
         const sampleData = [ { FeeRecordID_ToUpdate: 'Enter_Prismaid_Here (e.g., 12)', AmountPaid_Partially: 500, PaymentDate: 'YYYY-MM-DD (e.g., 2025-10-26)', PaymentMode: 'Cash | Cheque | NEFT | UPI etc.', Notes: 'Optional notes (e.g., Received part payment)', ChequeNumber: 'If PaymentMode is Cheque', BankName: 'If PaymentMode is Cheque/NEFT/RTGS' }, ];
         const wb = xlsx.utils.book_new(); const ws = xlsx.utils.json_to_sheet(sampleData);
@@ -605,7 +602,7 @@ const getSampleSheet = async (req, res) => { /* ... (Poora function code waisa h
 };
 
 // 15. Update Existing Records (Import Fee Payments)
-const updateExistingRecords = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const updateExistingRecords = async (req, res) => {
     if (!req.file || !req.file.buffer) return res.status(400).json({ message: 'No file uploaded.' });
     const schoolId = req.user.schoolId; const collectedByUserId = req.user.id;
     let workbook; try { workbook = xlsx.read(req.file.buffer, { type: 'buffer', cellDates: true }); } catch (parseError) { console.error("Error parsing Excel file:", parseError); return res.status(400).json({ message: 'Could not parse the Excel file.' }); }
@@ -625,7 +622,6 @@ const updateExistingRecords = async (req, res) => { /* ... (Poora function code 
                 if (!feeRecord) throw new Error(`Fee Record ${feeRecordIdInt} not found or doesn't belong to this school.`);
                 if (amountPaid > feeRecord.balanceDue) throw new Error(`Amount ${amountPaid} exceeds balance ${feeRecord.balanceDue}.`);
                 const transactionStatus = (mode === 'Cheque') ? 'Pending' : 'Success';
-                // FIX 10: sessionId data से हटा दिया गया
                 await tx.transaction.create({ data: { feeRecordId: feeRecord.id, studentId: feeRecord.studentId, classId: feeRecord.classId, schoolId: schoolId, templateId: feeRecord.templateId, amountPaid: amountPaid, paymentDate: paymentDate, paymentMode: mode, status: transactionStatus, collectedById: collectedByUserId, notes: notes || `Imported via Excel`, chequeNumber, bankName, receiptId: `TXN-${Date.now()}-${index}` } });
                 if (transactionStatus === 'Success') {
                     const newAmountPaid = feeRecord.amountPaid + amountPaid; const newBalanceDue = feeRecord.balanceDue - amountPaid;
@@ -636,17 +632,15 @@ const updateExistingRecords = async (req, res) => { /* ... (Poora function code 
             successCount++;
         } catch (error) { errorCount++; errors.push(`Row ${index + 2} (ID: ${feeRecordIdInt}): Error - ${error.message}`); console.error(`Error processing row ${index + 2} (ID: ${feeRecordIdInt}):`, error); }
     }
-    // FIX 11: Session ID payload हटा दिया गया
     if (req.io && updatedFeeRecordIds.size > 0) { console.log(`[Import] Emitting socket events for ${updatedFeeRecordIds.size} updated records.`); req.io.emit('updateDashboard'); req.io.emit('fee_records_updated'); }
     res.status(200).json({ message: `Import complete. ${successCount} payments recorded. ${errorCount} rows failed.`, errors: errors });
 };
 
 // 16. Export Detail Report
-const exportDetailReport = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const exportDetailReport = async (req, res) => {
      try {
         const schoolId = req.user.schoolId; const filters = req.body || {}; 
         let query = { schoolId };
-        // FIX 12: Session ID filter हटा दिया गया
         if (filters.status) query.status = filters.status; if (filters.paymentMode) query.paymentMode = filters.paymentMode; if (filters.classId) query.classId = parseInt(filters.classId);
         if (filters.startDate || filters.endDate) { query.paymentDate = {}; if (filters.startDate) query.paymentDate.gte = new Date(filters.startDate); if (filters.endDate) { const endDate = new Date(filters.endDate); endDate.setHours(23, 59, 59, 999); query.paymentDate.lte = endDate; } }
         if (filters.studentId) query.studentId = parseInt(filters.studentId); if (filters.templateId) query.templateId = parseInt(filters.templateId);
@@ -660,10 +654,9 @@ const exportDetailReport = async (req, res) => { /* ... (Poora function code wai
 };
 
 // 17. Get Paid Transactions (for Student Tab)
-const getPaidTransactions = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const getPaidTransactions = async (req, res) => {
      try {
         const studentIdInt = parseInt(req.params.studentId); const schoolId = req.user.schoolId; if (isNaN(studentIdInt)) return res.status(400).json({ message: 'Invalid Student ID.' });
-        // FIX 13: Session filter हटा दिया गया
         const allPaidTransactions = await prisma.transaction.findMany({ where: { schoolId: schoolId, studentId: studentIdInt, status: 'Success' }, include: { template: { select: { name: true } }, feeRecord: { select: { isDeposit: true } } }, orderBy: { paymentDate: 'desc' } });
         const deposits = allPaidTransactions.filter(tx => tx.feeRecord?.isDeposit === true); const paidRecords = allPaidTransactions.filter(tx => !tx.feeRecord || tx.feeRecord?.isDeposit !== true);
         res.status(200).json({ deposits, paidRecords });
@@ -671,27 +664,25 @@ const getPaidTransactions = async (req, res) => { /* ... (Poora function code wa
 };
 
 // 18. Get Failed Transactions (for Student Tab)
-const getFailedTransactions = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const getFailedTransactions = async (req, res) => {
      try {
         const studentIdInt = parseInt(req.params.id); const schoolId = req.user.schoolId; if (isNaN(studentIdInt)) return res.status(400).json({ message: 'Invalid Student ID.' });
-        // FIX 14: Session filter हटा दिया गया
         const failedTransactions = await prisma.transaction.findMany({ where: { schoolId: schoolId, studentId: studentIdInt, status: 'Failed' }, include: { template: { select: { name: true } } }, orderBy: { id: 'desc' } });
         res.status(200).json(failedTransactions);
       } catch (error) { console.error("Error fetching failed transactions:", error); res.status(500).send("Server Error"); }
 };
 
 // 19. Get Payment History (All transactions for Student Tab)
-const getPaymentHistory = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const getPaymentHistory = async (req, res) => {
      try {
         const studentIdInt = parseInt(req.params.id); const schoolId = req.user.schoolId; if (isNaN(studentIdInt)) return res.status(400).json({ message: 'Invalid Student ID.' });
-        // FIX 15: Session filter हटा दिया गया
         const historyRecords = await prisma.transaction.findMany({ where: { schoolId: schoolId, studentId: studentIdInt }, include: { template: { select: { name: true } } }, orderBy: { paymentDate: 'desc' } });
         res.status(200).json(historyRecords);
       } catch (error) { console.error("Error fetching payment history:", error); res.status(500).send("Server Error"); }
 };
 
 // 20. Collect Manual Fee
-const collectManualFee = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const collectManualFee = async (req, res) => {
     const { feeRecordId, amountPaid: amountPaidString, paymentMode, paymentDate, notes, chequeNumber, bankName } = req.body;
     const schoolId = req.user.schoolId; const collectedByUserId = req.user.id; const collectedByName = req.user.name || 'Admin';
     const feeRecordIdInt = parseInt(feeRecordId); if (isNaN(feeRecordIdInt)) return res.status(400).json({ msg: 'Invalid or missing Fee Record ID.' });
@@ -705,7 +696,6 @@ const collectManualFee = async (req, res) => { /* ... (Poora function code waisa
             if (!feeRecord) throw new Error('Fee Record not found or does not belong to this school.');
             if (amountPaid > feeRecord.balanceDue + 0.01) throw new Error(`Amount paid (${amountPaid}) exceeds balance due (${feeRecord.balanceDue})`);
             const receiptId = `TXN-${Date.now()}`; const transactionStatus = (paymentMode === 'Cheque') ? 'Pending' : 'Success';
-            // FIX 16: sessionId data से हटा दिया गया
             newTransaction = await tx.transaction.create({ data: { receiptId, feeRecordId: feeRecord.id, studentId: feeRecord.studentId, classId: feeRecord.classId, schoolId, templateId: feeRecord.templateId, amountPaid: amountPaid, paymentDate: paymentDateObj, paymentMode, status: transactionStatus, collectedById: collectedByUserId, notes, chequeNumber, bankName } });
             console.log(`[Manual Collect] Transaction created: ${newTransaction.id}`);
             if (newTransaction.status === 'Success') {
@@ -720,7 +710,6 @@ const collectManualFee = async (req, res) => { /* ... (Poora function code waisa
         const templateInfo = await prisma.feeTemplate.findUnique({ where: { id: result.updatedFeeRecord.templateId } });
         const schoolInfo = await prisma.school.findUnique({ where: { id: schoolId } });
         const populatedTransaction = { ...result.newTransaction, studentName: getFullName(studentInfo) || 'N/A', className: studentInfo?.class?.class_name || 'N/A', templateName: templateInfo?.name || 'N/A', collectedBy: collectedByName, schoolInfo: { name: schoolInfo?.name || 'School Name', address: schoolInfo?.address || 'School Address', logo: schoolInfo?.logo } };
-        // FIX 17: Session ID payload हटा दिया गया
         if (req.io) { console.log("[Manual Collect] Emitting Socket events..."); req.io.emit('updateDashboard'); req.io.emit('fee_record_updated', result.updatedFeeRecord); req.io.emit('transaction_added', populatedTransaction); if (result.newTransaction.status === 'Success') { req.io.emit('new_transaction_feed', { name: studentInfo ? getFullName(studentInfo) : 'A Student', amount: result.newTransaction.amountPaid }); } }
         else { console.warn('[Manual Collect] Socket.IO instance (req.io) not found.'); }
         res.status(201).json({ message: 'Fee collected successfully', transaction: populatedTransaction });
@@ -728,7 +717,7 @@ const collectManualFee = async (req, res) => { /* ... (Poora function code waisa
 };
 
 // 21. Get Single Transaction Details (Receipt)
-const getTransactionById = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const getTransactionById = async (req, res) => {
      try {
         const transactionIdInt = parseInt(req.params.id); const schoolId = req.user.schoolId; if (isNaN(transactionIdInt)) return res.status(400).json({ message: 'Invalid Transaction ID' });
         
@@ -777,11 +766,10 @@ const getTransactionById = async (req, res) => { /* ... (Poora function code wai
 };
 
 // 22. Get Class-wise Collection Report
-const getClasswiseReport = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const getClasswiseReport = async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
         const classes = await prisma.classes.findMany({ where: { schoolId }, include: { _count: { select: { students: true } } }, orderBy: { class_name: 'asc' } });
-        // FIX 18: Session filter हटा दिया गया
         const reportData = await prisma.transaction.groupBy({ by: ['classId'], where: { schoolId: schoolId, status: 'Success' }, _sum: { amountPaid: true } });
         const report = classes.map(cls => { const collection = reportData.find(r => r.classId === cls.classid); return { classId: cls.classid, className: cls.class_name, totalCollection: collection?._sum.amountPaid || 0, studentCount: cls._count.students || 0 } });
         res.status(200).json(report);
@@ -789,14 +777,12 @@ const getClasswiseReport = async (req, res) => { /* ... (Poora function code wai
 };
 
 // 23. Get Student-wise Report (by Class)
-const getStudentReportByClass = async (req, res) => { /* ... (Poora function code waisa hi rahega) ... */
+const getStudentReportByClass = async (req, res) => {
      try {
         const schoolId = req.user.schoolId; const classIdInt = parseInt(req.params.classId); if (isNaN(classIdInt)) return res.status(400).json({ message: 'Invalid Class ID' });
-        // FIX 19: Session filter हटा दिया गया
         const students = await prisma.students.findMany({ where: { schoolId, classId: classIdInt }, orderBy: { first_name: 'asc' } });
         if (students.length === 0) return res.status(200).json([]);
         const studentIds = students.map(s => s.studentid);
-        // FIX 20: Session filter हटा दिया गया
         const paidData = await prisma.transaction.groupBy({ by: ['studentId'], where: { schoolId, classId: classIdInt, status: 'Success', studentId: { in: studentIds } }, _sum: { amountPaid: true } });
         const feeData = await prisma.feeRecord.groupBy({ by: ['studentId'], where: { schoolId, classId: classIdInt, studentId: { in: studentIds } }, _sum: { amount: true, discount: true, balanceDue: true } });
         const report = students.map(student => { const paid = paidData.find(p => p.studentId === student.studentid); const fee = feeData.find(f => f.studentId === student.studentid); return { studentId: student.studentid, studentName: getFullName(student), studentRegId: student.roll_number || 'N/A', totalPaid: paid?._sum.amountPaid || 0, totalDue: fee?._sum.amount || 0, totalDiscount: fee?._sum.discount || 0, totalBalance: fee?._sum.balanceDue || 0 } });
@@ -831,7 +817,7 @@ let razorpay;if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET)
 
          const feeRecord = await prisma.feeRecord.findUnique({
              where: { id: feeRecordIdInt, schoolId },
-             select: { studentId: true, classId: true, balanceDue: true } // FIX 21: Session ID select हटा दिया गया
+             select: { studentId: true, classId: true, balanceDue: true } 
          });
 
          if (!feeRecord) { return res.status(404).json({ message: 'Fee record not found.' }); }
@@ -847,7 +833,6 @@ let razorpay;if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET)
             studentId: feeRecord.studentId.toString(),
             classId: feeRecord.classId.toString(),
             schoolId: schoolId.toString()
-            // FIX 22: sessionId note से हटा दिया गया
           }
         };
 
@@ -898,10 +883,6 @@ const verifyPaymentWebhook = async (req, res) => {
     const classIdInt = parseInt(payment.notes?.classId);
     const schoolId = payment.notes?.schoolId; // Yeh string hai
 
-    // FIX 23: sessionId note से हटा दिया गया
-    // const sessionIdInt = parseInt(payment.notes?.sessionId); 
-
-    // FIX 24: sessionIdInt check हटा दिया गया
     if (!feeRecordIdInt || !studentIdInt || !classIdInt || !schoolId) {
         console.error('Webhook Error: Missing or invalid IDs in payment notes.', payment.notes);
         return res.status(200).json({ message: 'Missing/Invalid IDs in notes.' });
@@ -918,7 +899,6 @@ const verifyPaymentWebhook = async (req, res) => {
             });
             if (existingTransaction) { throw new Error('Transaction already processed'); }
 
-            // FIX 25: Session filter हटा दिया गया
             const feeRecord = await tx.feeRecord.findUnique({
                 where: { id: feeRecordIdInt, schoolId }
             });
@@ -929,7 +909,6 @@ const verifyPaymentWebhook = async (req, res) => {
             const amountPaid = Number(payment.amount) / 100; // Rupees
             const receiptId = `TXN-${Date.now()}`;
 
-            // FIX 26: sessionId data से हटा दिया गया
             newTransaction = await tx.transaction.create({
                 data: {
                     receiptId: receiptId,
@@ -978,7 +957,6 @@ const verifyPaymentWebhook = async (req, res) => {
          };
 
         const io = req.app.get('socketio');
-        // FIX 27: Session ID payload हटा दिया गया
         if (io) {
             console.log("Webhook: Emitting Socket.IO events.");
             io.emit('updateDashboard');
@@ -1086,7 +1064,6 @@ const getTransactions = async (req, res) => {
         // --- END FIX 2 ---
 
 
-        // FIX 28: Session filter हटा दिया गया
         if (search && !studentIdInt) {
 
             queryConditions.OR = [
@@ -1095,23 +1072,23 @@ const getTransactions = async (req, res) => {
 
                     OR: [
 
-                      { first_name: { contains: search, mode: 'insensitive' } },
+                      { first_name: { contains: search } },
 
-                      { father_name: { contains: search, mode: 'insensitive' } },
+                      { father_name: { contains: search } },
 
-                      { last_name: { contains: search, mode: 'insensitive' } },
+                      { last_name: { contains: search } },
 
                     ]
 
                 }},
 
-                { receiptId: { contains: search, mode: 'insensitive' } }
+                { receiptId: { contains: search } }
 
             ];
 
         } else if (search && studentIdInt) {
 
-            queryConditions.receiptId = { contains: search, mode: 'insensitive' };
+            queryConditions.receiptId = { contains: search };
 
         }
 
