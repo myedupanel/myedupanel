@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail'); 
 
 // === YAHAN FIX KIYA (1/4): Smart mapping ko "SELF-AWARE" banaya ===
-// Humne 'clean keys' (jaise 'first_name') aur normalized keys (jaise 'firstname') add kar di hain
+// Humne 'clean keys' (jaise 'first_name') aur normalized keys (jaise 'firstname', 'classname') add kar di hain
 const headerMappings = {
   first_name: ['firstname', 'first name', 'student name', 'name', 'first_name'],
   father_name: ['fathername', 'father name', 'middle name', 'parentname', 'parent name', 'father_name'],
@@ -50,11 +50,6 @@ const addStudentsInBulk = async (req, res) => {
 
     const studentsData = req.body;
     
-    // === DEBUGGER 1: Frontend se kya data aa raha hai? ===
-    console.log("--- DEBUG: RAW DATA RECEIVED FROM FRONTEND ---");
-    console.log(JSON.stringify(studentsData, null, 2));
-    // === DEBUGGER ENDS ===
-    
     if (!studentsData || !Array.isArray(studentsData)) {
       return res.status(400).json({ message: 'No student data provided. Expected an array for bulk import.' });
     }
@@ -72,11 +67,8 @@ const addStudentsInBulk = async (req, res) => {
       return newStudent;
     });
 
-    // === DEBUGGER 2: Mapping ke baad data kaisa dikh raha hai? ===
-    console.log("--- DEBUG: DATA AFTER BACKEND MAPPING (processedStudents) ---");
-    console.log(JSON.stringify(processedStudents, null, 2));
-    // === DEBUGGER ENDS ===
-
+    // === DEBUG LOG 2 (Ab iski zaroorat nahi) ===
+    
     let createdCount = 0;
     const errors = [];
 
@@ -88,14 +80,8 @@ const addStudentsInBulk = async (req, res) => {
         if (!first_name || !last_name || !class_name || !roll_number || !father_name || !guardian_contact) {
           errors.push(`Skipped row: Missing required data for student '${first_name || 'N/A'}' (Roll No: ${roll_number || 'N/A'}). Required: first_name, last_name, class_name, roll_number, father_name, guardian_contact.`);
           
-          // === DEBUGGER 3: Pehla student reject kyun hua? ===
-          if (processedStudents.indexOf(student) === 0) { // Sirf pehle student ka error dikhao
-            console.log("--- DEBUG: FIRST STUDENT REJECTED ---");
-            console.log("REASON: Missing one or more required fields.");
-            console.log("DATA RECEIVED BY 'if' CHECK:", student);
-          }
-          // === DEBUGGER ENDS ===
-
+          // === DEBUG LOG 3 (Ab iski zaroorat nahi) ===
+          
           continue; // Is student ko skip karo aur agle par jaao
         }
         // === FLEXIBLE CHECK ENDS ===
@@ -338,7 +324,7 @@ const addSingleStudent = async (req, res) => {
     res.status(201).json({ message: 'Student added successfully!', student: newStudent });
 
   } catch (error) {
-    // 10. Catch block (No Change)
+    // 10. Catch block (Syntax Error Fixed)
     console.error("Error creating single student:", error);
     if (error.code === 'P2002') { 
        const target = error.meta?.target || [];
@@ -354,6 +340,7 @@ const addSingleStudent = async (req, res) => {
         const match = error.message.match(/Argument `(.*)` is missing/);
         const missingField = match ? match[1] : 'a required field';
         console.error(`Validation Error: Missing field: ${missingField}`);
+        // === YEH THA SYNTAX ERROR (4Z00 -> 400) ===
         return res.status(400).json({ message: `Data validation error. Please check all fields. Missing: ${missingField}` });
     }
     res.status(500).json({ message: 'Server error while adding student.' });
