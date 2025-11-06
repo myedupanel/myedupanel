@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Pehla section: Rewrites
+  // Pehla section: Rewrites (No Change)
   async rewrites() {
     return [
       {
@@ -12,7 +12,8 @@ const nextConfig = {
     ];
   },
 
-  // Doosra section: Images (isi object ke andar)
+  // === YAHAN FIX KIYA GAYA HAI ===
+  // Doosra section: Images
   images: {
     remotePatterns: [
       {
@@ -21,8 +22,16 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Hamein Cloudinary ko yahan add karna hai
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
+  // === FIX ENDS HERE ===
 };
 
 module.exports = nextConfig;
