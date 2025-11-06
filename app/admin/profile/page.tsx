@@ -4,7 +4,9 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import styles from './ProfilePage.module.scss'; 
 import { useAuth, User } from '../../context/AuthContext';
-import DefaultAvatar from '../../../components/common/DefaultAvatar';
+// === YAHAN FIX KIYA (1/2): DefaultAvatar ko 'Logo' se replace kiya ===
+import Logo from '../../../components/Logo'; // DefaultAvatar ki jagah Logo import kiya
+// === FIX ENDS HERE ===
 import api from '@/backend/utils/api';
 import { FiAlertCircle, FiCheckCircle, FiLoader } from 'react-icons/fi'; 
 
@@ -265,12 +267,16 @@ const SchoolProfilePage = () => {
       <div className={styles.profileCard}>
         <form className={styles.profileForm} onSubmit={handleFormSubmit}>
 
-          {/* Profile Header (No Change) */}
+          {/* Profile Header (FIXED) */}
           <div className={styles.profileHeader}>
             {imagePreview ? (
               <Image src={imagePreview} alt="School Logo" width={100} height={100} className={styles.profileImage} />
             ) : (
-              <DefaultAvatar name={formData.name || user?.schoolName || 'S'} size={100} />
+              // === YAHAN FIX KIYA (2/2): <DefaultAvatar> ko <Logo> se replace kiya ===
+              <div className={styles.profileImage}> {/* Ek wrapper div taaki styling same rahe */}
+                <Logo />
+              </div>
+              // === FIX ENDS HERE ===
             )}
             <div className={styles.imageUploadWrapper}>
               <label htmlFor="imageUpload" className={styles.uploadButton}>Change Logo</label>
