@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import styles from './ProfilePage.module.scss'; 
 import { useAuth, User } from '../../context/AuthContext';
-// === YAHAN FIX KIYA (1/2): DefaultAvatar ko 'Logo' se replace kiya ===
+// === YAHAN FIX KIYA (1/3): DefaultAvatar ko 'Logo' se replace kiya ===
 import Logo from '../../../components/Logo'; // DefaultAvatar ki jagah Logo import kiya
 // === FIX ENDS HERE ===
 import api from '@/backend/utils/api';
@@ -72,7 +72,7 @@ const SchoolProfilePage = () => {
     }
   }, [user]);
 
-  // useEffect fetches school profile (No Change)
+  // useEffect fetches school profile (FIXED)
   useEffect(() => {
     const fetchSchoolProfile = async () => {
       if (!user) {
@@ -84,22 +84,26 @@ const SchoolProfilePage = () => {
       setError('');
       try {
         const res = await api.get('/api/school/profile');
+        const profileData = res.data; // Data ko ek variable mein store karein
+
         setFormData({
-          name: res.data.name || user.schoolName || '',
-          name2: res.data.name2 || '',
-          address: res.data.address || '',
-          mobNo: res.data.contactNumber || '', 
-          email: res.data.email || '',
-          udiseNo: res.data.udiseNo || '',
-          govtReg: res.data.recognitionNumber || '', 
-          place: res.data.place || '',
-          logoUrl: res.data.logoUrl || '',
-          genRegNo: res.data.genRegNo || '' 
+          name: profileData.name || user.schoolName || '',
+          name2: profileData.name2 || '',
+          address: profileData.address || '',
+          mobNo: profileData.contactNumber || '', 
+          email: profileData.email || '',
+          udiseNo: profileData.udiseNo || '',
+          govtReg: profileData.recognitionNumber || '', 
+          place: profileData.place || '',
+          logoUrl: profileData.logoUrl || '',
+          genRegNo: profileData.genRegNo || '' 
         });
 
-        if (res.data.logoUrl) {
-          setImagePreview(res.data.logoUrl);
-        }
+        // === YAHAN FIX KIYA (2/3): Logic ko simple kiya ===
+        // 'imagePreview' ko seedha database ki value se set karein
+        // Agar logoUrl null, undefined, ya "" hai, toh imagePreview bhi wahi set ho jaayega
+        setImagePreview(profileData.logoUrl);
+        // === FIX ENDS HERE ===
 
       } catch (err: any) {
         console.error("Failed to fetch school profile:", err);
@@ -269,15 +273,19 @@ const SchoolProfilePage = () => {
 
           {/* Profile Header (FIXED) */}
           <div className={styles.profileHeader}>
+            {/* === YAHAN FIX KIYA (3/3): Logic ko check kiya === */}
+            {/* Ab 'imagePreview' ya toh URL hoga ya null/"" hoga. */}
             {imagePreview ? (
+              // Agar logoUrl database mein hai, toh Image component dikhao
               <Image src={imagePreview} alt="School Logo" width={100} height={100} className={styles.profileImage} />
             ) : (
-              // === YAHAN FIX KIYA (2/2): <DefaultAvatar> ko <Logo> se replace kiya ===
-              <div className={styles.profileImage}> {/* Ek wrapper div taaki styling same rahe */}
+              // Agar nahi hai, toh default Logo component dikhao
+              <div className={styles.profileImage}> 
                 <Logo />
               </div>
-              // === FIX ENDS HERE ===
             )}
+            {/* === FIX ENDS HERE === */}
+
             <div className={styles.imageUploadWrapper}>
               <label htmlFor="imageUpload" className={styles.uploadButton}>Change Logo</label>
               <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/webp" onChange={handleImageChange} onClick={handleInputClick} style={{ display: 'none' }} disabled={isSubmitting} />
@@ -289,31 +297,22 @@ const SchoolProfilePage = () => {
           {error && <p className={styles.errorMessage}><FiAlertCircle /> {error}</p>}
           {successMessage && <p className={styles.successMessage}><FiCheckCircle /> {successMessage}</p>}
 
-          {/*
-            ======================================================================
-            === YEH HAI AAPKA FIX ===
-            Maine 'name2' (Certificate Name) waale block ko upar
-            aur 'name' (Trust Name) waale block ko neeche kar diya hai.
-            ======================================================================
-          */}
+          {/* Form Fields (No Change) */}
           
-          {/* School Name 2 (For Certificates) - YEH AB PEHLE AAYEGA */}
+          {/* School Name 2 (For Certificates) */}
           <div className={styles.formGroup}>
             <label htmlFor="name2">School Name (For Certificates) *</label>
             <input type="text" id="name2" name="name2" value={formData.name2} onChange={handleInputChange} required disabled={isSubmitting} placeholder="e.x., MyEduPanel Sec. & Higher Sec. School" />
             <small>This will be the main name shown on certificates.</small>
           </div>
           
-          {/* School Name (Trust Name) - YEH AB DOOSRA AAYEGA */}
+          {/* School Name (Trust Name) */}
           <div className={styles.formGroup}>
             <label htmlFor="name">School/Trust Name (Main) *</label>
             <input type="text" id="name" name="name" value={formData.name} onChange={handleInputChange} required disabled={!canUpdateSchoolName || isSubmitting} className={!canUpdateSchoolName ? styles.disabledInput : ''} />
             {!canUpdateSchoolName && daysRemaining !== null && (<p className={styles.infoMessage}> You can change school name again in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}. </p> )}
           </div>
           
-          {/* === FIX ENDS HERE === */}
-
-
           {/* Address (No Change) */}
           <div className={styles.formGroup}>
             <label htmlFor="address">School Address *</label>
