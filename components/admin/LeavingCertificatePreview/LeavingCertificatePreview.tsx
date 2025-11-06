@@ -169,15 +169,15 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {fill(formData.motherName)}
           </GridRow>
 
-          <GridRow num="4" label="Nationality, Mother Tongue, Religion">
+          <GridRow num="4" label="Nationality">
             <div className={styles.multiFieldRow}>
-              <SubField label="Nationality" value={formData.nationality || 'Indian'} />
+              <SubField label="" value={formData.nationality || 'Indian'} />
               <SubField label="Mother Tongue" value={formData.motherTongue} />
-              <SubField label="Religion" value={formData.religion} />
+             
             </div>
           </GridRow>
           
-          <GridRow num="5" label="Caste">
+          <GridRow num="5" label="Religion,Caste">
             {fill(formData.caste)}
           </GridRow>
 
