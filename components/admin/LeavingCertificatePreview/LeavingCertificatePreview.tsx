@@ -103,41 +103,42 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* Header - MODIFIED TO MATCH SCREENSHOT ALIGNMENT */}
+        {/* === YAHAN FIX KIYA GAYA HAI === */}
         <header className={styles.certHeader}>
           <div className={styles.schoolInfoBlock}>
-            {/* Added a placeholder line for 'My EduPanel' like in the screenshot */}
-            <div className={styles.schoolNameMyEdu}>My EduPanel</div> 
-            <div className={styles.schoolName1}>{schoolDetails.name || 'Prime International School'}</div>
+            
+            {/* Trust Name (Small Text) - Ab 'name' field se aa raha hai */}
+            <div className={styles.schoolNameMyEdu}>{schoolDetails.name || 'My EduPanel Trust'}</div> 
+            
+            {/* School Name (Big Text) - Ab 'name2' field se aa raha hai */}
+            <div className={styles.schoolName1}>{schoolDetails.name2 || 'Your School Name'}</div>
+            
+            {/* Address (No Change) */}
             <div className={styles.schoolAddressCode}>
               {schoolDetails.address || 'Pune'}
               <br/>
               UDISE NO: {schoolDetails.udiseNo || '987654321012'}
             </div>
           </div>
+          {/* === FIX ENDS HERE === */}
           
 
-          {/* === YAHAN BADLAAV KIYA GAYA (1/2) === */}
-          {/* Title ko titleRow se bahar nikal kar upar move kiya */}
+          {/* Title (No Change) */}
           <h2 className={styles.mainTitle}>LEAVING CERTIFICATE</h2>
 
+          {/* Sr No / Reg No Row (No Change) */}
           <div className={styles.titleRow}>
-            {/* Sr. No. on the left */}
             <div className={styles.headerSrNo}>
               Sr. No: {fill(formData.genRegNo, '100px')}
             </div>
-            
-            {/* LEAVING CERTIFICATE - Yahan se move kar diya gaya hai */}
-            
-            {/* Reg. No. on the right */}
             <div className={styles.headerRegNo}>
               Reg. No: {fill(formData.regNo, '100px')}
             </div>
           </div>
-          {/* === BADLAAV KHATM === */}
-
         </header>
 
+        {/* --- Baaki poori file mein koi badlaav nahi hai --- */}
+        
         {/* Student Info Table (REST OF THE BODY REMAINS UNCHANGED) */}
         <table className={styles.studentInfoTable}>
             {/* ... table content remains here ... */}
