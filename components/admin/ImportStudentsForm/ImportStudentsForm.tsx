@@ -23,7 +23,7 @@ const normalizeData = (data: any[]) => {
     // Required Fields
     'first_name': ['first name', 'student name', 'name', 'f name', 'firstname'],
     'last_name': ['last name', 'l name', 'lastname', 'surname'],
-    'roll_number': ['roll no', 'student id', 'roll number', 'roll', 'student id (f name'],
+    'roll_number': ['roll no', 'student id', 'roll number', 'student id (f name)'], // <-- YAHAN ')' ADD KAR DIYA HAI
     'class_name': ['class', 'std', 'standard', 'class_name'],
     'father_name': ['father name', 'parent name', 'father_name', 'parent'],
     'guardian_contact': ['parent contact', 'contact', 'mobile', 'phone', 'guardian_contact'],
