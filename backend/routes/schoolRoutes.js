@@ -14,7 +14,6 @@ require('../config/cloudinaryConfig'); // Aapka Cloudinary config
 const storage = multer.memoryStorage();
 const upload = multer({ 
     storage: storage,
-    // --- FIX 1: Limit ko 2MB kar diya hai ---
     limits: { fileSize: 2 * 1024 * 1024 } // 2MB limit
 });
 
@@ -30,6 +29,7 @@ const uploadToCloudinary = (fileBuffer) => {
         if (result) {
           resolve(result.secure_url); 
         } else {
+          // Error ko reject karein taaki catch block use pakad sake
           reject(error); 
         }
       }
@@ -117,16 +117,13 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
       return res.status(404).json({ msg: 'School profile not found' });
     }
 
-    // --- FIX 2: 'genRegNo' ko req.body se nikaal rahe hain ---
-    // (Yeh line 128 thi, ab yeh 'genRegNo' ko bhi include karegi)
+    // req.body se text fields nikaalein
     const {
       name, name2, place, address, contactNumber, email,
       recognitionNumber, udiseNo, session, genRegNo 
     } = req.body; 
 
-    // Ab 'req.body' undefined nahi hona chahiye kyunki 'multer' isse parse kar raha hai
     if (name === undefined) {
-        // Agar 'name' undefined hai, iska matlab 'multer' ne body ko parse nahi kiya
         console.error("[PUT /profile] Error: req.body is not being populated by multer.");
         return res.status(500).json({ msg: 'Server error: Failed to parse form data.' });
     }
@@ -141,10 +138,10 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
     if (recognitionNumber !== undefined) updateFields.recognitionNumber = recognitionNumber;
     if (udiseNo !== undefined) updateFields.udiseNo = udiseNo;
     if (session !== undefined) updateFields.session = session;
-    // --- FIX 2: 'genRegNo' ko update query mein add kar rahe hain ---
     if (genRegNo !== undefined) updateFields.genRegNo = genRegNo;
 
 
+    // --- YAHAN FIX KIYA GAYA HAI ---
     if (req.file) {
       console.log("[PUT /profile] New logo file detected. Uploading to Cloudinary...");
       try {
@@ -153,11 +150,14 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
         console.log(`[PUT /profile] Upload successful. URL: ${imageUrl}`);
       } catch (uploadError) {
         console.error("[PUT /profile] Cloudinary upload failed:", uploadError);
-        // Hum fail hone par bhi profile update jaari rakhenge, logo ke bina
+        
+        // Agar upload fail ho, toh error bhej kar ruk jaayein
+        return res.status(500).json({ message: 'Profile text saved, but logo upload failed. Please check Cloudinary credentials or CORS settings.' });
       }
     } else {
       console.log("[PUT /profile] No new logo file detected.");
     }
+    // --- FIX ENDS HERE ---
 
     const updatedSchool = await prisma.school.update({
       where: { id: schoolId },
@@ -167,13 +167,8 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
     if (req.io) {
        req.io.emit('school_profile_updated', updatedSchool);
     }
-
-    // Naye token ki zaroorat nahi hai jab tak hum 'name' context mein update na karein
-    // (Lekin humne 'name' update kiya hai, isliye token bhejte hain)
-    // NOTE: Aapko frontend par new token handle karna hoga (jo aapka code pehle se kar raha hai)
     
-    // --- Yahan hum naya token generate kar sakte hain agar zaroori ho ---
-    // (Abhi ke liye, hum sirf profile update kar rahe hain)
+    // (Token logic ko abhi ke liye comment out kar raha hoon, yeh aapke frontend par depend karta hai)
     
     res.json({ msg: 'School profile updated successfully', school: updatedSchool });
 
@@ -188,7 +183,6 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
         return res.status(400).json({ message: `Error: This UDISE No. is already in use.` });
     }
     
-    // --- FIX 1: Error message ko 2MB ke hisaab se update kiya ---
     if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
          return res.status(413).json({ message: 'File is too large. Max 2MB allowed.' });
     }
