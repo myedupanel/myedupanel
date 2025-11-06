@@ -37,29 +37,27 @@
 
 .certHeader {
   display: flex;
-  /* === YAHAN FIX KIYA (1/3) === */
-  /* 'flex-start' (top align) se 'center' (vertical center) kiya */
-  align-items: center; 
+  align-items: flex-start;
   padding-bottom: 5px;
   margin-bottom: 5px;
   border-bottom: 1px solid #000;
 
   .logo {
-    width: 65px;
+    width: 65px;      
     height: auto;
-    max-height: 65px;
-    /* === YAHAN FIX KIYA (2/3) === */
-    /* Gap thoda kam kiya */
-    margin-right: 10px; 
+    max-height: 65px; 
+    margin-right: 15px;
     object-fit: contain;
     flex-shrink: 0;
   }
 
   .schoolInfoBlock {
     flex-grow: 1;
-    /* === YAHAN FIX KIYA (3/3) === */
-    /* 'center' se 'left' kiya taaki text left se shuru ho */
-    text-align: left; 
+    /* === YAHAN FIX KIYA HAI === */
+    text-align: left; /* Center se Left kiya */
+    margin-left: 10px; /* Thoda left ki taraf shift kiya */
+    padding-top: 2px; /* Thoda upar shift kiya */
+    /* === FIX ENDS HERE === */
   }
 
   .schoolName1 { font-size: 9pt; font-weight: bold; margin: 0; color: #000; }
@@ -69,12 +67,11 @@
 
   .regInfo {
     font-size: 9pt;
-    margin: 4px 0 0 0; /* 'auto' hatake left align kiya */
+    margin: 4px auto 0 auto;
     display: flex;
-    /* justify-content: space-between; (Ab zaroori nahi) */
-    gap: 20px; /* Thoda gap diya */
+    justify-content: space-between;
     font-weight: bold;
-    max-width: 100%; /* Max width badhaya */
+    max-width: 90%; /* Yeh abhi bhi center mein align ho sakta hai iski wajah se */
   }
 }
 
