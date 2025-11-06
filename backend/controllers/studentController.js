@@ -13,14 +13,14 @@ const headerMappings = {
   father_name: ['fathername', 'father name', 'middle name', 'parentname', 'parent name', 'father_name'],
   last_name: ['lastname', 'last name', 'surname', 'last_name'],
   class_name: ['class', 'grade', 'standard', 'std', 'class number', 'class_name', 'classname'], // 'classname' add kiya
-  roll_number: ['rollno', 'roll no', 'roll number', 'rollnumber', 'roll', 'roll_number'],
+  roll_number: ['rollno', 'roll no', 'roll number', 'rollnumber', 'roll', 'roll_number'], // 'rollnumber' add kiya
   guardian_contact: ['parentcontact', 'parent contact', 'contact', 'phone', 'mobile', 'contact number', 'mobile no', 'guardian_contact', 'guardiancontact'], // 'guardiancontact' add kiya
   // Optional fields
   mother_name: ['mothername', 'mother name', 'mother_name'],
   dob: ['dob', 'date of birth', 'birth date'],
   address: ['address'],
   email: ['email', 'student email'],
-  uid_number: ['uid', 'uid number', 'aadhar', 'aadhar card', 'uid_number', 'uidnumber'],
+  uid_number: ['uid', 'uid number', 'aadhar', 'aadhar card', 'uid_number', 'uidnumber'], // 'uidnumber' add kiya
   nationality: ['nationality'],
   caste: ['caste'],
   birth_place: ['birthplace', 'birth place', 'birth_place'],
@@ -210,8 +210,6 @@ const addStudentsInBulk = async (req, res) => {
   }
 };
 
-// ... (Baaki poori file 'getAllStudents' aur 'addSingleStudent' waise hi rahegi) ...
-
 // 5. FUNCTION 2: getAllStudents (No Change)
 const getAllStudents = async (req, res) => {
   try {
@@ -376,5 +374,5 @@ const addSingleStudent = async (req, res) => {
 module.exports = {
   addStudentsInBulk,
   getAllStudents,
-  addSingleStudent, 
-};
+  addSingleS
+}
