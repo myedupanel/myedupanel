@@ -1,13 +1,12 @@
 /* src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss */
 
-/* --- Base Styles --- */
+/* --- Base Styles (No Change) --- */
 .certificatePaper {
   width: 210mm;
-  padding: 0; /* Padding 0 kar di */
+  padding: 10mm;
   margin: 20px auto;
   font-family: 'Times New Roman', Times, serif;
-  /* === YAHAN FIX KIYA (A4 Fit) === */
-  font-size: 11pt; /* Base font thoda kam kiya */
+  font-size: 12pt;
   color: #000;
   background: #fff;
   border: 1px solid #ccc;
@@ -18,16 +17,13 @@
 
 .outerBorder {
   border: 2px solid #000;
-  /* === YAHAN FIX KIYA (A4 Fit) === */
-  padding: 10mm 10mm 5mm 10mm; /* Vertical padding kam ki */
+  padding: 12mm 10mm;
   display: flex;
   flex-direction: column;
   width: 100%;
   flex-grow: 1;
-  box-sizing: border-box;
 }
 
-/* Fill styles ko update kiya */
 .fill {
   font-weight: bold;
   padding: 0 4px;
@@ -37,34 +33,35 @@
   display: inline-block;
   border-bottom: 1px dotted #333;
   vertical-align: bottom;
-  /* width: 100%; (Hata diya taaki minWidth kaam kare) */
-  min-height: 1.2em; /* Ek default height di */
-  /* flex-grow: 1; (Hata diya) */
+  padding: 0 4px;
 }
 /* --- End Base Styles --- */
 
 
-/* --- Header Style --- */
+/* --- Header Style (MODIFIED) --- */
 .certHeader {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px; 
+  /* === YAHAN FIX KIYA (1/4) === */
+  flex-direction: row; /* Column se row kiya */
+  align-items: center; /* Vertically center kiya */
+  /* === FIX ENDS HERE === */
+  gap: 10px; /* Logo aur text ke beech gap */
   border-bottom: 1.5px solid #000;
-  padding-bottom: 5px; 
-  /* === YAHAN FIX KIYA (A4 Fit) === */
-  margin-bottom: 5px; /* 10px se kam kiya */
-
+  padding-bottom: 5px; /* Padding kam ki */
+  margin-bottom: 10px; 
+  
+  /* === YAHAN FIX KIYA (2/4) === */
   .logo { 
-    display: block; 
+    display: block; /* 'none' se 'block' kiya */
     width: 65px;
     height: 65px;
     object-fit: contain;
-    flex-shrink: 0; 
+    flex-shrink: 0; /* Logo ko shrink nahi hone denge */
   }
+  /* === FIX ENDS HERE === */
   
   .schoolInfoBlock {
-    flex-grow: 1; 
+    flex-grow: 1; /* Text block bachi hui jagah lega */
     text-align: center;
     padding: 0;
     line-height: 1.2;
@@ -76,18 +73,17 @@
   }
 }
 
+/* === YAHAN FIX KIYA (3/4) === */
 /* Title ko alag se style kiya */
 .mainTitle {
   font-size: 14pt;
   font-weight: bold;
-  /* === YAHAN FIX KIYA (A4 Fit) === */
-  margin: 8px 0 6px 0; /* 10px 0 8px se kam kiya */
+  margin: 10px 0 8px 0; 
   padding: 4px 15px;    
   text-align: center;
   
   border: 1.5px solid #000;
-  border-radius: 15px; 
-  /* display: none; (Yeh purane code se tha, hata diya) */
+  border-radius: 15px; /* Rounded corners */
 }
 
 .titleRow {
@@ -96,30 +92,31 @@
   align-items: center;
   width: 100%;
 
+  /* === YAHAN FIX KIYA (4/4) === */
   .headerSrNo, .headerRegNo {
     font-size: 11pt;
     font-weight: normal; 
     white-space: nowrap;
-    flex-basis: 33%; 
+    flex-basis: 33%; /* Dono ko 33% width di */
     flex-shrink: 0;
     padding: 0 5px;
   }
   .headerSrNo { text-align: left; }
   .headerRegNo { text-align: right; }
+  /* === FIX ENDS HERE === */
 }
 /* --- End Header Style --- */
 
 
-/* --- YEH PURANA TABLE LAYOUT HAI (jise hum fix kar rahe hain) --- */
+/* --- Student Info Table (No Change) --- */
 .studentInfoTable {
+// ... (Rest of the SCSS remains unchanged)
   width: 100%;
   border-collapse: collapse;
-  /* === YAHAN FIX KIYA (A4 Fit) === */
-  margin-top: 5px; /* 10px se kam kiya */
+  margin-top: 10px;
   
   tbody tr td {
-    /* === YAHAN FIX KIYA (A4 Fit) === */
-    padding: 4px 5px; /* 6px se 4px kiya (Yeh sabse bada fix hai) */
+    padding: 6px 5px; 
     vertical-align: top;
     line-height: 1.4;
     border-bottom: none; 
@@ -138,18 +135,9 @@
     align-items: center;
     justify-content: flex-start; 
     width: 100%;
-    /* === YAHAN FIX KIYA (A4 Fit) === */
-    gap: 5px 25px; /* 40px se kam kiya */
+    gap: 5px 40px; 
   }
   
-  /* === YAHAN FIX KIYA (Row 4 Spacing) === */
-  .row4Fields {
-    .subField {
-      margin-left: 40px; /* Mother Tongue ko right push karega */
-    }
-  }
-  /* === FIX ENDS HERE === */
-
   .gridWrapper {
     display: flex;
     flex-direction: column;
@@ -191,16 +179,14 @@
 .certText {
   font-size: 11pt;
   text-align: left;
-  /* === YAHAN FIX KIYA (A4 Fit) === */
-  margin-top: 10px; /* 15px se kam kiya */
-  line-height: 1.5; /* 1.6 se kam kiya */
+  margin-top: 15px; 
+  line-height: 1.6;
 }
 
 /* --- Footer Layout --- */
 .certFooterWrapper {
   margin-top: auto;
-  /* === YAHAN FIX KIYA (A4 Fit) === */
-  padding-top: 15px; /* 20px se kam kiya */
+  padding-top: 20px; 
   font-size: 12pt;
   font-weight: bold;
   background: #fff !important;
@@ -209,8 +195,7 @@
 
 .datePlace {
   text-align: left;
-  /* === YAHAN FIX KIYA (A4 Fit) === */
-  margin-bottom: 20px; /* 25px se kam kiya */
+  margin-bottom: 25px; 
 }
 
 .signatures {
@@ -222,8 +207,7 @@
 .sigBox {
   text-align: center;
   width: 30%;
-  /* === YAHAN FIX KIYA (A4 Fit) === */
-  padding-top: 20px; /* 30px se kam kiya */
+  padding-top: 30px;
   border-top: 1px solid #000;
 }
 
