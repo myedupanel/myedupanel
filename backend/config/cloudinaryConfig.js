@@ -1,5 +1,3 @@
-// backend/config/cloudinaryConfig.js
-
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
@@ -16,17 +14,21 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'study_materials', // Cloudinary mein folder ka naam jahaan files save hongi
-    allowed_formats: ['pdf', 'doc', 'docx', 'jpg', 'png', 'jpeg'], // Allowed file types (aap aur add kar sakte hain)
-    resource_type: 'raw', // Use 'raw' for non-image files like PDF/DOCX, 'auto' might also work
-    // publicid: (req, file) => 'computed-filename-using-request', // Optional: Agar custom filename chahiye
+    // === YAHAN FIX KIYA (1/2) ===
+    folder: 'school_logos', // 'study_materials' se 'school_logos' kiya
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'], // PDF/DOC hata diye
+    
+    // === YAHAN FIX KIYA (2/2) ===
+    // 'raw' ko 'image' (ya 'auto') se badal diya
+    // 'auto' best hai, yeh file type khud detect kar lega
+    resource_type: 'auto', 
   },
 });
 
 // Create the multer upload middleware
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 } // Optional: Limit file size to 10MB
+    limits: { fileSize: 2 * 1024 * 1024 } // Limit 2MB rakha (aapke frontend se match)
 });
 
 // Export the upload middleware and configured cloudinary instance
