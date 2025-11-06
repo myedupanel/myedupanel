@@ -55,8 +55,10 @@ app.use(cors({
 }));
 
 // --- YEH HAI FIX ---
-// JSON parser ko hamesha routes register karne se PEHLE rakhein
-app.use(express.json({ limit: '2mb' })); 
+// FIX 1: Limit 2mb se 5mb kar di, taaki Base64 (2.7MB) aaraam se aa sake
+app.use(express.json({ limit: '5mb' })); 
+// FIX 2: URL-encoded data ke liye parser add kiya (standard practice)
+app.use(express.urlencoded({ limit: '5mb', extended: true }));
 // --- FIX ENDS HERE ---
 
 // --- Debugging Middleware (No Change) ---
@@ -85,7 +87,7 @@ app.get('/', (req, res) => {
   res.send('SchoolPro Backend is running (Prisma Version)!'); 
 });
 
-// Ab sabhi routes 'express.json()' ke baad register honge
+// Ab sabhi routes body parsers ke baad register honge
 app.use('/api/school', schoolRoutes); 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
