@@ -41,38 +41,47 @@
 /* --- Header Style (MODIFIED) --- */
 .certHeader {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px; /* Reduced gap */
+  /* === YAHAN FIX KIYA (1/4) === */
+  flex-direction: row; /* Column se row kiya */
+  align-items: center; /* Vertically center kiya */
+  /* === FIX ENDS HERE === */
+  gap: 10px; /* Logo aur text ke beech gap */
   border-bottom: 1.5px solid #000;
-  padding-bottom: 8px;
+  padding-bottom: 5px; /* Padding kam ki */
   margin-bottom: 10px; 
-
-  .logo { display: none; }
+  
+  /* === YAHAN FIX KIYA (2/4) === */
+  .logo { 
+    display: block; /* 'none' se 'block' kiya */
+    width: 65px;
+    height: 65px;
+    object-fit: contain;
+    flex-shrink: 0; /* Logo ko shrink nahi hone denge */
+  }
+  /* === FIX ENDS HERE === */
   
   .schoolInfoBlock {
-    flex-grow: 0;
+    flex-grow: 1; /* Text block bachi hui jagah lega */
     text-align: center;
     padding: 0;
     line-height: 1.2;
     
-    .schoolNameMyEdu { font-size: 8pt; margin-bottom: 2px; } /* New line for My EduPanel */
-    .schoolName1 { font-size: 14pt; font-weight: bold; margin: 0; } /* Main School Name */
-    .schoolName2 { display: none; } /* Assuming this is redundant or handled by schoolName1 */
+    .schoolNameMyEdu { font-size: 8pt; margin-bottom: 2px; } 
+    .schoolName1 { font-size: 14pt; font-weight: bold; margin: 0; } 
+    .schoolName2 { display: none; } 
     .schoolAddressCode { font-size: 9pt; margin: 0; line-height: 1.4; }
   }
 }
 
-/* === YAHAN BADLAAV KIYA GAYA (2/2) === */
+/* === YAHAN FIX KIYA (3/4) === */
 /* Title ko alag se style kiya */
 .mainTitle {
   font-size: 14pt;
   font-weight: bold;
-  margin: 10px 0 8px 0; /* Upar (10px) aur neeche (8px) margin diya */
-  padding: 4px 15px;    /* Border ke andar padding */
+  margin: 10px 0 8px 0; 
+  padding: 4px 15px;    
   text-align: center;
   
-  /* Aapka request: Rounded Border */
   border: 1.5px solid #000;
   border-radius: 15px; /* Rounded corners */
 }
@@ -82,21 +91,19 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  /* margin-top: 10px; (Hata diya, margin ab .mainTitle par hai) */
 
-  /* h2 ki styling yahan se nikal di gayi hai */
-
+  /* === YAHAN FIX KIYA (4/4) === */
   .headerSrNo, .headerRegNo {
     font-size: 11pt;
-    font-weight: normal; /* Normal font weight for Sr/Reg no value */
+    font-weight: normal; 
     white-space: nowrap;
-    /* Using flex-basis to ensure the remaining space is perfectly centered */
-    flex-basis: auto; 
+    flex-basis: 33%; /* Dono ko 33% width di */
     flex-shrink: 0;
     padding: 0 5px;
   }
   .headerSrNo { text-align: left; }
   .headerRegNo { text-align: right; }
+  /* === FIX ENDS HERE === */
 }
 /* --- End Header Style --- */
 
@@ -112,8 +119,6 @@
     padding: 6px 5px; 
     vertical-align: top;
     line-height: 1.4;
-    /* === YAHAN CHANGE KIYA GAYA HAI === */
-    /* "blur lines" ko hatane ke liye border 'none' kar diya */
     border-bottom: none; 
   }
   tbody tr td:nth-child(1) { width: 35px; text-align: center; font-weight: normal; }
