@@ -3,7 +3,6 @@ import styles from './LeavingCertificatePreview.module.scss'; // Import the SCSS
 
 // --- Interfaces (No Change) ---
 interface Student {
-// ... (Interfaces remain unchanged)
   id: string; 
   name: string; 
   dob?: string; 
@@ -23,7 +22,6 @@ interface SchoolDetails {
 }
 
 export interface LeavingFormData {
-// ... (Interfaces remain unchanged)
   regNo?: string; 
   nationality?: string;
   motherTongue?: string;
@@ -53,7 +51,6 @@ export interface LeavingFormData {
 
 // --- formatDate Function (No Change) ---
 const formatDate = (dateString: string | undefined): string => {
-// ... (formatDate remains unchanged)
   if (!dateString) return '';
   try {
     const date = new Date(dateString);
@@ -105,39 +102,47 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
         
         {/* === YAHAN FIX KIYA GAYA HAI === */}
         <header className={styles.certHeader}>
+          
+          {/* Kadam 1: Logo ko add kiya (left side) */}
+          {schoolDetails.logoUrl && (
+            <img 
+              src={schoolDetails.logoUrl} 
+              alt="School Logo" 
+              className={styles.logo} 
+            />
+          )}
+
+          {/* Kadam 2: Text block (right side) */}
           <div className={styles.schoolInfoBlock}>
-            
-            {/* Trust Name (Small Text) - Ab 'name' field se aa raha hai */}
+            {/* Trust Name (Small Text) */}
             <div className={styles.schoolNameMyEdu}>{schoolDetails.name || 'My EduPanel Trust'}</div> 
             
-            {/* School Name (Big Text) - Ab 'name2' field se aa raha hai */}
+            {/* School Name (Big Text) */}
             <div className={styles.schoolName1}>{schoolDetails.name2 || 'Your School Name'}</div>
             
-            {/* Address (No Change) */}
+            {/* Address */}
             <div className={styles.schoolAddressCode}>
               {schoolDetails.address || 'Pune'}
               <br/>
               UDISE NO: {schoolDetails.udiseNo || '987654321012'}
             </div>
           </div>
-          {/* === FIX ENDS HERE === */}
+        </header>
+        {/* === FIX ENDS HERE === */}
           
 
-          {/* Title (No Change) */}
-          <h2 className={styles.mainTitle}>LEAVING CERTIFICATE</h2>
+        {/* Title (No Change) */}
+        <h2 className={styles.mainTitle}>LEAVING CERTIFICATE</h2>
 
-          {/* Sr No / Reg No Row (No Change) */}
-          <div className={styles.titleRow}>
-            <div className={styles.headerSrNo}>
-              Sr. No: {fill(formData.genRegNo, '100px')}
-            </div>
-            <div className={styles.headerRegNo}>
-              Reg. No: {fill(formData.regNo, '100px')}
-            </div>
+        {/* Sr No / Reg No Row (No Change) */}
+        <div className={styles.titleRow}>
+          <div className={styles.headerSrNo}>
+            Sr. No: {fill(formData.genRegNo, '100px')}
           </div>
-        </header>
-
-        {/* --- Baaki poori file mein koi badlaav nahi hai --- */}
+          <div className={styles.headerRegNo}>
+            Reg. No: {fill(formData.regNo, '100px')}
+          </div>
+        </div>
         
         {/* Student Info Table (REST OF THE BODY REMAINS UNCHANGED) */}
         <table className={styles.studentInfoTable}>
