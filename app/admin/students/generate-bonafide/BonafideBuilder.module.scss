@@ -38,14 +38,17 @@
 .certHeader {
   display: flex;
   align-items: flex-start;
-  padding-bottom: 5px;
-  margin-bottom: 5px;
+  padding-bottom: 3px;
+  margin-bottom: 3px;
   border-bottom: 1px solid #000;
 
   .logo {
-    width: 65px;      
+    /* === YAHAN FIX KIYA HAI === */
+    width: 65px;      /* 55px se 65px kiya */
     height: auto;
-    max-height: 65px; 
+    max-height: 65px; /* 55px se 65px kiya */
+    /* === FIX ENDS HERE === */
+    
     margin-right: 15px;
     object-fit: contain;
     flex-shrink: 0;
@@ -53,11 +56,7 @@
 
   .schoolInfoBlock {
     flex-grow: 1;
-    /* === YAHAN FIX KIYA HAI === */
-    text-align: left; /* Center se Left kiya */
-    margin-left: 10px; /* Thoda left ki taraf shift kiya */
-    padding-top: 2px; /* Thoda upar shift kiya */
-    /* === FIX ENDS HERE === */
+    text-align: center;
   }
 
   .schoolName1 { font-size: 9pt; font-weight: bold; margin: 0; color: #000; }
@@ -71,7 +70,7 @@
     display: flex;
     justify-content: space-between;
     font-weight: bold;
-    max-width: 90%; /* Yeh abhi bhi center mein align ho sakta hai iski wajah se */
+    max-width: 90%;
   }
 }
 
