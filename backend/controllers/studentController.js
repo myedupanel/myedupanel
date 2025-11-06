@@ -6,23 +6,21 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto'); 
 const sendEmail = require('../utils/sendEmail'); 
 
-// ... (Baaki sab kuch same rahega... headerMappings, getCanonicalKey) ...
-
-// === YAHAN FIX KIYA (1/4): Smart mapping ko update kiya ===
-// Humne 'clean keys' (jaise 'first_name') ko bhi unki list mein add kar diya hai
+// === YAHAN FIX KIYA (1/4): Smart mapping ko "SELF-AWARE" banaya ===
+// Humne 'clean keys' (jaise 'first_name') aur normalized keys (jaise 'firstname') add kar di hain
 const headerMappings = {
   first_name: ['firstname', 'first name', 'student name', 'name', 'first_name'],
   father_name: ['fathername', 'father name', 'middle name', 'parentname', 'parent name', 'father_name'],
   last_name: ['lastname', 'last name', 'surname', 'last_name'],
-  class_name: ['class', 'grade', 'standard', 'std', 'class number', 'class_name'],
+  class_name: ['class', 'grade', 'standard', 'std', 'class number', 'class_name', 'classname'], // 'classname' add kiya
   roll_number: ['rollno', 'roll no', 'roll number', 'rollnumber', 'roll', 'roll_number'],
-  guardian_contact: ['parentcontact', 'parent contact', 'contact', 'phone', 'mobile', 'contact number', 'mobile no', 'guardian_contact'],
-  // Optional fields (inko bhi add kar diya)
+  guardian_contact: ['parentcontact', 'parent contact', 'contact', 'phone', 'mobile', 'contact number', 'mobile no', 'guardian_contact', 'guardiancontact'], // 'guardiancontact' add kiya
+  // Optional fields
   mother_name: ['mothername', 'mother name', 'mother_name'],
   dob: ['dob', 'date of birth', 'birth date'],
   address: ['address'],
   email: ['email', 'student email'],
-  uid_number: ['uid', 'uid number', 'aadhar', 'aadhar card', 'uid_number'],
+  uid_number: ['uid', 'uid number', 'aadhar', 'aadhar card', 'uid_number', 'uidnumber'],
   nationality: ['nationality'],
   caste: ['caste'],
   birth_place: ['birthplace', 'birth place', 'birth_place'],
@@ -42,7 +40,6 @@ function getCanonicalKey(header) {
   return null;
 }
 
-
 // 4. FUNCTION 1: addStudentsInBulk (UPDATED)
 const addStudentsInBulk = async (req, res) => {
   try {
@@ -53,11 +50,9 @@ const addStudentsInBulk = async (req, res) => {
 
     const studentsData = req.body;
     
-    // === YAHAN PERMANENT FIX DAALA HAI (DEBUGGER) ===
-    // Hum check karenge ki frontend se raw data kya aa raha hai
+    // DEBUG LOGS (Inhe rehne dein, problem solve hone ke baad hata denge)
     console.log("--- DEBUG: RAW DATA RECEIVED FROM FRONTEND ---");
     console.log(JSON.stringify(studentsData, null, 2));
-    // === DEBUGGER ENDS ===
     
     if (!studentsData || !Array.isArray(studentsData)) {
       return res.status(400).json({ message: 'No student data provided. Expected an array for bulk import.' });
@@ -75,15 +70,13 @@ const addStudentsInBulk = async (req, res) => {
       }
       return newStudent;
     });
-    
-    // === DEBUGGER 2 ===
+
+    // DEBUG LOG 2
     console.log("--- DEBUG: DATA AFTER BACKEND MAPPING (processedStudents) ---");
     console.log(JSON.stringify(processedStudents, null, 2));
-    // === DEBUGGER ENDS ===
     
-
     // === YAHAN FIX KIYA (2/4): Strict filter ko HATA diya ===
-    // (Pehle se hata hua hai, good)
+    // (Pehle se hata hua hai)
 
     let createdCount = 0;
     const errors = [];
@@ -98,14 +91,12 @@ const addStudentsInBulk = async (req, res) => {
         if (!first_name || !last_name || !class_name || !roll_number || !father_name || !guardian_contact) {
           errors.push(`Skipped row: Missing required data for student '${first_name || 'N/A'}' (Roll No: ${roll_number || 'N/A'}). Required: first_name, last_name, class_name, roll_number, father_name, guardian_contact.`);
           
-          // === DEBUGGER 3 ===
+          // DEBUG LOG 3
           if (processedStudents.indexOf(student) === 0) { // Sirf pehle student ka error dikhao
             console.log("--- DEBUG: FIRST STUDENT REJECTED ---");
             console.log("REASON: Missing one or more required fields.");
             console.log("DATA RECEIVED:", student);
           }
-          // === DEBUGGER ENDS ===
-
           continue; // Is student ko skip karo aur agle par jaao
         }
         // === FLEXIBLE CHECK ENDS ===
@@ -128,12 +119,10 @@ const addStudentsInBulk = async (req, res) => {
         studentData.schoolId = schoolId; 
 
         // --- 6. FIX: Date fields ko handle karein ---
-        // DOB (optional reh sakta hai, null theek hai)
+        // (Pehle se theek hai)
         if (studentData.dob) {
            try {
-            // Excel dates ko handle karne ke liye check
             if (typeof studentData.dob === 'number') {
-                // Yeh 'Excel date serial number' ho sakta hai
                 const parsedDate = new Date(Date.UTC(1899, 11, 30 + studentData.dob));
                 if (!isNaN(parsedDate)) { studentData.dob = parsedDate; } else { studentData.dob = null; }
             } else {
@@ -142,8 +131,6 @@ const addStudentsInBulk = async (req, res) => {
             }
           } catch (e) { studentData.dob = null; }
         }
-        
-        // Admission Date (DEFAULT TO TODAY agar missing ya invalid hai)
         if (studentData.admission_date) {
            try {
              if (typeof studentData.admission_date === 'number') {
@@ -154,10 +141,10 @@ const addStudentsInBulk = async (req, res) => {
                 studentData.admission_date = !isNaN(parsedDate) ? parsedDate : new Date(); 
              }
            } catch (e) { 
-             studentData.admission_date = new Date(); // Error par aaj ki date
+             studentData.admission_date = new Date(); 
            }
         } else {
-           studentData.admission_date = new Date(); // Agar field tha hi nahi, toh aaj ki date
+           studentData.admission_date = new Date(); 
         }
         // --- END FIX ---
 
@@ -223,9 +210,10 @@ const addStudentsInBulk = async (req, res) => {
   }
 };
 
+// ... (Baaki poori file 'getAllStudents' aur 'addSingleStudent' waise hi rahegi) ...
+
 // 5. FUNCTION 2: getAllStudents (No Change)
 const getAllStudents = async (req, res) => {
-  // ... (koi badlaav nahi)
   try {
     const schoolId = req.user.schoolId;
     if (!schoolId) {
@@ -246,7 +234,6 @@ const getAllStudents = async (req, res) => {
 
 // 6. FUNCTION 3: addSingleStudent (UPDATED)
 const addSingleStudent = async (req, res) => {
-  // ... (koi badlaav nahi)
   try {
     // 1. School ID (No Change)
     const schoolId = req.user.schoolId;

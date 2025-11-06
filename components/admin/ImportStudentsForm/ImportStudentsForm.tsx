@@ -28,11 +28,11 @@ const normalizeData = (data: any[]) => {
     ],
     'last_name': [
       'last_name', 'lastname', 'last name', 'l name', 'surname', 
-      'last' // <-- Aapki Excel file se
+      'last' // <-- Aapki Excel file (Col C) se
     ],
     'roll_number': [
       'roll_number', 'roll no', 'student id', 'roll number', 'roll', 
-      'student id (f name' // <-- Aapki Excel file se (TYPO FIX)
+      'student id (f name' // <-- Aapki Excel file (Col A) se (TYPO FIX)
     ],
     'class_name': [
       'class_name', 'class', 'std', 'standard' // <-- 'class' aapki file se
