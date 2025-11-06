@@ -2,11 +2,12 @@ import axios from 'axios';
 
 // Axios ka ek naya instance banayein
 const api = axios.create({
-
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000', // <-- FIX 1: Use Render/localhost URL
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000', 
+  // --- YAHAN FIX KIYA ---
+  // Hardcoded 'Content-Type' header ko hata diya gaya hai.
+  // Ab axios request ke data ke hisaab se Content-Type khud set karega.
+  // (File upload ke liye 'multipart/form-data' aur text ke liye 'application/json')
+  // --- FIX ENDS HERE ---
 });
 
 // Request Interceptor: Yeh har request ke JAANE SE PEHLE token add karta hai AUR URL ko adjust karta hai.
@@ -21,6 +22,13 @@ api.interceptors.request.use(
 
       if (token) {
         config.headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      // Agar data FormData hai, toh Content-Type ko set NA karein (axios ko karne dein)
+      // Yeh line ab zaroori nahi hai kyunki humne default set nahi kiya, 
+      // lekin suraksha ke liye hum isse add kar sakte hain (optional).
+      if (config.data instanceof FormData) {
+         delete config.headers['Content-Type'];
       }
 
       // FIX 3: '/api' prefix ko request URL ke shuru mein add karein, agar woh pehle se nahi hai.
