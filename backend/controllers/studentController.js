@@ -7,20 +7,20 @@ const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail'); 
 
 // === YAHAN FIX KIYA (1/4): Smart mapping ko "SELF-AWARE" banaya ===
-// Humne 'clean keys' (jaise 'first_name') aur normalized keys (jaise 'firstname', 'classname') add kar di hain
+// Humne 'roll_number' ko bhi add kar diya hai taaki file se aa sake
 const headerMappings = {
   first_name: ['firstname', 'first name', 'student name', 'name', 'first_name'],
   father_name: ['fathername', 'father name', 'middle name', 'parentname', 'parent name', 'father_name'],
   last_name: ['lastname', 'last name', 'surname', 'last_name'],
-  class_name: ['class', 'grade', 'standard', 'std', 'class number', 'class_name', 'classname'], // 'classname' add kiya
-  roll_number: ['rollno', 'roll no', 'roll number', 'rollnumber', 'roll', 'roll_number'], // 'rollnumber' add kiya
-  guardian_contact: ['parentcontact', 'parent contact', 'contact', 'phone', 'mobile', 'contact number', 'mobile no', 'guardian_contact', 'guardiancontact'], // 'guardiancontact' add kiya
+  class_name: ['class', 'grade', 'standard', 'std', 'class number', 'class_name', 'classname'], 
+  roll_number: ['rollno', 'roll no', 'roll number', 'rollnumber', 'roll', 'roll_number'], // <-- YEH ZAROORI HAI
+  guardian_contact: ['parentcontact', 'parent contact', 'contact', 'phone', 'mobile', 'contact number', 'mobile no', 'guardian_contact', 'guardiancontact'],
   // Optional fields
   mother_name: ['mothername', 'mother name', 'mother_name'],
   dob: ['dob', 'date of birth', 'birth date'],
   address: ['address'],
   email: ['email', 'student email'],
-  uid_number: ['uid', 'uid number', 'aadhar', 'aadhar card', 'uid_number', 'uidnumber'], // 'uidnumber' add kiya
+  uid_number: ['uid', 'uid number', 'aadhar', 'aadhar card', 'uid_number', 'uidnumber'],
   nationality: ['nationality'],
   caste: ['caste'],
   birth_place: ['birthplace', 'birth place', 'birth_place'],
@@ -66,8 +66,6 @@ const addStudentsInBulk = async (req, res) => {
       }
       return newStudent;
     });
-
-    // === DEBUG LOG 2 (Ab iski zaroorat nahi) ===
     
     let createdCount = 0;
     const errors = [];
@@ -76,15 +74,13 @@ const addStudentsInBulk = async (req, res) => {
     for (const student of processedStudents) {
       try {
         // 4. Zaroori fields ko check karein
+        // === YAHAN FIX KIYA (2/4): 'roll_number' ko check mein add kiya ===
         const { first_name, last_name, class_name, roll_number, father_name, guardian_contact } = student;
         if (!first_name || !last_name || !class_name || !roll_number || !father_name || !guardian_contact) {
           errors.push(`Skipped row: Missing required data for student '${first_name || 'N/A'}' (Roll No: ${roll_number || 'N/A'}). Required: first_name, last_name, class_name, roll_number, father_name, guardian_contact.`);
-          
-          // === DEBUG LOG 3 (Ab iski zaroorat nahi) ===
-          
           continue; // Is student ko skip karo aur agle par jaao
         }
-        // === FLEXIBLE CHECK ENDS ===
+        // === FIX ENDS HERE ===
 
         const className = student.class_name;
         
@@ -98,10 +94,15 @@ const addStudentsInBulk = async (req, res) => {
           });
         }
         
-        // 5. Student data ko Prisma ke liye taiyaar karein (No Change)
-        const { class_name: cn, ...studentData } = student; // class_name ko hataya
+        // 5. Student data ko Prisma ke liye taiyaar karein
+        const { class_name: cn, ...studentData } = student; 
         studentData.classid = classRecord.classid; 
         studentData.schoolId = schoolId; 
+        
+        // === YAHAN FIX KIYA (3/4): roll_number ko string banaya (Database ke liye) ===
+        // Kyunki schema.prisma mein Roll Number ek String hai
+        studentData.roll_number = String(studentData.roll_number || '');
+        // === FIX ENDS HERE ===
 
         // 6. Date fields ko handle karein (No Change)
         if (studentData.dob) {
@@ -131,10 +132,16 @@ const addStudentsInBulk = async (req, res) => {
            studentData.admission_date = new Date(); 
         }
 
-        // 7. Student aur User Transaction (No Change)
+        // 7. Student aur User Transaction
         const studentFullName = `${studentData.first_name} ${studentData.last_name}`;
         const realEmail = studentData.email ? studentData.email.toLowerCase() : null;
-        const safeRollNumber = studentData.roll_number.replace(/[\s\W]+/g, '');
+
+        // === YAHAN FIX KIYA (4/4): YEH THI ASLI PROBLEM ===
+        // Pehle number ko string banaya, fir .replace() call kiya
+        const rollNumberStr = String(studentData.roll_number || '');
+        const safeRollNumber = rollNumberStr.replace(/[\s\W]+/g, '');
+        // === FIX ENDS HERE ===
+        
         const dummyEmail = `${safeRollNumber}@${schoolId}.local`;
         const emailForUserTable = realEmail || dummyEmail;
 
@@ -284,7 +291,11 @@ const addSingleStudent = async (req, res) => {
     const hashedPassword = await bcrypt.hash(tempPassword, salt);
     const studentFullName = `${first_name} ${last_name}`;
     const realEmail = studentData.email ? studentData.email.toLowerCase() : null;
-    const safeRollNumber = roll_number.replace(/[\s\W]+/g, '');
+    
+    // Yahan bhi string conversion add kar raha hoon (Safety ke liye)
+    const rollNumberStr = String(roll_number || '');
+    const safeRollNumber = rollNumberStr.replace(/[\s\W]+/g, '');
+
     const dummyEmail = `${safeRollNumber}@${schoolId}.local`;
     const emailForUserTable = realEmail || dummyEmail;
 
@@ -340,7 +351,6 @@ const addSingleStudent = async (req, res) => {
         const match = error.message.match(/Argument `(.*)` is missing/);
         const missingField = match ? match[1] : 'a required field';
         console.error(`Validation Error: Missing field: ${missingField}`);
-        // === YEH THA SYNTAX ERROR (4Z00 -> 400) ===
         return res.status(400).json({ message: `Data validation error. Please check all fields. Missing: ${missingField}` });
     }
     res.status(500).json({ message: 'Server error while adding student.' });
