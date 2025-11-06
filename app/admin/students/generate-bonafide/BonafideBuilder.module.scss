@@ -43,9 +43,12 @@
   border-bottom: 1px solid #000;
 
   .logo {
-    width: 55px;
+    /* === YAHAN FIX KIYA HAI === */
+    width: 65px;      /* 55px se 65px kiya */
     height: auto;
-    max-height: 55px;
+    max-height: 65px; /* 55px se 65px kiya */
+    /* === FIX ENDS HERE === */
+    
     margin-right: 15px;
     object-fit: contain;
     flex-shrink: 0;
