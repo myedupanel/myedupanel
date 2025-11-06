@@ -155,11 +155,13 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {/* === YAHAN FIX KIYA (Row 4) === */}
             <tr>
               <td>4</td>
-              <td>Nationality & Mother Tongue</td>
+              <td>Nationality & Mother Tongue</td> {/* Label badla */}
               <td> 
+                {/* Spacing ke liye naya class add kiya */}
                 <div className={`${styles.inlineFields} ${styles.row4Fields}`}>
-                  {/* Label (2 dots) hatane ke liye 'fill' use kiya */}
+                  {/* 'fill' helper use kiya taaki 'Nationality:' label na aaye */}
                   {fill(formData.nationality || 'Indian', '140px')} 
+                  {/* Religion yahan se hata diya */}
                   <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="85px" />
                 </div>
               </td>
@@ -169,10 +171,12 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {/* === YAHAN FIX KIYA (Row 5) === */}
             <tr>
               <td>5</td>
-              <td>Religion & Caste</td>
+              <td>Religion & Caste</td> {/* Label badla */}
               <td>
                 <div className={styles.inlineFields}>
+                  {/* Religion (bina label) pehle */}
                   {fill(formData.religion, '150px')}
+                  {/* Caste (label ke saath) baad mein */}
                   <SubField label="Caste" value={formData.caste} minWidth="150px" />
                 </div>
               </td>
@@ -237,8 +241,9 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <td>Date of School Leaving</td>
               <td>{fill(dateOfLeaving, '150px')}</td>
             </tr>
+            
+            {/* === YAHAN FIX KIYA (Typo 1D3 -> 13) === */}
             <tr>
-              {/* Typo theek kiya (1D3 -> 13) */}
               <td>13</td>
               <td>Standard in which studying and since when (in Words)</td>
               <td>
@@ -247,6 +252,8 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                 </div>
               </td>
             </tr>
+            {/* === FIX ENDS === */}
+            
             <tr>
               <td>14</td>
               <td>Reason for leaving school</td>
