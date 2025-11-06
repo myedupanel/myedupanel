@@ -31,7 +31,7 @@ const normalizeData = (data: any[]) => {
       'last' // <-- Aapki Excel file (Col C) se
     ],
     'roll_number': [
-      'roll_number', 'roll no', 'student id', 'roll number', 'roll', 
+      'roll_number', 'Roll Number','roll no', 'student id', 'roll number', 'roll', 
       'student id (f name' // <-- Aapki Excel file (Col A) se (TYPO FIX)
     ],
     'class_name': [

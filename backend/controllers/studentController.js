@@ -13,7 +13,7 @@ const headerMappings = {
   father_name: ['fathername', 'father name', 'middle name', 'parentname', 'parent name', 'father_name'],
   last_name: ['lastname', 'last name', 'surname', 'last_name'],
   class_name: ['class', 'grade', 'standard', 'std', 'class number', 'class_name', 'classname'], 
-  roll_number: ['rollno', 'roll no', 'roll number', 'rollnumber', 'roll', 'roll_number'], // <-- YEH ZAROORI HAI
+  roll_number: ['rollno', 'roll no', 'roll number', 'rollnumber', 'roll', 'roll_number','Roll Number'], // <-- YEH ZAROORI HAI
   guardian_contact: ['parentcontact', 'parent contact', 'contact', 'phone', 'mobile', 'contact number', 'mobile no', 'guardian_contact', 'guardiancontact'],
   // Optional fields
   mother_name: ['mothername', 'mother name', 'mother_name'],
