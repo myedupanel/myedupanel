@@ -6,28 +6,31 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto'); 
 const sendEmail = require('../utils/sendEmail'); 
 
-// 2. HEADER MAPPINGS (No Change)
+// === YAHAN FIX KIYA (1/4): Smart mapping ko update kiya ===
+// Humne 'clean keys' (jaise 'first_name') ko bhi unki list mein add kar diya hai
 const headerMappings = {
-  first_name: ['firstname', 'first name', 'student name', 'name'],
-  father_name: ['fathername', 'father name', 'middle name', 'parentname', 'parent name'],
-  last_name: ['lastname', 'last name', 'surname'],
-  class_name: ['class', 'grade', 'standard', 'std', 'class number'],
-  roll_number: ['rollno', 'roll no', 'roll number', 'rollnumber', 'roll'],
-  guardian_contact: ['parentcontact', 'parent contact', 'contact', 'phone', 'mobile', 'contact number', 'mobile no'],
-  mother_name: ['mothername', 'mother name'],
-  dob: ['dob', 'date of birth'],
+  first_name: ['firstname', 'first name', 'student name', 'name', 'first_name'],
+  father_name: ['fathername', 'father name', 'middle name', 'parentname', 'parent name', 'father_name'],
+  last_name: ['lastname', 'last name', 'surname', 'last_name'],
+  class_name: ['class', 'grade', 'standard', 'std', 'class number', 'class_name'],
+  roll_number: ['rollno', 'roll no', 'roll number', 'rollnumber', 'roll', 'roll_number'],
+  guardian_contact: ['parentcontact', 'parent contact', 'contact', 'phone', 'mobile', 'contact number', 'mobile no', 'guardian_contact'],
+  // Optional fields (inko bhi add kar diya)
+  mother_name: ['mothername', 'mother name', 'mother_name'],
+  dob: ['dob', 'date of birth', 'birth date'],
   address: ['address'],
   email: ['email', 'student email'],
-  uid_number: ['uid', 'uid number', 'aadhar', 'aadhar card'],
+  uid_number: ['uid', 'uid number', 'aadhar', 'aadhar card', 'uid_number'],
   nationality: ['nationality'],
   caste: ['caste'],
-  birth_place: ['birthplace', 'birth place'],
-  admission_date: ['admission date', 'admissiondate'],
+  birth_place: ['birthplace', 'birth place', 'birth_place'],
+  admission_date: ['admission date', 'admissiondate', 'admission_date'],
 };
 
 // 3. HELPER FUNCTION (No Change)
 function getCanonicalKey(header) {
   if (!header) return null;
+  // Bug fix: _ (underscore) ko bhi replace karein
   const normalizedHeader = header.toLowerCase().replace(/[\s_-]/g, '');
   for (const key in headerMappings) {
     if (headerMappings[key].includes(normalizedHeader)) {
@@ -51,6 +54,7 @@ const addStudentsInBulk = async (req, res) => {
     }
 
     // 1. Rows ko process karein (No Change)
+    // Yeh ab frontend se aaye clean data ko bhi handle kar lega
     const processedStudents = studentsData.map(row => {
       const newStudent = {};
       for (const rawHeader in row) {
@@ -63,21 +67,32 @@ const addStudentsInBulk = async (req, res) => {
       return newStudent;
     });
     
-    // 2. Filter karein (No Change)
-    const validStudents = processedStudents.filter(
-      s => s.first_name && s.last_name && s.class_name && s.roll_number
-    );
+    // === YAHAN FIX KIYA (2/4): Strict filter ko HATA diya ===
+    // const validStudents = processedStudents.filter(
+    //   s => s.first_name && s.last_name && s.class_name && s.roll_number
+    // );
     
-    if (validStudents.length === 0) {
-      return res.status(400).json({ message: 'No valid student data. Ensure file has first_name, last_name, class_name, roll_number.' });
-    }
+    // if (validStudents.length === 0) {
+    //   return res.status(400).json({ message: 'No valid student data. Ensure file has first_name, last_name, class_name, roll_number.' });
+    // }
+    // === STRECT FILTER ENDS ===
 
     let createdCount = 0;
     const errors = [];
 
+    // === YAHAN FIX KIYA (3/4): 'validStudents' ki jagah 'processedStudents' par loop ===
     // 3. Ek-ek karke student create karein
-    for (const student of validStudents) {
+    for (const student of processedStudents) {
       try {
+        // === YAHAN FIX KIYA (4/4): Naya flexible check, loop ke andar ===
+        // Zaroori fields ko check karein
+        const { first_name, last_name, class_name, roll_number, father_name, guardian_contact } = student;
+        if (!first_name || !last_name || !class_name || !roll_number || !father_name || !guardian_contact) {
+          errors.push(`Skipped row: Missing required data for student '${first_name || 'N/A'}' (Roll No: ${roll_number || 'N/A'}). Required: first_name, last_name, class_name, roll_number, father_name, guardian_contact.`);
+          continue; // Is student ko skip karo aur agle par jaao
+        }
+        // === FLEXIBLE CHECK ENDS ===
+
         const className = student.class_name;
         
         // 4. Class ko find/create karein (No Change)
@@ -91,7 +106,7 @@ const addStudentsInBulk = async (req, res) => {
         }
         
         // 5. Student data ko Prisma ke liye taiyaar karein (No Change)
-        const { class_name, ...studentData } = student; 
+        const { class_name: cn, ...studentData } = student; // class_name ko hataya
         studentData.classid = classRecord.classid; 
         studentData.schoolId = schoolId; 
 
@@ -99,17 +114,28 @@ const addStudentsInBulk = async (req, res) => {
         // DOB (optional reh sakta hai, null theek hai)
         if (studentData.dob) {
            try {
-            const parsedDate = new Date(studentData.dob);
-            if (!isNaN(parsedDate)) { studentData.dob = parsedDate; } else { studentData.dob = null; }
+            // Excel dates ko handle karne ke liye check
+            if (typeof studentData.dob === 'number') {
+                // Yeh 'Excel date serial number' ho sakta hai
+                const parsedDate = new Date(Date.UTC(1899, 11, 30 + studentData.dob));
+                if (!isNaN(parsedDate)) { studentData.dob = parsedDate; } else { studentData.dob = null; }
+            } else {
+                const parsedDate = new Date(studentData.dob);
+                if (!isNaN(parsedDate)) { studentData.dob = parsedDate; } else { studentData.dob = null; }
+            }
           } catch (e) { studentData.dob = null; }
         }
         
         // Admission Date (DEFAULT TO TODAY agar missing ya invalid hai)
         if (studentData.admission_date) {
            try {
-             const parsedDate = new Date(studentData.admission_date);
-             // Agar date invalid hai, toh aaj ki date set karein
-             studentData.admission_date = !isNaN(parsedDate) ? parsedDate : new Date(); 
+             if (typeof studentData.admission_date === 'number') {
+                const parsedDate = new Date(Date.UTC(1899, 11, 30 + studentData.admission_date));
+                studentData.admission_date = !isNaN(parsedDate) ? parsedDate : new Date();
+             } else {
+                const parsedDate = new Date(studentData.admission_date);
+                studentData.admission_date = !isNaN(parsedDate) ? parsedDate : new Date(); 
+             }
            } catch (e) { 
              studentData.admission_date = new Date(); // Error par aaj ki date
            }
@@ -164,13 +190,13 @@ const addStudentsInBulk = async (req, res) => {
            errors.push(`Error for student ${student.first_name || 'N/A'}: ${error.message}`);
         }
       }
-    }
+    } // End of for...of loop
 
     // 8. Final response (No Change)
     res.status(201).json({
-      message: `${createdCount} of ${validStudents.length} students were added successfully.`,
+      message: `${createdCount} of ${processedStudents.length} students were added successfully.`,
       errors: errors,
-      totalProcessed: validStudents.length,
+      totalProcessed: processedStudents.length,
     });
 
   } catch (error) {
