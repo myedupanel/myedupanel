@@ -374,5 +374,5 @@ const addSingleStudent = async (req, res) => {
 module.exports = {
   addStudentsInBulk,
   getAllStudents,
-  addSingleS
+  addSingleStudent
 }
