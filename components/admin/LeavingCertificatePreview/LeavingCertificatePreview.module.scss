@@ -17,8 +17,8 @@
 
 .outerBorder {
   border: 2px solid #000;
-  /* Padding adjust ki taaki print A4 mein fit ho */
-  padding: 10mm 10mm 5mm 10mm; 
+  /* Padding top kam kiya, bottom badhaya to make space for the footer border to go down */
+  padding: 8mm 10mm 15mm 10mm; 
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -36,7 +36,7 @@
 .fillNoLine {
   font-weight: bold;
   padding: 0 4px;
-  border-bottom: none; /* No line/dot */
+  border-bottom: none; /* Removed line for Nationality value */
   display: inline-block;
 }
 .fillBlank {
@@ -50,22 +50,29 @@
 /* --- End Base Styles --- */
 
 
-/* --- Header Style --- */
+/* --- Header Style (MODIFIED FOR ALIGNMENT & SIZE) --- */
 .certHeader {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  gap: 10px; 
+  justify-content: space-between;
+  align-items: center; /* Vertically centers logo and text block */
+  gap: 15px; 
   border-bottom: 1.5px solid #000;
   padding-bottom: 5px; 
   margin-bottom: 0; 
 
-  .logo { 
-    display: block; 
+  .logoContainer {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center; /* Ensures logo is vertically centered in its container */
     width: 65px;
     height: 65px;
+    padding: 5px 0;
+  }
+  .logo { 
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    flex-shrink: 0; 
   }
   
   .schoolInfoBlock {
@@ -74,20 +81,19 @@
     padding: 0;
     line-height: 1.2;
     
-    .schoolNameMyEdu { font-size: 8pt; margin-bottom: 2px; } 
-    .schoolName1 { font-size: 14pt; font-weight: bold; margin: 0; } 
-    .schoolName2 { display: none; } 
-    .schoolAddressCode { font-size: 9pt; margin: 0; line-height: 1.4; }
+    .schoolNameMyEdu { font-size: 9pt; margin-bottom: 2px; } 
+    .schoolName1 { font-size: 16pt; font-weight: bold; margin: 0; } /* Increased size */
+    .schoolAddressCode { font-size: 10pt; margin: 0; line-height: 1.4; } /* Increased size */
   }
 }
 
-/* Title Row (Boxed and Centered) */
+/* Title Row (Centering and Border Fix) */
 .titleRow {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr; /* Sr.No | Title | Reg.No */
   align-items: center;
   width: 100%;
-  margin-top: 10px; 
+  margin-top: 5px; 
   border: 1.5px solid #000;
   margin-bottom: -1.5px; 
   position: relative; 
@@ -95,15 +101,14 @@
   background: #fff; 
   
   h2 { 
-    font-size: 15pt;
+    font-size: 14pt;
     font-weight: bold;
     margin: 0;
     padding: 5px 10px; 
     text-align: center;
-    border-left: 1.5px solid #000; 
-    border-right: 1.5px solid #000; 
-    /* Title ko center mein lock karne ke liye: */
-    width: 100%;
+    /* --- INTERNAL BORDERS REMOVED --- */
+    border-left: none; 
+    border-right: none; 
   }
 
   .headerSrNo, .headerRegNo {
@@ -125,7 +130,7 @@
 
 /*
   ======================================================================
-  === MAIN GRID BLUEPRINT STYLE ===
+  === MAIN GRID BLUEPRINT STYLE (FULL HEIGHT/WIDTH) ===
   ======================================================================
 */
 .certificateGrid {
@@ -133,6 +138,9 @@
   border: 1.5px solid #000; 
   display: grid;
   grid-template-columns: 35px 35% auto; 
+  /* --- FULL HEIGHT FIX --- */
+  flex-grow: 1; 
+  align-content: stretch; /* Rows will stretch to fill height */
 }
 
 .rowNum, .rowLabel, .rowValue {
@@ -142,6 +150,7 @@
   border-bottom: 1.5px solid #000;
   display: flex;
   align-items: center; 
+  min-height: 35px; /* Ensures minimum height for even distribution */
 }
 
 .rowNum {
@@ -156,39 +165,31 @@
   font-weight: normal;
 }
 
-.rowValue {
-  font-weight: bold;
-}
-
 /* Aakhri row ke cells ki border hatayi */
 .lastRow {
   border-bottom: none !important;
 }
 
 /* --- STYLING FOR MULTI-FIELD ROWS (ROW 4 & ROW 5 FIX) --- */
-
 .multiFieldRow {
   display: flex;
   flex-wrap: wrap; 
   align-items: baseline;
   justify-content: flex-start; 
   width: 100%;
-  gap: 5px 25px; /* Mother Tongue ko right mein khiskaane ke liye gap */
+  gap: 5px 30px; /* Mother Tongue ko right mein khiskaane ke liye gap badhaya */
   
   .fill, .fillBlank {
-    /* MultiFieldRow ke andar ke fills ko default mein stretch nahi hone denge */
     width: auto; 
     flex-grow: 0; 
   }
 }
 
-/* Row 4 specific styling: Only .fillNoLine is used here, so no line appears */
-
 /* Row 5 specific styling (Religion Value + Caste Field) */
 .rowValue:has(.casteField) { 
     .multiFieldRow > .fill, .multiFieldRow > .fillBlank {
-        /* First fill (Religion value) ko 30% width do */
-        flex-basis: 30%; 
+        /* First fill (Religion value) ko fixed width do */
+        flex-basis: 35%; 
         min-width: 100px;
     }
     
@@ -239,7 +240,7 @@
 }
 
 .certFooterWrapper {
-  margin-top: auto; 
+  margin-top: 10px; /* Reduced gap between text and footer */
   padding-top: 15px; 
   font-size: 12pt;
   font-weight: bold;
@@ -270,7 +271,7 @@
 .sigBox {
   text-align: center;
   width: 30%;
-  padding-top: 25px; 
+  padding-top: 40px; /* Increased padding to push the line down */
   border-top: 1px solid #000;
 }
 
@@ -282,11 +283,11 @@
     margin: 0;
     padding: 0;
     height: 100%;
-    font-size: 11pt !important; 
+    font-size: 10pt !important; /* Base font size reduced further for print */
   }
   .outerBorder {
     border: 1px solid #000;
-    padding: 8mm 8mm 5mm 8mm; 
+    padding: 5mm 8mm 10mm 8mm; /* Reduced top/bottom padding for maximum space */
     min-height: 0;
     height: 100%;
     box-sizing: border-box; 
@@ -294,35 +295,35 @@
   
   /* Print ke liye row padding kam ki */
   .rowNum, .rowLabel, .rowValue {
-    padding: 3px 5px !important;
+    padding: 2px 5px !important; /* Minimal padding */
     line-height: 1.3 !important;
-    min-height: 28px; 
+    min-height: 25px; /* Minimum height reduced for print density */
     box-sizing: border-box;
   }
-  .multiFieldRow { gap: 2px 15px !important; }
-  .subGrid { gap: 2px 10px !important; }
+  .multiFieldRow { gap: 2px 10px !important; }
+  .subGrid { gap: 1px 5px !important; }
 
   /* Title alignment fix for print */
   .titleRow { 
-    margin-top: 5px !important; 
+    margin-top: 4px !important; 
     padding: 2px 0 !important; 
-    h2 { font-size: 13pt !important; }
+    h2 { font-size: 12pt !important; }
     .headerSrNo, .headerRegNo { 
-        font-size: 10pt !important; 
-        .fill, .fillBlank { width: 80px !important; }
+        font-size: 9pt !important; 
+        .fill, .fillBlank { width: 70px !important; }
     }
   }
   
   /* Footer space reduction */
   .certText { 
-    margin-top: 8px !important; 
-    font-size: 10pt !important;
-    line-height: 1.3 !important;
+    margin-top: 5px !important; 
+    font-size: 9pt !important;
   }
   .certFooterWrapper { 
-    padding-top: 8px !important; 
-    margin-top: 8px !important; 
+    padding-top: 5px !important; 
+    margin-top: 5px !important; 
+    font-size: 10pt !important;
   }
-  .datePlace { margin-bottom: 10px !important; }
-  .sigBox { padding-top: 15px !important; }
+  .datePlace { margin-bottom: 8px !important; }
+  .sigBox { padding-top: 10px !important; } /* Signature line height */
 }

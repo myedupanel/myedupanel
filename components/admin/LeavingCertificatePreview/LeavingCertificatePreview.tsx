@@ -25,7 +25,7 @@ export interface LeavingFormData {
   regNo?: string; 
   nationality?: string;
   motherTongue?: string;
-  religion?: string; // New field for Religion
+  religion?: string; 
   caste?: string;
   birthPlace?: string;
   birthTaluka?: string;
@@ -76,20 +76,19 @@ interface LeavingCertificatePreviewProps {
 }
 
 // --- Helper Components (Modified to include noLine flag) ---
-
-// fill function updated to include an option to remove the line (noLine=true)
 const fill = (value: string | undefined | null, noLine = false) => {
-  const className = noLine ? styles.fillNoLine : (value ? styles.fill : styles.fillBlank);
+  // .fillNoLine class added to SCSS
+  const className = noLine ? styles.fillNoLine : (value ? styles.fill : styles.fillBlank); 
   if (value) {
     return <span className={className}>{value}</span>;
   }
   return <span className={className}>&nbsp;</span>; 
 }
 
-// SubField function updated to check for label and use the noLine flag
+// SubField function updated to check for label
 const SubField: React.FC<{ label: string, value: string | undefined | null, noLine?: boolean }> = ({ label, value, noLine = false }) => (
   <span className={styles.subField}>
-    {/* Only show colon if label exists */}
+    {/* Only show label if it is provided */}
     {label && <span className={styles.subLabel}>{label}:</span>} 
     {fill(value, noLine)}
   </span>
@@ -122,27 +121,29 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* Header (Alignment Fixes applied via SCSS) */}
+        {/* Header (Updated SCSS handles alignment and sizing) */}
         <header className={styles.certHeader}>
           {schoolDetails.logoUrl && (
-            <img 
-              src={schoolDetails.logoUrl} 
-              alt="School Logo" 
-              className={styles.logo} 
-            />
+            <div className={styles.logoContainer}>
+              <img 
+                src={schoolDetails.logoUrl} 
+                alt="School Logo" 
+                className={styles.logo} 
+              />
+            </div>
           )}
           <div className={styles.schoolInfoBlock}>
             <div className={styles.schoolNameMyEdu}>{schoolDetails.name || 'My EduPanel Trust'}</div> 
-            <div className={styles.schoolName1}>{schoolDetails.name2 || 'Your School Name'}</div>
+            <div className={styles.schoolName1}>{schoolDetails.name2 || 'Prime International School'}</div>
             <div className={styles.schoolAddressCode}>
-              {schoolDetails.address || 'Pune'}
+              {schoolDetails.address || 'Hinjewadi, Pune, 411057'}
               <br/>
               UDISE NO: {schoolDetails.udiseNo || '987654321012'}
             </div>
           </div>
         </header>
           
-        {/* Title Row (Centering Fix applied via SCSS) */}
+        {/* Title Row (Centering and Border Fix) */}
         <div className={styles.titleRow}>
           <div className={styles.headerSrNo}>
             Sr. No: {fill(formData.genRegNo)}
@@ -168,10 +169,10 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {fill(formData.motherName)}
           </GridRow>
 
-          {/* === ROW 4 MODIFICATION: Nationality line removed, Mother Tongue shifted right === */}
+          {/* === ROW 4 MODIFICATION: Line removed under Nationality value, Mother Tongue shifted right === */}
           <GridRow num="4" label="Nationality">
             <div className={styles.multiFieldRow}>
-              {/* Nationality value, no line, no colon (using SubField with empty label and noLine=true) */}
+              {/* Nationality value, no line, no colon */}
               <SubField label="" value={formData.nationality || 'Indian'} noLine={true} />
               
               {/* Mother Tongue subfield, shifted right (via multiFieldRow gap) */}
@@ -185,7 +186,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                 {/* 1. Religion Value (will take fixed space) */}
                 {fill(formData.religion)}
                 
-                {/* 2. Caste Field (will be placed next to Religion value) */}
+                {/* 2. Caste Field (clean structure for Caste: [Value]) */}
                 <span className={styles.casteField}>
                     <span className={styles.subLabel}>Caste:</span>
                     {fill(formData.caste)}
@@ -256,7 +257,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           School General Register No. {fill(formData.genRegNo)}
         </p>
 
-        {/* Footer (No Change) */}
+        {/* Footer (Spacing Adjusted via SCSS) */}
         <footer className={styles.certFooterWrapper}>
           <div className={styles.datePlace}>
             <span>Date: {fill(null)}</span>
