@@ -25,7 +25,7 @@ export interface LeavingFormData {
   regNo?: string; 
   nationality?: string;
   motherTongue?: string;
-  religion?: string;
+  religion?: string; // New field for Religion
   caste?: string;
   birthPlace?: string;
   birthTaluka?: string;
@@ -75,28 +75,28 @@ interface LeavingCertificatePreviewProps {
   schoolDetails: SchoolDetails;
 }
 
-// --- Helper Components (Yahi hai naya structure) ---
+// --- Helper Components (Modified to include noLine flag) ---
 
-// fillBlank ab CSS dwara handle kiya jayega, taaki line poori fail sake
-const fill = (value: string | undefined | null) => {
+// fill function updated to include an option to remove the line (noLine=true)
+const fill = (value: string | undefined | null, noLine = false) => {
+  const className = noLine ? styles.fillNoLine : (value ? styles.fill : styles.fillBlank);
   if (value) {
-    return <span className={styles.fill}>{value}</span>;
+    return <span className={className}>{value}</span>;
   }
-  return <span className={styles.fillBlank}>&nbsp;</span>; 
+  return <span className={className}>&nbsp;</span>; 
 }
 
-const SubField = ({ label, value }: { label: string, value: string | undefined | null }) => (
+// SubField function updated to check for label and use the noLine flag
+const SubField: React.FC<{ label: string, value: string | undefined | null, noLine?: boolean }> = ({ label, value, noLine = false }) => (
   <span className={styles.subField}>
-    <span className={styles.subLabel}>{label}:</span> 
-    {fill(value)}
+    {/* Only show colon if label exists */}
+    {label && <span className={styles.subLabel}>{label}:</span>} 
+    {fill(value, noLine)}
   </span>
 );
 
 // Yeh naya GridRow component blueprint banayega
 const GridRow: React.FC<{ num: string, label: string, children: React.ReactNode, className?: string }> = ({ num, label, children, className }) => {
-  // Hum display: contents use karenge taaki yeh row DOM mein na aaye
-  // aur iske children seedha CSS grid mein fit ho jaayein.
-  // Isse saari lines 100% align hongi.
   return (
     <>
       <div className={`${styles.rowNum} ${className || ''}`}>{num}</div>
@@ -122,7 +122,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* Header (No Change) */}
+        {/* Header (Alignment Fixes applied via SCSS) */}
         <header className={styles.certHeader}>
           {schoolDetails.logoUrl && (
             <img 
@@ -142,7 +142,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           </div>
         </header>
           
-        {/* Title Row (Boxed) */}
+        {/* Title Row (Centering Fix applied via SCSS) */}
         <div className={styles.titleRow}>
           <div className={styles.headerSrNo}>
             Sr. No: {fill(formData.genRegNo)}
@@ -153,8 +153,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           </div>
         </div>
 
-        {/* === YEH HAI NAYA BLUEPRINT === */}
-        {/* Humne <table> ko hata diya hai aur CSS Grid use kiya hai */}
+        {/* === MAIN BLUEPRINT (GRID) === */}
         <div className={styles.certificateGrid}>
           
           <GridRow num="1" label="Student's Full Name">
@@ -169,16 +168,29 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {fill(formData.motherName)}
           </GridRow>
 
+          {/* === ROW 4 MODIFICATION: Nationality line removed, Mother Tongue shifted right === */}
           <GridRow num="4" label="Nationality">
             <div className={styles.multiFieldRow}>
-              <SubField label="" value={formData.nationality || 'Indian'} />
+              {/* Nationality value, no line, no colon (using SubField with empty label and noLine=true) */}
+              <SubField label="" value={formData.nationality || 'Indian'} noLine={true} />
+              
+              {/* Mother Tongue subfield, shifted right (via multiFieldRow gap) */}
               <SubField label="Mother Tongue" value={formData.motherTongue} />
-             
             </div>
           </GridRow>
           
-          <GridRow num="5" label="Religion,Caste">
-            {fill(formData.caste)}
+          {/* === ROW 5 MODIFICATION: Left=Religion, Right=Religion Value + Caste Label/Value === */}
+          <GridRow num="5" label="Religion"> 
+            <div className={styles.multiFieldRow}>
+                {/* 1. Religion Value (will take fixed space) */}
+                {fill(formData.religion)}
+                
+                {/* 2. Caste Field (will be placed next to Religion value) */}
+                <span className={styles.casteField}>
+                    <span className={styles.subLabel}>Caste:</span>
+                    {fill(formData.caste)}
+                </span>
+            </div>
           </GridRow>
 
           <GridRow num="6" label="Birth place (State/City)">
