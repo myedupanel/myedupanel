@@ -87,7 +87,14 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    h1 { font-size: 1.5rem; font-weight: 800; color: #000; margin: 0 0 2px 0; }
+    /* === FONT-SIZE ab TSX file se inline aa raha hai === */
+    h1 { 
+      /* font-size: 1.5rem; (Yahan se control nahi hoga) */
+      font-weight: 800; 
+      color: #000; 
+      margin: 0 0 2px 0; 
+      line-height: 1.2; /* Line height ko control kiya taaki wrap hone par bhi kam space le */
+    }
     p { font-size: 0.85rem; margin: 0; } /* Address added */
     .logo { max-width: 60px; max-height: 60px; margin: 0;}
   }

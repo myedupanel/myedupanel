@@ -234,6 +234,33 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     // Is component ko saare upar ke variables automatically mil jayenge
     // =================================================================
     const InternalReceipt = ({ copyType }: { copyType: string }) => {
+
+        // === YAHAN FIX KIYA (1/2): Smart font-size logic ===
+        const schoolName = schoolDetails?.name2 || schoolDetails?.name || 'My EduPanel';
+        
+        const getDynamicFontSize = (name: string) => {
+          const baseSize = 1.5; // rem (default font size)
+          const minSize = 1.1;  // rem (isse chhota nahi hoga)
+          const threshold = 28; // characters, iske baad naam 'lamba' maana jaayega
+          
+          // Har extra character ke liye kitna chhota karein
+          const reductionFactor = 0.015; 
+
+          if (name.length > threshold) {
+            const excessChars = name.length - threshold;
+            const newSize = baseSize - (excessChars * reductionFactor);
+            
+            // Math.max yeh ensure karega ki font size minSize se neeche na jaaye
+            return `${Math.max(minSize, newSize)}rem`;
+          }
+          
+          return `${baseSize}rem`; // Default size agar naam chhota hai
+        };
+        
+        const dynamicFontSize = getDynamicFontSize(schoolName);
+        // === FIX ENDS HERE ===
+
+
         return (
             <div className={styles.receiptCopy}>
                 {/* 1. Header (School Details) */}
@@ -241,8 +268,10 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                     <div className={styles.schoolDetails}>
                         {schoolDetails?.logo && (<img src={schoolDetails.logo} alt={`${schoolDetails.name || 'School'} Logo`} className={styles.logo} />)}
                         <div>
-                            {/* Ab yeh 'name2' (Certificate Name) ko state se dikhayega */}
-                            <h1>{schoolDetails?.name2 || schoolDetails?.name || 'My EduPanel'}</h1>
+                            {/* === YAHAN FIX KIYA (2/2): Inline style apply kiya === */}
+                            <h1 style={{ fontSize: dynamicFontSize }}>
+                                {schoolName}
+                            </h1>
                             <p>{schoolDetails?.address || 'School Address'}</p>
                         </div>
                     </div>
@@ -371,11 +400,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
                 {/* 7. Balance Due Wrapper (YAHAN SE HATA DIYA GAYA) */}
                 
-                {/* // ========================================================
-                // === YAHAN BADLAAV KIYA GAYA HAI (Footer) ===
-                // Footer ko blueprint ('image_61051c.jpg') jaisa banaya hai
-                // ========================================================
-                */}
+                {/* 8. Footer (Updated) */}
                 <footer className={styles.footer}>
                     {/* Yeh naya div 'Received By' aur 'Signature' ko ek line mein rakhega */}
                     <div className={styles.footerMain}>
