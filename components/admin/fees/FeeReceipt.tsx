@@ -197,7 +197,6 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     }
 
     // --- Data Extraction (No Change) ---
-    // const schoolInfo = transaction.schoolInfo || {}; // 'schoolDetails' state use hoga
     const studentData = transaction.studentId || {}; 
     const templateData = transaction.templateId || {}; 
     
@@ -205,8 +204,6 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
     const paymentDateDisplay = formatDate(transaction.paymentDate); 
     
     const studentNameDisplay = (studentData as any).name || transaction.studentName || 'N/A';
-    // const studentRegIdDisplay = (studentData as any).studentId || transaction.studentRegId || 'N/A'; // Removed
-    // const classDisplay = (studentData as any).class || transaction.className || 'N/A'; // Removed
     
     const collectedByInfo = transaction.collectedBy;
     const collectedByNameDisplay = collectedByInfo?.name || transaction.collectedByName || (transaction.paymentMode === 'Online' ? 'System (Online)' : 'Admin');
@@ -229,22 +226,20 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
 
 
     // =================================================================
-    // === YAHAN BADA BADLAAV KIYA GAYA HAI ===
-    // Ek internal component banaya taaki JSX ko repeat na karna pade
-    // Is component ko saare upar ke variables automatically mil jayenge
+    // === INTERNAL COMPONENT ===
     // =================================================================
     const InternalReceipt = ({ copyType }: { copyType: string }) => {
 
-        // === YAHAN FIX KIYA (1/2): Smart font-size logic ===
+        // === YAHAN FIX KIYA (1/2): Smart font-size logic ko "AGRESSIVE" banaya ===
         const schoolName = schoolDetails?.name2 || schoolDetails?.name || 'My EduPanel';
         
         const getDynamicFontSize = (name: string) => {
           const baseSize = 1.5; // rem (default font size)
-          const minSize = 1.1;  // rem (isse chhota nahi hoga)
-          const threshold = 28; // characters, iske baad naam 'lamba' maana jaayega
+          const minSize = 1.0;  // rem (isse chhota nahi hoga, 1.1 se 1.0 kiya)
+          const threshold = 25; // characters (28 se 25 kiya)
           
-          // Har extra character ke liye kitna chhota karein
-          const reductionFactor = 0.015; 
+          // Har extra character ke liye kitna chhota karein (0.015 se 0.025 kiya)
+          const reductionFactor = 0.025; 
 
           if (name.length > threshold) {
             const excessChars = name.length - threshold;
@@ -269,7 +264,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
                         {schoolDetails?.logo && (<img src={schoolDetails.logo} alt={`${schoolDetails.name || 'School'} Logo`} className={styles.logo} />)}
                         <div>
                             {/* === YAHAN FIX KIYA (2/2): Inline style apply kiya === */}
-                            <h1 style={{ fontSize: dynamicFontSize }}>
+                            <h1 style={{ fontSize: dynamicFontSize, lineHeight: 1.2 }}>
                                 {schoolName}
                             </h1>
                             <p>{schoolDetails?.address || 'School Address'}</p>

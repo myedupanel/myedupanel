@@ -350,7 +350,7 @@
 
     .receiptCopy {
         padding: 10mm !important; /* Print mein margin */
-        height: 50vh; /* Har copy ko adha page dega */
+        height: 50vh !important; /* Har copy ko adha page dega */
         box-sizing: border-box;
     }
 
