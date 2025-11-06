@@ -50,9 +50,10 @@ const addStudentsInBulk = async (req, res) => {
 
     const studentsData = req.body;
     
-    // DEBUG LOGS (Inhe rehne dein, problem solve hone ke baad hata denge)
+    // === DEBUGGER 1: Frontend se kya data aa raha hai? ===
     console.log("--- DEBUG: RAW DATA RECEIVED FROM FRONTEND ---");
     console.log(JSON.stringify(studentsData, null, 2));
+    // === DEBUGGER ENDS ===
     
     if (!studentsData || !Array.isArray(studentsData)) {
       return res.status(400).json({ message: 'No student data provided. Expected an array for bulk import.' });
@@ -71,32 +72,30 @@ const addStudentsInBulk = async (req, res) => {
       return newStudent;
     });
 
-    // DEBUG LOG 2
+    // === DEBUGGER 2: Mapping ke baad data kaisa dikh raha hai? ===
     console.log("--- DEBUG: DATA AFTER BACKEND MAPPING (processedStudents) ---");
     console.log(JSON.stringify(processedStudents, null, 2));
-    
-    // === YAHAN FIX KIYA (2/4): Strict filter ko HATA diya ===
-    // (Pehle se hata hua hai)
+    // === DEBUGGER ENDS ===
 
     let createdCount = 0;
     const errors = [];
 
-    // === YAHAN FIX KIYA (3/4): 'validStudents' ki jagah 'processedStudents' par loop ===
     // 3. Ek-ek karke student create karein
     for (const student of processedStudents) {
       try {
-        // === YAHAN FIX KIYA (4/4): Naya flexible check, loop ke andar ===
-        // Zaroori fields ko check karein
+        // 4. Zaroori fields ko check karein
         const { first_name, last_name, class_name, roll_number, father_name, guardian_contact } = student;
         if (!first_name || !last_name || !class_name || !roll_number || !father_name || !guardian_contact) {
           errors.push(`Skipped row: Missing required data for student '${first_name || 'N/A'}' (Roll No: ${roll_number || 'N/A'}). Required: first_name, last_name, class_name, roll_number, father_name, guardian_contact.`);
           
-          // DEBUG LOG 3
+          // === DEBUGGER 3: Pehla student reject kyun hua? ===
           if (processedStudents.indexOf(student) === 0) { // Sirf pehle student ka error dikhao
             console.log("--- DEBUG: FIRST STUDENT REJECTED ---");
             console.log("REASON: Missing one or more required fields.");
-            console.log("DATA RECEIVED:", student);
+            console.log("DATA RECEIVED BY 'if' CHECK:", student);
           }
+          // === DEBUGGER ENDS ===
+
           continue; // Is student ko skip karo aur agle par jaao
         }
         // === FLEXIBLE CHECK ENDS ===
@@ -118,8 +117,7 @@ const addStudentsInBulk = async (req, res) => {
         studentData.classid = classRecord.classid; 
         studentData.schoolId = schoolId; 
 
-        // --- 6. FIX: Date fields ko handle karein ---
-        // (Pehle se theek hai)
+        // 6. Date fields ko handle karein (No Change)
         if (studentData.dob) {
            try {
             if (typeof studentData.dob === 'number') {
@@ -146,7 +144,6 @@ const addStudentsInBulk = async (req, res) => {
         } else {
            studentData.admission_date = new Date(); 
         }
-        // --- END FIX ---
 
         // 7. Student aur User Transaction (No Change)
         const studentFullName = `${studentData.first_name} ${studentData.last_name}`;
@@ -158,7 +155,7 @@ const addStudentsInBulk = async (req, res) => {
         await prisma.$transaction(async (tx) => {
           // 7a: Student create karein
           await tx.students.create({
-            data: studentData, // Ismein ab admission_date hamesha hogi
+            data: studentData, 
           });
 
           // 7b: Hamesha User (login) create karein
@@ -181,7 +178,7 @@ const addStudentsInBulk = async (req, res) => {
         createdCount++;
 
       } catch (error) {
-         // ... (existing error handling)
+         // (Error handling - No Change)
          console.error("Error creating individual student:", error);
         if (error.code === 'P2002') { 
            const target = error.meta?.target || [];
@@ -230,7 +227,7 @@ const getAllStudents = async (req, res) => {
 };
 
 
-// 6. FUNCTION 3: addSingleStudent (UPDATED)
+// 6. FUNCTION 3: addSingleStudent (No Change)
 const addSingleStudent = async (req, res) => {
   try {
     // 1. School ID (No Change)
@@ -277,29 +274,23 @@ const addSingleStudent = async (req, res) => {
       schoolId: schoolId,
     };
 
-    // --- 6. FIX: Date fields ko handle karein ---
-    // DOB (optional reh sakta hai, null theek hai)
+    // 6. Date fields ko handle karein (No Change)
     if (studentData.dob) {
       try {
         const parsedDate = new Date(studentData.dob);
         studentData.dob = !isNaN(parsedDate) ? parsedDate : null;
       } catch (e) { studentData.dob = null; }
     }
-    
-    // Admission Date (DEFAULT TO TODAY agar missing ya invalid hai)
     if (studentData.admission_date) {
        try {
          const parsedDate = new Date(studentData.admission_date);
-         // Agar date invalid hai, toh aaj ki date set karein
          studentData.admission_date = !isNaN(parsedDate) ? parsedDate : new Date();
        } catch (e) { 
-         studentData.admission_date = new Date(); // Error par aaj ki date
+         studentData.admission_date = new Date(); 
        }
     } else {
-       studentData.admission_date = new Date(); // Agar field tha hi nahi, toh aaj ki date
+       studentData.admission_date = new Date(); 
     }
-    // --- END FIX ---
-
 
     // 7. Transaction (No Change)
     const tempPassword = crypto.randomBytes(8).toString('hex');
@@ -314,7 +305,7 @@ const addSingleStudent = async (req, res) => {
     const newStudent = await prisma.$transaction(async (tx) => {
       // 7a: Naya student create karein
       const createdStudent = await tx.students.create({
-        data: studentData, // Ismein ab admission_date hamesha hogi
+        data: studentData, 
       });
 
       // 7b: Hamesha User entry (login) create karein
@@ -374,5 +365,5 @@ const addSingleStudent = async (req, res) => {
 module.exports = {
   addStudentsInBulk,
   getAllStudents,
-  addSingleStudent
-}
+  addSingleStudent, 
+};
