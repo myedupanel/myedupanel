@@ -37,19 +37,19 @@
 
 .certHeader {
   display: flex;
-  align-items: flex-start;
-  /* === YAHAN FIX KIYA (UPAR MOVE KARNE KE LIYE) === */
-  padding-bottom: 3px; /* 5px se 3px kiya */
-  margin-bottom: 3px;  /* 5px se 3px kiya */
+  /* === YAHAN FIX KIYA (Vertical Center Alignment) === */
+  align-items: center; /* flex-start se center kiya */
   /* === FIX ENDS HERE === */
+  padding-bottom: 3px; 
+  margin-bottom: 3px;  
   border-bottom: 1px solid #000;
 
   .logo {
     width: 65px;
     height: auto;
     max-height: 65px;
-    /* === YAHAN FIX KIYA (LEFT SHIFT KE LIYE) === */
-    margin-right: 10px; /* 15px se 10px kiya */
+    /* === YAHAN FIX KIYA (Gap Kam Kiya) === */
+    margin-right: 5px; /* 10px se 5px kiya */
     /* === FIX ENDS HERE === */
     object-fit: contain;
     flex-shrink: 0;
