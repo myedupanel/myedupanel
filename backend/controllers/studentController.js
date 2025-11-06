@@ -6,6 +6,8 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto'); 
 const sendEmail = require('../utils/sendEmail'); 
 
+// ... (Baaki sab kuch same rahega... headerMappings, getCanonicalKey) ...
+
 // === YAHAN FIX KIYA (1/4): Smart mapping ko update kiya ===
 // Humne 'clean keys' (jaise 'first_name') ko bhi unki list mein add kar diya hai
 const headerMappings = {
@@ -40,6 +42,7 @@ function getCanonicalKey(header) {
   return null;
 }
 
+
 // 4. FUNCTION 1: addStudentsInBulk (UPDATED)
 const addStudentsInBulk = async (req, res) => {
   try {
@@ -49,12 +52,18 @@ const addStudentsInBulk = async (req, res) => {
     }
 
     const studentsData = req.body;
+    
+    // === YAHAN PERMANENT FIX DAALA HAI (DEBUGGER) ===
+    // Hum check karenge ki frontend se raw data kya aa raha hai
+    console.log("--- DEBUG: RAW DATA RECEIVED FROM FRONTEND ---");
+    console.log(JSON.stringify(studentsData, null, 2));
+    // === DEBUGGER ENDS ===
+    
     if (!studentsData || !Array.isArray(studentsData)) {
       return res.status(400).json({ message: 'No student data provided. Expected an array for bulk import.' });
     }
 
     // 1. Rows ko process karein (No Change)
-    // Yeh ab frontend se aaye clean data ko bhi handle kar lega
     const processedStudents = studentsData.map(row => {
       const newStudent = {};
       for (const rawHeader in row) {
@@ -67,15 +76,14 @@ const addStudentsInBulk = async (req, res) => {
       return newStudent;
     });
     
-    // === YAHAN FIX KIYA (2/4): Strict filter ko HATA diya ===
-    // const validStudents = processedStudents.filter(
-    //   s => s.first_name && s.last_name && s.class_name && s.roll_number
-    // );
+    // === DEBUGGER 2 ===
+    console.log("--- DEBUG: DATA AFTER BACKEND MAPPING (processedStudents) ---");
+    console.log(JSON.stringify(processedStudents, null, 2));
+    // === DEBUGGER ENDS ===
     
-    // if (validStudents.length === 0) {
-    //   return res.status(400).json({ message: 'No valid student data. Ensure file has first_name, last_name, class_name, roll_number.' });
-    // }
-    // === STRECT FILTER ENDS ===
+
+    // === YAHAN FIX KIYA (2/4): Strict filter ko HATA diya ===
+    // (Pehle se hata hua hai, good)
 
     let createdCount = 0;
     const errors = [];
@@ -89,6 +97,15 @@ const addStudentsInBulk = async (req, res) => {
         const { first_name, last_name, class_name, roll_number, father_name, guardian_contact } = student;
         if (!first_name || !last_name || !class_name || !roll_number || !father_name || !guardian_contact) {
           errors.push(`Skipped row: Missing required data for student '${first_name || 'N/A'}' (Roll No: ${roll_number || 'N/A'}). Required: first_name, last_name, class_name, roll_number, father_name, guardian_contact.`);
+          
+          // === DEBUGGER 3 ===
+          if (processedStudents.indexOf(student) === 0) { // Sirf pehle student ka error dikhao
+            console.log("--- DEBUG: FIRST STUDENT REJECTED ---");
+            console.log("REASON: Missing one or more required fields.");
+            console.log("DATA RECEIVED:", student);
+          }
+          // === DEBUGGER ENDS ===
+
           continue; // Is student ko skip karo aur agle par jaao
         }
         // === FLEXIBLE CHECK ENDS ===
@@ -208,6 +225,7 @@ const addStudentsInBulk = async (req, res) => {
 
 // 5. FUNCTION 2: getAllStudents (No Change)
 const getAllStudents = async (req, res) => {
+  // ... (koi badlaav nahi)
   try {
     const schoolId = req.user.schoolId;
     if (!schoolId) {
@@ -228,6 +246,7 @@ const getAllStudents = async (req, res) => {
 
 // 6. FUNCTION 3: addSingleStudent (UPDATED)
 const addSingleStudent = async (req, res) => {
+  // ... (koi badlaav nahi)
   try {
     // 1. School ID (No Change)
     const schoolId = req.user.schoolId;
