@@ -10,36 +10,51 @@ interface ImportStudentsFormProps {
   onImport: (data: any[]) => void;
 }
 
-// === YAHAN FIX KIYA (1/3): "Smart Mapping" ko Bada Banaya ===
+// === YAHAN FIX KIYA (1/3): "Smart Mapping" ko Super Intelligent Banaya ===
 /**
  * Yeh function user ki file se raw data lega aur headers ko
  * hamare database ke 'clean' keys (jaise first_name) mein map karega.
  */
 const normalizeData = (data: any[]) => {
-  // Yahan aap AddStudentForm ke hisaab se sabhi fields add kar rahe hain
+  // Yahan humne AddStudentForm ke saare fields aur aapki Excel file ke messy headers add kar diye hain
   const headerMapping: { [key: string]: string[] } = {
     // Hamare 'Clean' Keys -> User ke 'Messy' Header options
     
-    // Required Fields
-    'first_name': ['first name', 'student name', 'name', 'f name', 'firstname'],
-    'last_name': ['last name', 'l name', 'lastname', 'surname'],
-    'roll_number': ['roll no', 'student id', 'roll number', 'student id (f name)'], // <-- YAHAN ')' ADD KAR DIYA HAI
-    'class_name': ['class', 'std', 'standard', 'class_name'],
-    'father_name': ['father name', 'parent name', 'father_name', 'parent'],
-    'guardian_contact': ['parent contact', 'contact', 'mobile', 'phone', 'guardian_contact'],
+    'first_name': [
+      'first_name', 'firstname', 'first name', 'student name', 'name', 'f name', 
+      '', // <-- CSV se khaali header ke liye
+      '__empty', // <-- XLSX se khaali header ke liye (default)
+      '__empty_1', // <-- XLSX se khaali header ke liye (Col B)
+    ],
+    'last_name': [
+      'last_name', 'lastname', 'last name', 'l name', 'surname', 
+      'last' // <-- Aapki Excel file se
+    ],
+    'roll_number': [
+      'roll_number', 'roll no', 'student id', 'roll number', 'roll', 
+      'student id (f name' // <-- Aapki Excel file se (TYPO FIX)
+    ],
+    'class_name': [
+      'class_name', 'class', 'std', 'standard' // <-- 'class' aapki file se
+    ],
+    'father_name': [
+      'father_name', 'father name', 'parent name', 'parent' // <-- 'parent name' aapki file se
+    ],
+    'guardian_contact': [
+      'guardian_contact', 'parent contact', 'contact', 'mobile', 'phone' // <-- 'parent contact' aapki file se
+    ],
     
-    // === YAHAN NAYE FIELDS ADD KIYE HAIN ===
-    'mother_name': ['mother name', 'mother_name'],
+    // Optional Fields
+    'mother_name': ['mother_name', 'mother name'],
     'dob': ['dob', 'date of birth', 'birth date'],
-    'admission_date': ['admission date', 'date of admission', 'admission_date', 'doj', 'date of joining'],
+    'admission_date': ['admission_date', 'admission date', 'date of admission', 'doj', 'date of joining'],
     'email': ['email', 'email id', 'student email'],
-    'uid_number': ['aadhar', 'uid', 'uid number', 'uid_number', 'aadhaar no'],
+    'uid_number': ['uid_number', 'aadhar', 'uid', 'uid number', 'aadhaar no'],
     'nationality': ['nationality'],
     'caste': ['caste'],
-    'birth_place': ['birth place', 'birth_place'],
-    'previous_school': ['previous school', 'previous_school'],
+    'birth_place': ['birth_place', 'birth place'],
+    'previous_school': ['previous_school', 'previous school'],
     'address': ['address', 'home address']
-    // Aap is list mein aur bhi keys add kar sakte hain
   };
 
   // Ek reverse map banate hain taaki 'first name' ko 'first_name' se map kar sakein
@@ -61,8 +76,6 @@ const normalizeData = (data: any[]) => {
       // Smart mapping se clean key dhoondein
       const cleanKey = aliasMap.get(lowerRawKey);
       
-      // Agar mapping mil gayi, toh clean row mein data daalein
-      // Agar nahi mili, toh yeh function use ignore kar dega (jo hum chahte hain)
       if (cleanKey) {
         cleanRow[cleanKey] = row[rawKey];
       }
@@ -109,7 +122,6 @@ const ImportStudentsForm: React.FC<ImportStudentsFormProps> = ({ onClose, onImpo
         const normalizedData = normalizeData(data);
         
         // Check karein ki data hai ya nahi
-        // Yeh check ab thoda flexible hai
         if (normalizedData.length === 0) {
             setError("No data rows found in the file.");
             setIsLoading(false);
