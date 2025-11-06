@@ -2,13 +2,13 @@
 
 // 1. Data Source
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 // 2. Generator
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 // ===================================
@@ -17,475 +17,553 @@ generator client {
 
 // 3. School Model
 model School {
-  id                String  @id @unique
-  name              String  @unique
-  // --- NAYE FIELDS ---
-  name2             String?
-  place             String?
-  address           String?
-  contactNumber     String?
-  email             String?
-  recognitionNumber String?
-  udiseNo           String? @unique
-  logoUrl           String?
-  
-  // --- YEH FIELD ZAROORI HAI ---
-  genRegNo          String? 
-  // --- END ---
-  
-  logo              String?
-  session           String?
-  lateFineAmount    Float?  @default(100)
+  id                String  @id @unique
+  name              String  @unique
+  name2             String?
+  place             String?
+  address           String?
+  contactNumber     String?
+  email             String?
+  recognitionNumber String?
+  udiseNo           String? @unique
+  logoUrl           String?
+  genRegNo          String?
+  logo              String?
+  session           String?
+  lateFineAmount    Float?  @default(100)
 
-  // Relations
-  users             User[]
-  students          Students[]
-  classes           Classes[]
-  teachers          Teachers[]
-  templates         FeeTemplate[]
-  feeRecords        FeeRecord[]
-  transactions      Transaction[]
-  parents           Parent[]
-  attendances       Attendance[]
-  exams             Exam[]
-  marks             Mark[]
-  assignments       Assignment[]
-  todaysQuizId      Int?            @unique
-  todaysQuiz        Quiz?           @relation("TodaysQuiz", fields: [todaysQuizId], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  quizzes           Quiz[]          @relation("SchoolQuizLibrary")
-  events            Event[]
-  liveClasses       LiveClass[]
-  gradingScale      GradingScale?
-  studyMaterials    StudyMaterial[]
-  staffAttendances  StaffAttendance[]
-  // --- TIMETABLE RELATIONS ADDED ---
-  timeSlots         TimeSlot[]
-  workingDays       WorkingDay[]
-  timetablePeriods  TimetableAssignment[]
+  // Relations
+  users               User[]
+  students            Students[]
+  classes             Classes[]
+  teachers            Teachers[]
+  templates           FeeTemplate[]
+  feeRecords          FeeRecord[]
+  transactions        Transaction[]
+  parents             Parent[]
+  attendances         Attendance[]
+  exams               Exam[]
+  marks               Mark[]
+  assignments         Assignment[]
+  
+  // === FIX KIYA GAYA ===
+  // @unique yahan se hata diya gaya hai kyunki har school ka apna 'today's quiz' ho sakta hai
+  todaysQuizId        Int?
+  // =====================
+
+  todaysQuiz          Quiz?                   @relation("TodaysQuiz", fields: [todaysQuizId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  quizzes             Quiz[]                  @relation("SchoolQuizLibrary")
+  events              Event[]
+  liveClasses         LiveClass[]
+  gradingScale        GradingScale?
+  studyMaterials      StudyMaterial[]
+  staffAttendances    StaffAttendance[]
+  timeSlots           TimeSlot[]
+  workingDays         WorkingDay[]
+  timetablePeriods    TimetableAssignment[]
 }
 
 // 4. User Model
 model User {
-  id                    Int      @id @default(autoincrement())
-  name                  String?
-  email                 String   @unique
-  password              String
-  role                  String
-  status                String?  @default("active")
-  isVerified            Boolean  @default(false)
-  details               Json?
-  otp                   String?
-  otpExpires            DateTime?
-  resetPasswordToken    String?
-  resetPasswordExpire   DateTime?
+  id                  Int       @id @default(autoincrement())
+  name                String?
+  email               String    @unique
+  password            String
+  role                String
+  status              String?   @default("active")
+  isVerified          Boolean   @default(false)
+  details             Json?
+  otp                 String?
+  otpExpires          DateTime?
+  resetPasswordToken  String?
+  resetPasswordExpire DateTime?
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  createdById           Int?
-  createdBy             User?  @relation("UserCreations", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  usersCreated          User[] @relation("UserCreations")
-  staffAttendances      StaffAttendance[]
-  transactions          Transaction[]
-  student               Students? @relation("StudentUser")
-  parent                Parent?
-  // --- TIMETABLE RELATION ADDED ---
-  assignedPeriods       TimetableAssignment[] @relation("TeacherAssignments")
+  createdById  Int?
+  createdBy    User?  @relation("UserCreations", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usersCreated User[] @relation("UserCreations")
+
+  staffAttendances StaffAttendance[]
+  transactions     Transaction[]
+  student          Students?           @relation("StudentUser")
+  parent           Parent?
+  assignedPeriods  TimetableAssignment[] @relation("TeacherAssignments")
+
+  // === INDEXING ===
+  @@index([schoolId]) // Har query schoolId se filter hogi, isliye yeh zaroori hai
+  @@index([createdById])
 }
 
 // 5. Classes Model
 model Classes {
-  classid    Int      @id @default(autoincrement())
-  class_name String @db.VarChar(100)
+  classid    Int    @id @default(autoincrement())
+  class_name String @db.VarChar(100)
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  // Relations
-  students     Students[]
-  feeRecords   FeeRecord[]
-  transactions Transaction[]
-  assignments  Assignment[]
-  // --- TIMETABLE RELATION ADDED ---
-  timetablePeriods TimetableAssignment[]
-  
-  @@unique([schoolId, class_name])
+  // Relations
+  students         Students[]
+  feeRecords       FeeRecord[]
+  transactions     Transaction[]
+  assignments      Assignment[]
+  timetablePeriods TimetableAssignment[]
+
+  // Yeh unique constraint pehle se tha aur indexing ka kaam bhi karega
+  @@unique([schoolId, class_name])
 }
 
 // 6. Students Model
 model Students {
-  studentid         Int       @id @default(autoincrement())
-  first_name        String    @db.VarChar(100)
-  father_name       String    @db.VarChar(100)
-  last_name         String    @db.VarChar(100)
-  guardian_contact  String    @db.VarChar(20)
-  roll_number       String    @db.VarChar(20)
-  dob               DateTime? @db.Date
-  address           String?   @db.Text
-  email             String?   @unique @db.VarChar(255)
-  uid_number        String?   @db.VarChar(20)
-  mother_name       String?   @db.VarChar(255)
-  nationality       String?   @db.VarChar(100)
-  caste             String?   @db.VarChar(100)
-  birth_place       String?   @db.VarChar(255)
-  previous_school   String?   @db.Text
-  admission_date    DateTime? @db.Date
-  progress          String?   @db.VarChar(100)
-  leaving_date      DateTime? @db.Date
-  leaving_reason    String?   @db.Text
-  remarks           String?   @db.Text
-  dob_in_words      String?  @db.VarChar(255)
+  studentid        Int       @id @default(autoincrement())
+  first_name       String    @db.VarChar(100)
+  father_name      String    @db.VarChar(100)
+  last_name        String    @db.VarChar(100)
+  guardian_contact String    @db.VarChar(20)
+  roll_number      String    @db.VarChar(20)
+  dob              DateTime? @db.Date
+  address          String?   @db.Text
+  email            String?   @unique @db.VarChar(255)
+  uid_number       String?   @db.VarChar(20)
+  mother_name      String?   @db.VarChar(255)
+  nationality      String?   @db.VarChar(100)
+  caste            String?   @db.VarChar(100)
+  birth_place      String?   @db.VarChar(255)
+  previous_school  String?   @db.Text
+  admission_date   DateTime? @db.Date
+  progress         String?   @db.VarChar(100)
+  leaving_date     DateTime? @db.Date
+  leaving_reason   String?   @db.Text
+  remarks          String?   @db.Text
+  dob_in_words     String?   @db.VarChar(255)
 
-  // Relations
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  // Relations
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  userId   Int?    @unique
-  user     User?   @relation("StudentUser", fields: [userId], references: [id])
+  userId Int?  @unique
+  user   User? @relation("StudentUser", fields: [userId], references: [id])
 
-  classid Int
-  class   Classes @relation(fields: [classid], references: [classid])
+  classid Int
+  class   Classes @relation(fields: [classid], references: [classid])
 
-  feeRecords   FeeRecord[]
-  transactions Transaction[]
-  parents      Parent[]
-  attendances  Attendance[]
-  marks        Mark[]
-  assignments  Assignment[]
+  feeRecords   FeeRecord[]
+  transactions Transaction[]
+  parents      Parent[]
+  attendances  Attendance[]
+  marks        Mark[]
+  assignments  Assignment[]
+
+  // === INDEXING ===
+  @@index([schoolId]) // School ke saare students laane ke liye
+  @@index([classid]) // Class ke saare students laane ke liye
+  @@index([userId])
 }
 
 // 7. Teachers Model
 model Teachers {
-  teacher_dbid  Int     @id @default(autoincrement())
-  teacherId     String  @db.VarChar(100)
-  name          String  @db.VarChar(255)
-  subject       String? @db.VarChar(255)
-  contactNumber String? @db.VarChar(50)
-  email         String  @db.VarChar(255)
+  teacher_dbid  Int     @id @default(autoincrement())
+  teacherId     String  @db.VarChar(100)
+  name          String  @db.VarChar(255)
+  subject       String? @db.VarChar(255)
+  contactNumber String? @db.VarChar(50)
+  email         String  @db.VarChar(255)
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  @@unique([schoolId, email])
-  @@unique([schoolId, teacherId])
+  // Yeh unique constraints pehle se hain aur indexing ka kaam bhi karenge
+  @@unique([schoolId, email])
+  @@unique([schoolId, teacherId])
 }
 
 // 8. FeeTemplate Model
 model FeeTemplate {
-  id          Int     @id @default(autoincrement())
-  name        String
-  description String?
-  items       Json
-  totalAmount Float
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  items       Json
+  totalAmount Float
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  feeRecords   FeeRecord[]
-  transactions Transaction[]
+  feeRecords   FeeRecord[]
+  transactions Transaction[]
 
-  @@unique([schoolId, name])
+  // Yeh unique constraint pehle se hai aur indexing ka kaam bhi karega
+  @@unique([schoolId, name])
 }
 
 // 9. FeeRecord Model
 model FeeRecord {
-  id         Int      @id @default(autoincrement())
-  amount     Float
-  discount   Float    @default(0)
-  amountPaid Float    @default(0)
-  balanceDue Float
-  status     String
-  dueDate    DateTime
-  lateFine   Float    @default(0)
-  isDeposit  Boolean  @default(false)
+  id         Int      @id @default(autoincrement())
+  amount     Float
+  discount   Float    @default(0)
+  amountPaid Float    @default(0)
+  balanceDue Float
+  status     String
+  dueDate    DateTime
+  lateFine   Float    @default(0)
+  isDeposit  Boolean  @default(false)
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  studentId Int
-  student   Students @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
+  studentId Int
+  student   Students @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
 
-  classId Int
-  class   Classes @relation(fields: [classId], references: [classid])
+  classId Int
+  class   Classes @relation(fields: [classId], references: [classid])
 
-  templateId Int
-  template   FeeTemplate @relation(fields: [templateId], references: [id])
+  templateId Int
+  template   FeeTemplate @relation(fields: [templateId], references: [id])
 
-  transactions Transaction[]
+  transactions Transaction[]
 
-  @@unique([studentId, templateId, schoolId])
+  @@unique([studentId, templateId, schoolId])
+
+  // === INDEXING ===
+  // Yeh table bahut bada hoga, isliye zyaada index add kiye hain
+  @@index([schoolId]) // School ke saare records
+  @@index([studentId]) // Student ke saare records
+  @@index([classId]) // Class ke saare records
+  @@index([templateId]) // Ek template ke saare records
 }
 
 // 10. Transaction Model
 model Transaction {
-  id                   Int      @id @default(autoincrement())
-  receiptId            String   @unique
-  amountPaid           Float
-  paymentDate          DateTime
-  paymentMode          String
-  status               String
-  notes                String?
-  chequeNumber         String?
-  bankName             String?
-  gatewayTransactionId String?
-  gatewayOrderId       String?
-  gatewayMethod        String?
+  id                   Int      @id @default(autoincrement())
+  receiptId            String   @unique
+  amountPaid           Float
+  paymentDate          DateTime
+  paymentMode          String
+  status               String
+  notes                String?
+  chequeNumber         String?
+  bankName             String?
+  gatewayTransactionId String?
+  gatewayOrderId       String?
+  gatewayMethod        String?
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  studentId Int
-  student   Students @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
+  studentId Int
+  student   Students @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
 
-  classId Int
-  class   Classes @relation(fields: [classId], references: [classid])
+  classId Int
+  class   Classes @relation(fields: [classId], references: [classid])
 
-  templateId Int
-  template   FeeTemplate @relation(fields: [templateId], references: [id])
+  templateId Int
+  template   FeeTemplate @relation(fields: [templateId], references: [id])
 
-  feeRecordId Int
-  feeRecord   FeeRecord @relation(fields: [feeRecordId], references: [id], onDelete: Cascade) 
+  feeRecordId Int
+  feeRecord   FeeRecord @relation(fields: [feeRecordId], references: [id], onDelete: Cascade)
 
-  collectedById Int?
-  collectedBy   User? @relation(fields: [collectedById], references: [id])
+  collectedById Int?
+  collectedBy   User? @relation(fields: [collectedById], references: [id])
+
+  // === INDEXING ===
+  // YEH SABSE ZAROORI TABLE HAI!!
+  @@index([schoolId]) // School ki saari transactions
+  @@index([studentId]) // Student ki saari transactions
+  @@index([feeRecordId]) // Ek record ki saari transactions
+  @@index([classId]) // Class ki saari transactions
+  @@index([paymentDate]) // Date se search karne ke liye (e.g., "aaj ki report")
+  @@index([collectedById]) // Admin ki report ke liye
 }
 
 // 11. Parent Model
 model Parent {
-  id            Int     @id @default(autoincrement())
-  name          String
-  contactNumber String
-  email         String
-  occupation    String?
+  id            Int     @id @default(autoincrement())
+  name          String
+  contactNumber String
+  email         String
+  occupation    String?
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  studentId Int
-  student   Students @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
+  studentId Int
+  student   Students @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
 
-  userId Int?    @unique
-  user   User?   @relation(fields: [userId], references: [id])
+  userId Int?  @unique
+  user   User? @relation(fields: [userId], references: [id])
 
-  @@unique([schoolId, email])
+  @@unique([schoolId, email])
+
+  // === INDEXING ===
+  @@index([studentId]) // Student se parent dhoondhne ke liye
+  @@index([userId])
 }
 
 // 12. Attendance Model
 model Attendance {
-  id         Int      @id @default(autoincrement())
-  date       DateTime @db.Date
-  status     String
-  notes      String?
+  id        Int      @id @default(autoincrement())
+  date      DateTime @db.Date
+  status    String
+  notes     String?
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  studentId Int
-  student   Students @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
+  studentId Int
+  student   Students @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
 
-  @@unique([studentId, date, schoolId])
+  // Yeh unique constraint pehle se tha aur indexing ka kaam bhi karega
+  @@unique([studentId, date, schoolId])
+
+  // === INDEXING ===
+  // === FIX KIYA GAYA ===
+  // Pehle yahan galti se classId tha, jo is model mein nahi hai.
+  // Yeh index "schoolId" aur "date" se search ko fast karega.
+  @@index([schoolId, date])
 }
 
 // 13. StaffAttendance Model
 model StaffAttendance {
-  id     Int      @id @default(autoincrement())
-  date   DateTime @db.Date
-  status String
+  id     Int      @id @default(autoincrement())
+  date   DateTime @db.Date
+  status String
 
-  user     User   @relation(fields: [userId], references: [id])
-  userId Int
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
 
-  school   School @relation(fields: [schoolId], references: [id])
-  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
 
-  @@unique([userId, date])
+  // === FIX KIYA GAYA ===
+  // Pehle sirf [userId, date] tha, ab schoolId bhi add kiya hai
+  @@unique([userId, date, schoolId])
+
+  // === INDEXING ===
+  // "School ki aaj ki staff attendance" ke liye
+  @@index([schoolId, date])
 }
 
 // 14. Exam Model
 model Exam {
-  id             Int       @id @default(autoincrement())
-  name           String
-  date           DateTime? @db.Date
+  id             Int       @id @default(autoincrement())
+  name           String
+  date           DateTime? @db.Date
+  className      String?
+  subject        String?
+  startTime      String?
+  endTime        String?
+  maxMarks       Float?
+  minPassMarks   Float?
+  examType       String?
 
-  className      String?
-  subject        String?
-  startTime      String?
-  endTime        String?
-  maxMarks       Float?
-  minPassMarks   Float?
-  examType       String?
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  marks Mark[]
 
-  marks Mark[]
+  // Yeh unique constraint pehle se tha aur indexing ka kaam bhi karega
+  @@unique([schoolId, name, date])
 
-  @@unique([schoolId, name, date])
+  // === INDEXING ===
+  @@index([schoolId, className]) // Class ke exam dhoondhne ke liye
+  @@index([schoolId, subject]) // Subject ke exam dhoondhne ke liye
 }
 
 // 15. Mark Model
 model Mark {
-  id            Int       @id @default(autoincrement())
-  marksObtained Float?
-  maxMarks      Float?
-  percentage    Float?
-  grade         String?
-  subject       String?
-  notes         String?
+  id            Int     @id @default(autoincrement())
+  marksObtained Float?
+  maxMarks      Float?
+  percentage    Float?
+  grade         String?
+  subject       String?
+  notes         String?
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  studentId Int
-  student   Students @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
+  studentId Int
+  student   Students @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
 
-  assessmentId Int?
-  assessment   Exam? @relation(fields: [assessmentId], references: [id])
+  assessmentId Int?
+  assessment   Exam? @relation(fields: [assessmentId], references: [id])
 
-  @@unique([studentId, assessmentId, subject, schoolId])
+  // Yeh unique constraint pehle se tha aur indexing ka kaam bhi karega
+  @@unique([studentId, assessmentId, subject, schoolId])
+
+  // === INDEXING ===
+  @@index([studentId]) // Student ke saare marks
+  @@index([assessmentId]) // Exam ke saare marks
 }
 
 // 16. Assignment Model
 model Assignment {
-  id          Int       @id @default(autoincrement())
-  title       String
-  description String?
-  dueDate     DateTime?
-  status      String?
-  grade       String?
-  subject     String?
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  dueDate     DateTime?
+  status      String?
+  grade       String?
+  subject     String?
 
-  classInfo String?
+  classInfo String?
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  classId Int?
-  class   Classes? @relation(fields: [classId], references: [classid])
+  classId Int?
+  class   Classes? @relation(fields: [classId], references: [classid])
 
-  studentId Int?
-  student   Students? @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
+  studentId Int?
+  student   Students? @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  // === INDEXING ===
+  @@index([schoolId])
+  @@index([classId])
+  @@index([studentId])
 }
 
 // 17. Quiz Model
 model Quiz {
-  id             Int      @id @default(autoincrement())
-  title          String
-  questions      Json
+  id        Int      @id @default(autoincrement())
+  title     String
+  questions Json
 
-  schoolId       String
-  school         School   @relation("SchoolQuizLibrary", fields: [schoolId], references: [id])
-  schoolsAsToday School[] @relation("TodaysQuiz")
+  schoolId       String
+  school         School   @relation("SchoolQuizLibrary", fields: [schoolId], references: [id])
+  schoolsAsToday School[] @relation("TodaysQuiz")
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  // === INDEXING ===
+  @@index([schoolId]) // School ki quiz library ke liye
 }
 
 // 18. Event Model
 model Event {
-  id          Int      @id @default(autoincrement())
-  title       String
-  category    String
-  date        DateTime @db.Date
-  status      String
-  description String?
+  id          Int      @id @default(autoincrement())
+  title       String
+  category    String
+  date        DateTime @db.Date
+  status      String
+  description String?
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  // === INDEXING ===
+  @@index([schoolId])
+  @@index([schoolId, date]) // Date se event search ke liye
 }
 
 // 19. LiveClass Model
 model LiveClass {
-  id          Int      @id @default(autoincrement())
-  topic       String
-  teacherName String
-  className   String
-  subject     String
-  date        DateTime @db.Date
-  time        String
-  meetingLink String
-  status      String
+  id          Int      @id @default(autoincrement())
+  topic       String
+  teacherName String
+  className   String
+  subject     String
+  date        DateTime @db.Date
+  time        String
+  meetingLink String
+  status      String
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  // === INDEXING ===
+  @@index([schoolId])
+  @@index([schoolId, date]) // Date se class search ke liye
 }
 
 // 20. GradingScale Model
 model GradingScale {
-  id     Int    @id @default(autoincrement())
-  scale  Json @default("[{\"grade\":\"A+\",\"min\":90,\"max\":100},{\"grade\":\"A\",\"min\":80,\"max\":89},{\"grade\":\"B\",\"min\":70,\"max\":79},{\"grade\":\"C\",\"min\":60,\"max\":69},{\"grade\":\"D\",\"min\":50,\"max\":59},{\"grade\":\"F\",\"min\":0,\"max\":49}]")
+  id    Int  @id @default(autoincrement())
+  scale Json @default("[{\"grade\":\"A+\",\"min\":90,\"max\":100},{\"grade\":\"A\",\"min\":80,\"max\":89},{\"grade\":\"B\",\"min\":70,\"max\":79},{\"grade\":\"C\",\"min\":60,\"max\":69},{\"grade\":\"D\",\"min\":50,\"max\":59},{\"grade\":\"F\",\"min\":0,\"max\":49}]")
 
-  schoolId String @unique
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String @unique
+  school   School @relation(fields: [schoolId], references: [id])
 }
 
 // 21. StudyMaterial Model
 model StudyMaterial {
-  id               Int      @id @default(autoincrement())
-  title            String
-  className        String
-  subject          String
-  category         String
-  fileUrl          String
-  fileType         String
-  originalFilename String?
+  id               Int      @id @default(autoincrement())
+  title            String
+  className        String
+  subject          String
+  category         String
+  fileUrl          String
+  fileType         String
+  originalFilename String?
 
-  schoolId String
-  school   School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // === INDEXING ===
+  @@index([schoolId])
+  @@index([schoolId, className]) // Class ka material dhoondhne ke liye
+  @@index([schoolId, subject]) // Subject ka material dhoondhne ke liye
 }
 
 // 22. TimeSlot Model
 model TimeSlot {
-  id             Int                   @id @default(autoincrement())
-  name           String
-  startTime      String
-  endTime        String
-  isBreak        Boolean               @default(false)
+  id        Int     @id @default(autoincrement())
+  name      String
+  startTime String
+  endTime   String
+  isBreak   Boolean @default(false)
 
-  schoolId       String
-  school         School                @relation(fields: [schoolId], references: [id])
+  schoolId    String
+  school      School                  @relation(fields: [schoolId], references: [id])
+  assignments TimetableAssignment[]
 
-  assignments    TimetableAssignment[]
-
-  @@unique([schoolId, name])
+  @@unique([schoolId, name])
 }
 
 // 23. WorkingDay Model
 model WorkingDay {
-  id         Int    @id @default(autoincrement())
-  name       String
-  dayIndex   Int    @default(0)
+  id       Int    @id @default(autoincrement())
+  name     String
+  dayIndex Int    @default(0)
 
-  schoolId   String
-  school     School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  @@unique([schoolId, name])
+  @@unique([schoolId, name])
 }
 
 // 24. TimetableAssignment Model
 model TimetableAssignment {
-  id           Int      @id @default(autoincrement())
-  day          String
-  subject      String
-  
-  // Relations
-  classId      Int
-  class        Classes  @relation(fields: [classId], references: [classid])
-  
-  teacherId    Int
-  teacher      User     @relation("TeacherAssignments", fields: [teacherId], references: [id])
-  
-  timeSlotId   Int
-  timeSlot     TimeSlot @relation(fields: [timeSlotId], references: [id])
-  
-  schoolId     String
-  school       School   @relation(fields: [schoolId], references: [id])
+  id      Int    @id @default(autoincrement())
+  day     String
+  subject String
 
-  // Conflict Checks
-  @@unique([day, classId, timeSlotId], name: "class_time_unique")
-  @@unique([day, teacherId, timeSlotId], name: "teacher_time_unique")
+  // Relations
+  classId Int
+  class   Classes @relation(fields: [classId], references: [classid])
+
+  teacherId Int
+  teacher   User @relation("TeacherAssignments", fields: [teacherId], references: [id])
+
+  timeSlotId Int
+  timeSlot   TimeSlot @relation(fields: [timeSlotId], references: [id])
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  // === FIX KIYA GAYA ===
+  // In constraints mein schoolId add kiya hai taaki yeh poore system mein unique na ho,
+  // balki sirf ek school ke andar unique ho.
+  @@unique([day, classId, timeSlotId, schoolId], name: "class_time_unique")
+  @@unique([day, teacherId, timeSlotId, schoolId], name: "teacher_time_unique")
+
+  // === INDEXING ===
+  @@index([schoolId, classId]) // Class ka poora timetable laane ke liye
+  @@index([schoolId, teacherId]) // Teacher ka poora timetable laane ke liye
 }
