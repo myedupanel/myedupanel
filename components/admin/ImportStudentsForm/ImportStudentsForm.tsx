@@ -10,6 +10,69 @@ interface ImportStudentsFormProps {
   onImport: (data: any[]) => void;
 }
 
+// === YAHAN FIX KIYA (1/3): "Smart Mapping" ko Bada Banaya ===
+/**
+ * Yeh function user ki file se raw data lega aur headers ko
+ * hamare database ke 'clean' keys (jaise first_name) mein map karega.
+ */
+const normalizeData = (data: any[]) => {
+  // Yahan aap AddStudentForm ke hisaab se sabhi fields add kar rahe hain
+  const headerMapping: { [key: string]: string[] } = {
+    // Hamare 'Clean' Keys -> User ke 'Messy' Header options
+    
+    // Required Fields
+    'first_name': ['first name', 'student name', 'name', 'f name', 'firstname'],
+    'last_name': ['last name', 'l name', 'lastname', 'surname'],
+    'roll_number': ['roll no', 'student id', 'roll number', 'roll', 'student id (f name'],
+    'class_name': ['class', 'std', 'standard', 'class_name'],
+    'father_name': ['father name', 'parent name', 'father_name', 'parent'],
+    'guardian_contact': ['parent contact', 'contact', 'mobile', 'phone', 'guardian_contact'],
+    
+    // === YAHAN NAYE FIELDS ADD KIYE HAIN ===
+    'mother_name': ['mother name', 'mother_name'],
+    'dob': ['dob', 'date of birth', 'birth date'],
+    'admission_date': ['admission date', 'date of admission', 'admission_date', 'doj', 'date of joining'],
+    'email': ['email', 'email id', 'student email'],
+    'uid_number': ['aadhar', 'uid', 'uid number', 'uid_number', 'aadhaar no'],
+    'nationality': ['nationality'],
+    'caste': ['caste'],
+    'birth_place': ['birth place', 'birth_place'],
+    'previous_school': ['previous school', 'previous_school'],
+    'address': ['address', 'home address']
+    // Aap is list mein aur bhi keys add kar sakte hain
+  };
+
+  // Ek reverse map banate hain taaki 'first name' ko 'first_name' se map kar sakein
+  const aliasMap = new Map<string, string>();
+  for (const cleanKey in headerMapping) {
+    for (const alias of headerMapping[cleanKey]) {
+      // Sabko lowercase aur trim karke map mein store karein
+      aliasMap.set(alias.toLowerCase().trim(), cleanKey);
+    }
+  }
+
+  // Ab har row ko process karein
+  return data.map(row => {
+    const cleanRow: { [key: string]: any } = {};
+    for (const rawKey in row) {
+      // User ke header ko clean karein (lowercase, trim)
+      const lowerRawKey = rawKey.toLowerCase().trim();
+      
+      // Smart mapping se clean key dhoondein
+      const cleanKey = aliasMap.get(lowerRawKey);
+      
+      // Agar mapping mil gayi, toh clean row mein data daalein
+      // Agar nahi mili, toh yeh function use ignore kar dega (jo hum chahte hain)
+      if (cleanKey) {
+        cleanRow[cleanKey] = row[rawKey];
+      }
+    }
+    return cleanRow;
+  });
+};
+// === FIX (1/3) ENDS HERE ===
+
+
 const ImportStudentsForm: React.FC<ImportStudentsFormProps> = ({ onClose, onImport }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string>('');
@@ -19,7 +82,6 @@ const ImportStudentsForm: React.FC<ImportStudentsFormProps> = ({ onClose, onImpo
     setError('');
     const file = e.target.files?.[0];
     if (file) {
-      // Dono file types (CSV aur Excel) ko allow karein
       const validTypes = [
         'text/csv', 
         'application/vnd.ms-excel', 
@@ -41,15 +103,42 @@ const ImportStudentsForm: React.FC<ImportStudentsFormProps> = ({ onClose, onImpo
     }
     setIsLoading(true);
 
-    // File ke type ke hisaab se logic chalayein
+    const processData = (data: any[]) => {
+      try {
+        // === YAHAN FIX KIYA (2/3): Data ko pehle normalize karein ===
+        const normalizedData = normalizeData(data);
+        
+        // Check karein ki data hai ya nahi
+        // Yeh check ab thoda flexible hai
+        if (normalizedData.length === 0) {
+            setError("No data rows found in the file.");
+            setIsLoading(false);
+            return;
+        }
+
+        // Yeh check karega ki kam se kam ek row mein koi valid data mila ya nahi
+        const hasValidData = normalizedData.some(row => Object.keys(row).length > 0);
+        if (!hasValidData) {
+            setError("Could not detect any valid headers. Please check your file's column names.");
+            setIsLoading(false);
+            return;
+        }
+
+        // Clean data ko parent component (page.tsx) ko bhej dein
+        onImport(normalizedData);
+        // Modal ko parent component band karega
+      } catch (e) {
+        setError("Error processing file data.");
+        setIsLoading(false);
+      }
+    };
+
     if (selectedFile.name.endsWith('.csv')) {
-      // --- CSV Logic (using PapaParse) ---
       Papa.parse(selectedFile, {
         header: true,
         skipEmptyLines: true,
         complete: (results) => {
-          onImport(results.data);
-          // Modal ko parent component band karega
+          processData(results.data); // Raw data ko process karein
         },
         error: (err) => {
           setError("Failed to parse CSV file.");
@@ -57,16 +146,17 @@ const ImportStudentsForm: React.FC<ImportStudentsFormProps> = ({ onClose, onImpo
         }
       });
     } else {
-      // --- Excel Logic (using XLSX) ---
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
           const data = event.target?.result;
           const workbook = XLSX.read(data, { type: 'binary' });
-          const sheetName = workbook.SheetNames[0]; // Pehli sheet ko lein
+          const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
           const json = XLSX.utils.sheet_to_json(worksheet);
-          onImport(json);
+          
+          processData(json); // Raw data ko process karein
+
         } catch (e) {
             setError("Failed to parse Excel file.");
             setIsLoading(false);
@@ -83,7 +173,9 @@ const ImportStudentsForm: React.FC<ImportStudentsFormProps> = ({ onClose, onImpo
   return (
     <div className={styles.container}>
       <div className={styles.instructions}>
-        <p>Upload a CSV or Excel file. Headers must be: <strong>name, class, rollNo, parentName, parentContact</strong></p>
+        {/* === YAHAN FIX KIYA (3/3): Instruction ko simple rakha === */}
+        <p>Upload a CSV or Excel file with student details. The system will try to auto-detect your columns.</p>
+        <p style={{fontSize: '0.8rem', color: '#666'}}>Required fields are: <strong>Roll Number, First Name, Last Name, Class, Parent Name, Parent Contact.</strong> Other fields are optional.</p>
         <a href="/sample-students.csv" download className={styles.sampleLink}>
           <MdDownload /> Download Sample CSV
         </a>
@@ -93,7 +185,6 @@ const ImportStudentsForm: React.FC<ImportStudentsFormProps> = ({ onClose, onImpo
         <MdUploadFile size={40} />
         {selectedFile ? <p>Selected file: <strong>{selectedFile.name}</strong></p> : <p>Drag & drop your file here, or click to browse</p>}
       </label>
-      {/* Accept attribute ko update karein */}
       <input id="import-file-upload" type="file" accept=".csv, .xlsx, .xls" onChange={handleFileChange} className={styles.hiddenInput} />
       
       {error && <p className={styles.errorMessage}>{error}</p>}
