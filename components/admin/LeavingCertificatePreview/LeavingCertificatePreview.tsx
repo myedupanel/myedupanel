@@ -75,45 +75,23 @@ interface LeavingCertificatePreviewProps {
   schoolDetails: SchoolDetails;
 }
 
-// --- Helper Components (Yahi hai naya structure) ---
-
-// fillBlank ab CSS dwara handle kiya jayega, taaki line poori fail sake
-const fill = (value: string | undefined | null) => {
-  if (value) {
-    return <span className={styles.fill}>{value}</span>;
-  }
-  return <span className={styles.fillBlank}>&nbsp;</span>; 
-}
-
-const SubField = ({ label, value }: { label: string, value: string | undefined | null }) => (
-  <span className={styles.subField}>
-    <span className={styles.subLabel}>{label}:</span> 
-    {fill(value)}
-  </span>
-);
-
-// Yeh naya GridRow component blueprint banayega
-const GridRow: React.FC<{ num: string, label: string, children: React.ReactNode, className?: string }> = ({ num, label, children, className }) => {
-  // Hum display: contents use karenge taaki yeh row DOM mein na aaye
-  // aur iske children seedha CSS grid mein fit ho jaayein.
-  // Isse saari lines 100% align hongi.
-  return (
-    <>
-      <div className={`${styles.rowNum} ${className || ''}`}>{num}</div>
-      <div className={`${styles.rowLabel} ${className || ''}`}>{label}</div>
-      <div className={`${styles.rowValue} ${className || ''}`}>{children}</div>
-    </>
-  );
-};
-// --- End Helper Components ---
-
-
 const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
   student,
   formData,
   schoolDetails
 }) => {
-  
+  // --- Helper Functions (No Change) ---
+  const fill = (value: string | undefined | null, minWidth = '50px') => {
+    if (value) {
+      return <span className={styles.fill}>{value}</span>;
+    }
+    return <span className={styles.fillBlank} style={{ minWidth }}>&nbsp;</span>;
+  }
+  const SubField = ({ label, value, minWidth = '50px' }: { label: string, value: string | undefined | null, minWidth?: string }) => (
+    <span className={styles.subField}>
+      {label}: {fill(value, minWidth)}
+    </span>
+  );
   const dateOfAdmission = formatDate(formData.dateOfAdmission);
   const dateOfLeaving = formatDate(formData.dateOfLeaving);
   const studentDobFormatted = formatDate(student?.dob);
@@ -142,113 +120,156 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           </div>
         </header>
           
-        {/* Title Row (Boxed) */}
+        {/* Title (No Change) */}
+        <h2 className={styles.mainTitle}>LEAVING CERTIFICATE</h2>
+
+        {/* Sr No / Reg No Row (No Change) */}
         <div className={styles.titleRow}>
           <div className={styles.headerSrNo}>
-            Sr. No: {fill(formData.genRegNo)}
+            Sr. No: {fill(formData.genRegNo, '100px')}
           </div>
-          <h2>LEAVING CERTIFICATE</h2>
           <div className={styles.headerRegNo}>
-            Reg. No: {fill(formData.regNo)}
+            Reg. No: {fill(formData.regNo, '100px')}
           </div>
         </div>
 
-        {/* === YEH HAI NAYA BLUEPRINT === */}
-        {/* Humne <table> ko hata diya hai aur CSS Grid use kiya hai */}
-        <div className={styles.certificateGrid}>
-          
-          <GridRow num="1" label="Student's Full Name">
-            {fill(student?.name)}
-          </GridRow>
-          
-          <GridRow num="2" label="UID No (Aadhar card No.)">
-            {fill(student?.aadhaarNo)}
-          </GridRow>
+        {/* Student Info Table */}
+        <table className={styles.studentInfoTable}>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Student's Full Name</td>
+              <td>{fill(student?.name, '300px')}</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>UID No (Aadhar card No.)</td>
+              <td>{fill(student?.aadhaarNo, '200px')}</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Mother's Name</td>
+              <td>{fill(formData.motherName, '300px')}</td>
+            </tr>
+            
+            {/* === YAHAN FIX KIYA (Row 4) === */}
+            <tr>
+              <td>4</td>
+              <td>Nationality & Mother Tongue</td>
+              <td> 
+                <div className={`${styles.inlineFields} ${styles.row4Fields}`}>
+                  {/* Label (2 dots) hatane ke liye 'fill' use kiya */}
+                  {fill(formData.nationality || 'Indian', '140px')} 
+                  <SubField label="Mother Tongue" value={formData.motherTongue} minWidth="85px" />
+                </div>
+              </td>
+            </tr>
+            {/* === FIX ENDS === */}
 
-          <GridRow num="3" label="Mother's Name">
-            {fill(formData.motherName)}
-          </GridRow>
+            {/* === YAHAN FIX KIYA (Row 5) === */}
+            <tr>
+              <td>5</td>
+              <td>Religion & Caste</td>
+              <td>
+                <div className={styles.inlineFields}>
+                  {fill(formData.religion, '150px')}
+                  <SubField label="Caste" value={formData.caste} minWidth="150px" />
+                </div>
+              </td>
+            </tr>
+            {/* === FIX ENDS === */}
 
-          <GridRow num="4" label="Nationality">
-            <div className={styles.multiFieldRow}>
-              <SubField label="" value={formData.nationality || 'Indian'} />
-              <SubField label="Mother Tongue" value={formData.motherTongue} />
-             
-            </div>
-          </GridRow>
-          
-          <GridRow num="5" label="Religion,Caste">
-            {fill(formData.caste)}
-          </GridRow>
+            <tr>
+              <td>6</td>
+              <td>Birth place(State/City)</td>
+              <td>
+                <div className={styles.gridWrapper}>
+                  <div className={styles.gridRow}>
+                    <SubField label="Place" value={formData.birthPlace} minWidth="80px" />
+                    <SubField label="Taluka" value={formData.birthTaluka} minWidth="80px" />
+                  </div>
+                  <div className={styles.gridRow}>
+                    <SubField label="Dist" value={formData.birthDistrict} minWidth="80px" />
+                    <SubField label="State" value={formData.birthState} minWidth="80px" />
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>Date of Birth (Figures)</td>
+              <td>{fill(studentDobFormatted, '150px')}</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>Date of Birth (in Words)</td>
+              <td>{fill(formData.dobWords, '300px')}</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>Previous School Name</td>
+              <td>{fill(formData.previousSchool, '200px')}</td>
+            </tr>
+            
+            <tr>
+              <td>10</td>
+              <td colSpan={2}>
+                 <div className={styles.inlineFields}>
+                  <span style={{ marginRight: '15px' }}>Date of Admission</span>
+                  <SubField label="Date" value={dateOfAdmission} minWidth="140px" />
+                  <SubField label="Std" value={formData.standardAdmitted} minWidth="50px" />
+                 </div>
+              </td>
+            </tr>
 
-          <GridRow num="6" label="Birth place (State/City)">
-             <div className={styles.subGrid}> {/* Yeh 2x2 grid hai */}
-                <SubField label="Place" value={formData.birthPlace} />
-                <SubField label="Taluka" value={formData.birthTaluka} />
-                <SubField label="Dist" value={formData.birthDistrict} />
-                <SubField label="State" value={formData.birthState} />
-             </div>
-          </GridRow>
-
-          <GridRow num="7" label="Date of Birth (Figures)">
-            {fill(studentDobFormatted)}
-          </GridRow>
-          
-          <GridRow num="8" label="Date of Birth (in Words)">
-            {fill(formData.dobWords)}
-          </GridRow>
-
-          <GridRow num="9" label="Previous School Name">
-            {fill(formData.previousSchool)}
-          </GridRow>
-
-          <GridRow num="10" label="Date of Admission">
-             <div className={styles.multiFieldRow}>
-                <SubField label="Date" value={dateOfAdmission} />
-                <SubField label="Std" value={formData.standardAdmitted} />
-             </div>
-          </GridRow>
-
-          <GridRow num="11" label="Progress of Study">
-             <div className={styles.multiFieldRow}>
-                <SubField label="Progress" value={formData.progress} /> 
-                <SubField label="Conduct" value={formData.conduct} />
-             </div>
-          </GridRow>
-
-          <GridRow num="12" label="Date of School Leaving">
-            {fill(dateOfLeaving)}
-          </GridRow>
-          
-          <GridRow num="13" label="Standard in which studying and since when (in Words)">
-            <div className={styles.multiFieldRow}>
-              <SubField label="Std" value={formData.standardLeaving} />
-              <SubField label="Since" value={formData.sinceWhenLeaving} />
-            </div>
-          </GridRow>
-
-          <GridRow num="14" label="Reason for leaving school">
-            {fill(formData.reasonForLeaving)}
-          </GridRow>
-          
-          <GridRow num="15" label="Remarks" className={styles.lastRow}>
-            {fill(formData.remarks)}
-          </GridRow>
-        </div>
-        {/* === BLUEPRINT KHATM === */}
-
+            <tr>
+              <td>11</td>
+              <td>Progress of Study</td>
+              <td>
+                 <div className={styles.inlineFields}>
+                    {fill(formData.progress, '100px')} 
+                    <SubField label="Conduct" value={formData.conduct} minWidth="80px" />
+                 </div>
+              </td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td>Date of School Leaving</td>
+              <td>{fill(dateOfLeaving, '150px')}</td>
+            </tr>
+            <tr>
+              {/* Typo theek kiya (1D3 -> 13) */}
+              <td>13</td>
+              <td>Standard in which studying and since when (in Words)</td>
+              <td>
+                <div className={styles.inlineFields}>
+                  {fill(formData.standardLeaving, '80px')} / {fill(formData.sinceWhenLeaving, '100px')}
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td>Reason for leaving school</td>
+              <td>{fill(formData.reasonForLeaving, '200px')}</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>Remarks</td>
+              <td>{fill(formData.remarks, '200px')}</td>
+            </tr>
+          </tbody>
+        </table>
 
         {/* Certification Text (No Change) */}
         <p className={styles.certText}>
           This is to certify that, Above mentioned information is as per 
-          School General Register No. {fill(formData.genRegNo)}
+          School General Register No. {fill(formData.genRegNo, '80px')}
         </p>
 
         {/* Footer (No Change) */}
         <footer className={styles.certFooterWrapper}>
           <div className={styles.datePlace}>
-            <span>Date: {fill(null)}</span>
-            <span>Place: {fill(schoolDetails.place)}</span>
+            <span>Date: {fill(null, '50px')} / {fill(null, '50px')} / {fill(null, '70px')}</span>
           </div>
           <div className={styles.signatures}>
             <div className={styles.sigBox}>
