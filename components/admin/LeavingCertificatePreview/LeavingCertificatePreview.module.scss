@@ -63,22 +63,28 @@
   }
 }
 
+/* === YAHAN BADLAAV KIYA GAYA (2/2) === */
+/* Title ko alag se style kiya */
+.mainTitle {
+  font-size: 14pt;
+  font-weight: bold;
+  margin: 10px 0 8px 0; /* Upar (10px) aur neeche (8px) margin diya */
+  padding: 4px 15px;    /* Border ke andar padding */
+  text-align: center;
+  
+  /* Aapka request: Rounded Border */
+  border: 1.5px solid #000;
+  border-radius: 15px; /* Rounded corners */
+}
+
 .titleRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-top: 10px; /* Increased top margin for separation */
+  /* margin-top: 10px; (Hata diya, margin ab .mainTitle par hai) */
 
-  h2 { /* Title - LEAVING CERTIFICATE */
-    font-size: 14pt; /* Adjusted size */
-    font-weight: bold;
-    margin: 0;
-    padding: 0 10px; 
-    text-align: center;
-    flex-grow: 1; /* Allows it to take up available space */
-    flex-shrink: 1;
-  }
+  /* h2 ki styling yahan se nikal di gayi hai */
 
   .headerSrNo, .headerRegNo {
     font-size: 11pt;
