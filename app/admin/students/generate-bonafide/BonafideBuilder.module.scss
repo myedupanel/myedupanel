@@ -37,27 +37,42 @@
 
 .certHeader {
   display: flex;
-  /* === YAHAN FIX KIYA (Vertical Center Alignment) === */
-  align-items: center; /* flex-start se center kiya */
+  
+  /* === YAHAN FIX KIYA (1/4) === */
+  /* Header ko relative banaya aur min-height di */
+  position: relative;
+  min-height: 70px; /* Logo (65px) aur space ke liye */
+  align-items: center; /* Text block ko vertically center karega */
   /* === FIX ENDS HERE === */
+
   padding-bottom: 3px; 
-  margin-bottom: 3px;  
+  margin-bottom: 3px;
   border-bottom: 1px solid #000;
 
   .logo {
+    /* === YAHAN FIX KIYA (2/4) === */
+    /* Logo ko flow se bahar nikala (absolute) */
+    position: absolute;
+    left: 0; /* Left mein fix kiya */
+    top: 50%; /* Vertical center ke liye */
+    transform: translateY(-50%); /* Vertical center ke liye */
+    /* === FIX ENDS HERE === */
+    
     width: 65px;
     height: auto;
     max-height: 65px;
-    /* === YAHAN FIX KIYA (Gap Kam Kiya) === */
-    margin-right: 5px; /* 10px se 5px kiya */
-    /* === FIX ENDS HERE === */
+    margin-right: 0; /* Ab zaroori nahi */
     object-fit: contain;
     flex-shrink: 0;
   }
 
   .schoolInfoBlock {
+    /* === YAHAN FIX KIYA (3/4) === */
+    /* Ab yeh poori width lega aur center align karega */
     flex-grow: 1;
+    width: 100%; /* Explicitly poori width di */
     text-align: center;
+    /* === FIX ENDS HERE === */
   }
 
   .schoolName1 { font-size: 9pt; font-weight: bold; margin: 0; color: #000; }
@@ -72,6 +87,14 @@
     justify-content: space-between;
     font-weight: bold;
     max-width: 90%;
+    
+    /* === YAHAN FIX KIYA (4/4) === */
+    /* Text ko logo ke upar overlap hone se rokne ke liye */
+    /* Isse text block center mein rahega but logo se clear */
+    padding-left: 70px; /* Logo width (65px) + 5px gap */
+    padding-right: 70px; /* Right mein bhi same padding taaki center balance ho */
+    box-sizing: border-box; /* Padding ko width mein include karne ke liye */
+    /* === FIX ENDS HERE === */
   }
 }
 
