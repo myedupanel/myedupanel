@@ -1,3 +1,4 @@
+// backend/routes/school.js
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, authorize } = require('../middleware/authMiddleware');
@@ -79,7 +80,7 @@ router.get('/info', [authMiddleware], async (req, res) => {
             select: {
                 name: true,
                 address: true,
-                logo: true, 
+                logo: true, // <-- Yeh 'logo' read kar raha hai
                 session: true
             }
         });
@@ -146,7 +147,11 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
       console.log("[PUT /profile] New logo file detected. Uploading to Cloudinary...");
       try {
         const imageUrl = await uploadToCloudinary(req.file.buffer);
-        updateFields.logoUrl = imageUrl; 
+        
+        // Dono fields mein save karein
+        updateFields.logoUrl = imageUrl; // Naya field
+        updateFields.logo = imageUrl;    // Puraana field (safety ke liye)
+
         console.log(`[PUT /profile] Upload successful. URL: ${imageUrl}`);
       } catch (uploadError) {
         console.error("[PUT /profile] Cloudinary upload failed:", uploadError);
