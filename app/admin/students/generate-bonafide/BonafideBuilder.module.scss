@@ -39,10 +39,9 @@
   display: flex;
   
   /* === YAHAN FIX KIYA (1/4) === */
-  /* Header ko relative banaya aur min-height di */
-  position: relative;
-  min-height: 70px; /* Logo (65px) aur space ke liye */
-  align-items: center; /* Text block ko vertically center karega */
+  /* 'position: relative' hata diya */
+  /* 'min-height' hata diya */
+  align-items: center; /* YEH SABSE ZAROORI HAI: Logo aur Text ko vertically center karega */
   /* === FIX ENDS HERE === */
 
   padding-bottom: 3px; 
@@ -51,26 +50,21 @@
 
   .logo {
     /* === YAHAN FIX KIYA (2/4) === */
-    /* Logo ko flow se bahar nikala (absolute) */
-    position: absolute;
-    left: 0; /* Left mein fix kiya */
-    top: 50%; /* Vertical center ke liye */
-    transform: translateY(-50%); /* Vertical center ke liye */
+    /* 'position: absolute' aur uske related sab hata diya */
     /* === FIX ENDS HERE === */
     
     width: 65px;
     height: auto;
     max-height: 65px;
-    margin-right: 0; /* Ab zaroori nahi */
+    margin-right: 10px; /* Logo aur text ke beech thoda gap (halka left shift) */
     object-fit: contain;
-    flex-shrink: 0;
+    flex-shrink: 0; /* Logo ko shrink nahi hone dega */
   }
 
   .schoolInfoBlock {
     /* === YAHAN FIX KIYA (3/4) === */
-    /* Ab yeh poori width lega aur center align karega */
-    flex-grow: 1;
-    width: 100%; /* Explicitly poori width di */
+    /* 'width: 100%' hata diya */
+    flex-grow: 1; /* Yeh bachi hui poori jagah lega */
     text-align: center;
     /* === FIX ENDS HERE === */
   }
@@ -89,11 +83,9 @@
     max-width: 90%;
     
     /* === YAHAN FIX KIYA (4/4) === */
-    /* Text ko logo ke upar overlap hone se rokne ke liye */
-    /* Isse text block center mein rahega but logo se clear */
-    padding-left: 70px; /* Logo width (65px) + 5px gap */
-    padding-right: 70px; /* Right mein bhi same padding taaki center balance ho */
-    box-sizing: border-box; /* Padding ko width mein include karne ke liye */
+    /* Padding waale hacks hata diye kyunki ab logo flex flow mein hai */
+    padding-left: 0;
+    padding-right: 0;
     /* === FIX ENDS HERE === */
   }
 }
