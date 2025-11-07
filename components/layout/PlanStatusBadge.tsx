@@ -1,13 +1,13 @@
-// File: components/layout/PlanStatusBadge.tsx (UPDATED)
+// File: components/layout/PlanStatusBadge.tsx (UPDATED with SuperAdmin Check)
 
 "use client";
 
 import React from 'react';
-import { useAuth } from '@/app/context/AuthContext'; // !! Path check karein
+import { useAuth } from '@/app/context/AuthContext'; 
 import styles from './PlanStatusBadge.module.scss'; 
-import { useRouter } from 'next/navigation'; // <-- NAYA IMPORT
+import { useRouter } from 'next/navigation'; 
 
-// Helper function to calculate days left (Bina Badlaav)
+// Helper function to calculate days left (No Change)
 const getDaysLeft = (expiryDate: string | null): number | null => {
   if (!expiryDate) return null;
   const today = new Date();
@@ -19,16 +19,22 @@ const getDaysLeft = (expiryDate: string | null): number | null => {
 
 const PlanStatusBadge = () => {
   const { user } = useAuth(); 
-  const router = useRouter(); // <-- NAYA HOOK
+  const router = useRouter(); 
 
-  if (!user || !user.plan) {
+  // FIX 1: SuperAdmin Check
+  if (!user || user.role === 'SuperAdmin') {
+    return null; 
+  }
+  
+  // FIX 2: Subscription data available hai ya nahi check karein
+  if (!user.plan) {
     return null; 
   }
 
   const { plan, planExpiryDate } = user;
   const daysLeft = getDaysLeft(planExpiryDate);
 
-  // Badge ka logic (Bina Badlaav)
+  // Badge ka logic
   let badgeText = '';
   let badgeClass = '';
 
@@ -37,32 +43,40 @@ const PlanStatusBadge = () => {
       badgeText = `⏳ Trial: ${daysLeft} Days Left`;
       badgeClass = styles.trial; 
     } else {
-      badgeText = 'Trial Ended'; // Text chhota kar diya
+      badgeText = 'Trial Ended'; 
       badgeClass = styles.expired;
     }
   } else if (plan === 'STARTER') {
-    if (daysLeft !== null && daysLeft <= 14) {
-      badgeText = `⚠️ Expires in ${daysLeft} Days`; // Text chhota kar diya
+    if (daysLeft !== null && daysLeft <= 14 && daysLeft >= 0) {
+      // 14 days ya usse kam bache hon
+      badgeText = `⚠️ Expires in ${daysLeft} Days`; 
       badgeClass = styles.expiring; 
+    } else if (daysLeft !== null && daysLeft < 0) {
+      // Expiry date nikal chuki ho
+      badgeText = 'Plan Expired';
+      badgeClass = styles.expired; 
     } else {
       badgeText = '✓ Starter Plan';
       badgeClass = styles.starter; 
     }
   } else {
-    return null;
+    // Other valid plans (e.g., PREMIUM)
+    badgeText = `✓ ${plan} Plan`;
+    badgeClass = styles.starter; 
   }
   
-  // === NAYA LOGIC: Button kab dikhana hai? ===
+  // Button kab dikhana hai
   const showUpgradeButton = 
-    plan === 'TRIAL' || // Trial par hamesha dikhao
-    (plan === 'STARTER' && daysLeft !== null && daysLeft <= 14); // Ya jab plan expire ho raha ho
+    plan === 'TRIAL' || 
+    plan === 'NONE' || // Agar plan set nahi hai
+    (plan === 'STARTER' && daysLeft !== null && daysLeft <= 14); 
 
   // Button click par /upgrade page par bhejo
   const handleUpgradeClick = () => {
     router.push('/upgrade');
   };
 
-  // === NAYA RETURN: Ab ek container mein dono cheezein hain ===
+  // Final rendering
   return (
     <div className={styles.badgeContainer}>
       {/* 1. Hamara Puraana Badge */}
