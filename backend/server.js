@@ -10,10 +10,14 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require("socket.io");
 const prisma = require('./config/prisma');
-const paymentRoutes = require('./routes/payment'); // <-- 1. PRISMA CLIENT IMPORT KAREIN
+const paymentRoutes = require('./routes/payment'); 
 const couponRoutes = require('./routes/couponRoutes');
-const planRoutes = require('./routes/planRoutes');
-const planRoutes = require('./routes/plan');
+
+// === FIX: Donon files ko alag-alag naam se import karein ===
+const planRoutes = require('./routes/planRoutes'); // ./routes/planRoutes.js ko import karega
+const planSingularRoutes = require('./routes/plan');  // ./routes/plan.js ko import karega
+// === END FIX ===
+
 // --- Allowed URLs ki list (No Change) ---
 const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:3000", 
@@ -41,28 +45,21 @@ const quizRoutes = require('./routes/quiz');
 const analyticsRoutes = require('./routes/analytics');
 const classRoutes = require('./routes/classes');
 const attendanceRoutes = require('./routes/attendance'); 
-const timetableRoutes = require('./routes/timetable');// <-- NAYA ADD KIYA
+const timetableRoutes = require('./routes/timetable');
 // const dashboardRoutes = require('./routes/dashboard'); 
 
 // --- Express App Setup (No Change) ---
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- 2. MONGOOSE MODEL IMPORTS HATA DIYE ---
-// ... (jaisa pehle tha) ...
-
-// --- Standard Middlewares (ORDER IS FIXED) ---
+// --- Standard Middlewares (No Change) ---
 app.use(cors({
   origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE"]
 }));
 
-// --- YEH HAI FIX ---
-// FIX 1: Limit 2mb se 5mb kar di, taaki Base64 (2.7MB) aaraam se aa sake
 app.use(express.json({ limit: '5mb' })); 
-// FIX 2: URL-encoded data ke liye parser add kiya (standard practice)
 app.use(express.urlencoded({ limit: '5mb', extended: true }));
-// --- FIX ENDS HERE ---
 
 // --- Debugging Middleware (No Change) ---
 app.use((req, res, next) => {
@@ -85,7 +82,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// --- Register API Routes (ORDER IS UPDATED) ---
+// --- Register API Routes (FIXED) ---
 app.get('/', (req, res) => {
   res.send('SchoolPro Backend is running (Prisma Version)!'); 
 });
@@ -107,12 +104,16 @@ app.use('/api/study-material', studyMaterialRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/classes', classRoutes);
-app.use('/api/attendance', attendanceRoutes); // <-- NAYA ADD KIYA
+app.use('/api/attendance', attendanceRoutes); 
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/coupons', couponRoutes);
-app.use('/api/plans', planRoutes);
-app.use('/api/plans', plan);
+
+// === FIX: Donon routes ko alag-alag path par register karein ===
+app.use('/api/plans', planRoutes); // Ab /api/plans/admin-all isse match karega
+app.use('/api/plan', planSingularRoutes); // Naya path /api/plan (singular)
+// === END FIX ===
+
 // app.use('/api/dashboard', dashboardRoutes);
 
 // --- Socket.IO Connection Handler (No Change) ---
@@ -123,7 +124,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// --- 3. DATABASE CONNECTION & START SERVER (Updated for Prisma) ---
+// --- DATABASE CONNECTION & START SERVER (No Change) ---
 async function startServer() {
   try {
     // Prisma client ko connect karein
@@ -143,4 +144,3 @@ async function startServer() {
 
 // Server ko start karein
 startServer();
-// --- END FIX ---
