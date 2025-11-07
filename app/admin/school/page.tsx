@@ -123,8 +123,8 @@ const DashboardControlCenter = () => {
     }, [token]);
 
     if (loading) { return <div className={styles.message}>Loading Control Center...</div>; }
-    // FIX APPLIED HERE (Line 128)
-    if (error) { return <div className={`${styles.message} ${styles.error}`}>{error}</div>; }
+    // FIX APPLIED HERE (Line 128 in previous discussion was 126 in your image)
+    if (error) { return <div className={`${styles.message} ${styles.error}`}>{error}</div>; } 
     if (!data) { return <div className={styles.message}>No dashboard data available.</div>; }
 
     const getStudentClass = (student: RecentStudent) => student.class || student.details?.class || 'N/A';
@@ -134,7 +134,7 @@ const DashboardControlCenter = () => {
     return (
         <div className={styles.overviewContainer}>
             
-            {/* FIX 2: Title और Badge को एक Flex कंटेनर में रखा */}
+            {/* Title और Badge को एक Flex कंटेनर में रखा */}
             <div className={styles.headerWithBadge}>
                 <h1 className={styles.mainTitle}>School Control Center</h1>
                 <PlanStatusBadge /> 
