@@ -4,34 +4,23 @@ const express = require('express');
 const router = express.Router();
 const { authMiddleware, authorize } = require('../middleware/authMiddleware');
 
+// Controller se dono functions ko import karein
 const { 
     createSubscriptionOrder, 
-    verifySubscriptionWebhook,
-    validateCoupon // === NAYA FUNCTION IMPORT KAREIN ===
+    verifySubscriptionWebhook 
 } = require('../controllers/paymentController');
 
-// --- Route 1: Create Order (Bina Badlaav) ---
+// --- Route 1: Frontend ke liye (Order Banana) ---
 router.post(
     '/create-order', 
-    [authMiddleware, authorize('Admin')],
+    [authMiddleware, authorize('Admin')], // 'SuperAdmin' authorize() mein pehle se handled hai
     createSubscriptionOrder
 );
 
-// --- Route 2: Verify Webhook (Bina Badlaav) ---
+// --- Route 2: Razorpay ke liye (Payment Verify Karna) ---
 router.post(
     '/webhook-verify', 
-    verifySubscriptionWebhook
+    verifySubscriptionWebhook // Yeh line 30 hai (ya uske aaspaas)
 );
-
-// === NAYA ROUTE (STEP 1) ===
-// @route   POST /api/payment/validate-coupon
-// @desc    Coupon code ko validate karta hai aur naya price batata hai
-// @access  Private (Sirf Admin)
-router.post(
-    '/validate-coupon',
-    [authMiddleware, authorize('Admin')],
-    validateCoupon
-);
-// === END NAYA ROUTE ===
 
 module.exports = router;

@@ -1,11 +1,11 @@
-// File: backend/controllers/paymentController.js (UPDATED with Receipt Fix)
+// File: backend/controllers/paymentController.js (Full Updated Code)
 
 const prisma = require('../config/prisma');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
 
-// Razorpay instance (Bina Badlaav)
+// Razorpay instance
 let razorpay;
 if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
   razorpay = new Razorpay({
@@ -16,7 +16,7 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
   console.warn("WARNING: Razorpay keys are not set. Payment API will not work.");
 }
 
-// createReceiptHtml function (Bina Badlaav)
+// createReceiptHtml function (Helper)
 const createReceiptHtml = (userName, planName, amount, orderId, paymentId, expiryDate) => {
   return `
   <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
@@ -64,10 +64,9 @@ const createReceiptHtml = (userName, planName, amount, orderId, paymentId, expir
   </div>
   `;
 };
-// === END HELPER FUNCTION ===
 
 
-// === FUNCTION 1: CREATE ORDER (FIXED) ===
+// === FUNCTION 1: CREATE ORDER (Dynamic Price + Coupon + Receipt Fix) ===
 exports.createSubscriptionOrder = async (req, res) => {
   if (!razorpay) {
     return res.status(500).json({ message: "Payment gateway is not configured." });
@@ -76,10 +75,9 @@ exports.createSubscriptionOrder = async (req, res) => {
   try {
     const { planName, couponCode } = req.body;
     const schoolId = req.user.schoolId;
-    const userId = req.user.id; // Hum iska istemaal karenge
+    const userId = req.user.id; 
 
-    // --- (Dynamic Price Logic) ---
-    // Ab hum price ko database se fetch karenge
+    // --- Dynamic Price Logic ---
     const planFromDb = await prisma.plan.findUnique({
       where: { id: planName.toUpperCase() } // "STARTER"
     });
@@ -92,7 +90,7 @@ exports.createSubscriptionOrder = async (req, res) => {
     let finalAmountInRupees = originalAmountInRupees;
     let couponId = null;
 
-    // --- (Coupon Logic - Bina Badlaav) ---
+    // --- Coupon Logic ---
     if (couponCode) {
       const coupon = await prisma.coupon.findFirst({
         where: {
@@ -123,15 +121,15 @@ exports.createSubscriptionOrder = async (req, res) => {
 
       if (finalAmountInRupees < 0) finalAmountInRupees = 0;
     }
-    // --- (Coupon Logic Ends) ---
+    // --- Coupon Logic Ends ---
 
     const finalAmountInPaise = Math.round(finalAmountInRupees * 100);
 
-    // === YAHI HAI FIX ===
+    // === YAHI HAI RECEIPT ID FIX ===
     // 'receipt_school_... (lamba UUID)' ko badal kar
     // 'rec_u... (chhota User ID)' kar diya hai.
     const receiptId = `rec_u${userId}_${Date.now()}`;
-    // ===================
+    // ===============================
 
     const options = {
       amount: finalAmountInPaise,
@@ -147,7 +145,7 @@ exports.createSubscriptionOrder = async (req, res) => {
       }
     };
 
-    // --- (Razorpay Route / Split Payment Logic) ---
+    // --- (Split Payment Logic) ---
     const MY_LINKED_ACCOUNT_ID = process.env.MY_RAZORPAY_LINKED_ACCOUNT_ID;
     if (MY_LINKED_ACCOUNT_ID) {
       const myShareInPaise = Math.round(finalAmountInPaise * 0.50); // 50%
@@ -167,7 +165,6 @@ exports.createSubscriptionOrder = async (req, res) => {
     res.status(200).json({ ...order, key: process.env.RAZORPAY_KEY_ID });
 
   } catch (error) {
-    // Ab hum Razorpay ka error bhi user ko dikha sakte hain
     console.error("Error creating Razorpay order:", error);
     const errorMessage = error.error?.description || "Error creating payment order.";
     res.status(500).json({ message: errorMessage });
@@ -175,7 +172,7 @@ exports.createSubscriptionOrder = async (req, res) => {
 };
 
 
-// === FUNCTION 2: VERIFY WEBHOOK (Bina Badlaav) ===
+// === FUNCTION 2: VERIFY WEBHOOK (Dynamic Price + Coupon) ===
 exports.verifySubscriptionWebhook = async (req, res) => {
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
@@ -236,7 +233,7 @@ exports.verifySubscriptionWebhook = async (req, res) => {
         await tx.appSubscription.create({
           data: {
             planName: planName.toUpperCase(),
-            originalAmount: Number(originalAmount) || amountPaid,
+            originalAmount: Number(originalAmount) || amountPaid, // Database se aana chahiye
             finalAmount: amountPaid,
             durationInDays: durationDays,
             status: "SUCCESS",
@@ -264,7 +261,7 @@ exports.verifySubscriptionWebhook = async (req, res) => {
 
       console.log(`SUCCESS: School ${schoolId} plan updated to ${planName}.`);
       
-      // === EMAIL LOGIC (Bina Badlaav) ===
+      // === EMAIL LOGIC ===
       try {
         const user = await prisma.user.findUnique({
           where: { id: Number(userId) },
