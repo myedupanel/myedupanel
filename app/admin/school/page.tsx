@@ -245,6 +245,6 @@ const SchoolPage = () => {
             </main>
         </div>
     );
+return <DashboardControlCenter />;
 };
-
 export default SchoolPage;
