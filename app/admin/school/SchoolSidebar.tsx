@@ -49,7 +49,7 @@ const schoolMenuItems: NavItem[] = [
     { name: 'Teachers', path: '/admin/teachers', icon: <MdSchool style={{ color: Colors.Teachers }} />, type: 'free' },
     { name: 'Parents', path: '/admin/parents', icon: <MdFamilyRestroom style={{ color: Colors.Parents }} />, type: 'free' },
     { name: 'Staff', path: '/admin/staff', icon: <MdBadge style={{ color: Colors.Staff }} />, type: 'free' },
-    { name: 'Manage Classes', path: '/admin/school/classes', icon: <MdClass style={{ color: Colors.Classes }} />, type: 'free' },
+    { name: 'Manage Classes', path: '/admin/classes', icon: <MdClass style={{ color: Colors.Classes }} />, type: 'free' },
     
     // Starter Plan Features (Fee Counter is Starter/Trial)
     { name: 'Fee Counter', path: '/admin/fee-counter', icon: <MdAttachMoney style={{ color: Colors.FeeCounter }} />, type: 'starter' }, 
@@ -145,7 +145,7 @@ const SchoolSidebar = () => {
             </nav>
             
             {/* FOOTER: Back Button */}
-            <footer className={`${styles.sidebarFooter} ${styles.noBorder}`}> 
+            <footer className={`${styles.sidebarFooter} ${styles.noBorder}`} style={{ borderTop: 'none' }}>
                 <Link href="/admin/dashboard" className={`${styles.footerButton} ${styles.backButton}`}>
                     <MdArrowBack />
                     <span>Go to Main Dashboard</span>
