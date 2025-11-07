@@ -3,6 +3,10 @@
 /* --- Base Styles --- */
 .certificatePaper {
   width: 210mm;
+  /* === FIX: A4 PAGE HEIGHT === */
+  /* Browser preview ko A4 page ki height di, taaki 'flex-grow' kaam kare */
+  height: 297mm;
+  /* === END FIX === */
   padding: 0; 
   margin: 20px auto;
   font-family: 'Times New Roman', Times, serif;
@@ -26,7 +30,7 @@
   box-sizing: border-box;
 }
 
-/* Fill styles: Added .fillNoLine */
+/* Fill styles: (No Change) */
 .fill {
   font-weight: bold;
   padding: 0 4px;
@@ -50,7 +54,7 @@
 /* --- End Base Styles --- */
 
 
-/* --- Header Style (MODIFIED FOR ALIGNMENT & SIZE) --- */
+/* --- Header Style (No Change) --- */
 .certHeader {
   display: flex;
   flex-direction: row;
@@ -87,7 +91,7 @@
   }
 }
 
-/* Title Row (Centering and Border Fix) */
+/* Title Row (No Change) */
 .titleRow {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr; /* Sr.No | Title | Reg.No */
@@ -130,7 +134,7 @@
 
 /*
   ======================================================================
-  === MAIN GRID BLUEPRINT STYLE (FULL HEIGHT/WIDTH) ===
+  === MAIN GRID BLUEPRINT STYLE (No Change) ===
   ======================================================================
 */
 .certificateGrid {
@@ -170,7 +174,7 @@
   border-bottom: none !important;
 }
 
-/* --- STYLING FOR MULTI-FIELD ROWS (ROW 4 & ROW 5 FIX) --- */
+/* --- STYLING FOR MULTI-FIELD ROWS (No Change) --- */
 .multiFieldRow {
   display: flex;
   flex-wrap: wrap; 
@@ -185,7 +189,7 @@
   }
 }
 
-/* Row 5 specific styling (Religion Value + Caste Field) */
+/* Row 5 specific styling (No Change) */
 .rowValue:has(.casteField) { 
     .multiFieldRow > .fill, .multiFieldRow > .fillBlank {
         /* First fill (Religion value) ko fixed width do */
@@ -231,7 +235,7 @@
   }
 }
 
-/* --- Certification Text & Footer (A4 Fit check) --- */
+/* --- Certification Text & Footer (No Change) --- */
 .certText {
   font-size: 11pt;
   text-align: left;
@@ -275,7 +279,7 @@
   border-top: 1px solid #000;
 }
 
-/* --- Print Fix (A4 Page perft set) --- */
+/* --- Print Fix (No Change) --- */
 @media print {
   .certificatePaper {
     box-shadow: none;
