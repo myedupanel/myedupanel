@@ -1,9 +1,9 @@
-// File: app/admin/school/SchoolSidebar.tsx
+// File: app/admin/school/SchoolSidebar.tsx (FINAL WITH PREMIUM ICONS)
+
 "use client";
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-// FIX: Sidebar के styles को import करें ताकि visual consistency बनी रहे
 import styles from '@/components/layout/Sidebar/Sidebar.module.scss'; 
 
 import { 
@@ -19,26 +19,29 @@ export interface NavItem {
   type: 'free' | 'premium' | 'upcoming';
 }
 
-// --- School Control Center Menu Items ---
+// --- School Control Center Menu Items (Updated with Premium Colors) ---
 const schoolMenuItems: NavItem[] = [
-    { name: 'Control Center', path: '/admin/school', icon: <MdSchool />, type: 'free' },
-    { name: 'Students', path: '/admin/students', icon: <MdPeople />, type: 'free' },
-    { name: 'Teachers', path: '/admin/teachers', icon: <MdSchool />, type: 'free' },
-    { name: 'Parents', path: '/admin/parents', icon: <MdFamilyRestroom />, type: 'free' },
-    { name: 'Staff', path: '/admin/staff', icon: <MdBadge />, type: 'free' },
-    { name: 'Manage Classes', path: '/admin/school/classes', icon: <MdClass />, type: 'free' },
-    { name: 'Settings', path: '/admin/settings', icon: <MdSettings />, type: 'free' },
-    { name: 'Fee Counter', path: '/admin/fee-counter', icon: <MdAttachMoney />, type: 'premium' }, 
-    { name: 'Attendance', path: '/admin/attendance', icon: <MdEventAvailable />, type: 'upcoming' }, 
-    { name: 'Timetable', path: '/admin/timetable', icon: <MdSchedule />, type: 'upcoming' },
-    { name: 'Academics', path: '/admin/academics', icon: <MdAssessment />, type: 'upcoming' }, 
+    // Control Center - Main
+    { name: 'Control Center', path: '/admin/school', icon: <MdSchool style={{ color: '#8b5cf6' }} />, type: 'free' },
+    // Core Free Features - Unique Colors
+    { name: 'Students', path: '/admin/students', icon: <MdPeople style={{ color: '#3B82F6' }} />, type: 'free' },
+    { name: 'Teachers', path: '/admin/teachers', icon: <MdSchool style={{ color: '#10B981' }} />, type: 'free' },
+    { name: 'Parents', path: '/admin/parents', icon: <MdFamilyRestroom style={{ color: '#F59E0B' }} />, type: 'free' },
+    { name: 'Staff', path: '/admin/staff', icon: <MdBadge style={{ color: '#9333EA' }} />, type: 'free' },
+    { name: 'Manage Classes', path: '/admin/school/classes', icon: <MdClass style={{ color: '#EC4899' }} />, type: 'free' },
+    { name: 'Settings', path: '/admin/settings', icon: <MdSettings style={{ color: '#6B7280' }} />, type: 'free' },
+    
+    // Premium / Upcoming Features - Consistent Themed Colors
+    { name: 'Fee Counter', path: '/admin/fee-counter', icon: <MdAttachMoney style={{ color: '#F59E0B' }} />, type: 'premium' }, 
+    { name: 'Attendance', path: '/admin/attendance', icon: <MdEventAvailable style={{ color: '#10B981' }} />, type: 'upcoming' }, 
+    { name: 'Timetable', path: '/admin/timetable', icon: <MdSchedule style={{ color: '#6366F1' }} />, type: 'upcoming' },
+    { name: 'Academics', path: '/admin/academics', icon: <MdAssessment style={{ color: '#EF4444' }} />, type: 'upcoming' }, 
 ];
 // ---
 
 const SchoolSidebar = () => {
     const pathname = usePathname();
     
-    // Simple lock/tag logic for display (no modal function needed)
     const getTagClass = (type: NavItem['type']) => {
         if (type === 'premium') return styles.premium;
         if (type === 'upcoming') return styles.upcoming;
@@ -57,10 +60,9 @@ const SchoolSidebar = () => {
             <nav className={styles.menuSection}>
                 <ul className={styles.menuList}>
                     {schoolMenuItems.map((item) => { 
-                        // Active state check: current path, या उसका child path active हो
                         const isActive = item.path === '/admin/school' 
-                            ? pathname === item.path // 'Control Center' के लिए exact match
-                            : pathname.startsWith(item.path); // बाकी sections के लिए startswith check
+                            ? pathname === item.path 
+                            : pathname.startsWith(item.path); 
 
                         return (
                             <li 
@@ -80,9 +82,9 @@ const SchoolSidebar = () => {
                 </ul>
             </nav>
             
-            {/* === FOOTER: Main Dashboard पर वापस जाने का लिंक === */}
-            <footer className={styles.sidebarFooter}>
-                <Link href="/admin/dashboard" className={`${styles.footerButton}`}>
+            {/* FOOTER: No Border Class Add Kiya Tha */}
+            <footer className={`${styles.sidebarFooter} ${styles.noBorder}`}> 
+                <Link href="/admin/dashboard" className={`${styles.footerButton} ${styles.backButton}`}>
                     <MdArrowBack />
                     <span>Go to Main Dashboard</span>
                 </Link>
