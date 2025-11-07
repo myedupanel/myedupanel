@@ -36,32 +36,28 @@ interface HeaderProps {
 const Header = ({ admin }: HeaderProps) => {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
-  // --- YEH NAYA CODE HAI (Animation ke liye) ---
+  // Animation wala code (koi badlaav nahi)
   const [headerTitle, setHeaderTitle] = useState(`Welcome to ${admin.schoolName}`);
   const [titleAnimationClass, setTitleAnimationClass] = useState(styles.titleFadeIn);
   
   useEffect(() => {
-    // 1. Pehla title (Welcome to...) state mein set hai
-    // 2. Ek timer set karein jo title ko fade out karega
     const fadeOutTimer = setTimeout(() => {
       setTitleAnimationClass(styles.titleFadeOut);
-    }, 2500); // 2.5 second rukne ke baad fade out shuru hoga
+    }, 2500); 
 
-    // 3. Ek timer set karein jo naya text daalega aur fade in karega
     const changeTextTimer = setTimeout(() => {
-      setHeaderTitle(`${admin.schoolName} Dashboard`); // Title badlein
-      setTitleAnimationClass(styles.titleFadeIn); // Waapis fade-in class lagayein
-    }, 3000); // (2.5s wait + 0.5s fade-out animation)
+      setHeaderTitle(`${admin.schoolName} Dashboard`); 
+      setTitleAnimationClass(styles.titleFadeIn); 
+    }, 3000); 
 
-    // 4. Cleanup: Agar component unmount ho (page badle) toh timers clear karein
     return () => {
       clearTimeout(fadeOutTimer);
       clearTimeout(changeTextTimer);
     };
-  }, [admin.schoolName]); // Yeh effect sirf ek baar run hoga
-  // --- END NAYA CODE ---
+  }, [admin.schoolName]);
+  // --- END Animation Code ---
 
-
+  // Time wala code (koi badlaav nahi)
   useEffect(() => {
     setCurrentTime(new Date()); 
     const timer = setInterval(() => {
@@ -73,15 +69,13 @@ const Header = ({ admin }: HeaderProps) => {
   return (
     <div className={styles.headerWrapper}>
       <div className={styles.titleBar}>
-        {/* === YAHAN BADLAAV KIYA GAYA HAI === */}
-        {/* Title ab state se aa raha hai aur uspar animation class lagi hai */}
+        {/* Title (koi badlaav nahi) */}
         <h1 className={`${styles.pageTitle} ${titleAnimationClass}`}>
           {headerTitle}
         </h1>
-        {/* === END BADLAAV === */}
 
         <div className={styles.profileSection}>
-          {/* Avatar Logic (koi badlaav nahi) */}
+          {/* Avatar Logic */}
           <div className={styles.avatarContainer}>
             {admin.profileImageUrl ? (
               <Image 
@@ -93,13 +87,15 @@ const Header = ({ admin }: HeaderProps) => {
               />
             ) : (
               <div className={styles.defaultAvatar}>
-                <span>{getInitials(admin.adminName)}</span>
+                {/* === BADLAAV 1: School ke initials === */}
+                <span>{getInitials(admin.schoolName)}</span>
               </div>
             )}
           </div>
 
           <div className={styles.profileInfo}>
-            <span className={styles.profileName}>{admin.adminName}</span>
+            {/* === BADLAAV 2: Static text "School Profile" === */}
+            <span className={styles.profileName}>School Profile</span>
           </div>
           <Link href="/admin/profile" className={styles.editButton}>
             <MdEdit size={20} />
@@ -108,7 +104,7 @@ const Header = ({ admin }: HeaderProps) => {
       </div>
 
       <div className={styles.subtitleBar}>
-        {/* Subtitle se "Dashboard" hata diya, kyunki woh ab main title mein hai */}
+        {/* Subtitle (koi badlaav nahi) */}
         <p className={styles.subtitle}>Here's what's happening at your school today.</p>
         
         {currentTime && (
