@@ -262,7 +262,7 @@ const UpgradePage = () => {
             <>
               {/* === Box 2: Pro Plan (Dummy) === */}
               <div className={`${styles.planBox} ${styles.locked}`}>
-                <h3>Pro Plan</h3>
+                <h3>Plus Plan</h3>
                 <div className={styles.priceContainer}>
                   <p className={styles.price}>₹9,999 <span>/ year</span></p>
                 </div>
@@ -280,7 +280,7 @@ const UpgradePage = () => {
 
               {/* === Box 3: Plus Plan (Dummy) === */}
               <div className={`${styles.planBox} ${styles.locked}`}>
-                <h3>Plus Plan</h3>
+                <h3>Pro Plan</h3>
                 <div className={styles.priceContainer}>
                   <p className={styles.price}>₹14,999 <span>/ year</span></p>
                 </div>
