@@ -93,7 +93,7 @@ const SuperAdminPlansPage = () => {
             <span>Create New Plan</span>
           </button>
           {/* ============================= */}
-          <Link href="/superadmin/dashboard" className={styles.dashboardLinkButton}>
+          <Link href="/admin/dashboard" className={styles.dashboardLinkButton}>
             <MdGridView />
             <span>Go to Dashboard</span>
           </Link>
