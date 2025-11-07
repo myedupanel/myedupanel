@@ -1,10 +1,11 @@
 /* File: components/layout/Sidebar/Sidebar.module.scss */
+
 .sidebarContainer {
   background-color: #1f2937; // Dark background
   color: #d1d5db; // Light text color
   width: 260px; // Fixed width
   height: 100vh;
-  position: fixed; // <--- YEH ZAROORI HAI
+  position: fixed;
   top: 0;
   left: 0;
   display: flex;
@@ -33,7 +34,14 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: 1rem 0;
-  /* Scrollbar styles omitted for brevity */
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 10px;
+  }
 }
 
 .menuList {
@@ -56,12 +64,12 @@
     font-weight: 500;
     transition: background-color 0.2s ease, color 0.2s ease;
     border-radius: 8px;
-    white-space: nowrap;
+    white-space: nowrap; // Text ko wrap hone se rokega
   }
 
   .icon {
     font-size: 1.5rem;
-    flex-shrink: 0;
+    flex-shrink: 0; // Icon ko shrink nahi hone dega
   }
 
   &:hover {
@@ -72,22 +80,89 @@
   }
 
   &.active {
-    background-color: #3b82f6; 
+    background-color: #3b82f6; // Blue active color
     a {
       color: #ffffff;
     }
   }
 }
 
-/* --- TAGS AND FOOTER STYLES (Omitted for brevity, assuming they are correct) --- */
+/* === NAYE STYLES (PREMIUM/UPCOMING/SUPERADMIN) === */
 
+.proTag {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background-color: #ffc107; // Yellow
+  color: #333;
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+
+.upcomingTag {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background-color: #17a2b8; // Teal/Info color
+  color: white;
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+
+.upcoming {
+  a {
+    color: #6b7280; // Text ko halka grey kar dein
+    cursor: not-allowed;
+  }
+  
+  .icon {
+    color: #6b7280;
+  }
+
+  &:hover {
+    a {
+      background-color: transparent; // Hover effect band
+    }
+  }
+
+  &.active {
+    background-color: transparent; // Active effect band
+  }
+
+  .upcomingTag {
+    background-color: #4b5563;
+    color: #9ca3af;
+  }
+}
+
+.superAdminLink {
+  // Coupon button ko alag se style karein
+  a {
+    color: #60a5fa; // Halka blue
+    border: 1px dashed #374151;
+  }
+  
+  &:hover a {
+    background-color: #374151;
+    color: #93c5fd;
+    border-color: #4b5563;
+  }
+
+  &.active a {
+    background-color: #2563eb;
+    color: white;
+    border-color: #2563eb;
+  }
+}
+
+/* === FOOTER STYLES === */
 .sidebarFooter {
   padding: 1rem;
-  margin-top: auto; 
+  margin-top: auto; // Footer ko hamesha neeche rakhega
   border-top: 1px solid #374151;
 }
+
 .footerButton {
-  /* ... Logout button styles ... */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -98,6 +173,28 @@
   border-radius: 8px;
   background-color: #374151;
   color: #e5e7eb;
-  transition: background-color 0.2s ease;
+  text-decoration: none;
+  font-weight: 500;
+  text-align: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
   cursor: pointer;
+
+  svg {
+    font-size: 1.25rem;
+  }
+
+  &:hover {
+    background-color: #4b5563;
+    color: #ffffff;
+  }
+  
+  // Logout button ko alag se style karein
+  &.logoutButton {
+    background-color: #ef4444; // Red color
+    color: #ffffff;
+
+    &:hover {
+      background-color: #dc2626; // Darker red
+    }
+  }
 }
