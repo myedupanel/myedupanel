@@ -1,11 +1,11 @@
-// File: backend/routes/fees.js (POORI TARAH FIX KIYA GAYA)
+// File: backend/routes/fees.js (Saare 404 Errors ke liye FIX)
 
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, authorize } = require('../middleware/authMiddleware');
 const checkPremiumAccess = require('../middleware/checkPremiumAccess');
 
-// === FIX 1: Missing functions ko import karein ===
+// === FIX 1: Saare zaroori functions import karein ===
 const { 
     getDashboardOverview,
     getFeeTemplates,
@@ -13,55 +13,57 @@ const {
     getLatePayments,
     calculateLateFees,
     collectManualFee,
-    getStudentFeeRecords,
-    assignAndCollectFee, // <-- YEH MISSING THA
-    getTransactions,     // <-- YEH MISSING THA
-    // (Baaki functions jo controller se export ho rahe hain, unhe bhi add kar sakte hain)
+    getStudentFeeRecords,  // <-- Iska URL fix hoga
+    assignAndCollectFee,
+    getTransactions,
+    getProcessingPayments, // <-- YEH MISSING THA
+    getEditedRecords,      // <-- YEH MISSING THA
+    getPdcRecords,         // <-- YEH MISSING THA
+    getTransactionById,    // <-- YEH MISSING THA (Receipt ke liye)
+    // (Baaki functions...)
 } = require('../controllers/feeController'); 
 
-// Middleware for Admin access
+// Middleware
 const adminAuth = [authMiddleware, authorize('Admin'), checkPremiumAccess];
 
 // --- Dashboard & Template Routes ---
-// @route   GET /api/fees/dashboard-overview
 router.get('/dashboard-overview', adminAuth, getDashboardOverview);
-
-// @route   GET /api/fees/templates
 router.get('/templates', adminAuth, getFeeTemplates);
-
-// @route   GET /api/fees/templates/:id
 router.get('/templates/:id', adminAuth, getTemplateDetails);
 
-// === FIX 2: Missing 404 Routes ko add karein ===
-
-// @route   POST /api/fees/assign-and-collect (Fixing 404)
-// @desc    Ek naya fee assign bhi karein aur collect bhi karein
-// @access  Private (Admin)
+// --- Pichle Fixes (Correct Routes) ---
 router.post('/assign-and-collect', adminAuth, assignAndCollectFee);
-
-// @route   GET /api/fees/transactions (Fixing 404)
-// @desc    Saare transactions ki list fetch karein
-// @access  Private (Admin)
 router.get('/transactions', adminAuth, getTransactions);
-
-// @route   GET /api/fees/late-payments (Yeh bhi missing tha)
-// @desc    Late payment records fetch karein
-// @access  Private (Admin)
 router.get('/late-payments', adminAuth, getLatePayments);
-
-// @route   POST /api/fees/calculate-fine (Yeh bhi missing tha)
-// @desc    Late fine calculate karein
-// @access  Private (Admin)
 router.post('/calculate-fine', adminAuth, calculateLateFees);
+
+// === FIX 2: Naye 404 Errors ke Routes ===
+
+// @route   GET /api/fees/student-records (Fixing 404)
+// @desc    Fee Records page ke liye saare records
+// (Yeh pehle '/' par tha, ab sahi URL par hai)
+router.get('/student-records', adminAuth, getStudentFeeRecords);
+
+// @route   GET /api/fees/transaction/:id (Fixing 404)
+// @desc    Receipt details ke liye single transaction
+router.get('/transaction/:id', adminAuth, getTransactionById);
+
+// @route   GET /api/fees/processing-payments (Fixing 404)
+// @desc    Dashboard tab ke liye
+router.get('/processing-payments', adminAuth, getProcessingPayments);
+
+// @route   GET /api/fees/edited-records (Fixing 404)
+// @desc    Dashboard tab ke liye
+router.get('/edited-records', adminAuth, getEditedRecords);
+
+// @route   GET /api/fees/pdc-records (Fixing 404)
+// @desc    Dashboard tab ke liye
+router.get('/pdc-records', adminAuth, getPdcRecords);
 
 // --- END FIX ---
 
-// --- Existing Routes ---
-
-// @route   GET /api/fees/ (Default student fee records)
-router.get('/', adminAuth, getStudentFeeRecords);
-
-// @route   POST /api/fees/ (Collect fee or record transaction)
+// --- Existing Route ---
+// @route   POST /api/fees/ (Manual fee collect)
 router.post('/', adminAuth, collectManualFee);
 
 module.exports = router;
