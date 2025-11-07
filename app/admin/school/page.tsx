@@ -3,66 +3,62 @@ import React, { useState, useEffect } from 'react';
 import styles from './SchoolPage.module.scss';
 // Sidebar import ki zaroorat nahi hai
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation'; // useRouter add kiya
 import axios from 'axios';
-import { useAuth, User } from '@/app/context/AuthContext';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import {
+import { useAuth } from '@/app/context/AuthContext';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'; // recharts imports add kiye
+import { 
     MdPeople, MdSchool, MdFamilyRestroom, MdBadge,
     MdEventAvailable, MdAttachMoney, MdSchedule,
-    MdAssessment, MdSettings, MdPersonAdd,
-    MdClass 
-} from 'react-icons/md'; 
+    MdAssessment, MdSettings, MdPersonAdd, MdClass 
+} from 'react-icons/md'; // MdClass icon add kiya
+import api from '@/backend/utils/api'; // API import add kiya
+
+// Socket.IO client ko import karein (Agar aap real-time use kar rahe hain)
+import { io } from "socket.io-client";
 import Modal from '@/components/common/Modal/Modal';
 import AddStudentForm from '@/components/admin/AddStudentForm/AddStudentForm';
 import AddTeacherForm from '@/components/admin/AddTeacherForm/AddTeacherForm';
 import AddParentForm from '@/components/admin/AddParentForm/AddParentForm';
 import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
-import api from '@/backend/utils/api';
+
 
 // === TypeScript Interfaces (Errors Fix) ===
-interface RecentStudent { id: string; name: string; class?: string; details?: { class?: string }; }
-interface RecentTeacher { id: string; name: string; subject?: string; details?: { subject?: string }; }
-interface RecentStaff { id: string; name: string; role?: string; details?: { role?: string }; }
+interface Student { id: string; name: string; details?: { class: string; }; }
+interface Teacher { id: string; name: string; details?: { subject: string; }; }
+interface DashboardStats { totalStudents: number; totalTeachers: number; totalParents: number; totalStaff: number; }
+interface AdmissionDataPoint { month?: number; name: string; admissions: number; }
 interface RecentFee { id: string; student: string; amount: string; date?: string;}
 interface RecentParent { id: string; name: string; }
-interface AdmissionDataPoint { month?: number; name: string; admissions: number; }
+interface RecentStaff { id: string; name: string; role?: string; details?: { role?: string };}
+
 interface DashboardData {
+    stats: DashboardStats;
+    recentStudents: Student[];
+    recentTeachers: Teacher[];
     admissionsData: AdmissionDataPoint[];
-    recentStudents: RecentStudent[];
-    recentTeachers: RecentTeacher[];
     recentFees: RecentFee[];
     recentParents: RecentParent[];
     recentStaff: RecentStaff[];
-    stats?: { totalStudents: number; totalTeachers: number; totalParents: number; totalStaff: number; }
 }
 // ===========================================
 
+// Main Dashboard Component
 const DashboardControlCenter = () => {
-    // ... (Your DashboardControlCenter logic remains here) ...
-    const { token } = useAuth();
-    const router = useRouter();
+    const { token } = useAuth(); 
+    const router = useRouter(); 
+    
     const [data, setData] = useState<DashboardData | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(true); 
+    const [error, setError] = useState(''); 
     const [activeModal, setActiveModal] = useState<string | null>(null);
 
     const openModal = (modalName: string) => setActiveModal(modalName);
     const closeModal = () => setActiveModal(null);
-
-    const handleFormSubmit = async () => {
-        return new Promise<void>((resolve) => {
-             console.log("Form submitted!");
-             closeModal();
-             resolve();
-        });
-    };
-
     const handleStudentSuccess = () => { console.log("Student added!"); closeModal(); }
     const handleTeacherSuccess = () => { console.log("Teacher added!"); closeModal(); }
     const handleParentSuccess = () => { console.log("Parent added!"); closeModal(); }
-    const handleStaffSuccess = async (staffData: any) => { console.log("Staff potentially added/updated via API call inside AddStaffForm", staffData); closeModal(); return Promise.resolve(); }
-
+    const handleStaffSuccess = async (staffData: any) => { console.log("Staff added/updated", staffData); closeModal(); return Promise.resolve(); }
 
     const getModalTitle = () => {
         switch (activeModal) {
@@ -74,47 +70,66 @@ const DashboardControlCenter = () => {
         }
     };
 
+
+    const fetchData = async () => {
+        if (!token) return; 
+        if (!data) setLoading(true); 
+
+        try {
+            const response = await axios.get('/api/admin/dashboard-stats', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setData(response.data);
+            setError('');
+        } catch (err) {
+            console.error("Failed to fetch dashboard data:", err);
+            setError('Could not load dashboard data.');
+        } finally {
+            if (!data) setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            if (!token) {
-                setLoading(false);
-                setError('Authentication token not found.');
-                return;
-            }
-            try {
-                setLoading(true);
-                setError('');
-                const response = await api.get<DashboardData>('/admin/dashboard-data');
-                setData(response.data);
-            } catch (err: any) {
-                setError('Could not load dashboard data.');
-                console.error("API fetch error:", err.response?.data || err.message);
-            } finally {
-                setLoading(false);
-            }
+        if (token) {
+            fetchData();
+        }
+    }, [token]); 
+
+    // REAL-TIME UPDATES KE LIYE useEffect
+    useEffect(() => {
+        const socket = io("https://myedupanel.onrender.com");
+        socket.on('updateDashboard', () => {
+            console.log("REAL-TIME UPDATE RECEIVED! Dashboard data refresh ho raha hai...");
+            fetchData();
+        });
+        return () => {
+            socket.disconnect();
         };
-        fetchData();
-    }, [token]);
+    }, [token]); 
 
-    if (loading) { return <div className={styles.message}>Loading Control Center...</div>; }
-    if (error) { return <div className={`${styles.message} ${styles.error}`}>{error}</div>; }
-    if (!data) { return <div className={styles.message}>No dashboard data available.</div>; }
+    if (loading) {
+        return <div className={styles.loading}>Loading Dashboard...</div>;
+    }
+    if (error) {
+        return <div className={styles.error}>{error}</div>;
+    }
 
-    const getStudentClass = (student: RecentStudent) => student.class || student.details?.class || 'N/A';
-    const getTeacherSubject = (teacher: RecentTeacher) => teacher.subject || teacher.details?.subject || 'N/A';
-    const getStaffRole = (staff: RecentStaff) => staff.role || staff.details?.role || 'N/A';
-
+    // FIX: Helper functions ko dobara define kiya (TypeScript compatibility ke liye)
+    const getStudentClass = (student: Student | any) => student.class || student.details?.class || 'N/A';
+    const getTeacherSubject = (teacher: Teacher | any) => teacher.subject || teacher.details?.subject || 'N/A';
+    const getStaffRole = (staff: RecentStaff | any) => staff.role || staff.details?.role || 'N/A';
+    
     return (
         <div className={styles.overviewContainer}>
-            {/* Title ko ab left-aligned hona chahiye (SchoolPage.module.scss se) */}
             <h1 className={styles.mainTitle}>School Control Center</h1>
+            
             <div className={styles.mainGrid}>
                 {/* Chart Box */}
                 <div className={`${styles.summaryBox} ${styles.chartBox}`}>
                      <div className={styles.boxHeader}><h2><MdAssessment/> Student Admissions</h2></div>
                      <div className={styles.chartContainer}>
                         <ResponsiveContainer width="100%" height={250}>
-                            <BarChart data={data.admissionsData || []} margin={{ top: 5, right: 0, left: -20, bottom: 5 }}>
+                            <BarChart data={data?.admissionsData || []} margin={{ top: 5, right: 0, left: -20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                 <XAxis dataKey="name" fontSize={10} interval={0} />
                                 <YAxis fontSize={10} allowDecimals={false}/>
@@ -125,58 +140,68 @@ const DashboardControlCenter = () => {
                      </div>
                 </div>
 
-                {/* Students Box */}
+                {/* Students Box (Now with real data) */}
                 <div className={styles.summaryBox}>
-                    <div className={styles.boxHeader}><h2><MdPeople/> Students</h2><Link href="/admin/students" className={styles.viewAllLink}>View All</Link></div>
-                     <ul className={styles.recentList}>
-                        {(data.recentStudents || []).map(s => <li key={s.id}><span>{s.name} ({getStudentClass(s)})</span></li>)}
-                        {(data.recentStudents || []).length === 0 && <li className={styles.noRecent}>No recent students</li>}
-                     </ul>
+                    <div className={styles.boxHeader}>
+                        <h2><MdPeople/> Students ({data?.stats?.totalStudents})</h2>
+                        <Link href="/admin/students" className={styles.viewAllLink}>View All</Link>
+                    </div>
+                    <ul className={styles.recentList}>
+                        <li className={styles.listHeader}>Recent Admissions</li>
+                        {data?.recentStudents?.map(student => (
+                            <li key={student.id}><span>{student.name} ({getStudentClass(student)})</span></li>
+                        ))}
+                    </ul>
                     <div className={styles.boxFooter}><button onClick={() => openModal('add-student')} className={styles.addButton}><MdPersonAdd /> Add Student</button></div>
                 </div>
 
-                {/* Teachers Box */}
+                {/* Teachers Box (Now with real data) */}
                 <div className={styles.summaryBox}>
-                    <div className={styles.boxHeader}><h2><MdSchool/> Teachers</h2><Link href="/admin/teachers" className={styles.viewAllLink}>View All</Link></div>
+                    <div className={styles.boxHeader}>
+                        <h2><MdSchool/> Teachers ({data?.stats?.totalTeachers})</h2>
+                        <Link href="/admin/teachers" className={styles.viewAllLink}>View All</Link>
+                    </div>
                     <ul className={styles.recentList}>
-                       {(data.recentTeachers || []).map(t => <li key={t.id}><span>{t.name}</span><span className={styles.subject}>{getTeacherSubject(t)}</span></li>)}
-                       {(data.recentTeachers || []).length === 0 && <li className={styles.noRecent}>No recent teachers</li>}
+                        <li className={styles.listHeader}>Recently Joined</li>
+                         {data?.recentTeachers?.map(teacher => (
+                            <li key={teacher.id}><span>{teacher.name}</span><span className={styles.subject}>{getTeacherSubject(teacher)}</span></li>
+                        ))}
                     </ul>
                     <div className={styles.boxFooter}><button onClick={() => openModal('add-teacher')} className={styles.addButton}><MdPersonAdd /> Add Teacher</button></div>
                 </div>
-                
+
                 {/* Fee Counter Box */}
                 <div className={styles.summaryBox}>
                     <div className={styles.boxHeader}><h2><MdAttachMoney/> Fee Counter</h2><Link href="/admin/fee-counter" className={styles.viewAllLink}>View All</Link></div>
                      <ul className={styles.recentList}>
-                         {(data.recentFees || []).map(f => <li key={f.id}><span>{f.student}</span><span>{f.amount}</span></li>)}
-                         {(data.recentFees || []).length === 0 && <li className={styles.noRecent}>No recent payments</li>}
+                         {data?.recentFees?.map(f => <li key={f.id}><span>{f.student}</span><span>{f.amount}</span></li>)}
+                         {(data?.recentFees || []).length === 0 && <li className={styles.noRecent}>No recent payments</li>}
                      </ul>
                      <div className={styles.boxFooter}><Link href="/admin/fee-counter/collection" className={styles.addButton}>Collect Fees</Link></div>
                 </div>
 
                 {/* Parents Box */}
-                <div className={styles.summaryBox}>
-                    <div className={styles.boxHeader}><h2><MdFamilyRestroom/> Parents</h2><Link href="/admin/parents" className={styles.viewAllLink}>View All</Link></div>
-                     <ul className={styles.recentList}>
-                        {(data.recentParents || []).map(p => <li key={p.id}><span>{p.name}</span></li>)}
-                        {(data.recentParents || []).length === 0 && <li className={styles.noRecent}>No recent parents</li>}
-                     </ul>
+                 <div className={styles.summaryBox}>
+                    <div className={styles.boxHeader}><h2><MdFamilyRestroom/> Parents ({data?.stats?.totalParents})</h2><Link href="/admin/parents" className={styles.viewAllLink}>View All</Link></div>
+                    <ul className={styles.recentList}>
+                        {(data?.recentParents || []).map(p => <li key={p.id}><span>{p.name}</span></li>)}
+                        {(data?.recentParents || []).length === 0 && <li className={styles.noRecent}>No recent parents</li>}
+                    </ul>
                     <div className={styles.boxFooter}><button onClick={() => openModal('add-parent')} className={styles.addButton}><MdPersonAdd /> Add Parent</button></div>
                 </div>
-
-                {/* Staff Box */}
-                <div className={styles.summaryBox}>
-                    <div className={styles.boxHeader}><h2><MdBadge/> Staff</h2><Link href="/admin/staff" className={styles.viewAllLink}>View All</Link></div>
-                     <ul className={styles.recentList}>
-                        {(data.recentStaff || []).map(s => <li key={s.id}><span>{s.name}</span><span className={styles.subject}>{getStaffRole(s)}</span></li>)}
-                        {(data.recentStaff || []).length === 0 && <li className={styles.noRecent}>No recent staff</li>}
+                
+                 {/* Staff Box */}
+                 <div className={styles.summaryBox}>
+                    <div className={styles.boxHeader}><h2><MdBadge/> Staff ({data?.stats?.totalStaff})</h2><Link href="/admin/staff" className={styles.viewAllLink}>View All</Link></div>
+                    <ul className={styles.recentList}>
+                        {(data?.recentStaff || []).map(s => <li key={s.id}><span>{s.name}</span><span className={styles.subject}>{getStaffRole(s)}</span></li>)}
+                        {(data?.recentStaff || []).length === 0 && <li className={styles.noRecent}>No recent staff</li>}
                      </ul>
-                     <div className={styles.boxFooter}><button onClick={() => openModal('add-staff')} className={styles.addButton}><MdPersonAdd /> Add Staff</button></div>
+                    <div className={styles.boxFooter}><button onClick={() => openModal('add-staff')} className={styles.addButton}><MdPersonAdd /> Add Staff</button></div>
                 </div>
 
             </div>
-            
+             {/* Modal definition */}
             <Modal isOpen={!!activeModal} onClose={closeModal} title={getModalTitle()}>
                 <>
                     {activeModal === 'add-student' && <AddStudentForm onClose={closeModal} onSuccess={handleStudentSuccess} />}
@@ -189,11 +214,9 @@ const DashboardControlCenter = () => {
     );
 };
 
-
 // Main Page Component
 const SchoolPage = () => {
-    // FIX: सिर्फ DashboardControlCenter को रिटर्न करें।
-    // कोई अनावश्यक div या main tag नहीं।
+    // FIX: सिर्फ DashboardControlCenter को रिटर्न करें ताकि layout.tsx का CSS काम करे
     return <DashboardControlCenter />;
 };
 
