@@ -1,11 +1,10 @@
-// File: app/admin/layout.tsx (FINAL CLEANED UP & IMPORT CHECKED)
 "use client";
 import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+// FIX: usePathname को import करें
+import { useRouter, usePathname } from 'next/navigation'; 
 import Sidebar from '@/components/layout/Sidebar/Sidebar'; 
 import styles from './layout.module.scss';
 import { useAuth } from '@/app/context/AuthContext';
-// FIX: AdminLayoutProvider को सही path से इंपोर्ट किया गया
 import { AdminLayoutProvider } from '@/app/context/AdminLayoutContext'; 
 
 export default function AdminLayout({
@@ -15,6 +14,25 @@ export default function AdminLayout({
 }) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
+  
+  // FIX: usePathname hook का उपयोग करें
+  const pathname = usePathname(); 
+  
+  // FIX: School और Fee routes के लिए Main Sidebar hide करें
+  const isSchoolOrFeeRoute = 
+        pathname.startsWith('/admin/school') ||
+        pathname.startsWith('/admin/students') || 
+        pathname.startsWith('/admin/teachers') ||
+        pathname.startsWith('/admin/parents') ||
+        pathname.startsWith('/admin/staff') ||
+        pathname.startsWith('/admin/settings') ||
+        pathname.startsWith('/admin/attendance') ||
+        pathname.startsWith('/admin/academics') ||
+        pathname.startsWith('/admin/timetable') ||
+        pathname.startsWith('/admin/fee-counter');
+                        
+  const shouldRenderMainSidebar = !isSchoolOrFeeRoute;
+
 
   useEffect(() => {
     // Auth Logic (Remains the same)
@@ -35,10 +53,12 @@ export default function AdminLayout({
   }
   
   return (
-    // AdminLayoutProvider का उपयोग किया गया
     <AdminLayoutProvider>
       <div className={styles.container}>
-        <Sidebar /> 
+        {/* FIX: Conditional Rendering */}
+        {shouldRenderMainSidebar && <Sidebar />} 
+        
+        {/* Content Area */}
         <main className={styles.content}>
           {children}
         </main>

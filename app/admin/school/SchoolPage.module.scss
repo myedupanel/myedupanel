@@ -169,3 +169,28 @@
     text-align: center;
     strong { color: #212529; }
 }
+.schoolLayoutWrapper {
+  display: flex;
+  // Parent layout (app/admin/layout) में styles.content पहले से ही 100vh है, 
+  // इसलिए हम इसे flex-grow: 1 पर सेट करते हैं।
+  flex-grow: 1; 
+  position: relative; 
+}
+
+.schoolContent {
+  flex-grow: 1; 
+  overflow-y: auto;
+  min-height: 100vh;
+  // --- यह सबसे महत्वपूर्ण FIX है ---
+  // SchoolSidebar 260px चौड़ा है, इसलिए content को 260px का margin दें
+  margin-left: 260px; 
+  padding: 1.5rem 2rem;
+  background-color: #f4f7fa; 
+}
+
+/* ... बाकी styles ... */
+
+.overviewContainer {
+    max-width: 1600px;
+    margin: 0 auto;
+}
