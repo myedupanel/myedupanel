@@ -1,4 +1,4 @@
-// File: app/admin/school/page.tsx (FINAL STRUCTURE with Context)
+// File: app/admin/school/page.tsx (FINAL CLEANED CODE - Provider Removed)
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styles from './SchoolPage.module.scss';
@@ -19,51 +19,35 @@ import AddTeacherForm from '@/components/admin/AddTeacherForm/AddTeacherForm';
 import AddParentForm from '@/components/admin/AddParentForm/AddParentForm';
 import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
 import api from '@/backend/utils/api';
-// === NEW IMPORTS: Context ===
-import { UpcomingFeatureProvider, useUpcomingFeature } from '@/app/context/UpcomingFeatureContext';
+// === Context Imports Removed: अब ये layout.tsx में रहेंगे ===
 
 
-// === 1. TypeScript Interfaces ===
+// === 1. TypeScript Interfaces (Unchanged) ===
 interface RecentStudent {
-    id: string; 
-    name: string; 
-    class?: string; 
-    details?: { class?: string };
+    id: string; name: string; class?: string; details?: { class?: string };
 }
 interface RecentTeacher {
-    id: string; 
-    name: string; 
-    subject?: string; 
-    details?: { subject?: string };
+    id: string; name: string; subject?: string; details?: { subject?: string };
 }
 interface RecentStaff {
-    id: string; 
-    name: string; 
-    role?: string; 
-    details?: { role?: string };
+    id: string; name: string; role?: string; details?: { role?: string };
 }
 interface RecentFee {
-    id: string; 
-    student: string; 
-    amount: string; 
-    date?: string;
+    id: string; student: string; amount: string; date?: string;
 }
 interface RecentParent {
-    id: string;
-    name: string;
+    id: string; name: string;
 }
 interface AdmissionDataPoint {
-    month?: number; 
-    name: string; 
-    admissions: number;
+    month?: number; name: string; admissions: number;
 }
 
 
-// === Subscription Interface ===
+// === Subscription Interface (Unchanged) ===
 type PlanType = 'NONE' | 'TRIAL' | 'STARTER' | 'PRO'; 
 interface SubscriptionData {
     plan: PlanType;
-    planExpiryDate: string | null; // Database से आ रहा है
+    planExpiryDate: string | null; 
 }
 // =========================================================
 
@@ -119,13 +103,14 @@ const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, 
 // ----------------------------------------
 
 
-// --- UPDATED COMPONENT: SubscriptionBanner (Unchanged from previous final step) ---
+// --- UPDATED COMPONENT: SubscriptionBanner (Unchanged) ---
 interface SubscriptionBannerProps {
     plan: PlanType;
     planExpiryDate: string | null;
 }
 
 const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpiryDate }) => {
+    // ... (Subscription Banner logic remains unchanged) ...
     const [daysLeft, setDaysLeft] = useState<number | null>(null);
 
     // Calculate days left and update every minute
@@ -246,33 +231,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
 // -------------------------------------------
 
 
-// === NEW COMPONENT: UpcomingFeatureModal (From Step 3) ===
-const UpcomingFeatureModal = () => {
-    // Context से modal state read करो
-    const { showModal, setShowModal } = useUpcomingFeature();
-
-    return (
-        <Modal 
-            isOpen={showModal} 
-            onClose={() => setShowModal(false)} 
-            title="Upcoming Feature! ✨"
-        >
-            <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-                <MdFlashOn size={48} style={{ color: '#6366F1', marginBottom: '1rem' }} /> 
-                <h3 style={{ marginBottom: '0.5rem', color: '#333' }}>Feature Under Construction</h3>
-                <p style={{ color: '#666' }}>
-                    This feature is under development and will be available soon. 
-                    We are working hard to bring you the best experience!
-                </p>
-                <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>
-                    Thank you for your patience.
-                </p>
-            </div>
-        </Modal>
-    );
-};
-// ===========================================
-
+// === UpcomingFeatureModal REMOVED FROM HERE, it goes to layout.tsx ===
 
 // --- DashboardControlCenter Component (Main) ---
 const DashboardControlCenter = () => {
@@ -394,7 +353,7 @@ const DashboardControlCenter = () => {
             </div>
 
             <div className={styles.mainGrid}>
-                {/* ... (All other Boxes remain unchanged) ... */}
+                {/* ... (Chart Box and all other Boxes remain unchanged) ... */}
                  {/* Chart Box */}
                 <div className={`${styles.summaryBox} ${styles.chartBox}`}>
                      <div className={styles.boxHeader}><h2><MdAssessment/> Student Admissions</h2></div>
@@ -410,8 +369,6 @@ const DashboardControlCenter = () => {
                          </ResponsiveContainer>
                      </div>
                  </div>
-
-                 {/* Students Box, Teachers Box, Fee Counter Box, Parents Box, Staff Box remain unchanged below... */}
 
                  {/* Students Box */}
                  <div className={styles.summaryBox}>
@@ -490,17 +447,12 @@ const DashboardControlCenter = () => {
 };
 
 
-// Main Page Component (FINAL WRAPPING)
+// Main Page Component (CLEANED)
 const SchoolPage = () => {
     return (
         <div className={styles.schoolPageContainer}>
             <main className={styles.mainContent}>
-                {/* === WRAPPER: Provider and Modal === */}
-                <UpcomingFeatureProvider>
-                    <DashboardControlCenter />
-                    {/* Locked features पर क्लिक करने पर यह modal open होगा */}
-                    <UpcomingFeatureModal /> 
-                </UpcomingFeatureProvider>
+                <DashboardControlCenter />
             </main>
         </div>
     );
