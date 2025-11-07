@@ -1,33 +1,31 @@
-// File: components/layout/Sidebar/Sidebar.tsx
-
 "use client";
 
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext'; 
-// --- FIX: Import path ko 'app/admin/layout' se badal kar nayi file par karein ---
 import { useAdminLayout } from '@/app/context/AdminLayoutContext'; 
-import styles from './Sidebar.module.scss'; // Iske liye aapke paas SCSS file honi chahiye
+import styles from './Sidebar.module.scss'; // Path fix ho gaya hai
 import { FiTag } from 'react-icons/fi'; // Coupon icon
 
-// Sidebar ko `menuItems` prop ke through data milega
+// === FIX 1: Interface ko define karein jo props accept karega ===
 interface NavItem {
-  name: string; // <-- Yeh 'name' hai (jo error fix karega)
+  name: string; 
   path: string;
   icon: React.ReactNode;
   type: 'free' | 'premium' | 'upcoming';
 }
 
-// SidebarProps interface (jismein 'menuItems' array hai)
 interface SidebarProps {
-  menuItems: NavItem[];
+  menuItems: NavItem[]; // Sidebar 'menuItems' naam ka ek array lega
 }
+// === END FIX 1 ===
 
+// === FIX 2: Component ko batayein ki woh 'menuItems' prop lega ===
 const Sidebar = ({ menuItems }: SidebarProps) => {
   const pathname = usePathname();
   const { user } = useAuth(); 
-  const { showUpcomingFeatureModal } = useAdminLayout(); // Naya hook (ab sahi jagah se aa raha hai)
+  const { showUpcomingFeatureModal } = useAdminLayout(); 
 
   const isSuperAdmin = user?.role === 'SuperAdmin';
 
@@ -44,14 +42,11 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
     }
 
     // 3. Agar feature 'premium' hai (jaise Fee Counter)
-    // Link ko active rakhein. Backend 403 bhejega aur api.ts
-    // user ko /upgrade page par redirect kar dega.
     if (item.type === 'premium') {
       return { href: item.path, onClick: undefined, className: styles.premium };
     }
 
     // 4. Agar feature 'upcoming' hai (jaise Academics)
-    // Link ko dead karein (href="#") aur onClick par modal dikhayein.
     if (item.type === 'upcoming') {
       return {
         href: '#',

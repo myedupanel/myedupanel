@@ -1,19 +1,20 @@
-/* Main container for the entire sidebar */
-.sidebar-container {
+/* File: components/layout/Sidebar/Sidebar.module.scss */
+
+.sidebarContainer {
   background-color: #1f2937; // Dark background
   color: #d1d5db; // Light text color
-  width: 260px; // Fixed width for the sidebar
-  height: 100vh; // Takes up 100% of the screen height
-  position: fixed; // Stays in place when the main page content scrolls
+  width: 260px; // Fixed width
+  height: 100vh;
+  position: fixed;
   top: 0;
   left: 0;
   display: flex;
-  flex-direction: column; // Stacks children vertically (logo, menu, footer)
+  flex-direction: column;
   z-index: 1000;
+  transition: width 0.3s ease;
 }
 
-/* Logo at the top */
-.logo-section {
+.logoSection {
   padding: 1.5rem;
   border-bottom: 1px solid #374151;
   h2 {
@@ -21,19 +22,19 @@
     font-size: 1.8rem;
     margin: 0;
     text-align: center;
+    white-space: nowrap;
   }
   a {
     text-decoration: none;
   }
 }
 
-/* This is the main navigation area that will grow to fill space */
-.menu-section {
-  flex-grow: 1; // Allows this section to expand and fill available space
-  overflow-y: auto; // Adds a scrollbar ONLY if the content is too tall
+.menuSection {
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 1rem 0;
 
-  /* Custom scrollbar styles (optional but looks premium) */
   &::-webkit-scrollbar {
     width: 6px;
   }
@@ -41,24 +42,19 @@
     background: #4b5563;
     border-radius: 10px;
   }
-  &::-webkit-scrollbar-thumb:hover {
-    background: #6b7280;
-  }
 }
 
-.menu-list {
+.menuList {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-/* === YAHAN FIX KIYA GAYA HAI === */
-/* Ab .menu-item ke paas hi saare default styles hain */
-.menu-item {
+.menuItem {
   margin: 0.25rem 0.75rem;
   border-radius: 8px;
 
-  a {
+  a, .menuButtonLink { // Dono Links aur Buttons ke liye style
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -67,61 +63,63 @@
     text-decoration: none;
     font-weight: 500;
     transition: background-color 0.2s ease, color 0.2s ease;
+    border-radius: 8px;
+    white-space: nowrap; // Text ko wrap hone se rokega
+    
+    // Button-specific reset
+    background: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+    text-align: left;
   }
 
   .icon {
     font-size: 1.5rem;
+    flex-shrink: 0; // Icon ko shrink nahi hone dega
   }
 
-  &:hover:not(.active) {
-    background-color: #374151;
-    a {
+  &:hover {
+    a, .menuButtonLink {
+      background-color: #374151;
       color: #ffffff;
     }
   }
 
   &.active {
     background-color: #3b82f6;
-    a {
+    a, .menuButtonLink {
       color: #ffffff;
     }
   }
 }
 
-/* "PRO" Tag (Premium feature) */
-.proTag {
-  margin-left: auto;
-  font-size: 0.7rem;
-  font-weight: 700;
-  background-color: #ffc107; // Yellow
-  color: #333;
-  padding: 3px 8px;
-  border-radius: 5px;
-}
-
-/* "SOON" Tag (Upcoming feature) */
+// --- NAYE LOCK/TAG STYLES ---
 .upcomingTag {
   margin-left: auto;
   font-size: 0.7rem;
   font-weight: 700;
-  background-color: #17a2b8; // Teal/Info color
+  background-color: #17a2b8;
   color: white;
   padding: 3px 8px;
   border-radius: 5px;
 }
 
-/* Locked item ka style (Upcoming) */
 .upcoming {
-  cursor: not-allowed; // Cursor badal jaayega
+  a, .menuButtonLink {
+    color: #6b7280; // Text ko halka grey kar dein
+    cursor: not-allowed;
+  }
   
-  a {
-    color: #777; // Text ko halka grey kar dein
+  .icon {
+    color: #6b7280;
   }
 
-  &:hover:not(.active) {
-    background-color: transparent; // Hover effect band
-    a {
-      color: #777;
+  &:hover {
+    a, .menuButtonLink {
+      background-color: transparent; // Hover effect band
     }
   }
 
@@ -130,49 +128,42 @@
   }
 
   .upcomingTag {
-    background-color: #4b5563; // Darker grey
-    color: #ccc;
+    background-color: #4b5563;
+    color: #9ca3af;
   }
 }
 
-/* === YAHAN FIX KIYA GAYA HAI === */
-/* Khaali .premium block hata diya gaya hai. */
-/* Ab .premium links automatically .menu-item ke styles le lenge. */
-
-/* SuperAdmin button ka alag style (Optional) */
 .superAdminLink {
-  border: 1px dashed #3b82f6;
-  
   a {
-    color: #3b82f6;
+    color: #60a5fa; // Halka blue
   }
-
-  &:hover:not(.active) {
+  
+  &:hover a {
     background-color: #374151;
-    a {
-      color: #3b82f6;
-    }
+    color: #93c5fd;
   }
 
-  &.active {
-    border-color: #3b82f6;
+  &.active a {
+    background-color: #2563eb;
+    color: white;
   }
 }
+// --- END NAYE STYLES ---
 
 
-/* === NEW: Styles for the footer and dashboard button === */
-.sidebar-footer {
+.sidebarFooter {
   padding: 1rem;
   border-top: 1px solid #374151;
 }
 
-.footer-button {
+.footerButton {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
   padding: 0.75rem;
   width: 100%;
+  border: none;
   border-radius: 8px;
   background-color: #374151;
   color: #e5e7eb;
@@ -180,6 +171,7 @@
   font-weight: 500;
   text-align: center;
   transition: background-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
 
   svg {
     font-size: 1.25rem;
@@ -189,16 +181,77 @@
     background-color: #4b5563;
     color: #ffffff;
   }
-}
-.logout-button {
-  background-color: #ef4444 !important; // Red color for logout
-  color: #ffffff !important;
 
-  &:hover {
-    background-color: #dc2626 !important; // Darker red on hover
+  &.logout-button { // Isko specific rakhein
+    background-color: #ef4444;
+    color: #ffffff;
+
+    &:hover {
+      background-color: #dc2626;
+    }
   }
 }
 
-/* === YAHAN FIX KIYA GAYA HAI === */
-/* .menu-button-link aur .modal waale styles hata diye gaye hain */
-/* kyunki woh doosri file mein hain */
+// Modal styles (Aapke layout.module.scss se)
+.upcomingModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+}
+
+.upcomingModalBox {
+  background: white;
+  padding: 2.5rem 3rem;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 400px;
+  position: relative;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  transform: scale(0.9);
+  animation: popIn 0.3s forwards ease-out;
+  color: #333; // Modal text color
+}
+
+@keyframes popIn {
+  to {
+    transform: scale(1);
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  font-size: 2.5rem;
+  color: #aaa;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.iconWrapper {
+  font-size: 3.5rem;
+  color: #007bff; // Blue icon
+  margin-bottom: 1rem;
+}
+
+.upcomingModalBox h3 {
+  font-size: 1.7rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.upcomingModalBox p {
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.5;
+}

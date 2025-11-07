@@ -1,7 +1,5 @@
 "use client";
-// --- Import React explicitly for Fragment ---
 import React, { useState, useEffect } from 'react';
-// --- END ---
 import styles from './SchoolPage.module.scss';
 import Sidebar from '@/components/layout/Sidebar/Sidebar';
 import Link from 'next/link';
@@ -24,10 +22,8 @@ import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
 import api from '@/backend/utils/api';
 
 
-// --- FIX 2: Puraana 'MenuItem' interface hata diya gaya ---
-
-// --- FIX 3: 'schoolMenuItems' ko naye 'NavItem' structure se match kiya ---
-// (name aur type properties add kiye, id aur color hata diye)
+// --- FIX 2: 'schoolMenuItems' ko naye 'NavItem' structure se match kiya ---
+// (name aur type properties add kiye, id aur title hata diye)
 const schoolMenuItems = [
     { name: 'Students', path: '/admin/students', icon: <MdPeople />, type: 'free' },
     { name: 'Teachers', path: '/admin/teachers', icon: <MdSchool />, type: 'free' },
@@ -35,17 +31,16 @@ const schoolMenuItems = [
     { name: 'Staff', path: '/admin/staff', icon: <MdBadge />, type: 'free' },
     { 
       name: 'Manage Classes', 
-      path: '/admin/school/classes', // Path to your classes page
+      path: '/admin/school/classes', 
       icon: <MdClass />, 
-      type: 'free' // Yeh free feature hai
+      type: 'free'
     },
     { name: 'Attendance', path: '/admin/attendance/student', icon: <MdEventAvailable />, type: 'upcoming' },
     { name: 'Fee Counter', path: '/admin/fee-counter', icon: <MdAttachMoney />, type: 'premium' },
     { name: 'Timetable', path: '/admin/timetable', icon: <MdSchedule />, type: 'upcoming' },
-    // 'Timetable Settings' ka path /admin/settings hai (aapke layout.tsx ke hisaab se)
     { name: 'Timetable Settings', path: '/admin/settings', icon: <MdSettings />, type: 'upcoming' }, 
     { name: 'Academics', path: '/admin/academics', icon: <MdAssessment />, type: 'upcoming' },
-] as const; // 'as const' add karna acchi practice hai
+] as const; 
 // --- END FIX ---
 
 
@@ -59,7 +54,7 @@ interface DashboardData {
 }
 
 const DashboardControlCenter = () => {
-    // ... (Aapka poora DashboardControlCenter component code BINA KISI BADLAAV ke waisa hi rahega) ...
+    // ... (Aapka poora DashboardControlCenter component code BINA KISI BADLAAV ke) ...
     const { token } = useAuth();
     const router = useRouter();
     const [data, setData] = useState<DashboardData | null>(null);
