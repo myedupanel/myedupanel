@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import styles from './SchoolPage.module.scss';
+// Sidebar import ki zaroorat nahi hai
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -19,40 +20,13 @@ import AddParentForm from '@/components/admin/AddParentForm/AddParentForm';
 import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
 import api from '@/backend/utils/api';
 
-// === FIX 1: Missing TypeScript Interfaces ===
-interface RecentStudent {
-    id: string; 
-    name: string; 
-    class?: string; 
-    details?: { class?: string };
-}
-interface RecentTeacher {
-    id: string; 
-    name: string; 
-    subject?: string; 
-    details?: { subject?: string };
-}
-interface RecentStaff {
-    id: string; 
-    name: string; 
-    role?: string; 
-    details?: { role?: string };
-}
-interface RecentFee {
-    id: string; 
-    student: string; 
-    amount: string; 
-    date?: string;
-}
-interface RecentParent {
-    id: string;
-    name: string;
-}
-interface AdmissionDataPoint {
-    month?: number; 
-    name: string; 
-    admissions: number;
-}
+// === TypeScript Interfaces (Errors Fix) ===
+interface RecentStudent { id: string; name: string; class?: string; details?: { class?: string }; }
+interface RecentTeacher { id: string; name: string; subject?: string; details?: { subject?: string }; }
+interface RecentStaff { id: string; name: string; role?: string; details?: { role?: string }; }
+interface RecentFee { id: string; student: string; amount: string; date?: string;}
+interface RecentParent { id: string; name: string; }
+interface AdmissionDataPoint { month?: number; name: string; admissions: number; }
 interface DashboardData {
     admissionsData: AdmissionDataPoint[];
     recentStudents: RecentStudent[];
@@ -60,12 +34,7 @@ interface DashboardData {
     recentFees: RecentFee[];
     recentParents: RecentParent[];
     recentStaff: RecentStaff[];
-    stats?: {
-        totalStudents: number;
-        totalTeachers: number;
-        totalParents: number;
-        totalStaff: number;
-    }
+    stats?: { totalStudents: number; totalTeachers: number; totalParents: number; totalStaff: number; }
 }
 // ===========================================
 
@@ -137,10 +106,9 @@ const DashboardControlCenter = () => {
 
     return (
         <div className={styles.overviewContainer}>
-            {/* ... (Aapka poora Dashboard UI yahaan) ... */}
+            {/* Title ko ab left-aligned hona chahiye (SchoolPage.module.scss se) */}
             <h1 className={styles.mainTitle}>School Control Center</h1>
             <div className={styles.mainGrid}>
-                {/* ... (Chart, Students Box, Teachers Box, etc. ka code) ... */}
                 {/* Chart Box */}
                 <div className={`${styles.summaryBox} ${styles.chartBox}`}>
                      <div className={styles.boxHeader}><h2><MdAssessment/> Student Admissions</h2></div>
@@ -206,6 +174,7 @@ const DashboardControlCenter = () => {
                      </ul>
                      <div className={styles.boxFooter}><button onClick={() => openModal('add-staff')} className={styles.addButton}><MdPersonAdd /> Add Staff</button></div>
                 </div>
+
             </div>
             
             <Modal isOpen={!!activeModal} onClose={closeModal} title={getModalTitle()}>
@@ -223,14 +192,9 @@ const DashboardControlCenter = () => {
 
 // Main Page Component
 const SchoolPage = () => {
-    return (
-        // FIX: हमने SchoolPage component को सरल बनाया है।
-        // Layout (layout.tsx) पहले ही <main className={styles.content}> प्रदान करता है, 
-        // इसलिए हमें यहाँ किसी अनावश्यक wrapper या <main> tag की ज़रूरत नहीं है।
-        <div className={styles.schoolPageContainer}>
-            <DashboardControlCenter />
-        </div>
-    );
+    // FIX: सिर्फ DashboardControlCenter को रिटर्न करें।
+    // कोई अनावश्यक div या main tag नहीं।
+    return <DashboardControlCenter />;
 };
 
 export default SchoolPage;
