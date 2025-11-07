@@ -191,3 +191,33 @@
     padding-top: 100px;
   }
 }
+.locked {
+  opacity: 0.7;
+  background: #f8f9fa; // Thoda grey background
+  border-color: #e0e0e0;
+
+  .planName {
+    color: #6c757d; // Locked plan ka title grey
+  }
+
+  .featuresList li {
+    color: #6c757d; // Locked features grey
+  }
+  
+  .featuresList li .perkIcon {
+    color: #999; // Locked icon grey
+  }
+}
+
+.lockedButton {
+  /* !important zaroori hai taaki yeh .starter, .pro, .plus 
+    styles ko override kar sake.
+  */
+  background-color: #6c757d !important; 
+  color: white !important;
+  cursor: not-allowed !important;
+  
+  &:hover {
+     background-color: #5a6268 !important; // Hover par bhi grey
+  }
+}

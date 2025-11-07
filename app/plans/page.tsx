@@ -9,22 +9,19 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
-import api from '@/backend/utils/api'; // !! Path check karein (Aapka global api)
+import api from '@/backend/utils/api'; 
 
-// --- Interface ko naye Prisma Model se match karein ---
+// --- Interface (Bina Change) ---
 interface Plan {
-  id: string; // "STARTER", "PLUS", "PRO"
+  id: string; 
   name: string;
   price: number;
   originalPrice?: number;
   description: string;
-  features: string[]; // Prisma 'Json' ko string[] maan lega
+  features: string[]; 
   plusFeatures?: string[];
   isPopular?: boolean;
 }
-
-// --- 'plansData' (Hard-coded array) ko hata diya gaya hai ---
-// const plansData: Plan[] = [ ... ]; // <-- YEH POORA DELETE HO GAYA
 
 const PlansPage = () => {
   // --- NAYA STATE Data fetch karne ke liye ---
@@ -55,9 +52,22 @@ const PlansPage = () => {
       try {
         setIsLoading(true);
         setError('');
-        // Naya public API route call karein
         const { data } = await api.get('/plans');
-        setPlans(data);
+        
+        // === YAHAN BADLAAV KIYA GAYA HAI ===
+        // API se aaye plans ko parse karna zaroori hai
+        const parsedPlans = data.map((plan: Plan) => ({
+          ...plan,
+          features: Array.isArray(plan.features) 
+            ? plan.features 
+            : JSON.parse(plan.features || '[]'),
+          plusFeatures: Array.isArray(plan.plusFeatures)
+            ? plan.plusFeatures
+            : JSON.parse(plan.plusFeatures || '[]')
+        }));
+        setPlans(parsedPlans);
+        // === END BADLAAV ===
+
       } catch (err) {
         console.error("Failed to fetch plans:", err);
         setError('Could not load pricing plans. Please try again later.');
@@ -67,12 +77,12 @@ const PlansPage = () => {
     };
 
     fetchPlans();
-  }, []); // Page load par ek baar run hoga
+  }, []); 
   // ----------------------------------------------------
 
-  // --- handleBuyNowClick ko 'plan.id' (e.g., "STARTER") lene ke liye update kiya ---
+  // --- handleBuyNowClick (Bina Change) ---
   const handleBuyNowClick = (planId: string) => {
-    const planIdentifier = planId.toLowerCase(); // "starter", "plus", "pro"
+    const planIdentifier = planId.toLowerCase(); 
 
     if (planIdentifier === 'starter') {
       if (isAuthenticated) {
@@ -81,6 +91,7 @@ const PlansPage = () => {
         router.push('/signup?plan=starter');
       }
     } else {
+      // Yeh alert tab kaam karega jab hum locked button par click enable karenge
       alert('Only the Starter plan is available for now. Plus and Pro are coming soon!');
     }
   };
@@ -102,7 +113,7 @@ const PlansPage = () => {
           <p>Choose the plan that's right for your school's needs.</p>
         </header>
 
-        {/* --- NAYA LOADING aur ERROR STATE --- */}
+        {/* --- NAYA LOADING aur ERROR STATE (Bina Change) --- */}
         {isLoading && <p style={{ textAlign: 'center', fontSize: '1.2rem', padding: '2rem' }}>Loading plans...</p>}
         {error && <p style={{ textAlign: 'center', color: 'red', fontSize: '1.2rem', padding: '2rem' }}>{error}</p>}
         {/* ------------------------------------ */}
@@ -110,9 +121,11 @@ const PlansPage = () => {
         {/* Card Layout (Ab 'plans' state se map hoga) */}
         {!isLoading && !error && (
           <main className={styles.plansGrid}>
+            
+            {/* === YEH DYNAMICALLY "STARTER" PLAN RENDER KAREGA === */}
             {plans.map((plan) => (
               <div
-                key={plan.id} // Key ab 'plan.id' hai
+                key={plan.id} 
                 className={`${styles.planCard} ${plan.isPopular ? styles.popular : ''}`}
               >
                 {plan.isPopular && (
@@ -134,7 +147,6 @@ const PlansPage = () => {
                   <span>{plan.price > 0 ? '/ per year' : ''}</span>
                 </div>
                 <ul className={styles.featuresList}>
-                  {/* 'features' ab ek array hai */}
                   {plan.features.map((feature, index) => (
                     <li key={index} className={styles.included}>
                       <FiCheck className={styles.perkIcon} />
@@ -152,17 +164,88 @@ const PlansPage = () => {
                     ))}
                   </ul>
                 )}
-
-                {/* --- Button ab 'plan.id' pass karega --- */}
+                
                 <button
                   className={`${styles.ctaButton} ${styles[plan.id.toLowerCase()]}`}
                   onClick={() => handleBuyNowClick(plan.id)}
                 >
                   {plan.price === 0 ? 'Get Started' : 'Buy Now'}
                 </button>
-                {/* ------------------------------------- */}
               </div>
             ))}
+            {/* === END DYNAMIC PLAN === */}
+
+
+            {/* === NAYA CODE: Locked "Pro" Plan === */}
+            <div className={`${styles.planCard} ${styles.locked}`}>
+              <h3 className={styles.planName}>Pro Plan</h3>
+              <p className={styles.planDescription}>For growing schools ready to scale their operations.</p>
+              <div className={styles.planPrice}>
+                ₹9,999
+                <span>/ per year</span>
+              </div>
+              <ul className={styles.featuresList}>
+                <li className={styles.included}>
+                  <FiCheck className={styles.perkIcon} />
+                  <span>All Starter Features</span>
+                </li>
+                <li className={styles.included}>
+                  <FiCheck className={styles.perkIcon} />
+                  <span>Advanced Analytics</span>
+                </li>
+                <li className={styles.included}>
+                  <FiCheck className={styles.perkIcon} />
+                  <span>Staff Payroll</span>
+                </li>
+                <li className={styles.included}>
+                  <FiCheck className={styles.perkIcon} />
+                  <span>Transport Management</span>
+                </li>
+              </ul>
+              <button
+                className={`${styles.ctaButton} ${styles.lockedButton}`}
+                disabled
+              >
+                Coming Soon
+              </button>
+            </div>
+            {/* === END "PRO" PLAN === */}
+
+            {/* === NAYA CODE: Locked "Plus" Plan === */}
+            <div className={`${styles.planCard} ${styles.locked}`}>
+              <h3 className={styles.planName}>Plus Plan</h3>
+              <p className={styles.planDescription}>For large institutions with multi-branch needs.</p>
+              <div className={styles.planPrice}>
+                ₹14,999
+                <span>/ per year</span>
+              </div>
+              <ul className={styles.featuresList}>
+                <li className={styles.included}>
+                  <FiCheck className={styles.perkIcon} />
+                  <span>All Pro Features</span>
+                </li>
+                <li className={styles.included}>
+                  <FiCheck className={styles.perkIcon} />
+                  <span>Multi-Branch Support</span>
+                </li>
+                <li className={styles.included}>
+                  <FiCheck className={styles.perkIcon} />
+                  <span>Dedicated Support Manager</span>
+                </li>
+                 <li className={styles.included}>
+                  <FiCheck className={styles.perkIcon} />
+                  <span>App Integrations</span>
+                </li>
+              </ul>
+              <button
+                className={`${styles.ctaButton} ${styles.lockedButton}`}
+                disabled
+              >
+                Coming Soon
+              </button>
+            </div>
+            {/* === END "PLUS" PLAN === */}
+
           </main>
         )}
       </div>
