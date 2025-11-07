@@ -91,27 +91,49 @@ const getTemplateDetails = async (req, res) => {
         });
         if (!template) return res.status(404).json({ msg: 'Template not found' });
 
-        // Fee record stats (Session filter हटा दिया गया)
+        // Fee record stats
         const stats = await prisma.feeRecord.aggregate({
             where: { templateId: templateIdInt, schoolId: schoolId },
             _sum: { amount: true },
         });
-        const studentCount = await prisma.feeRecord.count({
-            where: { templateId: templateIdInt, schoolId: schoolId },
-            distinct: ['studentId']
-        });
 
-        // Transaction stats (Session filter हटा दिया गया)
+        // === YAHAN FIX KIYA GAYA HAI ===
+        // Purana code:
+        // const studentCount = await prisma.feeRecord.count({
+        //     where: { templateId: templateIdInt, schoolId: schoolId },
+        //     distinct: ['studentId']
+        // });
+        
+        // Naya code:
+        const distinctStudents = await prisma.feeRecord.findMany({
+            where: { templateId: templateIdInt, schoolId: schoolId },
+            distinct: ['studentId'],
+            select: { studentId: true } // Performance ke liye sirf ID select karein
+        });
+        const studentCount = distinctStudents.length;
+        // === FIX ENDS HERE ===
+
+        // Transaction stats
         const collectionStats = await prisma.transaction.aggregate({
           where: { templateId: templateIdInt, schoolId: schoolId, status: 'Success' },
           _sum: { amountPaid: true }
         });
 
-        // Paid student count (Session filter हटा दिया गया)
-        const paidStudentCount = await prisma.feeRecord.count({
+        // === YAHAN BHI FIX KIYA GAYA HAI ===
+        // Purana code:
+        // const paidStudentCount = await prisma.feeRecord.count({
+        //     where: { templateId: templateIdInt, schoolId: schoolId, status: "Paid" },
+        //     distinct: ['studentId']
+        // });
+        
+        // Naya code:
+        const distinctPaidStudents = await prisma.feeRecord.findMany({
             where: { templateId: templateIdInt, schoolId: schoolId, status: "Paid" },
-            distinct: ['studentId']
+            distinct: ['studentId'],
+            select: { studentId: true }
         });
+        const paidStudentCount = distinctPaidStudents.length;
+        // === FIX ENDS HERE ===
 
         const templateDetails = {
           name: template.name,
@@ -121,9 +143,12 @@ const getTemplateDetails = async (req, res) => {
           paidStudentCount: paidStudentCount || 0
         };
         res.status(200).json(templateDetails);
-      } catch (error) { console.error("Error in getTemplateDetails:", error); res.status(500).send("Server Error"); }
+      } catch (error) { 
+          // Ab error log mein "distinct" ki galti dikhegi
+          console.error("Error in getTemplateDetails:", error); 
+          res.status(500).send("Server Error"); 
+      }
 };
-
 // 4. Get Late Payment Records (No Change)
 const getLatePayments = async (req, res) => { 
      try {
