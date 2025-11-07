@@ -6,13 +6,12 @@
 }
 
 /* === FIX for Sidebar Overlap === */
-/* Give the main content a left margin equal to the sidebar's width.
-   You might need to adjust '260px' to match your actual Sidebar width. */
+/* Give the main content a left margin equal to the sidebar's width. */
 .mainContent {
     flex-grow: 1;
     padding: 1.5rem 2rem;
     overflow-y: auto;
-    margin-left: 260px; 
+    margin-left: 260px;
 }
 
 /* Rest of the styles */
@@ -21,176 +20,194 @@
     margin: 0 auto;
 }
 
+// === NEW: Header Row for Title and Banner ===
+.headerRow {
+    display: flex;
+    justify-content: space-between; // Title on the left, Banner on the right
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1.5rem; // Space between title and banner
+}
+// ===========================================
+
 .mainTitle {
     font-size: 2.25rem;
     font-weight: 700;
     color: #212529;
-    margin-bottom: 2rem;
+    margin: 0; // Remove default margin-bottom
+    flex-shrink: 0; // Prevent title from shrinking
 }
 
-/* Premium Stat Cards */
-.statsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-}
-
-.statCard {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 1.5rem;
+// === NEW: Subscription Banner Styles ===
+.subscriptionBanner {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    border: 1px solid #e9ecef;
-    border-top: 4px solid; // Color comes from component
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    &:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.07);
-    }
-}
-.iconWrapper {
-    padding: 1rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    svg { font-size: 1.75rem; }
-}
-.statInfo {
-    .statTitle { font-size: 0.9rem; color: #6c757d; margin: 0 0 0.25rem 0; font-weight: 500; }
-    .statValue { font-size: 1.75rem; font-weight: 700; color: #212529; margin: 0; }
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #212529;
+    flex-shrink: 1; // Allow banner to shrink if necessary
+    min-width: 250px; // Ensure a minimum size
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-/* Premium Main Grid */
-.mainGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); // 3-column layout
-    gap: 1.5rem;
+// Banner Colors and Themes
+.trialBanner {
+    background-color: #fef3c7; // Yellowish background for warning
+    border: 1px solid #fcd34d;
+    color: #92400e;
 }
 
-.summaryBox {
-    background-color: #fff;
-    border-radius: 12px;
-    border: 1px solid #e9ecef;
-    display: flex;
-    flex-direction: column;
-    grid-column: span 1; // Default to 1 column wide
+.starterBanner {
+    background-color: #d1fae5; // Greenish background for stability
+    border: 1px solid #10b981;
+    color: #065f46;
 }
 
-.chartBox {
-    grid-column: span 3; // Chart takes full width
-    height: 380px;
-    padding: 1rem;
-}
-.chartContainer {
-    width: 100%;
-    height: 100%;
+.proBanner {
+    background-color: #e0f2fe; // Blue background for premium
+    border: 1px solid #3b82f6;
+    color: #1e40af;
 }
 
-.boxHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid #e9ecef;
-    h2 {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #343a40;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-    }
-}
-.viewAllLink {
-    font-size: 0.8rem;
-    color: #495057;
-    text-decoration: none;
-    font-weight: 500;
-    &:hover { color: #007bff; }
-}
-
-.boxContent {
-    padding: 1.25rem;
-    flex-grow: 1;
-    p { margin: 0.25rem 0; }
-}
-
-.recentList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    flex-grow: 1;
-    li {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.85rem 1.25rem;
-        font-size: 0.9rem;
-        border-bottom: 1px solid #f1f3f5;
-        &:last-child { border-bottom: none; }
-    }
-}
-.subject {
-    color: #6c757d;
-    font-size: 0.85rem;
-}
-
-.boxFooter {
-    padding: 0.75rem 1.25rem;
-    background-color: #f8f9fa;
-    border-top: 1px solid #e9ecef;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-}
-.addButton {
-    width: 100%;
-    padding: 0.6rem;
-    background-color: #f8f9fa;
-    color: #495057;
-    border: 1px solid #dee2e6;
+.upgradeButton {
+    // Shared button style
+    padding: 0.5rem 1rem;
     border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 1rem;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    flex-shrink: 0;
+    
+    // Custom colors for Trial button
+    .trialBanner & {
+        background-color: #f59e0b;
+        color: #fff;
+        &:hover { 
+            background-color: #d97706; 
+            transform: translateY(-1px);
+        }
+    }
+    // Custom colors for Starter/Pro button (Manage Plan)
+    .starterBanner &, .proBanner & {
+        background-color: #fff;
+        color: #3b82f6;
+        border: 1px solid #3b82f6;
+        &:hover {
+            background-color: #3b82f6;
+            color: #fff;
+        }
+    }
+}
+
+// Standard Plan Content (Starter/Pro/Free)
+.planContent {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 0.5rem;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    &:hover { background-color: #007bff; color: #fff; border-color: #007bff; }
-}
-.smallText { 
-    font-size: 0.9rem; 
-    color: #6c757d; 
-    text-align: center;
-    strong { color: #212529; }
-}
-.schoolLayoutWrapper {
-  display: flex;
-  // Parent layout (app/admin/layout) में styles.content पहले से ही 100vh है, 
-  // इसलिए हम इसे flex-grow: 1 पर सेट करते हैं।
-  flex-grow: 1; 
-  position: relative; 
+    font-size: 1rem;
+    flex-grow: 1;
 }
 
-.schoolContent {
-  flex-grow: 1; 
-  overflow-y: auto;
-  min-height: 100vh;
-  // --- यह सबसे महत्वपूर्ण FIX है ---
-  // SchoolSidebar 260px चौड़ा है, इसलिए content को 260px का margin दें
-  margin-left: 260px; 
-  padding: 1.5rem 2rem;
-  background-color: #f4f7fa; 
+// Trial Countdown Styles (Professional Animation)
+.trialContent {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    gap: 0.5rem;
 }
 
-/* ... बाकी styles ... */
+.countdownValue {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ef4444; // Red color for urgency
+    line-height: 1;
+}
 
-.overviewContainer {
-    max-width: 1600px;
-    margin: 0 auto;
+.countdownLabel {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: #92400e;
+    line-height: 1;
+}
+
+.progressBar {
+    flex-grow: 1;
+    height: 8px;
+    background-color: #fde68a; // Light track color
+    border-radius: 4px;
+    overflow: hidden;
+    margin-left: 1rem;
+}
+
+.progressFill {
+    height: 100%;
+    background-color: #ef4444; // Red fill color
+    border-radius: 4px;
+    // Animation to show progress dynamically
+    transition: width 0.5s ease-out; 
+}
+// ===========================================
+
+.progressFill {
+    height: 100%;
+    background-color: #ef4444; // Red fill color
+    border-radius: 4px;
+    // Animation to show progress dynamically
+    transition: width 0.5s ease-out; 
+}
+// ===========================================
+
+
+// === NEW: Warning Modal Styles (Fixed) ===
+.warningModal {
+    /* FIX: Adding max-width to remove empty ruleset error and make it smaller */
+    max-width: 550px !important; // Narrower than default modal
+    
+    /* You might need to add specific backdrop/container styles here if Modal component allows */
+}
+
+.modalContent {
+    padding: 1rem 0;
+    p {
+        margin: 0 0 0.8rem 0;
+        font-size: 1rem;
+        color: #495057;
+        font-weight: 500;
+    }
+}
+.warningMessage {
+    display: flex;
+    align-items: center;
+    background-color: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    padding: 0.8rem;
+    border-radius: 4px;
+    color: #92400e !important;
+    font-weight: 600 !important;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.upgradeLinkButton {
+    @extend .addButton; // Use the base button style
+    background-color: #10b981;
+    color: #fff;
+    border: none;
+    &:hover { background-color: #059669; color: #fff; }
+}
+
+.dismissButton {
+    @extend .addButton; // Use the base button style
+    background-color: #f8f9fa;
+    color: #495057;
+    border-color: #dee2e6;
+    &:hover { background-color: #e9ecef; }
 }

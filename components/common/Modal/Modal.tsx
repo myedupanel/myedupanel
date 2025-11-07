@@ -1,6 +1,6 @@
 // components/common/Modal.tsx
 "use client";
-import React, { useEffect } from 'react'; // <-- Step 1: useEffect ko import karein
+import React, { useEffect } from 'react';
 import styles from './Modal.module.scss';
 import { FiX } from 'react-icons/fi';
 
@@ -9,35 +9,39 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  // [FIX 1]: modalClassName prop को जोड़ा गया
+  modalClassName?: string; 
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
-  // Step 2: useEffect hook add karein
+// [FIX 2]: modalClassName prop को destructure किया गया
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, modalClassName }) => {
+  // Functionality for ESC key to close modal (as you added)
   useEffect(() => {
-    // Function to handle key down event
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
       }
     };
 
-    // Add event listener when the modal is open
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown);
     }
 
-    // Cleanup function: remove event listener when the modal closes
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]); // Dependencies: re-run effect if these change
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    // ... baaki ka code same rahega
-    <div className={styles.backdrop} onClick={onClose} data-modal-backdrop="true"> {/* <-- YEH ADD KAREIN */}
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+    // Backdrop allows clicking outside to close
+    <div className={styles.backdrop} onClick={onClose} data-modal-backdrop="true">
+      {/* [FIX 3]: styles.modalContent के साथ modalClassName को apply किया गया */}
+      <div 
+        className={`${styles.modalContent} ${modalClassName || ''}`} 
+        onClick={(e) => e.stopPropagation()} // Stop click from bubbling to backdrop
+      >
         <header className={styles.header}>
           <h2>{title}</h2>
           <button onClick={onClose} className={styles.closeButton}>
