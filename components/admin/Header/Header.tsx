@@ -1,9 +1,13 @@
 "use client";
 // --- useState aur useEffect ko React se import karein ---
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+// Image component ab zaroori nahi agar hum hamesha icon use kar rahe hain, hata sakte hain
+// import Image from 'next/image'; 
 import Link from 'next/link';
 import { MdEdit } from 'react-icons/md';
+// === NAYA IMPORT ===
+import { FaGraduationCap } from 'react-icons/fa'; // Ek professional icon
+// === END NAYA IMPORT ===
 import styles from './Header.module.scss';
 
 // Helper functions to format date and time (koi badlaav nahi)
@@ -14,14 +18,14 @@ const formatDate = (date: Date) => {
   return date.toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 };
 
-// getInitials helper function (koi badlaav nahi)
-const getInitials = (name: string) => {
-  if (!name) return '?'; 
-  const names = name.split(' ');
-  const firstInitial = names[0]?.[0] || '';
-  const lastInitial = names.length > 1 ? names[names.length - 1]?.[0] : '';
-  return `${firstInitial}${lastInitial}`.toUpperCase();
-};
+// getInitials helper function ab zaroori nahi agar hum hamesha icon use kar rahe hain, hata sakte hain
+// const getInitials = (name: string) => {
+//   if (!name) return '?'; 
+//   const names = name.split(' ');
+//   const firstInitial = names[0]?.[0] || '';
+//   const lastInitial = names.length > 1 ? names[names.length - 1]?.[0] : '';
+//   return `${firstInitial}${lastInitial}`.toUpperCase();
+// };
 
 // HeaderProps (koi badlaav nahi)
 interface HeaderProps {
@@ -75,28 +79,15 @@ const Header = ({ admin }: HeaderProps) => {
         </h1>
 
         <div className={styles.profileSection}>
-          {/* Avatar Logic */}
+          {/* === YAHAN BADLAAV KIYA GAYA HAI: Ab hamesha icon dikhega === */}
           <div className={styles.avatarContainer}>
-            {admin.profileImageUrl ? (
-              <Image 
-                src={admin.profileImageUrl}
-                // === YAHAN BADLAAV KIYA GAYA HAI ===
-                alt="School Logo" 
-                // === END BADLAAV ===
-                width={40} 
-                height={40} 
-                className={styles.profileImage}
-              />
-            ) : (
-              <div className={styles.defaultAvatar}>
-                {/* Yeh logic humne pichli baar update kiya tha aur sahi hai */}
-                <span>{getInitials(admin.schoolName)}</span>
-              </div>
-            )}
+            <div className={`${styles.defaultAvatar} ${styles.premiumIcon}`}>
+              <FaGraduationCap size={24} color="white" /> {/* Icon aur uska size/color */}
+            </div>
           </div>
+          {/* === END BADLAAV === */}
 
           <div className={styles.profileInfo}>
-             {/* Yeh logic humne pichli baar update kiya tha aur sahi hai */}
             <span className={styles.profileName}>School Profile</span>
           </div>
           <Link href="/admin/profile" className={styles.editButton}>
