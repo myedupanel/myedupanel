@@ -1,0 +1,172 @@
+/* app/superadmin/plans/PlansPage.module.scss */
+
+.plansPage {
+  padding: 1.5rem 2rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #dee2e6;
+
+  h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #343a40;
+  }
+}
+
+.headerActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.dashboardLinkButton,
+.createButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1px solid #dee2e6;
+  
+  svg {
+    font-size: 1.2rem;
+  }
+}
+
+.dashboardLinkButton {
+  color: #343a40;
+  background-color: #f8f9fa;
+
+  &:hover {
+    background-color: #e9ecef;
+    color: #000;
+  }
+}
+
+.createButton {
+  color: #fff;
+  background-color: #007bff; // Primary blue
+  border-color: #007bff;
+
+  &:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+  }
+}
+
+.tableContainer {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+  h3 {
+    font-size: 1.25rem;
+    color: #495057;
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+}
+
+.error {
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.plansTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+
+  thead tr {
+    border-bottom: 2px solid #dee2e6;
+  }
+  
+  th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    color: #6c757d;
+    font-weight: 600;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #e9ecef;
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  td {
+    padding: 1rem;
+    color: #343a40;
+    vertical-align: middle;
+  }
+}
+
+.statusActive {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.statusInactive {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid #ced4da;
+  background-color: #fff;
+  color: #495057;
+  transition: all 0.2s ease;
+
+  svg {
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    background-color: #e9ecef;
+  }
+}
+
+.deleteButton {
+  color: #dc3545;
+  border-color: #dc3545;
+
+  &:hover {
+    background-color: #dc3545;
+    color: #fff;
+  }
+}
