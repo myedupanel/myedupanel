@@ -263,16 +263,15 @@
 }
 
 .premiumIcon {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); /* Ek gradient use karein */
+  /* === YAHAN FIX KIYA GAYA HAI ===
+    Pehle wale gradient variables (var(...)) kaam nahi kar rahe the.
+    Ab hum ek solid, premium-looking gradient seedha add kar rahe hain.
+  */
+  background: linear-gradient(135deg, #6a11cb, #2575fc); 
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  // Yahan aap gradient colors define kar sakte hain:
-  // For example:
-  // --primary-color: #6a0dad; // Dark purple
-  // --secondary-color: #8a2be2; // Blue violet
-  // Isse purple-ish gradient banega
   
-  // Icon ka size already component mein set hai (size={24})
-  // Lekin agar aapko avatar ka size badalna hai toh yahan:
-  // width: 44px;
-  // height: 44px;
+  /* Yeh properties icon ko center mein rakhti hain (defaultAvatar se) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
