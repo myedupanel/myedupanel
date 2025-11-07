@@ -1,27 +1,109 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import styles from './SchoolPage.module.scss'; // Using the name from your example
+import React, { useState, useEffect } from 'react'; // <--- Make sure React is imported!
+import styles from './SchoolPage.module.scss';
 import Sidebar from '@/components/layout/Sidebar/Sidebar'; 
 import Link from 'next/link';
 import axios from 'axios';
-import { useAuth } from '@/app/context/AuthContext'; // To get the auth token
+import { useAuth } from '@/app/context/AuthContext';
 import { 
     MdPeople, MdSchool, MdFamilyRestroom, MdBadge,
     MdEventAvailable, MdAttachMoney, MdSchedule,
     MdAssessment, MdSettings, MdPersonAdd 
 } from 'react-icons/md';
 
-// ✨ 1. Socket.IO client ko import karein
+// 1. Socket.IO client ko import karein
 import { io } from "socket.io-client";
 
-// (schoolMenuItems array remains the same)
-const schoolMenuItems = [
-    { id: 'students', title: 'Students', path: '/admin/students', icon: <MdPeople /> },
-    { id: 'teachers', title: 'Teachers', path: '/admin/teachers', icon: <MdSchool /> },
-    // ... rest of the items
+// --- FIX: UPDATED NAVITEM INTERFACE (JSX Namespace Error Fixed) ---
+interface NavItem {
+    id: string;
+    title: string;
+    path: string;
+    // FIX: JSX.Element को React.ReactElement से बदला गया है
+    icon: React.ReactElement; 
+    name: string; 
+    type: 'free' | 'premium' | 'upcoming'; 
+}
+// ----------------------------------------
+
+
+// schoolMenuItems array ko NavItem[] type dekar fix karein
+const schoolMenuItems: NavItem[] = [
+    { 
+        id: 'students', 
+        title: 'Students', 
+        path: '/admin/students', 
+        icon: <MdPeople />,
+        name: 'Students', 
+        type: 'free'     
+    },
+    { 
+        id: 'teachers', 
+        title: 'Teachers', 
+        path: '/admin/teachers', 
+        icon: <MdSchool />,
+        name: 'Teachers', 
+        type: 'free'     
+    },
+    { 
+        id: 'parents', 
+        title: 'Parents', 
+        path: '/admin/parents', 
+        icon: <MdFamilyRestroom />,
+        name: 'Parents', 
+        type: 'free'     
+    },
+    { 
+        id: 'staff', 
+        title: 'Staff', 
+        path: '/admin/staff', 
+        icon: <MdBadge />,
+        name: 'Staff', 
+        type: 'free'     
+    },
+    { 
+        id: 'events', 
+        title: 'Events', 
+        path: '/admin/events', 
+        icon: <MdEventAvailable />,
+        name: 'Events', 
+        type: 'premium'     
+    },
+    { 
+        id: 'fees', 
+        title: 'Fees', 
+        path: '/admin/fees', 
+        icon: <MdAttachMoney />,
+        name: 'Fees', 
+        type: 'premium'     
+    },
+    { 
+        id: 'schedules', 
+        title: 'Schedules', 
+        path: '/admin/schedules', 
+        icon: <MdSchedule />,
+        name: 'Schedules', 
+        type: 'premium'     
+    },
+    { 
+        id: 'reports', 
+        title: 'Reports', 
+        path: '/admin/reports', 
+        icon: <MdAssessment />,
+        name: 'Reports', 
+        type: 'premium'     
+    },
+    { 
+        id: 'settings', 
+        title: 'Settings', 
+        path: '/admin/settings', 
+        icon: <MdSettings />,
+        name: 'Settings', 
+        type: 'free'     
+    },
 ];
 
-// (All your interfaces remain the same)
+// (All your existing interfaces remain the same)
 interface Student {
     id: string;
     name: string;
@@ -56,16 +138,13 @@ const DashboardControlCenter = () => {
     const [loading, setLoading] = useState(true); // Loading state
     const [error, setError] = useState(''); // Error state
 
-    // ✨ 2. Humne 'fetchData' function ko 'useEffect' se bahar nikaal liya hai
-    //    Taaki hum isse baar-baar call kar sakein
+    // fetchData function defined outside useEffect
     const fetchData = async () => {
-        if (!token) return; // Wait until token is available
+        if (!token) return; 
 
-        // Sirf pehli baar page load par 'Loading...' dikhayein
         if (!data) setLoading(true); 
 
         try {
-            // NOTE: Make sure this is your correct dashboard API endpoint
             const response = await axios.get('/api/admin/dashboard-stats', {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -75,38 +154,30 @@ const DashboardControlCenter = () => {
             console.error("Failed to fetch dashboard data:", err);
             setError('Could not load dashboard data.');
         } finally {
-            // Loading state ko sirf pehli baar hi false karein
             if (!data) setLoading(false);
         }
     };
 
-    // ✨ 3. Yeh 'useEffect' pehli baar data load karne ke liye hai
+    // 3. Data load karne ke liye useEffect
     useEffect(() => {
         if (token) {
             fetchData();
         }
-    }, [token]); // Re-run when token becomes available
+    }, [token]); 
 
-    // ✨ 4. YEH NAYA 'useEffect' REAL-TIME UPDATES KE LIYE HAI
+    // 4. REAL-TIME UPDATES KE LIYE useEffect
     useEffect(() => {
-        // Apne backend server se connect karein
         const socket = io("https://myedupanel.onrender.com");
 
-        // 'updateDashboard' event ko "sunein"
-        // Yeh wahi event hai jo aapne backend 'students.js' se emit kiya tha
         socket.on('updateDashboard', () => {
             console.log("REAL-TIME UPDATE RECEIVED! Dashboard data refresh ho raha hai...");
-            
-            // Jaise hi event aaye, data ko dobaara fetch karein
             fetchData();
         });
 
-        // Clean-up function: Jab component hatega, toh connection band kar dein
         return () => {
             socket.disconnect();
         };
-    }, [token, fetchData]); // Dependencies add ki hain
-
+    }, [token]); 
 
     if (loading) {
         return <div className={styles.loading}>Loading Dashboard...</div>;
@@ -123,7 +194,6 @@ const DashboardControlCenter = () => {
                 {/* Students Box (Now with real data) */}
                 <div className={styles.summaryBox}>
                     <div className={styles.boxHeader}>
-                        {/* YEH NUMBER AB REAL-TIME MEIN UPDATE HOGA */}
                         <h2><MdPeople/> Students ({data?.stats?.totalStudents})</h2>
                         <Link href="/admin/students" className={styles.viewAllLink}>View All</Link>
                     </div>
@@ -139,7 +209,6 @@ const DashboardControlCenter = () => {
                 {/* Teachers Box (Now with real data) */}
                 <div className={styles.summaryBox}>
                     <div className={styles.boxHeader}>
-                         {/* YEH NUMBER BHI AB REAL-TIME MEIN UPDATE HOGA */}
                         <h2><MdSchool/> Teachers ({data?.stats?.totalTeachers})</h2>
                         <Link href="/admin/teachers" className={styles.viewAllLink}>View All</Link>
                     </div>
@@ -171,7 +240,7 @@ const DashboardControlCenter = () => {
 const SchoolPage = () => {
     return (
         <div className={styles.schoolPageContainer}>
-            <Sidebar menuItems={schoolMenuItems} />
+            <Sidebar menuItems={schoolMenuItems} /> 
             <main className={styles.mainContent}>
                 <DashboardControlCenter />
             </main>
