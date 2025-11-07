@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import styles from './SchoolPage.module.scss';
-// FIX: Sidebar import ko yahaan se hata diya gaya hai, yeh ab layout.tsx se aayega
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -20,9 +19,7 @@ import AddParentForm from '@/components/admin/AddParentForm/AddParentForm';
 import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
 import api from '@/backend/utils/api';
 
-
 // === FIX 1: Missing TypeScript Interfaces ===
-
 interface RecentStudent {
     id: string; 
     name: string; 
@@ -63,7 +60,6 @@ interface DashboardData {
     recentFees: RecentFee[];
     recentParents: RecentParent[];
     recentStaff: RecentStaff[];
-    // Agar backend se stats aa rahe hain toh unhe bhi yahaan define karein
     stats?: {
         totalStudents: number;
         totalTeachers: number;
@@ -73,16 +69,10 @@ interface DashboardData {
 }
 // ===========================================
 
-// --- schoolMenuItems array (No longer used by SchoolPage but kept for reference) ---
-const schoolMenuItems = [
-    // ... items ...
-] as const;
-
-
 const DashboardControlCenter = () => {
+    // ... (Your DashboardControlCenter logic remains here) ...
     const { token } = useAuth();
     const router = useRouter();
-    // FIX: State ko DashboardData type diya
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -141,18 +131,16 @@ const DashboardControlCenter = () => {
     if (error) { return <div className={`${styles.message} ${styles.error}`}>{error}</div>; }
     if (!data) { return <div className={styles.message}>No dashboard data available.</div>; }
 
-    // === FIX 2: Implicit 'any' errors ke liye typing add ki ===
     const getStudentClass = (student: RecentStudent) => student.class || student.details?.class || 'N/A';
     const getTeacherSubject = (teacher: RecentTeacher) => teacher.subject || teacher.details?.subject || 'N/A';
     const getStaffRole = (staff: RecentStaff) => staff.role || staff.details?.role || 'N/A';
-    // =========================================================
 
     return (
         <div className={styles.overviewContainer}>
             {/* ... (Aapka poora Dashboard UI yahaan) ... */}
             <h1 className={styles.mainTitle}>School Control Center</h1>
-            {/* ... (Chart, Boxes, Modals, etc. ka code) ... */}
             <div className={styles.mainGrid}>
+                {/* ... (Chart, Students Box, Teachers Box, etc. ka code) ... */}
                 {/* Chart Box */}
                 <div className={`${styles.summaryBox} ${styles.chartBox}`}>
                      <div className={styles.boxHeader}><h2><MdAssessment/> Student Admissions</h2></div>
@@ -218,10 +206,8 @@ const DashboardControlCenter = () => {
                      </ul>
                      <div className={styles.boxFooter}><button onClick={() => openModal('add-staff')} className={styles.addButton}><MdPersonAdd /> Add Staff</button></div>
                 </div>
-
             </div>
             
-            {/* Modal definition */}
             <Modal isOpen={!!activeModal} onClose={closeModal} title={getModalTitle()}>
                 <>
                     {activeModal === 'add-student' && <AddStudentForm onClose={closeModal} onSuccess={handleStudentSuccess} />}
@@ -238,11 +224,11 @@ const DashboardControlCenter = () => {
 // Main Page Component
 const SchoolPage = () => {
     return (
+        // FIX: हमने SchoolPage component को सरल बनाया है।
+        // Layout (layout.tsx) पहले ही <main className={styles.content}> प्रदान करता है, 
+        // इसलिए हमें यहाँ किसी अनावश्यक wrapper या <main> tag की ज़रूरत नहीं है।
         <div className={styles.schoolPageContainer}>
-            {/* Sidebar yahaan nahi aayega, woh ab layout.tsx mein hai */}
-            <main className={styles.mainContent}>
-                <DashboardControlCenter />
-            </main>
+            <DashboardControlCenter />
         </div>
     );
 };
