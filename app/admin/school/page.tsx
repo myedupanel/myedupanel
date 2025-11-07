@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import styles from './SchoolPage.module.scss';
-import Sidebar from '@/components/layout/Sidebar/Sidebar';
+// FIX: Sidebar import ko yahaan se hata diya gaya hai, yeh ab layout.tsx se aayega
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -12,8 +12,7 @@ import {
     MdEventAvailable, MdAttachMoney, MdSchedule,
     MdAssessment, MdSettings, MdPersonAdd,
     MdClass 
-} from 'react-icons/md'; // <--- FIX 1: 'reicons' ko 'react-icons' kar diya
-
+} from 'react-icons/md'; 
 import Modal from '@/components/common/Modal/Modal';
 import AddStudentForm from '@/components/admin/AddStudentForm/AddStudentForm';
 import AddTeacherForm from '@/components/admin/AddTeacherForm/AddTeacherForm';
@@ -22,41 +21,68 @@ import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
 import api from '@/backend/utils/api';
 
 
-// === FIX 2: 'schoolMenuItems' ko naye 'NavItem' structure se match kiya ===
-// (Aapke screenshot se saare items)
-const schoolMenuItems = [
-    { name: 'Students', path: '/admin/students', icon: <MdPeople />, type: 'free' },
-    { name: 'Teachers', path: '/admin/teachers', icon: <MdSchool />, type: 'free' },
-    { name: 'Parents', path: '/admin/parents', icon: <MdFamilyRestroom />, type: 'free' },
-    { name: 'Staff', path: '/admin/staff', icon: <MdBadge />, type: 'free' },
-    { 
-      name: 'Manage Classes', 
-      path: '/admin/school/classes', // Path to your classes page
-      icon: <MdClass />, 
-      type: 'free'
-    },
-    { name: 'Attendance', path: '/admin/attendance', icon: <MdEventAvailable />, type: 'upcoming' },
-    { name: 'Fee Counter', path: '/admin/fee-counter', icon: <MdAttachMoney />, type: 'premium' },
-    { name: 'Timetable', path: '/admin/timetable', icon: <MdSchedule />, type: 'upcoming' },
-    { name: 'Timetable Settings', path: '/admin/timetable-settings', icon: <MdSettings />, type: 'upcoming' }, 
-    { name: 'Academics', path: '/admin/academics', icon: <MdAssessment />, type: 'upcoming' },
-] as const; 
-// --- END FIX ---
+// === FIX 1: Missing TypeScript Interfaces ===
 
-
-interface DashboardData {
-    admissionsData: { month?: number; name: string; admissions: number }[];
-    recentStudents: { id: string; name: string; class?: string; details?: { class?: string } }[];
-    recentTeachers: { id: string; name: string; subject?: string; details?: { subject?: string } }[];
-    recentFees: { id: string; student: string; amount: string; date?: string }[];
-    recentParents: { id: string; name: string }[];
-    recentStaff: { id: string; name: string; role?: string; details?: { role?: string } }[];
+interface RecentStudent {
+    id: string; 
+    name: string; 
+    class?: string; 
+    details?: { class?: string };
 }
+interface RecentTeacher {
+    id: string; 
+    name: string; 
+    subject?: string; 
+    details?: { subject?: string };
+}
+interface RecentStaff {
+    id: string; 
+    name: string; 
+    role?: string; 
+    details?: { role?: string };
+}
+interface RecentFee {
+    id: string; 
+    student: string; 
+    amount: string; 
+    date?: string;
+}
+interface RecentParent {
+    id: string;
+    name: string;
+}
+interface AdmissionDataPoint {
+    month?: number; 
+    name: string; 
+    admissions: number;
+}
+interface DashboardData {
+    admissionsData: AdmissionDataPoint[];
+    recentStudents: RecentStudent[];
+    recentTeachers: RecentTeacher[];
+    recentFees: RecentFee[];
+    recentParents: RecentParent[];
+    recentStaff: RecentStaff[];
+    // Agar backend se stats aa rahe hain toh unhe bhi yahaan define karein
+    stats?: {
+        totalStudents: number;
+        totalTeachers: number;
+        totalParents: number;
+        totalStaff: number;
+    }
+}
+// ===========================================
+
+// --- schoolMenuItems array (No longer used by SchoolPage but kept for reference) ---
+const schoolMenuItems = [
+    // ... items ...
+] as const;
+
 
 const DashboardControlCenter = () => {
-    // ... (Aapka poora DashboardControlCenter component code BINA KISI BADLAAV ke) ...
     const { token } = useAuth();
     const router = useRouter();
+    // FIX: State ko DashboardData type diya
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -73,23 +99,10 @@ const DashboardControlCenter = () => {
         });
     };
 
-    const handleStudentSuccess = () => {
-        console.log("Student added!");
-        closeModal();
-    }
-     const handleTeacherSuccess = () => {
-        console.log("Teacher added!");
-        closeModal();
-    }
-      const handleParentSuccess = () => {
-        console.log("Parent added!");
-        closeModal();
-    }
-     const handleStaffSuccess = async (staffData: any) => {
-        console.log("Staff potentially added/updated via API call inside AddStaffForm", staffData);
-        closeModal();
-        return Promise.resolve();
-    }
+    const handleStudentSuccess = () => { console.log("Student added!"); closeModal(); }
+    const handleTeacherSuccess = () => { console.log("Teacher added!"); closeModal(); }
+    const handleParentSuccess = () => { console.log("Parent added!"); closeModal(); }
+    const handleStaffSuccess = async (staffData: any) => { console.log("Staff potentially added/updated via API call inside AddStaffForm", staffData); closeModal(); return Promise.resolve(); }
 
 
     const getModalTitle = () => {
@@ -112,8 +125,7 @@ const DashboardControlCenter = () => {
             try {
                 setLoading(true);
                 setError('');
-                // Note: Ensure '/admin/dashboard-data' is the correct endpoint
-                const response = await api.get<DashboardData>('/admin/dashboard-data'); 
+                const response = await api.get<DashboardData>('/admin/dashboard-data');
                 setData(response.data);
             } catch (err: any) {
                 setError('Could not load dashboard data.');
@@ -129,16 +141,17 @@ const DashboardControlCenter = () => {
     if (error) { return <div className={`${styles.message} ${styles.error}`}>{error}</div>; }
     if (!data) { return <div className={styles.message}>No dashboard data available.</div>; }
 
-
-    const getStudentClass = (student: any) => student.class || student.details?.class || 'N/A';
-    const getTeacherSubject = (teacher: any) => teacher.subject || teacher.details?.subject || 'N/A';
-    const getStaffRole = (staff: any) => staff.role || staff.details?.role || 'N/A';
-
+    // === FIX 2: Implicit 'any' errors ke liye typing add ki ===
+    const getStudentClass = (student: RecentStudent) => student.class || student.details?.class || 'N/A';
+    const getTeacherSubject = (teacher: RecentTeacher) => teacher.subject || teacher.details?.subject || 'N/A';
+    const getStaffRole = (staff: RecentStaff) => staff.role || staff.details?.role || 'N/A';
+    // =========================================================
 
     return (
         <div className={styles.overviewContainer}>
+            {/* ... (Aapka poora Dashboard UI yahaan) ... */}
             <h1 className={styles.mainTitle}>School Control Center</h1>
-
+            {/* ... (Chart, Boxes, Modals, etc. ka code) ... */}
             <div className={styles.mainGrid}>
                 {/* Chart Box */}
                 <div className={`${styles.summaryBox} ${styles.chartBox}`}>
@@ -175,7 +188,7 @@ const DashboardControlCenter = () => {
                     </ul>
                     <div className={styles.boxFooter}><button onClick={() => openModal('add-teacher')} className={styles.addButton}><MdPersonAdd /> Add Teacher</button></div>
                 </div>
-
+                
                 {/* Fee Counter Box */}
                 <div className={styles.summaryBox}>
                     <div className={styles.boxHeader}><h2><MdAttachMoney/> Fee Counter</h2><Link href="/admin/fee-counter" className={styles.viewAllLink}>View All</Link></div>
@@ -207,7 +220,7 @@ const DashboardControlCenter = () => {
                 </div>
 
             </div>
-
+            
             {/* Modal definition */}
             <Modal isOpen={!!activeModal} onClose={closeModal} title={getModalTitle()}>
                 <>
@@ -226,8 +239,7 @@ const DashboardControlCenter = () => {
 const SchoolPage = () => {
     return (
         <div className={styles.schoolPageContainer}>
-            {/* Sidebar ab updated 'schoolMenuItems' list use karega */}
-            <Sidebar menuItems={[...schoolMenuItems]} />
+            {/* Sidebar yahaan nahi aayega, woh ab layout.tsx mein hai */}
             <main className={styles.mainContent}>
                 <DashboardControlCenter />
             </main>
