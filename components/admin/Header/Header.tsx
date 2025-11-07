@@ -80,21 +80,23 @@ const Header = ({ admin }: HeaderProps) => {
             {admin.profileImageUrl ? (
               <Image 
                 src={admin.profileImageUrl}
-                alt="Admin Profile Photo" 
+                // === YAHAN BADLAAV KIYA GAYA HAI ===
+                alt="School Logo" 
+                // === END BADLAAV ===
                 width={40} 
                 height={40} 
                 className={styles.profileImage}
               />
             ) : (
               <div className={styles.defaultAvatar}>
-                {/* === BADLAAV 1: School ke initials === */}
+                {/* Yeh logic humne pichli baar update kiya tha aur sahi hai */}
                 <span>{getInitials(admin.schoolName)}</span>
               </div>
             )}
           </div>
 
           <div className={styles.profileInfo}>
-            {/* === BADLAAV 2: Static text "School Profile" === */}
+             {/* Yeh logic humne pichli baar update kiya tha aur sahi hai */}
             <span className={styles.profileName}>School Profile</span>
           </div>
           <Link href="/admin/profile" className={styles.editButton}>
