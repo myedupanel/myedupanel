@@ -1,4 +1,3 @@
-// File: components/layout/Sidebar/Sidebar.tsx (FINAL, SUPER INTELLIGENT)
 "use client";
 import React from 'react';
 import Link from 'next/link';
@@ -7,7 +6,11 @@ import { useAuth } from '@/app/context/AuthContext';
 import { useAdminLayout } from '@/app/context/AdminLayoutContext'; 
 import styles from './Sidebar.module.scss'; 
 import { FiTag } from 'react-icons/fi'; 
-import { MdLogout, MdPeople, MdSchool, MdFamilyRestroom, MdBadge, MdClass, MdEventAvailable, MdSchedule, MdSettings, MdAssessment, MdGridView, MdPublic, MdAttachMoney } from 'react-icons/md'; 
+import { 
+  MdLogout, MdPeople, MdSchool, MdFamilyRestroom, MdBadge, MdClass, 
+  MdEventAvailable, MdSchedule, MdSettings, MdAssessment, MdGridView, 
+  MdPublic, MdAttachMoney, MdLayers // <-- 1. NAYA ICON IMPORT KIYA
+} from 'react-icons/md'; 
 import { FaLandmark } from 'react-icons/fa';
 import { GiReceiveMoney } from 'react-icons/gi';
 
@@ -19,7 +22,7 @@ export interface NavItem {
   type: 'free' | 'premium' | 'upcoming';
 }
 
-// === MENU 1: DASHBOARD MAIN MENU ===
+// === MENU 1: DASHBOARD MAIN MENU (Bina Badlaav) ===
 const mainMenuItems: NavItem[] = [
   { name: 'Main Dashboard', path: '/admin/dashboard', icon: <MdGridView style={{ color: '#3b82f6' }} />, type: 'free' },
   { name: 'School', path: '/admin/school', icon: <MdSchool style={{ color: '#8b5cf6' }} />, type: 'free' },
@@ -27,7 +30,7 @@ const mainMenuItems: NavItem[] = [
   { name: 'Expense', path: '/admin/expense', icon: <GiReceiveMoney style={{ color: '#f97316' }} />, type: 'upcoming' },
 ];
 
-// === MENU 2: SCHOOL CONTROL CENTER MENU ===
+// === MENU 2: SCHOOL CONTROL CENTER MENU (Bina Badlaav) ===
 const schoolMenuItems: NavItem[] = [
     { name: 'Students', path: '/admin/students', icon: <MdPeople />, type: 'free' },
     { name: 'Teachers', path: '/admin/teachers', icon: <MdSchool />, type: 'free' },
@@ -48,7 +51,7 @@ const Sidebar = () => {
 
   const isSuperAdmin = user?.role === 'SuperAdmin';
   
-  // DYNAMIC MENU SELECTION LOGIC
+  // DYNAMIC MENU SELECTION LOGIC (Bina Badlaav)
   const isSchoolFeatureRoute = pathname.startsWith('/admin/school') || 
                                pathname.startsWith('/admin/students') || 
                                pathname.startsWith('/admin/teachers') || 
@@ -58,6 +61,7 @@ const Sidebar = () => {
                                
   const currentMenuItems = isSchoolFeatureRoute ? schoolMenuItems : mainMenuItems;
 
+  // getLinkProps (Bina Badlaav)
   const getLinkProps = (item: NavItem) => {
     // Locking Logic (Same as before)
     if (isSuperAdmin || item.type === 'free') {
@@ -103,7 +107,7 @@ const Sidebar = () => {
                 >
                   <span className={styles.icon}>{item.icon}</span>
                   <span>{item.name}</span>
-                  {/* === TAGS === */}
+                  {/* === TAGS (Bina Badlaav) === */}
                   {(item.type === 'premium' && !isSuperAdmin) && (
                     <span className={styles.proTag}>PRO</span>
                   )}
@@ -115,7 +119,7 @@ const Sidebar = () => {
             );
           })}
           
-          {/* === COUPON BUTTON === */}
+          {/* === COUPON BUTTON (Bina Badlaav) === */}
           {isSuperAdmin && (
             <li className={`${styles.menuItem} ${styles.superAdminLink} ${
                 pathname === '/superadmin/coupons' ? styles.active : ''
@@ -127,6 +131,21 @@ const Sidebar = () => {
               </Link>
             </li>
           )}
+
+          {/* === 2. NAYA MANAGE PLANS LINK === */}
+          {isSuperAdmin && (
+            <li className={`${styles.menuItem} ${styles.superAdminLink} ${
+                pathname === '/superadmin/plans' ? styles.active : ''
+              }`}
+            >
+              <Link href="/superadmin/plans">
+                <span className={styles.icon}><MdLayers /></span>
+                <span>Manage Plans</span>
+              </Link>
+            </li>
+          )}
+          {/* ============================== */}
+
         </ul>
       </nav>
 
