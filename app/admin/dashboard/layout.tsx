@@ -1,10 +1,11 @@
-// File: app/admin/layout.tsx (CLEANED UP - FINAL)
+// File: app/admin/layout.tsx (FINAL CLEANED UP & IMPORT CHECKED)
 "use client";
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/layout/Sidebar/Sidebar'; // Sidebar ab prop nahi lega
+import Sidebar from '@/components/layout/Sidebar/Sidebar'; 
 import styles from './layout.module.scss';
 import { useAuth } from '@/app/context/AuthContext';
+// FIX: AdminLayoutProvider को सही path से इंपोर्ट किया गया
 import { AdminLayoutProvider } from '@/app/context/AdminLayoutContext'; 
 
 export default function AdminLayout({
@@ -15,7 +16,14 @@ export default function AdminLayout({
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
 
-  // Auth Logic (Remains the same)
+  useEffect(() => {
+    // Auth Logic (Remains the same)
+    if (!isLoading) {
+      const isAdminOrSuperAdmin = user?.role === 'Admin' || user?.role === 'SuperAdmin';
+      if (!isAuthenticated) { router.push('/login'); } 
+      else if (!isAdminOrSuperAdmin) { router.push('/login'); }
+    }
+  }, [isLoading, isAuthenticated, router, user]);
 
   if (isLoading || !user) {
     return <div className={styles.loadingState}>Loading Admin Area...</div>; 
@@ -27,10 +35,9 @@ export default function AdminLayout({
   }
   
   return (
-    // FIX: AdminLayoutProvider aur AuthProvider Sidebar ke upar hona chahiye
+    // AdminLayoutProvider का उपयोग किया गया
     <AdminLayoutProvider>
       <div className={styles.container}>
-        {/* FIX: Sidebar ko koi prop nahi chahiye */}
         <Sidebar /> 
         <main className={styles.content}>
           {children}

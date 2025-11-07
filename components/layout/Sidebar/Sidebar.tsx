@@ -1,4 +1,4 @@
-// File: components/layout/Sidebar/Sidebar.tsx (FINAL FIX - NO PROPS)
+// File: components/layout/Sidebar/Sidebar.tsx (FINAL, SUPER INTELLIGENT)
 "use client";
 import React from 'react';
 import Link from 'next/link';
@@ -11,7 +11,7 @@ import { MdLogout, MdPeople, MdSchool, MdFamilyRestroom, MdBadge, MdClass, MdEve
 import { FaLandmark } from 'react-icons/fa';
 import { GiReceiveMoney } from 'react-icons/gi';
 
-// Interface definition (Internal to Sidebar)
+// NavItem Interface (Internal)
 export interface NavItem {
   name: string;
   path: string;
@@ -41,13 +41,9 @@ const schoolMenuItems: NavItem[] = [
     { name: 'Academics', path: '/admin/academics', icon: <MdAssessment />, type: 'upcoming' }, 
 ];
 
-// Sidebar Component - NO PROPS! (Guarantees no 'menuItems' conflict)
 const Sidebar = () => { 
   const pathname = usePathname();
   const { user, logout } = useAuth(); 
-  
-  // FIX: useAdminLayout ko yahaan call karne se pehle, hum uske parent ko check karenge.
-  // Lekin is component ko useAdminLayout ke bina chalaya nahi ja sakta.
   const { showUpcomingFeatureModal } = useAdminLayout(); 
 
   const isSuperAdmin = user?.role === 'SuperAdmin';
@@ -58,7 +54,7 @@ const Sidebar = () => {
                                pathname.startsWith('/admin/teachers') || 
                                pathname.startsWith('/admin/parents') || 
                                pathname.startsWith('/admin/staff') ||
-                               pathname.startsWith('/admin/settings'); 
+                               pathname.startsWith('/admin/settings');
                                
   const currentMenuItems = isSchoolFeatureRoute ? schoolMenuItems : mainMenuItems;
 
@@ -134,7 +130,6 @@ const Sidebar = () => {
         </ul>
       </nav>
 
-      {/* --- FOOTER (LOGOUT BUTTON) --- */}
       <footer className={styles.sidebarFooter}>
         <button onClick={logout} className={`${styles.footerButton} ${styles.logoutButton}`}>
           <MdLogout />
