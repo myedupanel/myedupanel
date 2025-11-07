@@ -197,7 +197,8 @@
 }
 
 .upgradeLinkButton {
-    @extend .addButton; // Use the base button style
+    // [FIX 1]: !optional keyword added
+    @extend .addButton !optional; 
     background-color: #10b981;
     color: #fff;
     border: none;
@@ -205,7 +206,8 @@
 }
 
 .dismissButton {
-    @extend .addButton; // Use the base button style
+    // [FIX 2]: !optional keyword added
+    @extend .addButton !optional; 
     background-color: #f8f9fa;
     color: #495057;
     border-color: #dee2e6;
