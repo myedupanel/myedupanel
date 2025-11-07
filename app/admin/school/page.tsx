@@ -22,8 +22,8 @@ import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
 import api from '@/backend/utils/api';
 
 
-// --- FIX 2: 'schoolMenuItems' ko naye 'NavItem' structure se match kiya ---
-// (name aur type properties add kiye, id aur title hata diye)
+// === FIX 2: 'schoolMenuItems' ko naye 'NavItem' structure se match kiya ===
+// (Aapke screenshot se saare items)
 const schoolMenuItems = [
     { name: 'Students', path: '/admin/students', icon: <MdPeople />, type: 'free' },
     { name: 'Teachers', path: '/admin/teachers', icon: <MdSchool />, type: 'free' },
@@ -31,14 +31,14 @@ const schoolMenuItems = [
     { name: 'Staff', path: '/admin/staff', icon: <MdBadge />, type: 'free' },
     { 
       name: 'Manage Classes', 
-      path: '/admin/school/classes', 
+      path: '/admin/school/classes', // Path to your classes page
       icon: <MdClass />, 
       type: 'free'
     },
-    { name: 'Attendance', path: '/admin/attendance/student', icon: <MdEventAvailable />, type: 'upcoming' },
+    { name: 'Attendance', path: '/admin/attendance', icon: <MdEventAvailable />, type: 'upcoming' },
     { name: 'Fee Counter', path: '/admin/fee-counter', icon: <MdAttachMoney />, type: 'premium' },
     { name: 'Timetable', path: '/admin/timetable', icon: <MdSchedule />, type: 'upcoming' },
-    { name: 'Timetable Settings', path: '/admin/settings', icon: <MdSettings />, type: 'upcoming' }, 
+    { name: 'Timetable Settings', path: '/admin/timetable-settings', icon: <MdSettings />, type: 'upcoming' }, 
     { name: 'Academics', path: '/admin/academics', icon: <MdAssessment />, type: 'upcoming' },
 ] as const; 
 // --- END FIX ---
@@ -112,7 +112,8 @@ const DashboardControlCenter = () => {
             try {
                 setLoading(true);
                 setError('');
-                const response = await api.get<DashboardData>('/admin/dashboard-data');
+                // Note: Ensure '/admin/dashboard-data' is the correct endpoint
+                const response = await api.get<DashboardData>('/admin/dashboard-data'); 
                 setData(response.data);
             } catch (err: any) {
                 setError('Could not load dashboard data.');
@@ -225,8 +226,7 @@ const DashboardControlCenter = () => {
 const SchoolPage = () => {
     return (
         <div className={styles.schoolPageContainer}>
-            {/* --- FIX 4: 'as const' se array 'readonly' ho jaata hai --- */}
-            {/* --- Use spread operator [...] to make it mutable --- */}
+            {/* Sidebar ab updated 'schoolMenuItems' list use karega */}
             <Sidebar menuItems={[...schoolMenuItems]} />
             <main className={styles.mainContent}>
                 <DashboardControlCenter />

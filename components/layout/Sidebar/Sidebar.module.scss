@@ -54,7 +54,7 @@
   margin: 0.25rem 0.75rem;
   border-radius: 8px;
 
-  a, .menuButtonLink { // Dono Links aur Buttons ke liye style
+  a {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -65,15 +65,6 @@
     transition: background-color 0.2s ease, color 0.2s ease;
     border-radius: 8px;
     white-space: nowrap; // Text ko wrap hone se rokega
-    
-    // Button-specific reset
-    background: none;
-    border: none;
-    width: 100%;
-    cursor: pointer;
-    font-size: inherit;
-    font-family: inherit;
-    text-align: left;
   }
 
   .icon {
@@ -82,33 +73,44 @@
   }
 
   &:hover {
-    a, .menuButtonLink {
+    a {
       background-color: #374151;
       color: #ffffff;
     }
   }
 
   &.active {
-    background-color: #3b82f6;
-    a, .menuButtonLink {
+    background-color: #3b82f6; // Blue active color
+    a {
       color: #ffffff;
     }
   }
 }
 
-// --- NAYE LOCK/TAG STYLES ---
+/* === NAYE STYLES (PREMIUM/UPCOMING/SUPERADMIN) === */
+
+.proTag {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background-color: #ffc107; // Yellow
+  color: #333;
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+
 .upcomingTag {
   margin-left: auto;
   font-size: 0.7rem;
   font-weight: 700;
-  background-color: #17a2b8;
+  background-color: #17a2b8; // Teal/Info color
   color: white;
   padding: 3px 8px;
   border-radius: 5px;
 }
 
 .upcoming {
-  a, .menuButtonLink {
+  a {
     color: #6b7280; // Text ko halka grey kar dein
     cursor: not-allowed;
   }
@@ -118,7 +120,7 @@
   }
 
   &:hover {
-    a, .menuButtonLink {
+    a {
       background-color: transparent; // Hover effect band
     }
   }
@@ -134,25 +136,29 @@
 }
 
 .superAdminLink {
+  // Coupon button ko alag se style karein
   a {
     color: #60a5fa; // Halka blue
+    border: 1px dashed #374151;
   }
   
   &:hover a {
     background-color: #374151;
     color: #93c5fd;
+    border-color: #4b5563;
   }
 
   &.active a {
     background-color: #2563eb;
     color: white;
+    border-color: #2563eb;
   }
 }
-// --- END NAYE STYLES ---
 
-
+/* === FOOTER STYLES === */
 .sidebarFooter {
   padding: 1rem;
+  margin-top: auto; // Footer ko hamesha neeche rakhega
   border-top: 1px solid #374151;
 }
 
@@ -181,77 +187,14 @@
     background-color: #4b5563;
     color: #ffffff;
   }
-
-  &.logout-button { // Isko specific rakhein
-    background-color: #ef4444;
+  
+  // Logout button ko alag se style karein
+  &.logoutButton {
+    background-color: #ef4444; // Red color
     color: #ffffff;
 
     &:hover {
-      background-color: #dc2626;
+      background-color: #dc2626; // Darker red
     }
   }
-}
-
-// Modal styles (Aapke layout.module.scss se)
-.upcomingModalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  backdrop-filter: blur(5px);
-}
-
-.upcomingModalBox {
-  background: white;
-  padding: 2.5rem 3rem;
-  border-radius: 12px;
-  text-align: center;
-  max-width: 400px;
-  position: relative;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-  transform: scale(0.9);
-  animation: popIn 0.3s forwards ease-out;
-  color: #333; // Modal text color
-}
-
-@keyframes popIn {
-  to {
-    transform: scale(1);
-  }
-}
-
-.closeButton {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  background: transparent;
-  border: none;
-  font-size: 2.5rem;
-  color: #aaa;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.iconWrapper {
-  font-size: 3.5rem;
-  color: #007bff; // Blue icon
-  margin-bottom: 1rem;
-}
-
-.upcomingModalBox h3 {
-  font-size: 1.7rem;
-  margin-bottom: 0.5rem;
-  color: #333;
-}
-
-.upcomingModalBox p {
-  color: #555;
-  font-size: 1rem;
-  line-height: 1.5;
 }

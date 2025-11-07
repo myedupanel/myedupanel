@@ -1,33 +1,45 @@
 "use client";
 
-import React, { useEffect } from 'react'; // useState, createContext, useContext hata diye
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/layout/Sidebar/Sidebar'; // Path check kar lein
+import Sidebar from '@/components/layout/Sidebar/Sidebar'; 
 import styles from './layout.module.scss';
 import { useAuth } from '@/app/context/AuthContext';
-// Naye Provider ko import karein
 import { AdminLayoutProvider } from '@/app/context/AdminLayoutContext'; 
 
-// Icons
-import { FiUsers, FiFileText, FiBarChart2, FiCalendar, FiClock, FiBookOpen, FiSettings } from 'react-icons/fi';
-import { MdDashboard, MdSchool } from 'react-icons/md';
+// === YEH HAIN AAPKE NAYE ICONS ===
+import { MdGridView, MdSchool } from 'react-icons/md';
+import { FaLandmark } from 'react-icons/fa';
+import { GiReceiveMoney } from 'react-icons/gi';
 
-// === FIX: 'title' ko 'name' se badal diya ===
-const menuItems = [
-  { name: 'Main Dashboard', path: '/admin/dashboard', icon: <MdDashboard />, type: 'free' },
-  { name: 'School', path: '/admin/school', icon: <MdSchool />, type: 'free' },
-  { name: 'Staff', path: '/admin/staff', icon: <FiUsers />, type: 'free' },
-  { name: 'Manage Classes', path: '/admin/classes', icon: <FiFileText />, type: 'free' },
-  { name: 'Fee Counter', path: '/admin/fees', icon: <FiBarChart2 />, type: 'premium' },
-  { name: 'Attendance', path: '/admin/attendance', icon: <FiCalendar />, type: 'upcoming' },
-  { name: 'Timetable', path: '/admin/timetable', icon: <FiClock />, type: 'upcoming' },
-  { name: 'Timetable Settings', path: '/admin/timetable-settings', icon: <FiClock />, type: 'upcoming' },
-  { name: 'Academics', path: '/admin/academics', icon: <FiBookOpen />, type: 'upcoming' },
-  { name: 'Settings', path: '/admin/settings', icon: <FiSettings />, type: 'upcoming' },
+// === YEH HAI AAPKA NAYA DASHBOARD MENU ===
+const mainMenuItems = [
+  { 
+    name: 'Main Dashboard', 
+    path: '/admin/dashboard', 
+    icon: <MdGridView style={{ color: '#3b82f6' }} />, // Blue
+    type: 'free' 
+  },
+  { 
+    name: 'School', 
+    path: '/admin/school', 
+    icon: <MdSchool style={{ color: '#8b5cf6' }} />, // Purple
+    type: 'free' 
+  },
+  { 
+    name: 'Gov Schemes', 
+    path: '/admin/schemes', // Path kuch bhi ho sakta hai, yeh locked rahega
+    icon: <FaLandmark style={{ color: '#10b981' }} />, // Green
+    type: 'upcoming' // Admin ke liye locked
+  },
+  { 
+    name: 'Expense', 
+    path: '/admin/expense', // Path kuch bhi ho sakta hai, yeh locked rahega
+    icon: <GiReceiveMoney style={{ color: '#f97316' }} />, // Orange
+    type: 'upcoming' // Admin ke liye locked
+  },
 ] as const;
-// ===========================================
-
-// === 'useAdminLayout' aur Context yahaan se hata diya gaya hai ===
+// ===================================
 
 export default function AdminLayout({
   children,
@@ -36,8 +48,6 @@ export default function AdminLayout({
 }) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
-  
-  // --- Modal state yahaan se hata diya gaya hai ---
 
   useEffect(() => {
     if (!isLoading) {
@@ -63,16 +73,14 @@ export default function AdminLayout({
   }
   
   return (
-    // --- NAYA PROVIDER yahaan wrap karega ---
     <AdminLayoutProvider>
       <div className={styles.container}>
-        {/* Ab yeh 'name' property ke saath pass hoga aur error nahi aayega */}
-        <Sidebar menuItems={[...menuItems]} />
+        {/* Sidebar ko ab dashboard waale items bhej rahe hain */}
+        <Sidebar menuItems={[...mainMenuItems]} />
         <main className={styles.content}>
           {children}
         </main>
       </div>
-      {/* Modal ab AdminLayoutProvider ke andar chala gaya hai */}
     </AdminLayoutProvider>
   );
 }

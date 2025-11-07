@@ -2,29 +2,29 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation'; // useRouter import kiya
 import { useAuth } from '@/app/context/AuthContext'; 
 import { useAdminLayout } from '@/app/context/AdminLayoutContext'; 
-import styles from './Sidebar.module.scss'; // Path fix ho gaya hai
+import styles from './Sidebar.module.scss'; // Iske liye SCSS neeche hai
 import { FiTag } from 'react-icons/fi'; // Coupon icon
+import { MdLogout } from 'react-icons/md'; // Logout icon
 
-// === FIX 1: Interface ko define karein jo props accept karega ===
-interface NavItem {
-  name: string; 
+// Interface batata hai ki 'menuItems' array kaisa dikhega
+export interface NavItem {
+  name: string;
   path: string;
   icon: React.ReactNode;
   type: 'free' | 'premium' | 'upcoming';
 }
 
+// Sidebar ab 'menuItems' prop lega
 interface SidebarProps {
-  menuItems: NavItem[]; // Sidebar 'menuItems' naam ka ek array lega
+  menuItems: NavItem[];
 }
-// === END FIX 1 ===
 
-// === FIX 2: Component ko batayein ki woh 'menuItems' prop lega ===
 const Sidebar = ({ menuItems }: SidebarProps) => {
   const pathname = usePathname();
-  const { user } = useAuth(); 
+  const { user, logout } = useAuth(); // 'logout' function ko useAuth se liya
   const { showUpcomingFeatureModal } = useAdminLayout(); 
 
   const isSuperAdmin = user?.role === 'SuperAdmin';
@@ -42,11 +42,14 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
     }
 
     // 3. Agar feature 'premium' hai (jaise Fee Counter)
+    // Link ko active rakhein. Backend 403 bhejega aur api.ts
+    // user ko /upgrade page par redirect kar dega.
     if (item.type === 'premium') {
       return { href: item.path, onClick: undefined, className: styles.premium };
     }
 
     // 4. Agar feature 'upcoming' hai (jaise Academics)
+    // Link ko dead karein (href="#") aur onClick par modal dikhayein.
     if (item.type === 'upcoming') {
       return {
         href: '#',
@@ -63,25 +66,29 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
   };
 
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.logo}>
-        My EduPanel
+    <aside className={styles.sidebarContainer}>
+      <div className={styles.logoSection}>
+        <Link href="/admin/dashboard">
+          <h2>My EduPanel</h2>
+        </Link>
       </div>
 
-      <nav className={styles.nav}>
-        <ul>
+      <nav className={styles.menuSection}>
+        <ul className={styles.menuList}>
           {/* 'menuItems' prop se map karein */}
           {menuItems.map((item) => {
             const linkProps = getLinkProps(item);
 
             return (
-              <li key={item.path}>
+              <li key={item.path} className={`${styles.menuItem} ${
+                  (pathname === item.path && item.path) ? styles.active : ''
+                } ${linkProps.className}`}
+              >
                 <Link
                   href={linkProps.href}
                   onClick={linkProps.onClick}
-                  className={`${styles.navLink} ${pathname === item.path ? styles.active : ''} ${linkProps.className}`}
                 >
-                  {item.icon}
+                  <span className={styles.icon}>{item.icon}</span>
                   <span>{item.name}</span>
                   {/* === NAYE TAGS === */}
                   {(item.type === 'premium' && !isSuperAdmin) && (
@@ -91,27 +98,34 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
                     <span className={styles.upcomingTag}>SOON</span>
                   )}
                   {/* === END TAGS === */}
-
                 </Link>
               </li>
             );
           })}
+          
           {/* === NAYA COUPON BUTTON (SIRF SUPERADMIN KE LIYE) === */}
           {isSuperAdmin && (
-            <li>
-              <Link
-                href="/superadmin/coupons"
-                className={`${styles.navLink} ${pathname === '/superadmin/coupons' ? styles.active : ''} ${styles.superAdminLink}`}
-              >
-                <FiTag />
+            <li className={`${styles.menuItem} ${styles.superAdminLink} ${
+                pathname === '/superadmin/coupons' ? styles.active : ''
+              }`}
+            >
+              <Link href="/superadmin/coupons">
+                <span className={styles.icon}><FiTag /></span>
                 <span>Manage Coupons</span>
               </Link>
             </li>
           )}
           {/* === END COUPON BUTTON === */}
-
         </ul>
       </nav>
+
+      {/* --- FOOTER (Aapke original design ke hisaab se) --- */}
+      <footer className={styles.sidebarFooter}>
+        <button onClick={logout} className={`${styles.footerButton} ${styles.logoutButton}`}>
+          <MdLogout />
+          <span>Logout</span>
+        </button>
+      </footer>
     </aside>
   );
 };

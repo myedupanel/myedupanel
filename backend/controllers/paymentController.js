@@ -1,4 +1,4 @@
-// File: backend/controllers/paymentController.js
+// File: backend/controllers/paymentController.js (UPDATED with Receipt Fix)
 
 const prisma = require('../config/prisma');
 const Razorpay = require('razorpay');
@@ -16,9 +16,8 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
   console.warn("WARNING: Razorpay keys are not set. Payment API will not work.");
 }
 
-// HTML Receipt Template (Bina Badlaav)
+// createReceiptHtml function (Bina Badlaav)
 const createReceiptHtml = (userName, planName, amount, orderId, paymentId, expiryDate) => {
-  // ... (Aapka poora HTML code yahaan) ...
   return `
   <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
     <div style="background-color: #007bff; color: white; padding: 20px;">
@@ -68,40 +67,36 @@ const createReceiptHtml = (userName, planName, amount, orderId, paymentId, expir
 // === END HELPER FUNCTION ===
 
 
-// === FUNCTION 1: CREATE ORDER (UPDATED WITH DYNAMIC PRICE) ===
+// === FUNCTION 1: CREATE ORDER (FIXED) ===
 exports.createSubscriptionOrder = async (req, res) => {
   if (!razorpay) {
     return res.status(500).json({ message: "Payment gateway is not configured." });
   }
 
   try {
-    const { planName, couponCode } = req.body; 
+    const { planName, couponCode } = req.body;
     const schoolId = req.user.schoolId;
-    const userId = req.user.id;
+    const userId = req.user.id; // Hum iska istemaal karenge
 
-    if (planName !== 'STARTER') {
-      return res.status(400).json({ message: "Invalid plan name. Only 'STARTER' is allowed." });
-    }
-    
-    // --- YAHI HAI NAYA DYNAMIC PRICE LOGIC ---
+    // --- (Dynamic Price Logic) ---
+    // Ab hum price ko database se fetch karenge
     const planFromDb = await prisma.plan.findUnique({
-      where: { id: planName } // "STARTER"
+      where: { id: planName.toUpperCase() } // "STARTER"
     });
 
     if (!planFromDb || !planFromDb.isActive) {
       return res.status(404).json({ message: "This plan is not available." });
     }
-    
-    const originalAmountInRupees = planFromDb.price; // Database se price (e.g., 4999)
-    // --- END DYNAMIC PRICE LOGIC ---
-    
+
+    const originalAmountInRupees = planFromDb.price; // e.g., 4999 (database se)
     let finalAmountInRupees = originalAmountInRupees;
     let couponId = null;
 
+    // --- (Coupon Logic - Bina Badlaav) ---
     if (couponCode) {
       const coupon = await prisma.coupon.findFirst({
         where: {
-          code: couponCode,
+          code: couponCode.toUpperCase(),
           isActive: true,
           OR: [
             { expiryDate: null },
@@ -115,7 +110,7 @@ exports.createSubscriptionOrder = async (req, res) => {
       });
 
       if (!coupon) {
-        return res.status(404).json({ message: "Invalid or expired coupon code." });
+        return res.status(400).json({ message: "Invalid or expired coupon code." });
       }
 
       couponId = coupon.id;
@@ -126,104 +121,62 @@ exports.createSubscriptionOrder = async (req, res) => {
         finalAmountInRupees = originalAmountInRupees - coupon.discountValue;
       }
 
-      if (finalAmountInRupees < 0) {
-        finalAmountInRupees = 0;
-      }
+      if (finalAmountInRupees < 0) finalAmountInRupees = 0;
     }
+    // --- (Coupon Logic Ends) ---
 
     const finalAmountInPaise = Math.round(finalAmountInRupees * 100);
+
+    // === YAHI HAI FIX ===
+    // 'receipt_school_... (lamba UUID)' ko badal kar
+    // 'rec_u... (chhota User ID)' kar diya hai.
+    const receiptId = `rec_u${userId}_${Date.now()}`;
+    // ===================
 
     const options = {
       amount: finalAmountInPaise,
       currency: "INR",
-      receipt: `receipt_school_${schoolId}_${Date.now()}`,
+      receipt: receiptId, // <-- FIXED
       notes: {
         schoolId: String(schoolId),
         userId: String(userId),
         planName: planName,
         type: "APP_SUBSCRIPTION",
         originalAmount: String(originalAmountInRupees),
-        finalAmount: String(finalAmountInRupees),
         couponId: couponId ? String(couponId) : null
       }
     };
+
+    // --- (Razorpay Route / Split Payment Logic) ---
+    const MY_LINKED_ACCOUNT_ID = process.env.MY_RAZORPAY_LINKED_ACCOUNT_ID;
+    if (MY_LINKED_ACCOUNT_ID) {
+      const myShareInPaise = Math.round(finalAmountInPaise * 0.50); // 50%
+      options.transfers = [
+        {
+          account: MY_LINKED_ACCOUNT_ID,
+          amount: myShareInPaise,
+          currency: "INR",
+          on_hold: 0,
+        }
+      ];
+    }
+    // --- (Split Logic Ends) ---
 
     const order = await razorpay.orders.create(options);
     
     res.status(200).json({ ...order, key: process.env.RAZORPAY_KEY_ID });
 
   } catch (error) {
+    // Ab hum Razorpay ka error bhi user ko dikha sakte hain
     console.error("Error creating Razorpay order:", error);
-    res.status(500).json({ message: "Error creating payment order." });
-  }
-};
-
-// === FUNCTION 2: VALIDATE COUPON (UPDATED WITH DYNAMIC PRICE) ===
-exports.validateCoupon = async (req, res) => {
-  try {
-    const { couponCode } = req.body;
-    
-    if (!couponCode) {
-      return res.status(400).json({ message: "Coupon code is required." });
-    }
-
-    // --- YAHI HAI NAYA DYNAMIC PRICE LOGIC ---
-    const planFromDb = await prisma.plan.findUnique({
-      where: { id: "STARTER" } // Abhi sirf starter ke liye
-    });
-
-    if (!planFromDb) {
-      return res.status(404).json({ message: "Starter plan not found." });
-    }
-    const originalAmountInRupees = planFromDb.price;
-    // --- END DYNAMIC PRICE LOGIC ---
-    
-    let finalAmountInRupees = originalAmountInRupees;
-
-    const coupon = await prisma.coupon.findFirst({
-      where: {
-        code: couponCode,
-        isActive: true,
-        OR: [ { expiryDate: null }, { expiryDate: { gt: new Date() } } ],
-        OR: [ { maxUses: null }, { timesUsed: { lt: prisma.coupon.fields.maxUses } } ]
-      }
-    });
-
-    if (!coupon) {
-      return res.status(404).json({ message: "Invalid or expired coupon code." });
-    }
-
-    if (coupon.discountType === 'PERCENTAGE') {
-      const discountAmount = (originalAmountInRupees * coupon.discountValue) / 100;
-      finalAmountInRupees = originalAmountInRupees - discountAmount;
-    } else if (coupon.discountType === 'FIXED_AMOUNT') {
-      finalAmountInRupees = originalAmountInRupees - coupon.discountValue;
-    }
-
-    if (finalAmountInRupees < 0) {
-      finalAmountInRupees = 0;
-    }
-
-    res.status(200).json({
-      message: `Coupon "${coupon.code}" applied successfully!`,
-      originalPrice: originalAmountInRupees,
-      newPrice: Math.round(finalAmountInRupees),
-      couponCode: coupon.code
-    });
-
-  } catch (error) {
-    console.error("Error validating coupon:", error);
-    res.status(500).json({ message: "Error validating coupon." });
+    const errorMessage = error.error?.description || "Error creating payment order.";
+    res.status(500).json({ message: errorMessage });
   }
 };
 
 
-// === FUNCTION 3: VERIFY WEBHOOK (Bina Badlaav) ===
-// (Yeh function pehle se hi 'notes' se originalAmount le raha tha, isliye ismein badlaav ki zaroorat nahi hai)
+// === FUNCTION 2: VERIFY WEBHOOK (Bina Badlaav) ===
 exports.verifySubscriptionWebhook = async (req, res) => {
-  
-  // ... (Aapka poora verifySubscriptionWebhook function yahaan) ...
-  
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
@@ -231,7 +184,7 @@ exports.verifySubscriptionWebhook = async (req, res) => {
     return res.status(400).json({ message: "Webhook secret not configured." });
   }
 
-  // 1. Signature Verify Karein (Bina Badlaav)
+  // 1. Signature Verify Karein
   try {
     const shasum = crypto.createHmac('sha256', webhookSecret);
     shasum.update(JSON.stringify(req.body));
@@ -261,27 +214,25 @@ exports.verifySubscriptionWebhook = async (req, res) => {
     }
 
     const amountPaid = Number(payment.amount) / 100;
-    const planStartDate = new Date(payment.created_at * 1000);
+    const planStartDate = new Date(payment.created_at * 1000); 
     const planEndDate = new Date();
     planEndDate.setFullYear(planEndDate.getFullYear() + 1);
     const durationDays = 365;
 
     try {
       let updatedSchool; 
-
       await prisma.$transaction(async (tx) => {
-        
-        // 1. School table ko update karein (Bina Badlaav)
+        // 1. School table update karein
         updatedSchool = await tx.school.update({
           where: { id: schoolId },
           data: {
-            plan: planName.toUpperCase(),
+            plan: planName.toUpperCase(), 
             planStartDate: planStartDate,
             planExpiryDate: planEndDate
           }
         });
 
-        // 2. Naya AppSubscription record banayein (Bina Badlaav)
+        // 2. AppSubscription record banayein
         await tx.appSubscription.create({
           data: {
             planName: planName.toUpperCase(),
@@ -292,14 +243,13 @@ exports.verifySubscriptionWebhook = async (req, res) => {
             paymentId: payment.id,
             orderId: payment.order_id,
             createdAt: planStartDate,
-            
             schoolId: schoolId,
             userId: Number(userId),
             couponId: couponId ? Number(couponId) : null
           }
         });
 
-        // 3. Coupon ka 'timesUsed' count badhayein (Bina Badlaav)
+        // 3. Coupon count update karein (agar use hua hai)
         if (couponId) {
           await tx.coupon.update({
             where: { id: Number(couponId) },
@@ -310,7 +260,6 @@ exports.verifySubscriptionWebhook = async (req, res) => {
             }
           });
         }
-
       }); // Transaction yahaan khatam
 
       console.log(`SUCCESS: School ${schoolId} plan updated to ${planName}.`);
@@ -342,7 +291,6 @@ exports.verifySubscriptionWebhook = async (req, res) => {
             subject: 'Your MyEduPanel Subscription Receipt (Order Confirmed)',
             html: htmlReceipt
           });
-          
           console.log(`Payment receipt successfully sent to ${user.email}`);
         
         } else {
