@@ -181,7 +181,7 @@ const PlansPage = () => {
               <h3 className={styles.planName}>Pro Plan</h3>
               <p className={styles.planDescription}>For growing schools ready to scale their operations.</p>
               <div className={styles.planPrice}>
-                ₹9,999
+                Undefined
                 <span>/ per year</span>
               </div>
               <ul className={styles.featuresList}>
@@ -216,7 +216,7 @@ const PlansPage = () => {
               <h3 className={styles.planName}>Plus Plan</h3>
               <p className={styles.planDescription}>For large institutions with multi-branch needs.</p>
               <div className={styles.planPrice}>
-                ₹14,999
+                Undefined
                 <span>/ per year</span>
               </div>
               <ul className={styles.featuresList}>
