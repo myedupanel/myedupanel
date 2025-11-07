@@ -9,8 +9,10 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require("socket.io");
-const prisma = require('./config/prisma'); // <-- 1. PRISMA CLIENT IMPORT KAREIN
-
+const prisma = require('./config/prisma');
+const paymentRoutes = require('./routes/payment'); // <-- 1. PRISMA CLIENT IMPORT KAREIN
+const couponRoutes = require('./routes/couponRoutes');
+const planRoutes = require('./routes/planRoutes');
 // --- Allowed URLs ki list (No Change) ---
 const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:3000", 
@@ -106,6 +108,9 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/attendance', attendanceRoutes); // <-- NAYA ADD KIYA
 app.use('/api/timetable', timetableRoutes);
+app.use('/api/payment', paymentRoutes);
+app.use('/api/coupons', couponRoutes);
+app.use('/api/plans', planRoutes);
 // app.use('/api/dashboard', dashboardRoutes);
 
 // --- Socket.IO Connection Handler (No Change) ---

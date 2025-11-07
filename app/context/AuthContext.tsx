@@ -1,18 +1,21 @@
-// File: app/context/AuthContext.tsx
-
 "use client";
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 
 export interface User { 
-  id: number;          // <--- id ko id kiya aur type number kiya
+  id: number;
   name: string;        
   schoolName: string;  
   role: string;
   email: string;
-  schoolId: string;    // <--- schoolId bhi add karein
+  schoolId: string;
   schoolNameLastUpdated?: string; 
+  
+  // === YEH FIELDS ADD KIYE HAIN ===
+  plan: string;                 // (e.g., 'TRIAL', 'STARTER', 'NONE')
+  planExpiryDate: string | null;  // (ISO date string)
+  // ===================================
 }
 
 interface AuthContextType {
@@ -45,6 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const response = await axios.get('/api/auth/me');
         // Fetched data should match the exported User interface
+        // Naye fields (plan, planExpiryDate) yahaan automatically aa jayenge
         setUser(response.data);
       } catch (error: any) {
         console.error("Failed to fetch user from token:", error.response?.status, error.message);
@@ -73,6 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       // API response should match the exported User interface
       const response = await axios.get('/api/auth/me');
+      // Naye fields yahaan bhi automatically aa jayenge
       setUser(response.data);
       setIsLoading(false); // Set loading false after fetching
       return response.data;

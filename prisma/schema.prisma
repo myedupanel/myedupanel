@@ -11,6 +11,26 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// === YAHAN NAYE ENUMS ADD KIYE GAYE HAIN (Professional Tareeka) ===
+enum PlanType {
+  NONE    // Jinhone abhi tak koi plan nahi chuna
+  TRIAL   // 14-day free trial
+  STARTER // Aapka paid plan
+  PRO     // Future ke liye
+}
+
+enum AppSubscriptionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+// ==========================================================
+
 // ===================================
 // MODELS
 // ===================================
@@ -32,35 +52,40 @@ model School {
   session           String?
   lateFineAmount    Float?  @default(100)
 
-  // Relations
-  users               User[]
-  students            Students[]
-  classes             Classes[]
-  teachers            Teachers[]
-  templates           FeeTemplate[]
-  feeRecords          FeeRecord[]
-  transactions        Transaction[]
-  parents             Parent[]
-  attendances         Attendance[]
-  exams               Exam[]
-  marks               Mark[]
-  assignments         Assignment[]
-  
-  // === FIX KIYA GAYA ===
-  // @unique yahan se hata diya gaya hai kyunki har school ka apna 'today's quiz' ho sakta hai
-  todaysQuizId        Int?
-  // =====================
+  // === YAHAN NAYE PLAN FIELDS ADD KIYE GAYE HAIN ===
+  plan              PlanType   @default(TRIAL) // Naya school sign up par TRIAL plan pe rahega
+  planStartDate     DateTime? // Plan kab shuru hua
+  planExpiryDate    DateTime? // Plan kab expire hoga
+  // ===============================================
 
-  todaysQuiz          Quiz?                   @relation("TodaysQuiz", fields: [todaysQuizId], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  quizzes             Quiz[]                  @relation("SchoolQuizLibrary")
-  events              Event[]
-  liveClasses         LiveClass[]
-  gradingScale        GradingScale?
-  studyMaterials      StudyMaterial[]
-  staffAttendances    StaffAttendance[]
-  timeSlots           TimeSlot[]
-  workingDays         WorkingDay[]
-  timetablePeriods    TimetableAssignment[]
+  // Relations
+  users            User[]
+  students         Students[]
+  classes          Classes[]
+  teachers         Teachers[]
+  templates        FeeTemplate[]
+  feeRecords       FeeRecord[]
+  transactions     Transaction[]
+  parents          Parent[]
+  attendances      Attendance[]
+  exams            Exam[]
+  marks            Mark[]
+  assignments      Assignment[]
+  todaysQuizId     Int?
+  todaysQuiz       Quiz?                 @relation("TodaysQuiz", fields: [todaysQuizId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  quizzes          Quiz[]                @relation("SchoolQuizLibrary")
+  events           Event[]
+  liveClasses      LiveClass[]
+  gradingScale     GradingScale?
+  studyMaterials   StudyMaterial[]
+  staffAttendances StaffAttendance[]
+  timeSlots        TimeSlot[]
+  workingDays      WorkingDay[]
+  timetablePeriods TimetableAssignment[]
+  
+  // === NAYE SUBSCRIPTION KI RELATION ===
+  subscriptions    AppSubscription[]
+  // ===================================
 }
 
 // 4. User Model
@@ -69,7 +94,7 @@ model User {
   name                String?
   email               String    @unique
   password            String
-  role                String
+  role                String // Yahan "SuperAdmin" value bhi aa sakti hai
   status              String?   @default("active")
   isVerified          Boolean   @default(false)
   details             Json?
@@ -90,9 +115,13 @@ model User {
   student          Students?           @relation("StudentUser")
   parent           Parent?
   assignedPeriods  TimetableAssignment[] @relation("TeacherAssignments")
+  
+  // === NAYE SUBSCRIPTION KI RELATION ===
+  appSubscriptions AppSubscription[] // Admin ne jo payments ki hain
+  // ===================================
 
   // === INDEXING ===
-  @@index([schoolId]) // Har query schoolId se filter hogi, isliye yeh zaroori hai
+  @@index([schoolId]) 
   @@index([createdById])
 }
 
@@ -111,7 +140,6 @@ model Classes {
   assignments      Assignment[]
   timetablePeriods TimetableAssignment[]
 
-  // Yeh unique constraint pehle se tha aur indexing ka kaam bhi karega
   @@unique([schoolId, class_name])
 }
 
@@ -157,8 +185,8 @@ model Students {
   assignments  Assignment[]
 
   // === INDEXING ===
-  @@index([schoolId]) // School ke saare students laane ke liye
-  @@index([classid]) // Class ke saare students laane ke liye
+  @@index([schoolId]) 
+  @@index([classid]) 
   @@index([userId])
 }
 
@@ -174,7 +202,6 @@ model Teachers {
   schoolId String
   school   School @relation(fields: [schoolId], references: [id])
 
-  // Yeh unique constraints pehle se hain aur indexing ka kaam bhi karenge
   @@unique([schoolId, email])
   @@unique([schoolId, teacherId])
 }
@@ -193,7 +220,6 @@ model FeeTemplate {
   feeRecords   FeeRecord[]
   transactions Transaction[]
 
-  // Yeh unique constraint pehle se hai aur indexing ka kaam bhi karega
   @@unique([schoolId, name])
 }
 
@@ -226,11 +252,10 @@ model FeeRecord {
   @@unique([studentId, templateId, schoolId])
 
   // === INDEXING ===
-  // Yeh table bahut bada hoga, isliye zyaada index add kiye hain
-  @@index([schoolId]) // School ke saare records
-  @@index([studentId]) // Student ke saare records
-  @@index([classId]) // Class ke saare records
-  @@index([templateId]) // Ek template ke saare records
+  @@index([schoolId]) 
+  @@index([studentId]) 
+  @@index([classId]) 
+  @@index([templateId]) 
 }
 
 // 10. Transaction Model
@@ -267,13 +292,12 @@ model Transaction {
   collectedBy   User? @relation(fields: [collectedById], references: [id])
 
   // === INDEXING ===
-  // YEH SABSE ZAROORI TABLE HAI!!
-  @@index([schoolId]) // School ki saari transactions
-  @@index([studentId]) // Student ki saari transactions
-  @@index([feeRecordId]) // Ek record ki saari transactions
-  @@index([classId]) // Class ki saari transactions
-  @@index([paymentDate]) // Date se search karne ke liye (e.g., "aaj ki report")
-  @@index([collectedById]) // Admin ki report ke liye
+  @@index([schoolId]) 
+  @@index([studentId]) 
+  @@index([feeRecordId]) 
+  @@index([classId]) 
+  @@index([paymentDate]) 
+  @@index([collectedById]) 
 }
 
 // 11. Parent Model
@@ -296,7 +320,7 @@ model Parent {
   @@unique([schoolId, email])
 
   // === INDEXING ===
-  @@index([studentId]) // Student se parent dhoondhne ke liye
+  @@index([studentId]) 
   @@index([userId])
 }
 
@@ -313,13 +337,9 @@ model Attendance {
   studentId Int
   student   Students @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
 
-  // Yeh unique constraint pehle se tha aur indexing ka kaam bhi karega
   @@unique([studentId, date, schoolId])
 
   // === INDEXING ===
-  // === FIX KIYA GAYA ===
-  // Pehle yahan galti se classId tha, jo is model mein nahi hai.
-  // Yeh index "schoolId" aur "date" se search ko fast karega.
   @@index([schoolId, date])
 }
 
@@ -335,12 +355,9 @@ model StaffAttendance {
   school   School @relation(fields: [schoolId], references: [id])
   schoolId String
 
-  // === FIX KIYA GAYA ===
-  // Pehle sirf [userId, date] tha, ab schoolId bhi add kiya hai
   @@unique([userId, date, schoolId])
 
   // === INDEXING ===
-  // "School ki aaj ki staff attendance" ke liye
   @@index([schoolId, date])
 }
 
@@ -362,12 +379,11 @@ model Exam {
 
   marks Mark[]
 
-  // Yeh unique constraint pehle se tha aur indexing ka kaam bhi karega
   @@unique([schoolId, name, date])
 
   // === INDEXING ===
-  @@index([schoolId, className]) // Class ke exam dhoondhne ke liye
-  @@index([schoolId, subject]) // Subject ke exam dhoondhne ke liye
+  @@index([schoolId, className]) 
+  @@index([schoolId, subject]) 
 }
 
 // 15. Mark Model
@@ -389,12 +405,11 @@ model Mark {
   assessmentId Int?
   assessment   Exam? @relation(fields: [assessmentId], references: [id])
 
-  // Yeh unique constraint pehle se tha aur indexing ka kaam bhi karega
   @@unique([studentId, assessmentId, subject, schoolId])
 
   // === INDEXING ===
-  @@index([studentId]) // Student ke saare marks
-  @@index([assessmentId]) // Exam ke saare marks
+  @@index([studentId]) 
+  @@index([assessmentId]) 
 }
 
 // 16. Assignment Model
@@ -439,7 +454,7 @@ model Quiz {
   createdAt DateTime @default(now())
 
   // === INDEXING ===
-  @@index([schoolId]) // School ki quiz library ke liye
+  @@index([schoolId]) 
 }
 
 // 18. Event Model
@@ -456,7 +471,7 @@ model Event {
 
   // === INDEXING ===
   @@index([schoolId])
-  @@index([schoolId, date]) // Date se event search ke liye
+  @@index([schoolId, date]) 
 }
 
 // 19. LiveClass Model
@@ -476,7 +491,7 @@ model LiveClass {
 
   // === INDEXING ===
   @@index([schoolId])
-  @@index([schoolId, date]) // Date se class search ke liye
+  @@index([schoolId, date]) 
 }
 
 // 20. GradingScale Model
@@ -507,8 +522,8 @@ model StudyMaterial {
 
   // === INDEXING ===
   @@index([schoolId])
-  @@index([schoolId, className]) // Class ka material dhoondhne ke liye
-  @@index([schoolId, subject]) // Subject ka material dhoondhne ke liye
+  @@index([schoolId, className]) 
+  @@index([schoolId, subject]) 
 }
 
 // 22. TimeSlot Model
@@ -557,13 +572,73 @@ model TimetableAssignment {
   schoolId String
   school   School @relation(fields: [schoolId], references: [id])
 
-  // === FIX KIYA GAYA ===
-  // In constraints mein schoolId add kiya hai taaki yeh poore system mein unique na ho,
-  // balki sirf ek school ke andar unique ho.
   @@unique([day, classId, timeSlotId, schoolId], name: "class_time_unique")
   @@unique([day, teacherId, timeSlotId, schoolId], name: "teacher_time_unique")
 
   // === INDEXING ===
-  @@index([schoolId, classId]) // Class ka poora timetable laane ke liye
-  @@index([schoolId, teacherId]) // Teacher ka poora timetable laane ke liye
+  @@index([schoolId, classId]) 
+  @@index([schoolId, teacherId]) 
+}
+
+// ===================================
+// === NAYE MODELS (Step 1) ADD KIYE GAYE ===
+// ===================================
+
+// 25. AppSubscription Model (Aapke platform ki payment history)
+model AppSubscription {
+  id             Int                   @id @default(autoincrement())
+  planName       String // e.g., "STARTER"
+  originalAmount Float
+  finalAmount    Float // Discount ke baad
+  durationInDays Int   // e.g., 365
+  status         AppSubscriptionStatus @default(PENDING)
+  paymentId      String                @unique // Razorpay/Stripe Payment ID
+  orderId        String?
+  createdAt      DateTime              @default(now())
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  userId Int // Kis admin ne payment kiya
+  user   User @relation(fields: [userId], references: [id])
+
+  couponId Int?
+  coupon   Coupon? @relation(fields: [couponId], references: [id])
+
+  @@index([schoolId])
+  @@index([userId])
+  @@index([couponId])
+}
+
+// 26. Coupon Model (Aapka flexible coupon system)
+model Coupon {
+  id            Int          @id @default(autoincrement())
+  code          String       @unique // e.g., "WELCOME50"
+  discountType  DiscountType // "PERCENTAGE" ya "FIXED_AMOUNT"
+  discountValue Float
+  isActive      Boolean      @default(true)
+  maxUses       Int? // null = unlimited
+  timesUsed     Int          @default(0)
+  expiryDate    DateTime?
+
+  // Relation
+  subscriptions AppSubscription[]
+
+  @@index([code])
+}
+
+// 27. Plan Model (Plans ki details store karega)
+// === YEH AAPKA UPDATED MODEL HAI ===
+model Plan {
+  id            String    @id @unique // "STARTER", "PLUS", "PRO"
+  name          String    // "Starter (The Core)"
+  price         Int       // 4999 (Rupees mein store karein)
+  originalPrice Int?      // 12999 (Optional)
+  description   String
+  features      Json      // ["Feature 1", "Feature 2"]
+  plusFeatures  Json?     // (Optional) ["Feature 3", "Feature 4"]
+  isPopular     Boolean   @default(false)
+  isActive      Boolean   @default(true)
+
+  @@index([isActive])
 }

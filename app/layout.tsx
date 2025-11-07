@@ -1,10 +1,11 @@
+// File: app/layout.tsx (Updated)
+
 import type { Metadata } from "next";
-// ===== BADLAV 1: 'Geist' ko 'Inter' se replace kiya gaya hai =====
 import { Inter } from "next/font/google";
+import Script from "next/script"; // Import next/script
 import "./globals.scss";
 import { AuthProvider } from './context/AuthContext';
 
-// ===== BADLAV 2: 'Inter' font ko setup kiya gaya hai =====
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,7 +20,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/* ===== BADLAV 3: Naya font `body` par apply kiya gaya hai ===== */}
+      <head>
+        {/*
+          Add the Razorpay Checkout script.
+          We set strategy="lazyOnload" so it doesn't block page loading.
+        */}
+        <Script
+          id="razorpay-checkout-js"
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="lazyOnload"
+        />
+      </head>
       <body className={inter.className}>
         <AuthProvider>
           {children}

@@ -1,60 +1,122 @@
-// app/admin/layout.tsx
+"use client"; 
 
-"use client"; // Kynuki hum hooks (useState, useEffect, useAuth) use karenge
-
-import React, { useEffect } from 'react'; // useEffect ko import karein
-import { useRouter } from 'next/navigation'; // useRouter ko import karein
-import Sidebar from '@/components/layout/Sidebar/Sidebar';
+// === NAYE IMPORTS ===
+import React, { useState, createContext, useContext, ReactNode, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Sidebar from '@/components/layout/Sidebar/Sidebar'; // Path check kar lein
 import styles from './layout.module.scss';
-import { MdDashboard, MdSchool } from 'react-icons/md';
-import { useAuth } from '@/app/context/AuthContext'; // AuthContext ko import karein
+import { useAuth } from '@/app/context/AuthContext'; 
+// Icons (Aapke screenshot ke hisaab se)
+// --- FIX: 'FiRocket' ko 'FiZap' se badal diya ---
+import { FiGrid, FiUsers, FiFileText, FiBarChart2, FiCalendar, FiClock, FiBookOpen, FiSettings, FiZap } from 'react-icons/fi'; 
+import { MdDashboard, MdSchool } from 'react-icons/md'; // Aapke puraane icons
 
-const mainMenuItems = [
-  { title: 'Dashboard', path: '/admin/dashboard', icon: <MdDashboard /> },
-  { title: 'School', path: '/admin/school', icon: <MdSchool /> },
-];
+// === NAYA CONTEXT (MODAL KE LIYE) ===
+interface AdminLayoutContextType {
+  showUpcomingFeatureModal: () => void;
+}
+const AdminLayoutContext = createContext<AdminLayoutContextType | undefined>(undefined);
+export const useAdminLayout = () => {
+  const context = useContext(AdminLayoutContext);
+  if (!context) {
+    throw new Error('useAdminLayout must be used within AdminLayout');
+  }
+  return context;
+};
+// === END NAYA CONTEXT ===
+
+// === NAYA MENU ITEMS ARRAY (Aapke screenshot + logic ke saath) ===
+// Humne features ko 3 types mein baant diya hai
+const menuItems = [
+  // --- Free Features (Starter plan mein included) ---
+  { title: 'Main Dashboard', path: '/admin/dashboard', icon: <MdDashboard />, type: 'free' },
+  { title: 'School', path: '/admin/school', icon: <MdSchool />, type: 'free' },
+  { title: 'Staff', path: '/admin/staff', icon: <FiUsers />, type: 'free' },
+  { title: 'Manage Classes', path: '/admin/classes', icon: <FiFileText />, type: 'free' },
+  // (Aap 'Students' bhi yahaan add kar sakte hain, type: 'free' ke saath)
+
+  // --- Premium Features (Payment ke liye locked) ---
+  { title: 'Fee Counter', path: '/admin/fees', icon: <FiBarChart2 />, type: 'premium' },
+  
+  // --- Upcoming Features (Jaldi aa rahe hain) ---
+  { title: 'Attendance', path: '/admin/attendance', icon: <FiCalendar />, type: 'upcoming' },
+  { title: 'Timetable', path: '/admin/timetable', icon: <FiClock />, type: 'upcoming' },
+  { title: 'Timetable Settings', path: '/admin/timetable-settings', icon: <FiClock />, type: 'upcoming' },
+  { title: 'Academics', path: '/admin/academics', icon: <FiBookOpen />, type: 'upcoming' },
+  { title: 'Settings', path: '/admin/settings', icon: <FiSettings />, type: 'upcoming' },
+] as const; // <--- === YAHI HAI FIX! ===
+
+// =============================
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { isAuthenticated, isLoading, user } = useAuth(); // AuthContext se state nikaalein
+  const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
+  
+  // --- NAYA MODAL STATE ---
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const showUpcomingFeatureModal = () => setIsModalOpen(true);
+  const hideModal = () => setIsModalOpen(false);
+  // -------------------------
 
   useEffect(() => {
-    // Check karein jab loading poori ho jaaye
     if (!isLoading) {
-      // Agar user authenticated nahi hai, toh login page par bhejein
+      // --- SUPERADMIN FIX ---
+      // Ab: Dono (Admin aur SuperAdmin) ko allow karega
+      const isAdminOrSuperAdmin = user?.role === 'Admin' || user?.role === 'SuperAdmin';
+
       if (!isAuthenticated) {
         router.push('/login');
       } 
-      // FIX: Check ko 'admin' (lowercase) se 'Admin' (uppercase) kiya
-      else if (user?.role !== 'Admin') { 
-         console.warn(`User is authenticated but role is "${user?.role}", not "Admin". Redirecting.`);
+      else if (!isAdminOrSuperAdmin) { 
+         console.warn(`User is authenticated but role is "${user?.role}". Redirecting.`);
          router.push('/login'); 
       }
-      // Agar role 'Admin' hai, toh kuch nahi hoga aur user dashboard par rahega.
+      // --- END FIX ---
     }
-  }, [isLoading, isAuthenticated, router, user]); // Dependency array ko update karein
+  }, [isLoading, isAuthenticated, router, user]);
 
-  // Jab tak AuthContext load ho raha hai, loading spinner dikhayein
   if (isLoading) {
     return <div className={styles.loadingState}>Loading Admin Area...</div>; 
   }
 
-  // Agar user authenticated nahi hai (ya role galat hai), toh children ko render na karein
-  if (!isAuthenticated || user?.role !== 'Admin') { // FIX: Yahaan bhi check ko 'Admin' kiya
+  // --- SUPERADMIN FIX ---
+  const isAdminOrSuperAdmin = user?.role === 'Admin' || user?.role === 'SuperAdmin';
+  if (!isAuthenticated || !isAdminOrSuperAdmin) {
      return <div className={styles.loadingState}>Redirecting...</div>;
   }
   
-  // Agar loading poori ho gayi hai aur user authenticated hai (aur Admin hai), toh layout dikhayein
   return (
-    <div className={styles.container}>
-      <Sidebar menuItems={mainMenuItems} />
-      <main className={styles.content}>
-        {children}
-      </main>
-    </div>
+    // --- NAYA CONTEXT PROVIDER ---
+    <AdminLayoutContext.Provider value={{ showUpcomingFeatureModal }}>
+      <div className={styles.container}>
+        {/* 'menuItems' ko prop ke through bhej rahe hain */}
+        <Sidebar menuItems={[...menuItems]} />
+        <main className={styles.content}>
+          {children}
+        </main>
+      </div>
+
+      {/* === YEH HAI AAPKA NAYA "UPCOMING FEATURE" MODAL === */}
+      {isModalOpen && (
+        <div className={styles.upcomingModalOverlay} onClick={hideModal}>
+          <div className={styles.upcomingModalBox} onClick={(e) => e.stopPropagation()}>
+            <button onClick={hideModal} className={styles.closeButton}>&times;</button>
+            <div className={styles.iconWrapper}>
+              {/* --- FIX: 'FiZap' icon istemaal kiya --- */}
+              <FiZap />
+            </div>
+            <h3>Upcoming Feature!</h3>
+            <p>This feature is under construction and will be available soon.</p>
+          </div>
+        </div>
+      )}
+      {/* === MODAL ENDS HERE === */}
+
+    </AdminLayoutContext.Provider>
+    // --- END CONTEXT PROVIDER ---
   );
 }

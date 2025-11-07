@@ -1,96 +1,80 @@
+// File: components/layout/Sidebar/Sidebar.tsx
+
 "use client";
-import React, { useState } from 'react'; // <-- useState import kiya
+
+import React from 'react'; // useState hata diya
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import './Sidebar.scss';
 import { useAuth } from '@/app/context/AuthContext';
-import { FiFileText, FiDownload, FiUpload, FiPlus } from 'react-icons/fi';
+import { useAdminLayout } from '@/app/admin/dashboard/layout'; // !! Naya AdminLayout hook
 import { MdGridView, MdLogout } from 'react-icons/md';
-// --- In icons ko naye items ke liye istemaal karenge ---
-import { FaLandmark } from 'react-icons/fa';
-import { GiReceiveMoney } from 'react-icons/gi';
+import { FiTag } from 'react-icons/fi'; // Coupon icon
 
-interface MenuItem {
-  title: string;
-  path?: string; // <-- Path ko optional banaya
+// Sidebar ko `menuItems` prop ke through data milega
+interface NavItem {
+  title: string; // 'title' istemaal ho raha hai
+  path: string;
   icon: React.ReactNode;
-  color?: string;
-  onClick?: () => void; // <-- Click handler add kiya
-}
-interface SidebarProps {
-  menuItems: MenuItem[];
+  type: 'free' | 'premium' | 'upcoming'; // type property
 }
 
-// --- YEH NAYA POPUP COMPONENT HAI ---
-const UpcomingFeatureModal = ({ onClose }: { onClose: () => void }) => {
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h3>🚀 Upcoming Feature</h3>
-        <p>
-          Yeh feature jald hi aa raha hai! Hum ispar tezi se kaam kar rahe hain
-          taaki aapko behtareen experience de sakein.
-        </p>
-        <button onClick={onClose} className="modal-close-btn">
-          Samajh Gaya
-        </button>
-      </div>
-    </div>
-  );
-};
+interface SidebarProps {
+  menuItems: NavItem[];
+}
 
 const Sidebar = ({ menuItems }: SidebarProps) => {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth(); // User ka data (role) aur logout function
+  const { showUpcomingFeatureModal } = useAdminLayout(); // Naya hook modal ke liye
 
-  // --- MODAL KE LIYE STATE ---
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const isSuperAdmin = user?.role === 'SuperAdmin';
 
+  // Contextual menus (Aapka puraana logic, aage zaroorat pad sakti hai)
   const isStudentPage = pathname === '/admin/students';
   const isTeacherPage = pathname.startsWith('/admin/teachers');
 
-  const openStudentModal = (modalName: string) => {
-    router.push(`/admin/students?modal=${modalName}`);
-  };
+  // Har item ke liye link properties generate karne ka function
+  const getLinkProps = (item: NavItem) => {
+    
+    // 1. Agar SuperAdmin hai, toh sab kuch allowed hai
+    if (isSuperAdmin) {
+      return { href: item.path, onClick: undefined, className: '' };
+    }
 
-  const handleTeacherExport = () => {
-    router.push('/admin/teachers?modal=export');
-  };
-  const handleTeacherImport = () => {
-    router.push('/admin/teachers?modal=import');
-  };
-  const handleAddNewTeacher = () => {
-    router.push('/admin/teachers?modal=add');
-  };
+    // 2. Agar feature 'free' hai, toh allowed hai
+    if (item.type === 'free') {
+      return { href: item.path, onClick: undefined, className: '' };
+    }
 
-  // --- NAYE MENU ITEMS KO ADD KARNE KA LOGIC ---
-  const processedMenuItems = [...menuItems];
-  const schoolIndex = processedMenuItems.findIndex(
-    (item) => item.title === 'School'
-  );
+    // 3. Agar feature 'premium' hai (jaise Fee Counter)
+    // Link ko active rakhein. Backend 403 bhejega aur api.ts
+    // user ko /upgrade page par redirect kar dega.
+    if (item.type === 'premium') {
+      return { href: item.path, onClick: undefined, className: 'premium' }; // 'premium' class
+    }
 
-  if (schoolIndex !== -1) {
-    processedMenuItems.splice(
-      schoolIndex + 1,
-      0,
-      {
-        title: 'Gov Schemes',
-        icon: <FaLandmark />,
-        onClick: () => setIsModalOpen(true), // <-- Modal kholega
-      },
-      {
-        title: 'Expense',
-        icon: <GiReceiveMoney />,
-        onClick: () => setIsModalOpen(true), // <-- Modal kholega
-      }
-    );
-  }
+    // 4. Agar feature 'upcoming' hai (jaise Academics)
+    // Link ko dead karein (href="#") aur onClick par modal dikhayein.
+    if (item.type === 'upcoming') {
+      return { 
+        href: '#', 
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          showUpcomingFeatureModal();
+        }, 
+        className: 'upcoming' // 'upcoming' class
+      };
+    }
+
+    // Fallback
+    return { href: item.path, onClick: undefined, className: '' };
+  };
 
   return (
     <aside className="sidebar-container">
-      {/* --- MODAL KO YAHAN RENDER KIYA --- */}
-      {isModalOpen && <UpcomingFeatureModal onClose={() => setIsModalOpen(false)} />}
+      {/* Modal ko yahaan se hata diya gaya hai, yeh ab layout.tsx mein hai */}
 
       <div className="logo-section">
         <Link href="/admin/dashboard">
@@ -101,38 +85,50 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
       <nav className="menu-section">
         <ul className="menu-list">
           {/* --- .map() LOGIC UPDATE KIYA GAYA --- */}
-          {processedMenuItems.map((item, index) => (
-            <li
-              key={index} // Key ko index par set kiya kyunki path hamesha unique nahi hoga
-              className={`menu-item item-${index + 1} ${
-                item.path &&
-                ((pathname.startsWith(item.path) && item.path !== '/') ||
-                  (pathname === '/' && item.path === '/'))
-                  ? 'active'
-                  : ''
-              }`}
-            >
-              {/* --- YAHAN CHECK KARTE HAIN KI LINK HAI YA BUTTON --- */}
-              {item.path ? (
-                <Link href={item.path}>
-                  <span className="icon" style={{ color: item.color }}>
+          {/* Ab 'menuItems' prop se map karein (processedMenuItems ki zaroorat nahi) */}
+          {menuItems.map((item) => {
+            const linkProps = getLinkProps(item);
+
+            return (
+              <li
+                key={item.path}
+                className={`menu-item ${
+                  pathname.startsWith(item.path) ? 'active' : ''
+                } ${linkProps.className}`} // Nayi class yahaan add ki
+              >
+                <Link href={linkProps.href} onClick={linkProps.onClick}>
+                  <span className="icon">
                     {item.icon}
                   </span>
                   <span>{item.title}</span>
+                  
+                  {/* --- NAYE TAGS --- */}
+                  {(item.type === 'premium' && !isSuperAdmin) && (
+                    <span className="proTag">PRO</span>
+                  )}
+                  {(item.type === 'upcoming' && !isSuperAdmin) && (
+                    <span className="upcomingTag">SOON</span>
+                  )}
+                  {/* --- END TAGS --- */}
                 </Link>
-              ) : (
-                <button onClick={item.onClick} className="menu-button-link">
-                  <span className="icon" style={{ color: item.color }}>
-                    {item.icon}
-                  </span>
-                  <span>{item.title}</span>
-                </button>
-              )}
+              </li>
+            );
+          })}
+          
+          {/* === NAYA COUPON BUTTON (SIRF SUPERADMIN KE LIYE) === */}
+          {isSuperAdmin && (
+            <li className={`menu-item superAdminLink ${pathname === '/superadmin/coupons' ? 'active' : ''}`}>
+              <Link href="/superadmin/coupons">
+                <span className="icon"><FiTag /></span>
+                <span>Manage Coupons</span>
+              </Link>
             </li>
-          ))}
+          )}
+          {/* === END COUPON BUTTON === */}
+
         </ul>
 
-        {/* Naya Teacher Menu (Ab functional hai) */}
+        {/* Naya Teacher Menu (Aapka puraana logic) */}
         {isTeacherPage && (
           <div className="contextual-menu">
             {/* ... (aapka teacher menu) ... */}
@@ -146,20 +142,12 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
         )}
       </nav>
 
-      {/* ... (aapka footer code) ... */}
       <footer className="sidebar-footer">
-        {pathname === '/admin/school' && (
-          <Link href="/admin/dashboard" className="footer-button">
-            <MdGridView />
-            <span>Main Dashboard</span>
-          </Link>
-        )}
-        {pathname === '/admin/dashboard' && (
-          <button onClick={logout} className="footer-button logout-button">
-            <MdLogout />
-            <span>Logout</span>
-          </button>
-        )}
+        {/* Logout button ko hamesha dikhayein */}
+        <button onClick={logout} className="footer-button logout-button">
+          <MdLogout />
+          <span>Logout</span>
+        </button>
       </footer>
     </aside>
   );

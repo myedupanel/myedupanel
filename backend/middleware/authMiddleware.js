@@ -1,5 +1,3 @@
-// backend/middleware/authMiddleware.js
-
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma'); // Naya import: Prisma client
 
@@ -55,13 +53,28 @@ const authMiddleware = async (req, res, next) => { // Function ko 'async' banaya
   }
 };
 
-// --- authorize function (No changes) ---
-// Yeh function ab database se mile 'req.user.role' ko check karega
+// --- authorize function (UPDATED WITH BYPASS) ---
 const authorize = (...roles) => {
   return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ msg: `Access denied. Role '${req.user?.role}' is not authorized.` });
+    
+    // Pehle check karo user hai ya nahi
+    if (!req.user) {
+      return res.status(401).json({ msg: 'No user found, authorization denied.' });
     }
+
+    // === YAHI HAI SUPER ADMIN BYPASS ===
+    // Agar user ka role 'SuperAdmin' hai, toh baaki rules check hi mat karo
+    // aur unhein direct entry de do.
+    if (req.user.role === 'SuperAdmin') {
+      return next(); // <-- Rule check skip kiya, direct entry
+    }
+    // === BYPASS ENDS HERE ===
+
+    // Normal users ke liye (Admin, Teacher, etc.)
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ msg: `Access denied. Role '${req.user.role}' is not authorized.` });
+    }
+    
     next();
   };
 };

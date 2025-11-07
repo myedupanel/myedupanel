@@ -1,0 +1,119 @@
+/* File: components/layout/PlanStatusBadge.module.scss */
+
+/* Base style for the badge (pill shape) */
+.planBadge {
+  padding: 6px 14px;
+  border-radius: 999px; /* This creates the pill shape */
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* --- Plan Colors & Animations --- */
+
+/* 1. Trial (Blue/Orange with Pulse) */
+.trial {
+  background-color: #e0f0ff; /* Light Blue */
+  color: #0056b3;
+  border: 1px solid #007bff;
+  /* Pulse Animation */
+  animation: pulse 2s infinite;
+}
+
+/* 2. Starter (Green & Stable) */
+.starter {
+  background-color: #e6f7ec; /* Light Green */
+  color: #0d6a2c;
+  border: 1px solid #28a745;
+  /* Optional: Faint glow as requested */
+  /* box-shadow: 0 0 10px rgba(40, 167, 69, 0.3); */
+}
+
+/* 3. Expiring (Yellow/Orange) */
+.expiring {
+  background-color: #fff8e1; /* Light Yellow */
+  color: #e65100;
+  border: 1px solid #ffab00;
+  /* You can add a different animation here if you want */
+  /* animation: shake 0.5s infinite; */
+}
+
+/* 4. Expired (Red) */
+.expired {
+  background-color: #ffebee; /* Light Red */
+  color: #c62828;
+  border: 1px solid #dc3545;
+}
+
+
+/* --- Keyframes for Pulse Animation --- */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+  }
+}
+
+/* Optional: Shake animation for expiring */
+/*
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+*/
+.upgradeButton {
+  margin-left: 12px; /* Badge se thodi doori */
+  padding: 5px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  
+  /* Aapke brand ka primary color (Example: Blue) */
+  background-color: #007bff; 
+  color: white;
+  
+  border: none;
+  border-radius: 999px; /* Pill shape */
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  
+  /* Eye-catching animation (jaisa aapne kaha) */
+  animation: glow 1.5s infinite alternate;
+
+  &:hover {
+    background-color: #0056b3;
+    transform: scale(1.05); /* Thoda bada hoga hover par */
+  }
+}
+
+/* Animation keyframes */
+@keyframes glow {
+  from {
+    box-shadow: 0 0 3px #007bff, 0 0 5px #007bff;
+  }
+  to {
+    box-shadow: 0 0 8px #007bff, 0 0 12px #0056b3;
+  }
+}
+
+/* Puraane badge styles (Bina Badlaav) */
+.planBadge {
+  /* ... (aapke puraane styles ... ) ... */
+  padding: 6px 14px;
+  border-radius: 999px; 
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+}

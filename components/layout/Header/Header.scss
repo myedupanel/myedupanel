@@ -1,9 +1,28 @@
-// file: components/layout/Header/Header.scss
+/* File: components/layout/Header/Header.scss */
+
 .header-container {
-  height: 70px; /* Example height */
+  /* Flexbox layout to align items */
+  display: flex;
+  justify-content: space-between; /* This puts logo left, badge middle, menu right */
+  align-items: center;
+  
+  /* Size and padding */
+  width: 100%;
+  height: 70px; /* Using your preferred height */
+  padding: 0 1.5rem; /* Using 1.5rem (approx 24px) for padding */
+
+  /* Appearance */
   background-color: #ffffff;
   border-bottom: 1px solid #e0e0e0;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
 }
+
+.header-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+}
+
+/* No styles are needed for .header-plan-status or .header-user-menu
+  because the 'justify-content: space-between' in the parent
+  (.header-container) is already handling their alignment.
+*/

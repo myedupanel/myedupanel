@@ -7,6 +7,10 @@ const generatePassword = require('generate-password');
 const sendEmail = require('../utils/sendEmail');
 const { authMiddleware, authorize } = require('../middleware/authMiddleware'); 
 
+// === YAHAN FIX KIYA (1/2): Naya "Lock" middleware import karein ===
+const checkSubscription = require('../middleware/checkSubscription');
+// === FIX ENDS HERE ===
+
 // Helper: Get Full Name
 const getFullName = (student) => {
   return [student?.first_name, student?.father_name, student?.last_name].filter(Boolean).join(' ');
@@ -20,12 +24,21 @@ const {
 } = require('../controllers/studentController'); 
 
 // --- Routes using Controller ---
-router.post('/', [authMiddleware, authorize('Admin')], addSingleStudent);
-router.post('/bulk', [authMiddleware, authorize('Admin')], addStudentsInBulk);
-router.get('/', [authMiddleware, authorize('Admin', 'Teacher')], getAllStudents);
+// === YAHAN FIX KIYA (2/2): 'checkSubscription' ko routes mein add kiya ===
+
+// Naya student add karna (Locked)
+router.post('/', [authMiddleware, checkSubscription, authorize('Admin')], addSingleStudent);
+
+// Bulk mein students add karna (Locked)
+router.post('/bulk', [authMiddleware, checkSubscription, authorize('Admin')], addStudentsInBulk);
+
+// Saare students dekhna (Locked)
+router.get('/', [authMiddleware, checkSubscription, authorize('Admin', 'Teacher')], getAllStudents);
+
+// === FIX ENDS HERE ===
 
 // @route   GET /api/students/classes
-// (Yeh code pehle se sahi tha)
+// (Yeh locked nahi hai, taaki form dropdowns kaam karein)
 router.get('/classes', [authMiddleware], async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
@@ -50,7 +63,7 @@ router.get('/classes', [authMiddleware], async (req, res) => {
 
 
 // @route   GET /api/students/search
-// --- YAHAN FIX KIYA GAYA HAI ---
+// (Search locked nahi hai, taaki LC generation form search kar sake)
 router.get('/search', authMiddleware, async (req, res) => {
      try {
         const schoolId = req.user.schoolId;
@@ -116,12 +129,11 @@ router.get('/search', authMiddleware, async (req, res) => {
         res.status(500).send("Server Error");
     }
 });
-// --- FIX YAHAN KHATAM HUA ---
 
 
 // @route   GET /api/students/:id
-// (Yeh code pehle se sahi tha)
-router.get('/:id', authMiddleware, async (req, res) => {
+// (Single student dekhna locked hai)
+router.get('/:id', [authMiddleware, checkSubscription], async (req, res) => {
     try {
         const studentIdInt = parseInt(req.params.id);
         if (isNaN(studentIdInt)) {
@@ -158,8 +170,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
 });
 
 // @route   PUT /api/students/:id
-// (Yeh code pehle se sahi tha)
-router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { 
+// (Update karna locked hai)
+router.put('/:id', [authMiddleware, checkSubscription, authorize('Admin')], async (req, res) => { 
      try {
         const studentIdInt = parseInt(req.params.id);
         if (isNaN(studentIdInt)) {
@@ -259,8 +271,8 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => {
 
 
 // @route   DELETE /api/students/:id
-// (Yeh code pehle se sahi tha)
-router.delete('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { 
+// (Delete karna locked hai)
+router.delete('/:id', [authMiddleware, checkSubscription, authorize('Admin')], async (req, res) => { 
     try {
         const studentIdInt = parseInt(req.params.id);
         if (isNaN(studentIdInt)) {

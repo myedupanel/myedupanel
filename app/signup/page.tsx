@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+// --- BADLAAV 1: 'useSearchParams' ko import karein ---
+import { useRouter, useSearchParams } from 'next/navigation'; 
 import axios from 'axios';
 import { FiHome, FiUser, FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff } from 'react-icons/fi';
 import styles from './signup.module.scss';
@@ -20,6 +21,9 @@ const slideshowImages = [
 
 export default function SignupPage() {
   const router = useRouter();
+  // --- BADLAAV 2.1: Hook ko initialize karein ---
+  const searchParams = useSearchParams(); 
+  
   const [showPassword, setShowPassword] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [formData, setFormData] = useState({
@@ -32,7 +36,17 @@ export default function SignupPage() {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Slideshow effect (no change)
+  // --- BADLAAV 2.2: Yeh naya useEffect add karein ---
+  // Yeh effect page load hote hi URL check karega
+  useEffect(() => {
+    const plan = searchParams.get('plan');
+    if (plan === 'starter') {
+      // User ke "intent" ko localStorage mein save karein
+      localStorage.setItem('signupIntent', 'starter');
+    }
+  }, [searchParams]); // Page load par run hoga
+
+  // Slideshow effect (Bina Badlaav)
   useEffect(() => {
     const timer = setTimeout(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % slideshowImages.length);
@@ -47,7 +61,9 @@ export default function SignupPage() {
     });
   };
 
-  // --- SIGNUP HANDLER MEIN BADLAV KIYA GAYA HAI ---
+  // --- SIGNUP HANDLER (Bina Badlaav) ---
+  // Ismein koi badlaav ki zaroorat nahi hai.
+  // Yeh user ko OTP page par bhej dega, aur "intent" localStorage mein saved hai.
   const handleSignup = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
@@ -56,20 +72,15 @@ export default function SignupPage() {
 
     try {
       const response = await axios.post('/api/auth/signup', formData);
-      
-      // Backend se mile success message ko set karein
       setMessage(response.data.message || "OTP sent successfully!");
 
-      // --- BADLAV: Ab hum login ke bajaye OTP page par redirect karenge ---
       if (response.data.success) {
-        // 2 second ke baad user ko OTP page par bhej dein, email ke saath
         setTimeout(() => {
           router.push(`/verify-otp?email=${formData.email}`);
         }, 2000);
       }
 
     } catch (err: any) {
-      // Backend se mile error message ko set karein
       if (err.response && err.response.data.message) {
         setError(err.response.data.message);
       } else {
@@ -80,9 +91,11 @@ export default function SignupPage() {
     }
   };
 
+  // --- JSX (Bina Badlaav) ---
   return (
     <div className={`${styles.pageWrapper} ${inter.className}`}>
       <div className={styles.formContainer}>
+        {/* ... (Aapka saara JSX code yahaan hai) ... */}
         <div className={styles.formWrapper}>
           <header className={styles.header}>
             <h3 className={styles.welcomeText}>Welcome To</h3>
@@ -100,7 +113,7 @@ export default function SignupPage() {
               {message && <div className={styles.successMessage}>{message}</div>}
 
               <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-                {isLoading ? 'Sending OTP...' : ( // Button text update
+                {isLoading ? 'Sending OTP...' : (
                   <><span>Create Account</span><FiArrowRight /></>
                 )}
               </button>
@@ -124,6 +137,7 @@ export default function SignupPage() {
       </div>
 
       <div className={`${styles.slideshowContainer} ${montserrat.className}`}>
+        {/* ... (Aapka saara slideshow JSX) ... */}
         <div className={styles.overlay}></div>
         {slideshowImages.map((src, index) => (
           <div

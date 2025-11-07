@@ -1,75 +1,92 @@
 import axios from 'axios';
 
-// Axios ka ek naya instance banayein
+// Create a new Axios instance
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000', 
-  // --- YAHAN FIX KIYA ---
-  // Hardcoded 'Content-Type' header ko hata diya gaya hai.
-  // Ab axios request ke data ke hisaab se Content-Type khud set karega.
-  // (File upload ke liye 'multipart/form-data' aur text ke liye 'application/json')
-  // --- FIX ENDS HERE ---
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
+  // Removed hardcoded 'Content-Type' header.
+  // Axios will now set Content-Type based on the request data.
+  // (e.g., 'multipart/form-data' for file uploads, 'application/json' for text)
 });
 
-// Request Interceptor: Yeh har request ke JAANE SE PEHLE token add karta hai AUR URL ko adjust karta hai.
+// Request Interceptor: Adds token AND adjusts URL before every request.
 api.interceptors.request.use(
   (config) => {
-    // LocalStorage se token nikalo (yeh client-side par hi chalega)
+    // Get token from LocalStorage (this only runs client-side)
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
 
-      // FIX 2: Check if the request URL already starts with /api (to avoid adding it twice)
+      // Check if the request URL already starts with /api (to avoid adding it twice)
       const needsApiPrefix = !config.url?.startsWith('/api');
 
       if (token) {
         config.headers['Authorization'] = `Bearer ${token}`;
       }
-      
-      // Agar data FormData hai, toh Content-Type ko set NA karein (axios ko karne dein)
-      // Yeh line ab zaroori nahi hai kyunki humne default set nahi kiya, 
-      // lekin suraksha ke liye hum isse add kar sakte hain (optional).
+
+      // If data is FormData, do NOT set Content-Type (let Axios do it)
       if (config.data instanceof FormData) {
-         delete config.headers['Content-Type'];
+        delete config.headers['Content-Type'];
       }
 
-      // FIX 3: '/api' prefix ko request URL ke shuru mein add karein, agar woh pehle se nahi hai.
-      // Yeh ensure karta hai ki path jaise '/academics/exams' banega '/api/academics/exams'
+      // Add '/api' prefix to the request URL if it's not already there.
+      // This ensures paths like '/academics/exams' become '/api/academics/exams'
       if (needsApiPrefix && config.url) {
-         config.url = `/api${config.url}`;
+        config.url = `/api${config.url}`;
       }
     }
-    // Agar server-side rendering hai (window undefined), toh URL ko modify na karein
+    // If server-side rendering (window undefined), don't modify the URL
     // (Assume server-side calls handle the full path correctly if needed)
 
     return config;
   },
   (error) => {
-    console.error("Axios request interceptor error:", error); // Added logging
+    console.error('Axios request interceptor error:', error);
     return Promise.reject(error);
   }
 );
 
-// Response Interceptor (Automatic Logout)
+// Response Interceptor (Error Handling: Lock & Logout)
 api.interceptors.response.use(
   (response) => {
-    // Agar response theek hai, to use seedha aage bhej do.
+    // If the response is good, just return it.
     return response;
   },
   (error) => {
-    // Agar response mein error hai, to use check karo.
-    console.error("Axios response interceptor error:", error.response?.data || error.message); // Added logging
+    // If there's an error, check it.
+    console.error(
+      'Axios response interceptor error:',
+      error.response?.data || error.message
+    );
 
-    if (error.response && error.response.status === 401) {
-      // Agar error 401 (Unauthorized) hai, to token invalid hai.
+    // === THIS IS THE NEW "LOCK" ===
+    if (error.response && error.response.status === 403) {
+      // 403 Forbidden error means the 'checkSubscription' middleware
+      // has blocked the user.
       if (typeof window !== 'undefined') {
-        console.log("Unauthorized (401) error detected. Logging out."); // Added logging
+        // Redirect them to the upgrade page.
+        // Check to avoid redirect loop if /upgrade itself fails
+        if (window.location.pathname !== '/upgrade') {
+          console.log('Subscription error (403). Redirecting to /upgrade.');
+          window.location.href = '/upgrade';
+        }
+      }
+    }
+    // === "LOCK" ENDS HERE ===
+
+    // --- Automatic Logout ---
+    if (error.response && error.response.status === 401) {
+      // 401 (Unauthorized) error means token is invalid.
+      if (typeof window !== 'undefined') {
+        console.log('Unauthorized (401) error detected. Logging out.');
         localStorage.removeItem('token');
-        // User ko login page par bhej do.
+        // Send the user to the login page.
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
       }
     }
-    // Baaki sabhi errors ke liye, unhe aage bhej do.
+    // --- Logout Ends Here ---
+
+    // For all other errors, just pass them along.
     return Promise.reject(error);
   }
 );

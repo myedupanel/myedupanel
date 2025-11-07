@@ -7,8 +7,8 @@ import axios from 'axios';
 import { FiArrowRight, FiEye, FiEyeOff, FiHome } from 'react-icons/fi';
 import styles from './login.module.scss';
 import { Inter } from 'next/font/google';
-// ===== BADLAV 1: AuthContext se 'useAuth' hook ko import karein =====
-import { useAuth } from '@/app/context/AuthContext';
+// Import 'useAuth' hook (Aapka code pehle se sahi hai)
+import { useAuth } from '@/app/context/AuthContext'; 
 
 const inter = Inter({
   subsets: ['latin'],
@@ -24,8 +24,8 @@ const slideshowImages = [
 
 export default function LoginPage() {
   const router = useRouter();
-  // ===== BADLAV 2: AuthContext se 'login' function nikalein =====
-  const { login } = useAuth();
+  // 'login' function (Aapka code pehle se sahi hai)
+  const { login } = useAuth(); 
 
   const [showPassword, setShowPassword] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -44,23 +44,34 @@ export default function LoginPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ===== BADLAV 3: handleLogin function ko poori tarah update kiya gaya hai =====
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
+      // Axios call ab aapke global 'api.ts' instance ko use nahi karega, 
+      // isliye '/api' prefix zaroori hai
       const response = await axios.post('/api/auth/login', formData);
       const token = response.data.token;
       
-      // Context ke login function ko call karein. Yeh token save karega aur state update karega.
       const user = await login(token);
 
       if (user) {
-        // Role ke hisaab se sahi dashboard par bhejna
+        
+        // 'signupIntent' logic (Yeh bilkul sahi hai)
+        const signupIntent = localStorage.getItem('signupIntent');
+        if (signupIntent === 'starter') {
+          localStorage.removeItem('signupIntent');
+          router.push('/upgrade');
+          return; 
+        }
+        
+        // ===== YAHI HAI SUPERADMIN LOGIN FIX =====
+        // Role ke hisaab se redirect karein
         switch (user.role) {
           case 'Admin':
+          case 'SuperAdmin': // <-- YEH NAYI LINE ADD KI HAI
             router.push('/admin/dashboard');
             break;
           case 'Teacher':
