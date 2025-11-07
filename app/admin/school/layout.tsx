@@ -2,7 +2,7 @@
 
 import React from 'react';
 // मौजूदा AdminLayout के styles को import करें (जहां .container और .content define हैं)
-import styles from '../layout.module.scss'; 
+import styles from './layout.module.scss'; 
 
 // SchoolSidebar कंपोनेंट को import करें
 import SchoolSidebar from '@/app/admin/school/SchoolSidebar'; 
