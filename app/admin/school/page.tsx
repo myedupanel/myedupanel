@@ -1,4 +1,4 @@
-// File: app/admin/school/page.tsx (FINAL UPDATED CODE)
+// File: app/admin/school/page.tsx (FINAL STRUCTURE with Context)
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styles from './SchoolPage.module.scss';
@@ -19,6 +19,8 @@ import AddTeacherForm from '@/components/admin/AddTeacherForm/AddTeacherForm';
 import AddParentForm from '@/components/admin/AddParentForm/AddParentForm';
 import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
 import api from '@/backend/utils/api';
+// === NEW IMPORTS: Context ===
+import { UpcomingFeatureProvider, useUpcomingFeature } from '@/app/context/UpcomingFeatureContext';
 
 
 // === 1. TypeScript Interfaces ===
@@ -117,7 +119,7 @@ const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, 
 // ----------------------------------------
 
 
-// --- UPDATED COMPONENT: SubscriptionBanner ---
+// --- UPDATED COMPONENT: SubscriptionBanner (Unchanged from previous final step) ---
 interface SubscriptionBannerProps {
     plan: PlanType;
     planExpiryDate: string | null;
@@ -129,7 +131,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
     // Calculate days left and update every minute
     useEffect(() => {
         if (plan === 'TRIAL' || plan === 'STARTER' || plan === 'PRO') {
-            if (!planExpiryDate) { // If plan is active but expiry is null (e.g., SuperAdmin override or error)
+            if (!planExpiryDate) {
                  setDaysLeft(null);
                  return;
             }
@@ -151,7 +153,6 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
 
     const isTrial = plan === 'TRIAL';
     
-    // Choose icon, text, and action based on the plan
     const { icon: PlanIcon, text, link, buttonText, className, isPaid } = useMemo(() => {
         switch (plan) {
             case 'TRIAL':
@@ -167,9 +168,9 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                 return {
                     icon: MdStar,
                     text: 'Starter Plan Active',
-                    link: '/admin/settings/billing', // Though we remove the button, keep link for safety
-                    buttonText: null, // Button removed for paid plan as requested
-                    className: styles.paidPlanBanner, // Use new glowing class
+                    link: '/admin/settings/billing', 
+                    buttonText: null, 
+                    className: styles.paidPlanBanner, 
                     isPaid: true,
                 };
             case 'PRO':
@@ -177,8 +178,8 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                     icon: MdStar,
                     text: 'Pro Plan Active',
                     link: '/admin/settings/billing', 
-                    buttonText: null, // Button removed
-                    className: styles.paidPlanBanner, // Use new glowing class
+                    buttonText: null, 
+                    className: styles.paidPlanBanner, 
                     isPaid: true,
                 };
             case 'NONE':
@@ -195,7 +196,6 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
     }, [plan, daysLeft]);
 
     const renderContent = () => {
-        // === RENDER FOR TRIAL MODE (Slogan, Countdown, Bar) ===
         if (isTrial && daysLeft !== null) {
             const progress = (daysLeft / 14) * 100;
             
@@ -216,7 +216,6 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
             );
         }
 
-        // === RENDER FOR PAID/SUPERADMIN MODE (Simple Badge) ===
         return (
             <div className={styles.planContent}>
                 <PlanIcon size={20} />
@@ -236,7 +235,6 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
     return (
         <div className={`${styles.subscriptionBanner} ${className}`}>
             {renderContent()}
-            {/* Upgrade Button sirf tab dikhega jab buttonText set ho (i.e., Trial/None) */}
             {buttonText && (
                 <Link href={link} className={styles.upgradeButton}>
                     {buttonText}
@@ -248,6 +246,34 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
 // -------------------------------------------
 
 
+// === NEW COMPONENT: UpcomingFeatureModal (From Step 3) ===
+const UpcomingFeatureModal = () => {
+    // Context से modal state read करो
+    const { showModal, setShowModal } = useUpcomingFeature();
+
+    return (
+        <Modal 
+            isOpen={showModal} 
+            onClose={() => setShowModal(false)} 
+            title="Upcoming Feature! ✨"
+        >
+            <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+                <MdFlashOn size={48} style={{ color: '#6366F1', marginBottom: '1rem' }} /> 
+                <h3 style={{ marginBottom: '0.5rem', color: '#333' }}>Feature Under Construction</h3>
+                <p style={{ color: '#666' }}>
+                    This feature is under development and will be available soon. 
+                    We are working hard to bring you the best experience!
+                </p>
+                <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>
+                    Thank you for your patience.
+                </p>
+            </div>
+        </Modal>
+    );
+};
+// ===========================================
+
+
 // --- DashboardControlCenter Component (Main) ---
 const DashboardControlCenter = () => {
     const { token, user } = useAuth(); 
@@ -257,11 +283,9 @@ const DashboardControlCenter = () => {
     const [error, setError] = useState('');
     const [activeModal, setActiveModal] = useState<string | null>(null);
 
-    // REAL-TIME SUBSCRIPTION DATA from useAuth().user
+    // REAL-TIME SUBSCRIPTION DATA from useAuth().user (Unchanged)
     const subscriptionData: SubscriptionData = useMemo(() => {
-        // === SuperAdmin Logic (Override) ===
         if (user && user.role === 'SuperAdmin') {
-            // SuperAdmin को सिर्फ 'Starter Plan Active' दिखना चाहिए, भले ही database में 'PRO' हो
             return { plan: 'STARTER' as PlanType, planExpiryDate: null }; 
         }
 
@@ -308,9 +332,8 @@ const DashboardControlCenter = () => {
         }
     };
 
-    // Main Data Fetch (Dashboard Data)
+    // Main Data Fetch (Dashboard Data) - Unchanged
     useEffect(() => {
-        // ... (data fetching logic remains unchanged) ...
         const fetchData = async () => {
             if (!token) {
                 setLoading(false);
@@ -333,9 +356,8 @@ const DashboardControlCenter = () => {
         setWarningDismissed(localStorage.getItem('trialWarningDismissed') === 'true');
     }, [token]);
 
-    // POP-UP LOGIC: Show warning if trial and <= 14 days left and not dismissed
+    // POP-UP LOGIC: Show warning if trial and <= 14 days left and not dismissed - Unchanged
     useEffect(() => {
-        // ... (logic remains unchanged) ...
         if (subscriptionData.plan === 'TRIAL' && subscriptionData.planExpiryDate && !warningDismissed) {
             const end = new Date(subscriptionData.planExpiryDate).getTime();
             const now = new Date().getTime();
@@ -388,6 +410,8 @@ const DashboardControlCenter = () => {
                          </ResponsiveContainer>
                      </div>
                  </div>
+
+                 {/* Students Box, Teachers Box, Fee Counter Box, Parents Box, Staff Box remain unchanged below... */}
 
                  {/* Students Box */}
                  <div className={styles.summaryBox}>
@@ -466,12 +490,17 @@ const DashboardControlCenter = () => {
 };
 
 
-// Main Page Component
+// Main Page Component (FINAL WRAPPING)
 const SchoolPage = () => {
     return (
         <div className={styles.schoolPageContainer}>
             <main className={styles.mainContent}>
-                <DashboardControlCenter />
+                {/* === WRAPPER: Provider and Modal === */}
+                <UpcomingFeatureProvider>
+                    <DashboardControlCenter />
+                    {/* Locked features पर क्लिक करने पर यह modal open होगा */}
+                    <UpcomingFeatureModal /> 
+                </UpcomingFeatureProvider>
             </main>
         </div>
     );
