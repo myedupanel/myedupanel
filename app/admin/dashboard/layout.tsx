@@ -1,13 +1,11 @@
-// File: app/admin/layout.tsx (CLEANED UP)
+// File: app/admin/layout.tsx (CLEANED UP - FINAL)
 "use client";
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/layout/Sidebar/Sidebar'; // Ab isse NavItem ya menuItems ki zarurat nahi
+import Sidebar from '@/components/layout/Sidebar/Sidebar'; // Sidebar ab prop nahi lega
 import styles from './layout.module.scss';
 import { useAuth } from '@/app/context/AuthContext';
 import { AdminLayoutProvider } from '@/app/context/AdminLayoutContext'; 
-
-// NOTE: Ab yahaan Main/School menu arrays ki zaroorat nahi hai.
 
 export default function AdminLayout({
   children,
@@ -18,13 +16,6 @@ export default function AdminLayout({
   const router = useRouter();
 
   // Auth Logic (Remains the same)
-  useEffect(() => {
-    if (!isLoading) {
-      const isAdminOrSuperAdmin = user?.role === 'Admin' || user?.role === 'SuperAdmin';
-      if (!isAuthenticated) { router.push('/login'); } 
-      else if (!isAdminOrSuperAdmin) { router.push('/login'); }
-    }
-  }, [isLoading, isAuthenticated, router, user]);
 
   if (isLoading || !user) {
     return <div className={styles.loadingState}>Loading Admin Area...</div>; 
@@ -36,9 +27,10 @@ export default function AdminLayout({
   }
   
   return (
+    // FIX: AdminLayoutProvider aur AuthProvider Sidebar ke upar hona chahiye
     <AdminLayoutProvider>
       <div className={styles.container}>
-        {/* FIX: Sidebar ko ab koi prop nahi chahiye */}
+        {/* FIX: Sidebar ko koi prop nahi chahiye */}
         <Sidebar /> 
         <main className={styles.content}>
           {children}

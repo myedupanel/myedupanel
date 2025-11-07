@@ -1,4 +1,4 @@
-// File: components/layout/Sidebar/Sidebar.tsx (SUPER INTELLIGENT VERSION)
+// File: components/layout/Sidebar/Sidebar.tsx (FINAL FIX - NO PROPS)
 "use client";
 import React from 'react';
 import Link from 'next/link';
@@ -11,7 +11,7 @@ import { MdLogout, MdPeople, MdSchool, MdFamilyRestroom, MdBadge, MdClass, MdEve
 import { FaLandmark } from 'react-icons/fa';
 import { GiReceiveMoney } from 'react-icons/gi';
 
-// Interface definition (ab yeh internal hai)
+// Interface definition (Internal to Sidebar)
 export interface NavItem {
   name: string;
   path: string;
@@ -19,76 +19,51 @@ export interface NavItem {
   type: 'free' | 'premium' | 'upcoming';
 }
 
-// === MENU 1: DASHBOARD MAIN MENU (Chota Menu) ===
+// === MENU 1: DASHBOARD MAIN MENU ===
 const mainMenuItems: NavItem[] = [
-  { 
-    name: 'Main Dashboard', 
-    path: '/admin/dashboard', 
-    icon: <MdGridView style={{ color: '#3b82f6' }} />, 
-    type: 'free' 
-  },
-  { 
-    name: 'School', 
-    path: '/admin/school', 
-    icon: <MdSchool style={{ color: '#8b5cf6' }} />, 
-    type: 'free' 
-  },
-  { 
-    name: 'Gov Schemes', 
-    path: '/admin/schemes',
-    icon: <FaLandmark style={{ color: '#10b981' }} />, 
-    type: 'upcoming' 
-  },
-  { 
-    name: 'Expense', 
-    path: '/admin/expense', 
-    icon: <GiReceiveMoney style={{ color: '#f97316' }} />, 
-    type: 'upcoming' 
-  },
+  { name: 'Main Dashboard', path: '/admin/dashboard', icon: <MdGridView style={{ color: '#3b82f6' }} />, type: 'free' },
+  { name: 'School', path: '/admin/school', icon: <MdSchool style={{ color: '#8b5cf6' }} />, type: 'free' },
+  { name: 'Gov Schemes', path: '/admin/schemes', icon: <FaLandmark style={{ color: '#10b981' }} />, type: 'upcoming' },
+  { name: 'Expense', path: '/admin/expense', icon: <GiReceiveMoney style={{ color: '#f97316' }} />, type: 'upcoming' },
 ];
 
-// === MENU 2: SCHOOL CONTROL CENTER MENU (Bada Menu + Locking) ===
+// === MENU 2: SCHOOL CONTROL CENTER MENU ===
 const schoolMenuItems: NavItem[] = [
-    // Free Features
     { name: 'Students', path: '/admin/students', icon: <MdPeople />, type: 'free' },
     { name: 'Teachers', path: '/admin/teachers', icon: <MdSchool />, type: 'free' },
     { name: 'Parents', path: '/admin/parents', icon: <MdFamilyRestroom />, type: 'free' },
     { name: 'Staff', path: '/admin/staff', icon: <MdBadge />, type: 'free' },
     { name: 'Manage Classes', path: '/admin/school/classes', icon: <MdClass />, type: 'free' },
     { name: 'Settings', path: '/admin/settings', icon: <MdSettings />, type: 'free' },
-    
-    // --- LOCKED FEATURES ---
-    // Premium Lock
     { name: 'Fee Counter', path: '/admin/fee-counter', icon: <MdAttachMoney />, type: 'premium' }, 
-    
-    // Upcoming Locks (Popup open hoga)
     { name: 'Attendance', path: '/admin/attendance', icon: <MdEventAvailable />, type: 'upcoming' }, 
     { name: 'Timetable', path: '/admin/timetable', icon: <MdSchedule />, type: 'upcoming' },
     { name: 'Academics', path: '/admin/academics', icon: <MdAssessment />, type: 'upcoming' }, 
 ];
 
-// Sidebar Component - No 'menuItems' prop now!
-const Sidebar = () => { // Removed { menuItems }: SidebarProps
+// Sidebar Component - NO PROPS! (Guarantees no 'menuItems' conflict)
+const Sidebar = () => { 
   const pathname = usePathname();
   const { user, logout } = useAuth(); 
+  
+  // FIX: useAdminLayout ko yahaan call karne se pehle, hum uske parent ko check karenge.
+  // Lekin is component ko useAdminLayout ke bina chalaya nahi ja sakta.
   const { showUpcomingFeatureModal } = useAdminLayout(); 
 
   const isSuperAdmin = user?.role === 'SuperAdmin';
   
-  // === DYNAMIC MENU SELECTION LOGIC ===
+  // DYNAMIC MENU SELECTION LOGIC
   const isSchoolFeatureRoute = pathname.startsWith('/admin/school') || 
                                pathname.startsWith('/admin/students') || 
                                pathname.startsWith('/admin/teachers') || 
                                pathname.startsWith('/admin/parents') || 
                                pathname.startsWith('/admin/staff') ||
-                               pathname.startsWith('/admin/settings'); // Settings school area mein bhi hai
+                               pathname.startsWith('/admin/settings'); 
                                
   const currentMenuItems = isSchoolFeatureRoute ? schoolMenuItems : mainMenuItems;
-  // ===================================
-
 
   const getLinkProps = (item: NavItem) => {
-    // Logic remains the same (handles locking/unlocked states)
+    // Locking Logic (Same as before)
     if (isSuperAdmin || item.type === 'free') {
       return { href: item.path, onClick: undefined, className: '' };
     }
@@ -118,7 +93,7 @@ const Sidebar = () => { // Removed { menuItems }: SidebarProps
 
       <nav className={styles.menuSection}>
         <ul className={styles.menuList}>
-          {currentMenuItems.map((item) => { // currentMenuItems ko map kiya
+          {currentMenuItems.map((item) => { 
             const linkProps = getLinkProps(item);
 
             return (
@@ -144,7 +119,7 @@ const Sidebar = () => { // Removed { menuItems }: SidebarProps
             );
           })}
           
-          {/* === COUPON BUTTON (SIRF SUPERADMIN KE LIYE) === */}
+          {/* === COUPON BUTTON === */}
           {isSuperAdmin && (
             <li className={`${styles.menuItem} ${styles.superAdminLink} ${
                 pathname === '/superadmin/coupons' ? styles.active : ''
