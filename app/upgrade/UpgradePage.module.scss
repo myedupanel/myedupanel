@@ -1,179 +1,210 @@
-/* File: app/upgrade/UpgradePage.module.scss */
+/* app/upgrade/UpgradePage.module.scss */
 
 .upgradeContainer {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start; /* Taaki page top se shuru ho */
   min-height: 100vh;
-  background-color: #f4f7f6;
-  padding: 2rem;
+  padding: 2rem 1rem; /* Mobile ke liye padding */
+  background-color: #f0f2f5;
 }
 
 .upgradeBox {
+  width: 100%;
+  max-width: 1100px; /* Bada container taaki 3 box fit ho sakein */
   background: #ffffff;
+  padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 2.5rem;
-  max-width: 450px;
-  width: 100%;
   text-align: center;
 
   h2 {
-    font-size: 1.8rem;
+    font-size: 2rem;
     color: #333;
+    margin-top: 0;
     margin-bottom: 0.5rem;
   }
-
+  
   p {
+    font-size: 1.1rem;
     color: #666;
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
   }
 }
 
-.planDetails {
+/* === NAYA STYLE: Plan Grid === */
+.planGrid {
+  display: grid;
+  grid-template-columns: 1fr; /* Mobile par ek column */
+  gap: 1.5rem;
+
+  /* Tablet aur Desktop par 3 column */
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+/* === STYLE BADLA GAYA: planDetails -> planBox === */
+.planBox {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 1.5rem;
-  margin-bottom: 2rem;
-  text-align: left;
-
+  text-align: left; /* Box ke andar content left-aligned */
+  background: #fdfdfd;
+  display: flex;
+  flex-direction: column; /* Taaki button neeche rahe */
+  height: 100%; /* Taaki sabhi box ek size ke dikhein */
+  
   h3 {
-    font-size: 1.3rem;
-    color: #222;
-    text-align: center;
-    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: var(--primary-color, #007bff);
+    margin-top: 0;
+    margin-bottom: 0.5rem;
   }
-
-  .price {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #007bff;
-    text-align: center;
-    margin-bottom: 1.5rem;
-
-    span {
-      font-size: 1rem;
-      font-weight: 400;
-      color: #666;
-    }
-  }
-
+  
   ul {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 1rem 0;
+    flex-grow: 1; /* Yeh feature list ko expand karega taaki button neeche chipak jaaye */
 
     li {
-      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
       color: #555;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      
+      /* ✓ icon ko text se align karein */
+      &::before {
+        content: '✓';
+        color: #28a745;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-right: 0.5rem;
+      }
     }
   }
 }
 
-.buyButton {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 0.8rem 1.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  width: 100%;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-}
 .priceContainer {
-  text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .price {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  color: #007bff;
+  color: #222;
   margin: 0;
-
+  
   span {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 400;
-    color: #666;
+    color: #777;
+    margin-left: 0.25rem;
   }
 }
 
 .originalPrice {
   font-size: 1.2rem;
-  color: #888;
+  color: #999;
   text-decoration: line-through;
-  display: block;
 }
 
-/* Coupon Section */
+/* === NAYA STYLE: Locked Plan === */
+.locked {
+  opacity: 0.7;
+  background: #f8f9fa;
+  
+  ul li::before {
+    color: #999; /* Locked features ka icon grey */
+  }
+}
+
+.lockedButton {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #6c757d; /* Grey button */
+  border: none;
+  border-radius: 5px;
+  cursor: not-allowed;
+  margin-top: auto; /* Button ko hamesha neeche rakhega */
+}
+
+/* Coupon aur Buy Button Styles (Bina Badlaav) */
 .couponSection {
   display: flex;
-  margin-bottom: 1rem;
-  gap: 8px;
+  margin-top: 1.5rem;
+  width: 100%;
 }
 
 .couponInput {
   flex-grow: 1;
-  padding: 0.7rem;
   border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 1rem;
-
+  padding: 0 0.75rem;
+  font-size: 0.9rem;
+  border-radius: 5px 0 0 5px;
   &:disabled {
-    background-color: #f4f4f4;
+    background: #eee;
   }
 }
 
 .applyButton {
-  padding: 0.7rem 1rem;
+  padding: 0.75rem 1rem;
   border: none;
-  border-radius: 5px;
-  background-color: #555;
+  background: #555;
   color: white;
-  font-weight: 600;
+  border-radius: 0 5px 5px 0;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-
+  font-weight: 600;
   &:hover {
-    background-color: #333;
+    background: #333;
   }
-
   &:disabled {
-    background-color: #aaa;
+    background: #999;
     cursor: not-allowed;
   }
 }
 
-/* Coupon Messages */
 .couponMessage {
-  font-size: 0.9rem;
-  padding: 10px;
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
   border-radius: 5px;
-  margin-bottom: 1rem;
-  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  
+  &.success {
+    background: #d4edda;
+    color: #155724;
+  }
+  &.error {
+    background: #f8d7da;
+    color: #721c24;
+  }
 }
 
-.success {
-  background-color: #e6f7ec;
-  color: #0d6a2c;
-  border: 1px solid #28a745;
-}
+.buyButton {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 1.5rem; /* Coupon section se gap */
+  transition: background-color 0.2s ease;
 
-.error {
-  background-color: #ffebee;
-  color: #c62828;
-  border: 1px solid #dc3545;
-}
-
-/* Buy Button Loading State */
-.buyButton:disabled {
-  background-color: #aaa;
-  cursor: not-allowed;
+  &:hover {
+    background-color: #0056b3;
+  }
+  &:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+  }
 }
