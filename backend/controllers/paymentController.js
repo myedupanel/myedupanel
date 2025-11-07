@@ -1,10 +1,10 @@
-// File: backend/controllers/paymentController.js (Full Updated Code with validateCoupon)
+// File: backend/controllers/paymentController.js (FIXED)
 const prisma = require('../config/prisma');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
 
-// Razorpay instance
+// Razorpay instance (Bina Badlaav)
 let razorpay;
 if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
   razorpay = new Razorpay({
@@ -15,8 +15,9 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
   console.warn("WARNING: Razorpay keys are not set. Payment API will not work.");
 }
 
-// createReceiptHtml function (Helper)
+// createReceiptHtml function (Bina Badlaav)
 const createReceiptHtml = (userName, planName, amount, orderId, paymentId, expiryDate) => {
+  // ... (poora HTML waisa hi)
   return `
   <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
     <div style="background-color: #007bff; color: white; padding: 20px;">
@@ -64,7 +65,7 @@ const createReceiptHtml = (userName, planName, amount, orderId, paymentId, expir
   `;
 };
 
-// === FUNCTION 1: CREATE ORDER (Dynamic Price + Coupon + Receipt Fix) ===
+// === FUNCTION 1: CREATE ORDER (FIXED) ===
 exports.createSubscriptionOrder = async (req, res) => {
   if (!razorpay) {
     return res.status(500).json({ message: "Payment gateway is not configured." });
@@ -75,7 +76,7 @@ exports.createSubscriptionOrder = async (req, res) => {
     const schoolId = req.user.schoolId;
     const userId = req.user.id; 
 
-    // --- Dynamic Price Logic ---
+    // --- Dynamic Price Logic (Bina Badlaav) ---
     const planFromDb = await prisma.plan.findUnique({
       where: { id: planName.toUpperCase() }
     });
@@ -88,24 +89,34 @@ exports.createSubscriptionOrder = async (req, res) => {
     let finalAmountInRupees = originalAmountInRupees;
     let couponId = null;
 
-    // --- Coupon Logic ---
+    // --- Coupon Logic (FIXED) ---
     if (couponCode) {
+      // === FIX: YAHAN PAR LOGIC GALAT THA ===
+      // Humne isse `validateCoupon` waale logic se match kar diya hai.
       const coupon = await prisma.coupon.findFirst({
         where: {
           code: couponCode.toUpperCase(),
           isActive: true,
-          OR: [
-            { expiryDate: null },
-            { expiryDate: { gt: new Date() } }
-          ],
-          AND: [
-             { maxUses: null },
-             { timesUsed: { lt: prisma.coupon.fields.maxUses } } 
+          AND: [ // Donon conditions (Expiry aur Uses) true honi chahiye
+            { // Expiry Check
+              OR: [
+                { expiryDate: null },
+                { expiryDate: { gt: new Date() } }
+              ]
+            },
+            { // Max Uses Check (OR ke saath)
+              OR: [
+                 { maxUses: null },
+                 { timesUsed: { lt: prisma.coupon.fields.maxUses } } 
+              ]
+            }
           ]
         }
       });
+      // === END FIX ===
 
       if (!coupon) {
+        // Yeh error ab sahi se trigger hoga agar coupon invalid hai
         return res.status(400).json({ message: "Invalid or expired coupon code." });
       }
 
@@ -139,7 +150,7 @@ exports.createSubscriptionOrder = async (req, res) => {
       }
     };
 
-    // --- (Split Payment Logic) ---
+    // --- (Split Payment Logic - Bina Badlaav) ---
     const MY_LINKED_ACCOUNT_ID = process.env.MY_RAZORPAY_LINKED_ACCOUNT_ID;
     if (MY_LINKED_ACCOUNT_ID) {
       const myShareInPaise = Math.round(finalAmountInPaise * 0.50); // 50%
@@ -165,12 +176,12 @@ exports.createSubscriptionOrder = async (req, res) => {
   }
 };
 
-// --- NAYA FUNCTION 2: VALIDATE COUPON ---
+// --- FUNCTION 2: VALIDATE COUPON (Bina Badlaav) ---
 exports.validateCoupon = async (req, res) => {
     try {
         const { couponCode } = req.body;
         
-        // 1. Fetch Plan Details (STARTER plan assumed for coupon validation page)
+        // 1. Fetch Plan Details
         const planFromDb = await prisma.plan.findUnique({
             where: { id: 'STARTER' }
         });
@@ -190,7 +201,6 @@ exports.validateCoupon = async (req, res) => {
             where: {
                 code: couponCode.toUpperCase(),
                 isActive: true,
-                // Check expiry and max uses (Same logic as in createSubscriptionOrder)
                 AND: [
                     { 
                         OR: [
@@ -228,7 +238,7 @@ exports.validateCoupon = async (req, res) => {
 
         // 4. Send Response
         res.status(200).json({
-            couponCode: coupon.code,
+            couponCode: coupon.code, // Yeh frontend ke liye zaroori tha!
             originalPrice: originalPrice,
             newPrice: Math.round(newPrice),
             discountAmount: Math.round(discountAmount),
@@ -327,7 +337,7 @@ exports.verifySubscriptionWebhook = async (req, res) => {
 
       console.log(`SUCCESS: School ${schoolId} plan updated to ${planName}.`);
       
-      // === EMAIL LOGIC ===
+      // === EMAIL LOGIC (Bina Badlaav) ===
       try {
         const user = await prisma.user.findUnique({
           where: { id: Number(userId) },
