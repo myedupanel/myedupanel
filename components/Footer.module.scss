@@ -1,0 +1,91 @@
+/* File: components/Footer.module.scss */
+
+.footerWrapper {
+  background-color: #0f172a; /* Ekdum dark blue/black, professional */
+  color: #cbd5e1; /* Halka white/grey text */
+  padding: 4rem 0 2rem 0; /* Upar-neeche zyada padding */
+  font-size: 0.95rem;
+  margin-top: auto; /* Yeh footer ko hamesha page ke neeche rakhega */
+}
+
+.footerGrid {
+  display: grid;
+  /* Mobile par 2 column, Tablet/Desktop par 4 column */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3rem;
+  }
+}
+
+.footerColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; /* Links ke beech ka gap */
+
+  h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff; /* Column title safed */
+    margin-bottom: 0.5rem;
+  }
+
+  /* Saare links ke liye style */
+  a {
+    color: #cbd5e1; /* Halka text color */
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+
+    &:hover {
+      color: #ffffff; /* Hover par poora safed */
+      text-decoration: underline;
+    }
+  }
+
+  /* Jo links contact info hain (email/phone), unpar hover alag dikhega */
+  .contactLink {
+    word-break: break-word; // Lambe email/phone ko break karega
+    &:hover {
+      color: #38bdf8; // Hover par halka blue
+      text-decoration: none;
+    }
+  }
+}
+
+.footerBottom {
+  display: flex;
+  flex-direction: column; /* Mobile par ek ke neeche ek */
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 2.5rem;
+  margin-top: 2.5rem;
+  border-top: 1px solid #334155; /* Beech ki line */
+  gap: 1.5rem;
+
+  @media (min-width: 768px) {
+    flex-direction: row; /* Desktop par side-by-side */
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #94a3b8; /* Copyright text thoda aur halka */
+  }
+}
+
+.socialIcons {
+  display: flex;
+  gap: 1.5rem;
+
+  a {
+    font-size: 1.3rem;
+    color: #94a3b8;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #ffffff; /* Social icon hover par safed */
+    }
+  }
+}
