@@ -1,3 +1,4 @@
+// File: app/admin/school/page.tsx (UPDATED FOR REAL-TIME DATA)
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styles from './SchoolPage.module.scss';
@@ -20,7 +21,7 @@ import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
 import api from '@/backend/utils/api';
 
 
-// === 1. TypeScript Interfaces ===
+// === 1. TypeScript Interfaces (Unchanged) ===
 interface RecentStudent {
     id: string; 
     name: string; 
@@ -33,6 +34,7 @@ interface RecentTeacher {
     subject?: string; 
     details?: { subject?: string };
 }
+// ... (All other Recent interfaces and AdmissionDataPoint remain unchanged) ...
 interface RecentStaff {
     id: string; 
     name: string; 
@@ -55,26 +57,13 @@ interface AdmissionDataPoint {
     admissions: number;
 }
 
-// === NEW: Subscription Interface and Data Simulation ===
-type PlanType = 'TRIAL' | 'STARTER' | 'PRO' | 'FREE';
 
+// === UPDATED: Subscription Interface (School data se match karega) ===
+type PlanType = 'NONE' | 'TRIAL' | 'STARTER' | 'PRO'; // NONE added as per Prisma
 interface SubscriptionData {
     plan: PlanType;
-    trialEndDate: string | null; // ISO Date string for trial end
+    planExpiryDate: string | null; // Database se aayega
 }
-
-// Simulating the backend data fetch for subscription (Change 'TRIAL' to test STARTER or PRO)
-const getSimulatedSubscriptionData = (): SubscriptionData => {
-    const today = new Date();
-    const trialEnd = new Date(today);
-    // Setting trial to end 10 days from now for testing the 14-day warning
-    trialEnd.setDate(today.getDate() + 10); 
-    
-    return {
-        plan: 'TRIAL', 
-        trialEndDate: trialEnd.toISOString(),
-    };
-};
 // =========================================================
 
 interface DashboardData {
@@ -93,19 +82,20 @@ interface DashboardData {
 }
 // ===========================================
 
-// --- NEW COMPONENT: TrialWarningModal ---
+// --- NEW COMPONENT: TrialWarningModal (Unchanged) ---
 interface TrialWarningModalProps {
     isOpen: boolean;
     onClose: () => void;
     daysLeft: number;
 }
 const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, daysLeft }) => {
+    // ... (Modal implementation remains unchanged) ...
     return (
         <Modal 
             isOpen={isOpen} 
             onClose={onClose} 
             title="Trial Period Ending Soon! ⏳"
-            modalClassName={styles.warningModal} // FIX: Now that Modal.tsx is fixed, this works
+            modalClassName={styles.warningModal}
         >
             <div className={styles.modalContent}>
                 <p>Your **{daysLeft} day** free trial will expire soon.</p>
@@ -115,7 +105,7 @@ const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, 
                     Once your trial ends, access to some features will be restricted.
                 </p>
                 <div className={styles.modalActions}>
-                    <Link href="/pricing" className={styles.upgradeLinkButton}>
+                    <Link href="/upgrade" className={styles.upgradeLinkButton}>
                         Upgrade Now
                     </Link>
                     <button onClick={onClose} className={styles.dismissButton}>
@@ -129,20 +119,21 @@ const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, 
 // ----------------------------------------
 
 
-// --- NEW COMPONENT: SubscriptionBanner ---
+// --- UPDATED COMPONENT: SubscriptionBanner (Uses planExpiryDate) ---
 interface SubscriptionBannerProps {
-    subscription: SubscriptionData;
+    plan: PlanType;
+    planExpiryDate: string | null;
 }
 
-const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ subscription }) => {
+const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpiryDate }) => {
     const [daysLeft, setDaysLeft] = useState<number | null>(null);
 
     // Calculate days left and update every second
     useEffect(() => {
-        if (subscription.plan === 'TRIAL' && subscription.trialEndDate) {
+        if (plan === 'TRIAL' && planExpiryDate) {
             const calculateDays = () => {
                 const now = new Date().getTime();
-                const end = new Date(subscription.trialEndDate!).getTime();
+                const end = new Date(planExpiryDate).getTime();
                 const diffTime = end - now;
                 
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
@@ -150,24 +141,24 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ subscription })
             };
 
             calculateDays();
-            const interval = setInterval(calculateDays, 60000); // Update every minute
+            const interval = setInterval(calculateDays, 60000);
 
             return () => clearInterval(interval);
         }
         setDaysLeft(null);
-    }, [subscription]);
+    }, [plan, planExpiryDate]);
 
-    const isTrial = subscription.plan === 'TRIAL';
+    const isTrial = plan === 'TRIAL';
     
     // Choose icon, text, and action based on the plan
     const { icon: PlanIcon, text, link, buttonText, className } = useMemo(() => {
-        switch (subscription.plan) {
+        switch (plan) {
             case 'TRIAL':
                 const text = daysLeft !== null ? `${daysLeft} days left` : 'Trial Mode';
                 return {
                     icon: MdFlashOn,
                     text: text,
-                    link: '/pricing',
+                    link: '/upgrade', // Upgrade page
                     buttonText: 'Upgrade Now',
                     className: styles.trialBanner,
                 };
@@ -187,16 +178,17 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ subscription })
                     buttonText: 'Manage Plan',
                     className: styles.proBanner,
                 };
-            default: // e.g., FREE
+            case 'NONE':
+            default:
                 return {
                     icon: MdFlashOn,
-                    text: 'Free Plan',
-                    link: '/pricing',
-                    buttonText: 'Upgrade Now',
+                    text: 'No Active Plan',
+                    link: '/upgrade',
+                    buttonText: 'Start Trial / Upgrade',
                     className: styles.freeBanner,
                 };
         }
-    }, [subscription.plan, daysLeft]);
+    }, [plan, daysLeft]);
 
     const renderContent = () => {
         if (isTrial && daysLeft !== null) {
@@ -224,12 +216,11 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ subscription })
         );
     };
 
-    if (!text) return null;
+    if (!text || plan === 'NONE') return null; // NONE plan ke liye banner nahi dikhayenge
 
     return (
         <div className={`${styles.subscriptionBanner} ${className}`}>
             {renderContent()}
-            {/* Upgrade Button */}
             <Link href={link} className={styles.upgradeButton}>
                 {buttonText}
             </Link>
@@ -241,28 +232,44 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ subscription })
 
 // --- DashboardControlCenter Component (Main) ---
 const DashboardControlCenter = () => {
-    const { token } = useAuth();
+    const { token, user } = useAuth(); // User object ko destructure kiya
     const router = useRouter();
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeModal, setActiveModal] = useState<string | null>(null);
 
-    // NEW STATE: Subscription and Warning
-    const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>(getSimulatedSubscriptionData);
+    // NEW STATE: Subscription data (User object se read kiya jayega)
+    const subscriptionData: SubscriptionData = useMemo(() => {
+        // SuperAdmin ko plan check ki zaroorat nahi
+        if (user && user.role === 'SuperAdmin') {
+            return { plan: 'PRO', planExpiryDate: null }; 
+        }
+
+        // Real data user object se
+        const plan = user?.plan as PlanType || 'NONE';
+        const planExpiryDate = user?.planExpiryDate || null;
+        
+        return { plan, planExpiryDate };
+    }, [user]);
+
     const [showWarningModal, setShowWarningModal] = useState(false);
     const [warningDismissed, setWarningDismissed] = useState(false);
 
     const openModal = (modalName: string) => setActiveModal(modalName);
     const closeModal = () => setActiveModal(null);
     
-    // NEW HANDLERS
     const closeWarningModal = () => {
-        setShowWarningModal(false);
-        localStorage.setItem('trialWarningDismissed', 'true');
-        setWarningDismissed(true);
-    };
 
+        setShowWarningModal(false);
+
+        // localStorage में dismissal status save करें
+
+        localStorage.setItem('trialWarningDismissed', 'true');
+
+        setWarningDismissed(true);
+
+    };
 
     const handleFormSubmit = async () => {
         return new Promise<void>((resolve) => {
@@ -277,7 +284,6 @@ const DashboardControlCenter = () => {
     const handleParentSuccess = () => { console.log("Parent added!"); closeModal(); }
     const handleStaffSuccess = async (staffData: any) => { console.log("Staff potentially added/updated via API call inside AddStaffForm", staffData); closeModal(); return Promise.resolve(); }
 
-
     const getModalTitle = () => {
         switch (activeModal) {
             case 'add-student': return 'Add New Student';
@@ -288,7 +294,7 @@ const DashboardControlCenter = () => {
         }
     };
 
-    // Main Data Fetch
+    // Main Data Fetch (Dashboard Data)
     useEffect(() => {
         const fetchData = async () => {
             if (!token) {
@@ -301,10 +307,6 @@ const DashboardControlCenter = () => {
                 setError('');
                 const response = await api.get<DashboardData>('/admin/dashboard-data');
                 setData(response.data);
-                
-                // IMPORTANT: Fetch and set REAL subscription data here in a production environment
-                setSubscriptionData(getSimulatedSubscriptionData()); 
-
             } catch (err: any) {
                 setError('Could not load dashboard data.');
                 console.error("API fetch error:", err.response?.data || err.message);
@@ -319,8 +321,8 @@ const DashboardControlCenter = () => {
 
     // POP-UP LOGIC: Show warning if trial and <= 14 days left and not dismissed
     useEffect(() => {
-        if (subscriptionData.plan === 'TRIAL' && subscriptionData.trialEndDate && !warningDismissed) {
-            const end = new Date(subscriptionData.trialEndDate).getTime();
+        if (subscriptionData.plan === 'TRIAL' && subscriptionData.planExpiryDate && !warningDismissed) {
+            const end = new Date(subscriptionData.planExpiryDate).getTime();
             const now = new Date().getTime();
             const daysLeft = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
             
@@ -344,16 +346,20 @@ const DashboardControlCenter = () => {
     return (
         <div className={styles.overviewContainer}>
             
-            {/* === FEATURE: Title and Subscription Banner Alignment === */}
             <div className={styles.headerRow}>
                 <h1 className={styles.mainTitle}>School Control Center</h1>
-                {/* Subscription Banner Component Integration */}
-                <SubscriptionBanner subscription={subscriptionData} />
+                {/* Subscription Banner Component Integration (Real-time data passed) */}
+                {user && (
+                    <SubscriptionBanner 
+                        plan={subscriptionData.plan} 
+                        planExpiryDate={subscriptionData.planExpiryDate} 
+                    />
+                )}
             </div>
-            {/* ==================================================== */}
 
             <div className={styles.mainGrid}>
-                {/* Chart Box */}
+                {/* ... (All other Boxes remain unchanged) ... */}
+                 {/* Chart Box */}
                 <div className={`${styles.summaryBox} ${styles.chartBox}`}>
                      <div className={styles.boxHeader}><h2><MdAssessment/> Student Admissions</h2></div>
                      <div className={styles.chartContainer}>
@@ -369,7 +375,6 @@ const DashboardControlCenter = () => {
                      </div>
                  </div>
 
-                 {/* Students Box, Teachers Box, Fee Counter Box, Parents Box, Staff Box remain unchanged below... */}
                  {/* Students Box */}
                  <div className={styles.summaryBox}>
                      <div className={styles.boxHeader}><h2><MdPeople/> Students</h2><Link href="/admin/students" className={styles.viewAllLink}>View All</Link></div>
@@ -419,7 +424,6 @@ const DashboardControlCenter = () => {
                       </ul>
                       <div className={styles.boxFooter}><button onClick={() => openModal('add-staff')} className={styles.addButton}><MdPersonAdd /> Add Staff</button></div>
                  </div>
-
             </div>
             
             {/* General Modals */}
@@ -432,14 +436,16 @@ const DashboardControlCenter = () => {
                 </>
             </Modal>
 
-            {/* Trial Warning Modal (NEW) */}
-            <TrialWarningModal 
-                isOpen={showWarningModal} 
-                onClose={closeWarningModal} 
-                daysLeft={
-                    Math.ceil((new Date(subscriptionData.trialEndDate!).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
-                } 
-            />
+            {/* Trial Warning Modal (Shows if applicable) */}
+            {subscriptionData.planExpiryDate && (
+                <TrialWarningModal 
+                    isOpen={showWarningModal} 
+                    onClose={closeWarningModal} 
+                    daysLeft={
+                        Math.ceil((new Date(subscriptionData.planExpiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+                    } 
+                />
+            )}
 
         </div>
     );
