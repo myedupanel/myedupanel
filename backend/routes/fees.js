@@ -1,15 +1,22 @@
-// File: backend/routes/fees.js (UPDATED)
+// File: backend/routes/fees.js (FIXED)
 
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, authorize } = require('../middleware/authMiddleware');
-// --- FIX: Naya "Premium" lock import karein ---
 const checkPremiumAccess = require('../middleware/checkPremiumAccess');
-const { getFeeRecords, addFeePayment } = require('../controllers/feeController'); // (Controller ka naam example hai)
 
-// --- FIX: Ab sirf SuperAdmin ya PRO plan waale hi access kar sakte hain ---
-router.get('/', [authMiddleware, authorize('Admin'), checkPremiumAccess], getFeeRecords);
-router.post('/', [authMiddleware, authorize('Admin'), checkPremiumAccess], addFeePayment);
+// --- FIX: getFeeRecords को getStudentFeeRecords से बदला गया ---
+// --- FIX: addFeePayment को collectManualFee या assignAndCollectFee से बदला गया ---
+const { 
+    getStudentFeeRecords, // <--- Correct function from controller
+    collectManualFee      // <--- Assuming POST '/' is for collecting fees
+} = require('../controllers/feeController'); 
+
+// FIX: router.get('/') अब getStudentFeeRecords को कॉल करेगा
+router.get('/', [authMiddleware, authorize('Admin'), checkPremiumAccess], getStudentFeeRecords);
+
+// FIX: router.post('/') अब collectManualFee को कॉल करेगा (यह 'addFeePayment' के बजाय है)
+router.post('/', [authMiddleware, authorize('Admin'), checkPremiumAccess], collectManualFee);
 
 // ... (Baaki fee routes) ...
 
