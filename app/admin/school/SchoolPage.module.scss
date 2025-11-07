@@ -1,31 +1,39 @@
 /* Main container for the whole page */
-.schoolPageContainer {
+/* .schoolPageContainer {
     display: flex;
     background-color: #f8f9fa; // Lighter background color
     min-height: 100vh;
-}
+} */
 
 /* === FIX for Sidebar Overlap === */
-/* Give the main content a left margin equal to the sidebar's width.
-   You might need to adjust '260px' to match your actual Sidebar width. */
-.mainContent {
+/* .mainContent {
     flex-grow: 1;
     padding: 1.5rem 2rem;
     overflow-y: auto;
     margin-left: 260px; 
-}
+} */
 
 /* Rest of the styles */
 .overviewContainer {
     max-width: 1600px;
     margin: 0 auto;
+    /* FIX: यहां कोई margin-left नहीं होना चाहिए, यह पेरेंट लेआउट से आएगा */
+}
+
+/* FIX 1: New Class for Title and Badge alignment */
+.headerWithBadge {
+    display: flex;
+    justify-content: space-between; /* Title left, Badge right */
+    align-items: center; /* Vertically center */
+    margin-bottom: 2rem; 
 }
 
 .mainTitle {
     font-size: 2.25rem;
     font-weight: 700;
     color: #212529;
-    margin-bottom: 2rem;
+    /* FIX 2: margin-bottom हटा दिया क्योंकि यह अब Flex कंटेनर में है */
+    margin-bottom: 0; 
 }
 
 /* Premium Stat Cards */
@@ -169,28 +177,5 @@
     text-align: center;
     strong { color: #212529; }
 }
-.schoolLayoutWrapper {
-  display: flex;
-  // Parent layout (app/admin/layout) में styles.content पहले से ही 100vh है, 
-  // इसलिए हम इसे flex-grow: 1 पर सेट करते हैं।
-  flex-grow: 1; 
-  position: relative; 
-}
-
-.schoolContent {
-  flex-grow: 1; 
-  overflow-y: auto;
-  min-height: 100vh;
-  // --- यह सबसे महत्वपूर्ण FIX है ---
-  // SchoolSidebar 260px चौड़ा है, इसलिए content को 260px का margin दें
-  margin-left: 260px; 
-  padding: 1.5rem 2rem;
-  background-color: #f4f7fa; 
-}
-
-/* ... बाकी styles ... */
-
-.overviewContainer {
-    max-width: 1600px;
-    margin: 0 auto;
-}
+/* FIX: ये लोकल स्टाइल्स अब अनावश्यक हैं और हटा दिए गए हैं */
+/* .schoolLayoutWrapper, .schoolContent */
