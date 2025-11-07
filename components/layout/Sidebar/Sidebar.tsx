@@ -1,57 +1,39 @@
 // File: components/layout/Sidebar/Sidebar.tsx
-
 "use client";
-
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext'; 
-// --- FIX: Import path ko 'app/admin/layout' se badal kar nayi file par karein ---
 import { useAdminLayout } from '@/app/context/AdminLayoutContext'; 
-import styles from  './Sidebar.module.scss';
+import styles from './Sidebar.module.scss'; 
 import { FiTag } from 'react-icons/fi'; // Coupon icon
+import { MdLogout } from 'react-icons/md'; // Logout icon
 
-// Sidebar ko `menuItems` prop ke through data milega
-interface NavItem {
-  name: string; // <-- Yeh 'name' hai (jo error fix karega)
+// Interface definition
+export interface NavItem {
+  name: string;
   path: string;
   icon: React.ReactNode;
   type: 'free' | 'premium' | 'upcoming';
 }
-
-// SidebarProps interface (jismein 'menuItems' array hai)
 interface SidebarProps {
   menuItems: NavItem[];
 }
 
 const Sidebar = ({ menuItems }: SidebarProps) => {
   const pathname = usePathname();
-  const { user } = useAuth(); 
-  const { showUpcomingFeatureModal } = useAdminLayout(); // Naya hook (ab sahi jagah se aa raha hai)
+  const { user, logout } = useAuth(); // FIX: 'logout' function ko liya
+  const { showUpcomingFeatureModal } = useAdminLayout(); 
 
   const isSuperAdmin = user?.role === 'SuperAdmin';
 
-  // Har item ke liye link properties generate karne ka function
   const getLinkProps = (item: NavItem) => {
-    // 1. Agar SuperAdmin hai, toh sab kuch allowed hai
-    if (isSuperAdmin) {
+    if (isSuperAdmin || item.type === 'free') {
       return { href: item.path, onClick: undefined, className: '' };
     }
-
-    // 2. Agar feature 'free' hai, toh allowed hai
-    if (item.type === 'free') {
-      return { href: item.path, onClick: undefined, className: '' };
-    }
-
-    // 3. Agar feature 'premium' hai (jaise Fee Counter)
-    // Link ko active rakhein. Backend 403 bhejega aur api.ts
-    // user ko /upgrade page par redirect kar dega.
     if (item.type === 'premium') {
       return { href: item.path, onClick: undefined, className: styles.premium };
     }
-
-    // 4. Agar feature 'upcoming' hai (jaise Academics)
-    // Link ko dead karein (href="#") aur onClick par modal dikhayein.
     if (item.type === 'upcoming') {
       return {
         href: '#',
@@ -62,63 +44,68 @@ const Sidebar = ({ menuItems }: SidebarProps) => {
         className: styles.upcoming
       };
     }
-
-    // Fallback
     return { href: item.path, onClick: undefined, className: '' };
   };
 
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.logo}>
-        My EduPanel
+    <aside className={styles.sidebarContainer}>
+      <div className={styles.logoSection}>
+        <Link href="/admin/dashboard">
+          <h2>My EduPanel</h2>
+        </Link>
       </div>
 
-      <nav className={styles.nav}>
-        <ul>
-          {/* 'menuItems' prop se map karein */}
+      <nav className={styles.menuSection}>
+        <ul className={styles.menuList}>
           {menuItems.map((item) => {
             const linkProps = getLinkProps(item);
 
             return (
-              <li key={item.path}>
+              <li key={item.path} className={`${styles.menuItem} ${
+                  (pathname === item.path && item.path) ? styles.active : ''
+                } ${linkProps.className}`}
+              >
                 <Link
                   href={linkProps.href}
                   onClick={linkProps.onClick}
-                  className={`${styles.navLink} ${pathname === item.path ? styles.active : ''} ${linkProps.className}`}
                 >
-                  {item.icon}
+                  <span className={styles.icon}>{item.icon}</span>
                   <span>{item.name}</span>
-                  {/* === NAYE TAGS === */}
+                  {/* === TAGS === */}
                   {(item.type === 'premium' && !isSuperAdmin) && (
                     <span className={styles.proTag}>PRO</span>
                   )}
                   {(item.type === 'upcoming' && !isSuperAdmin) && (
                     <span className={styles.upcomingTag}>SOON</span>
                   )}
-                  {/* === END TAGS === */}
-
                 </Link>
               </li>
             );
           })}
-          {/* === NAYA COUPON BUTTON (SIRF SUPERADMIN KE LIYE) === */}
+          
+          {/* === COUPON BUTTON (SIRF SUPERADMIN KE LIYE) === */}
           {isSuperAdmin && (
-            <li>
-              <Link
-                href="/superadmin/coupons"
-                className={`${styles.navLink} ${pathname === '/superadmin/coupons' ? styles.active : ''} ${styles.superAdminLink}`}
-              >
-                <FiTag />
+            <li className={`${styles.menuItem} ${styles.superAdminLink} ${
+                pathname === '/superadmin/coupons' ? styles.active : ''
+              }`}
+            >
+              <Link href="/superadmin/coupons">
+                <span className={styles.icon}><FiTag /></span>
                 <span>Manage Coupons</span>
               </Link>
             </li>
           )}
-          {/* === END COUPON BUTTON === */}
-
         </ul>
       </nav>
+
+      {/* --- FOOTER (LOGOUT BUTTON) --- */}
+      <footer className={styles.sidebarFooter}>
+        <button onClick={logout} className={`${styles.footerButton} ${styles.logoutButton}`}>
+          <MdLogout />
+          <span>Logout</span>
+        </button>
+      </footer>
     </aside>
   );
 };
-
 export default Sidebar;
