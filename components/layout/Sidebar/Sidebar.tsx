@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext'; 
 // --- FIX: Import path ko 'app/admin/layout' se badal kar nayi file par karein ---
 import { useAdminLayout } from '@/app/context/AdminLayoutContext'; 
-import styles from './Sidebar.module.scss'; // Iske liye aapke paas SCSS file honi chahiye
+import styles from  '@/components/layout/sidebar/Sidebar.module.scss';
 import { FiTag } from 'react-icons/fi'; // Coupon icon
 
 // Sidebar ko `menuItems` prop ke through data milega

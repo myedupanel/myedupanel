@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 // Hum aapke purane sidebar ki styling hi yahan istemal karenge
-import '../../../components/layout/Sidebar/Sidebar.scss'; 
+import '@/components/layout/Sidebar/Sidebar.module.scss'; 
 
 import { 
   MdDashboard, 
