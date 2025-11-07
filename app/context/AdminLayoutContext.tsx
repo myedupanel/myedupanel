@@ -2,7 +2,7 @@
 
 import { createContext, useContext, ReactNode, useState } from 'react';
 import { FiZap } from 'react-icons/fi'; // Icon ko yahaan import karein
-import styles from '@/app/admin/dashboard/layout.module.scss'; // Style file ko reuse karein
+import styles from '@/app/admin/layout.module.scss'; // Style file ko reuse karein
 
 // 1. Context banayein
 interface AdminLayoutContextType {

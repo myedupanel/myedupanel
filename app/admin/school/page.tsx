@@ -13,8 +13,8 @@ import {
     MdPeople, MdSchool, MdFamilyRestroom, MdBadge,
     MdEventAvailable, MdAttachMoney, MdSchedule,
     MdAssessment, MdSettings, MdPersonAdd,
-    MdClass // <-- 1. YEH NAYA ICON IMPORT KIYA HAI
-} from 'react-icons/md';
+    MdClass 
+} from 'react-icons/md'; // <--- FIX 1: 'reicons' ko 'react-icons' kar diya
 
 import Modal from '@/components/common/Modal/Modal';
 import AddStudentForm from '@/components/admin/AddStudentForm/AddStudentForm';
@@ -24,34 +24,30 @@ import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
 import api from '@/backend/utils/api';
 
 
-interface MenuItem {
-    id: string;
-    title: string;
-    path: string;
-    icon: React.ReactNode;
-    color: string;
-}
+// --- FIX 2: Puraana 'MenuItem' interface hata diya gaya ---
 
-const schoolMenuItems: MenuItem[] = [
-    { id: 'students', title: 'Students', path: '/admin/students', icon: <MdPeople />, color: '#3b82f6' },
-    { id: 'teachers', title: 'Teachers', path: '/admin/teachers', icon: <MdSchool />, color: '#8b5cf6' },
-    { id: 'parents', title: 'Parents', path: '/admin/parents', icon: <MdFamilyRestroom />, color: '#ef4444' },
-    { id: 'staff', title: 'Staff', path: '/admin/staff', icon: <MdBadge />, color: '#f97316' },
-    // --- 2. YEH NAYA LINK "STAFF" KE NEECHE ADD KIYA HAI ---
+// --- FIX 3: 'schoolMenuItems' ko naye 'NavItem' structure se match kiya ---
+// (name aur type properties add kiye, id aur color hata diye)
+const schoolMenuItems = [
+    { name: 'Students', path: '/admin/students', icon: <MdPeople />, type: 'free' },
+    { name: 'Teachers', path: '/admin/teachers', icon: <MdSchool />, type: 'free' },
+    { name: 'Parents', path: '/admin/parents', icon: <MdFamilyRestroom />, type: 'free' },
+    { name: 'Staff', path: '/admin/staff', icon: <MdBadge />, type: 'free' },
     { 
-      id: 'manage-classes',
-      title: 'Manage Classes', 
+      name: 'Manage Classes', 
       path: '/admin/school/classes', // Path to your classes page
       icon: <MdClass />, 
-      color: '#64748b' // Using Timetable Settings color
+      type: 'free' // Yeh free feature hai
     },
-    // --- END NAYA LINK ---
-    { id: 'attendance', title: 'Attendance', path: '/admin/attendance/student', icon: <MdEventAvailable />, color: '#10b981' },
-    { id: 'fee-counter', title: 'Fee Counter', path: '/admin/fee-counter', icon: <MdAttachMoney />, color: '#14b8a6' },
-    { id: 'timetable', title: 'Timetable', path: '/admin/timetable', icon: <MdSchedule />, color: '#6366f1' },
-    { id: 'Timetable settings', title: 'Timetable Settings', path: '/admin/settings', icon: <MdSettings />, color: '#64748b' },
-    { id: 'academics', title: 'Academics', path: '/admin/academics', icon: <MdAssessment />, color: '#0ea5e9' },
-];
+    { name: 'Attendance', path: '/admin/attendance/student', icon: <MdEventAvailable />, type: 'upcoming' },
+    { name: 'Fee Counter', path: '/admin/fee-counter', icon: <MdAttachMoney />, type: 'premium' },
+    { name: 'Timetable', path: '/admin/timetable', icon: <MdSchedule />, type: 'upcoming' },
+    // 'Timetable Settings' ka path /admin/settings hai (aapke layout.tsx ke hisaab se)
+    { name: 'Timetable Settings', path: '/admin/settings', icon: <MdSettings />, type: 'upcoming' }, 
+    { name: 'Academics', path: '/admin/academics', icon: <MdAssessment />, type: 'upcoming' },
+] as const; // 'as const' add karna acchi practice hai
+// --- END FIX ---
+
 
 interface DashboardData {
     admissionsData: { month?: number; name: string; admissions: number }[];
@@ -63,8 +59,7 @@ interface DashboardData {
 }
 
 const DashboardControlCenter = () => {
-    // ... (Poora DashboardControlCenter component code waisa hi rahega) ...
-    // ... (No changes needed inside this component) ...
+    // ... (Aapka poora DashboardControlCenter component code BINA KISI BADLAAV ke waisa hi rahega) ...
     const { token } = useAuth();
     const router = useRouter();
     const [data, setData] = useState<DashboardData | null>(null);
@@ -235,8 +230,9 @@ const DashboardControlCenter = () => {
 const SchoolPage = () => {
     return (
         <div className={styles.schoolPageContainer}>
-            {/* Sidebar ab updated 'schoolMenuItems' list use karega */}
-            <Sidebar menuItems={schoolMenuItems} />
+            {/* --- FIX 4: 'as const' se array 'readonly' ho jaata hai --- */}
+            {/* --- Use spread operator [...] to make it mutable --- */}
+            <Sidebar menuItems={[...schoolMenuItems]} />
             <main className={styles.mainContent}>
                 <DashboardControlCenter />
             </main>
