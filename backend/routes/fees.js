@@ -24,7 +24,7 @@ const {
 } = require('../controllers/feeController'); 
 
 // Middleware
-const adminAuth = [authMiddleware, authorize('Admin'), checkPremiumAccess];
+const adminAuth = [authMiddleware, authorize('Admin')];
 
 // --- Dashboard & Template Routes ---
 router.get('/dashboard-overview', adminAuth, getDashboardOverview);
