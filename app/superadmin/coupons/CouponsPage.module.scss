@@ -89,3 +89,44 @@
     background-color: #f9f9f9;
   }
 }
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #dee2e6;
+
+  h1 {
+    margin: 0;
+    font-size: 1.8rem;
+  }
+}
+
+.dashboardLinkButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #343a40;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+
+  &:hover {
+    background-color: #e9ecef;
+    color: #000;
+  }
+}
+
+/* Error message ke liye style (jo 'Failed to fetch' dikha raha hai) */
+.error {
+  color: #dc3545;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}

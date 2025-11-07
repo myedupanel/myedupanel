@@ -1,8 +1,8 @@
-// File: backend/controllers/couponController.js
+// File: backend/controllers/couponController.js (FIXED)
 
 const prisma = require('../config/prisma');
 
-// === 1. Naya Coupon Banane ka Function ===
+// === 1. Naya Coupon Banane ka Function (Bina Badlaav) ===
 exports.createCoupon = async (req, res) => {
   try {
     const { code, discountType, discountValue, expiryDate, maxUses } = req.body;
@@ -33,6 +33,7 @@ exports.createCoupon = async (req, res) => {
         expiryDate: expiryDate ? new Date(expiryDate) : null,
         maxUses: maxUses ? parseInt(maxUses) : null,
       }
+      // Note: Hum assume kar rahe hain ki 'createdAt' schema mein @default(now()) hai
     });
 
     res.status(201).json({ message: 'Coupon created successfully!', coupon: newCoupon });
@@ -43,13 +44,15 @@ exports.createCoupon = async (req, res) => {
   }
 };
 
-// === 2. Saare Coupons Dekhne ka Function ===
+// === 2. Saare Coupons Dekhne ka Function (FIXED) ===
 exports.getAllCoupons = async (req, res) => {
   try {
     const coupons = await prisma.coupon.findMany({
-      orderBy: {
-        createdAt: 'desc' // Sabse naya coupon upar
-      }
+      // === FIX: orderBy waali line ko hata diya ===
+      // orderBy: {
+      //   createdAt: 'desc' 
+      // }
+      // ==========================================
     });
     res.status(200).json(coupons);
   } catch (error) {

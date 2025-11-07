@@ -1,10 +1,12 @@
-// File: app/superadmin/coupons/page.tsx
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import api from '@/backend/utils/api'; // !! Path check karein, yeh aapki global api.ts file honi chahiye
-import styles from './CouponsPage.module.scss'; // Hum yeh file agle step mein banayenge
+import api from '@/backend/utils/api'; 
+import styles from './CouponsPage.module.scss'; 
+// === YEH IMPORTS ADD KAREIN ===
+import Link from 'next/link';
+import { MdGridView } from 'react-icons/md';
+// =============================
 
 // Coupon ki type (Prisma se match karti hui)
 interface Coupon {
@@ -35,10 +37,11 @@ const CouponsPage = () => {
   const fetchCoupons = async () => {
     try {
       setIsLoading(true);
+      setError(''); // Purana error clear karein
       const { data } = await api.get('/coupons');
       setCoupons(data);
     } catch (err) {
-      setError('Failed to fetch coupons.');
+      setError('Failed to fetch coupons.'); // YEH AAPKE ERROR MESSAGE SE MATCH HOTA HAI
     } finally {
       setIsLoading(false);
     }
@@ -76,14 +79,21 @@ const CouponsPage = () => {
 
   return (
     <div className={styles.couponsPage}>
-      <header>
+      {/* === HEADER KO UPDATE KIYA GAYA HAI === */}
+      <header className={styles.header}>
         <h1>Manage Coupons (SuperAdmin)</h1>
+        <Link href="/superadmin/dashboard" className={styles.dashboardLinkButton}>
+          <MdGridView />
+          <span>Go to Dashboard</span>
+        </Link>
       </header>
+      {/* =================================== */}
 
       {/* 1. Naya Coupon Banane ka Form */}
       <div className={styles.formContainer}>
         <h3>Create New Coupon</h3>
         <form onSubmit={handleSubmit} className={styles.couponForm}>
+          {/* ...baaki form groups jaise the waise hi... */}
           <div className={styles.formGroup}>
             <label>Coupon Code</label>
             <input 
@@ -130,6 +140,7 @@ const CouponsPage = () => {
           </div>
           <button type="submit" className={styles.submitButton}>Create Coupon</button>
         </form>
+        {/* Error message ab form ke neeche dikhega (frontend aur backend donon ke liye) */}
         {error && <p className={styles.error}>{error}</p>}
       </div>
 
