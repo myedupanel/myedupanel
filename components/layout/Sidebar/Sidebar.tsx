@@ -1,19 +1,18 @@
-// File: components/layout/Sidebar/Sidebar.tsx
-
 "use client";
 
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext'; 
-// --- FIX: Import path ko 'app/admin/layout' se badal kar nayi file par karein ---
 import { useAdminLayout } from '@/app/context/AdminLayoutContext'; 
-import styles from  './components/layout/sidebar/Sidebar.module.scss';
+// --- YAHI HAI FIX ---
+import styles from './Sidebar.module.scss'; // Path theek kar diya gaya hai
+// --------------------
 import { FiTag } from 'react-icons/fi'; // Coupon icon
 
 // Sidebar ko `menuItems` prop ke through data milega
 interface NavItem {
-  name: string; // <-- Yeh 'name' hai (jo error fix karega)
+  name: string; 
   path: string;
   icon: React.ReactNode;
   type: 'free' | 'premium' | 'upcoming';
@@ -27,7 +26,7 @@ interface SidebarProps {
 const Sidebar = ({ menuItems }: SidebarProps) => {
   const pathname = usePathname();
   const { user } = useAuth(); 
-  const { showUpcomingFeatureModal } = useAdminLayout(); // Naya hook (ab sahi jagah se aa raha hai)
+  const { showUpcomingFeatureModal } = useAdminLayout(); 
 
   const isSuperAdmin = user?.role === 'SuperAdmin';
 
