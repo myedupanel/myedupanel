@@ -1,20 +1,17 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import styles from './SchoolPage.module.scss';
-// Sidebar import ki zaroorat nahi hai
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // useRouter add kiya
+import { useRouter } from 'next/navigation'; 
 import axios from 'axios';
 import { useAuth } from '@/app/context/AuthContext';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'; // recharts imports add kiye
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'; 
 import { 
     MdPeople, MdSchool, MdFamilyRestroom, MdBadge,
     MdEventAvailable, MdAttachMoney, MdSchedule,
     MdAssessment, MdSettings, MdPersonAdd, MdClass 
-} from 'react-icons/md'; // MdClass icon add kiya
-import api from '@/backend/utils/api'; // API import add kiya
-
-// Socket.IO client ko import karein (Agar aap real-time use kar rahe hain)
+} from 'react-icons/md';
+import api from '@/backend/utils/api';
 import { io } from "socket.io-client";
 import Modal from '@/components/common/Modal/Modal';
 import AddStudentForm from '@/components/admin/AddStudentForm/AddStudentForm';
@@ -23,7 +20,7 @@ import AddParentForm from '@/components/admin/AddParentForm/AddParentForm';
 import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
 
 
-// === TypeScript Interfaces (Errors Fix) ===
+// === TypeScript Interfaces (No Change) ===
 interface Student { id: string; name: string; details?: { class: string; }; }
 interface Teacher { id: string; name: string; details?: { subject: string; }; }
 interface DashboardStats { totalStudents: number; totalTeachers: number; totalParents: number; totalStaff: number; }
@@ -76,9 +73,11 @@ const DashboardControlCenter = () => {
         if (!data) setLoading(true); 
 
         try {
-            const response = await axios.get('/api/admin/dashboard-stats', {
+            // === FIX 1: API Endpoint बदला गया ===
+            const response = await axios.get('/api/admin/dashboard-data', {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            // ===================================
             setData(response.data);
             setError('');
         } catch (err) {
@@ -114,7 +113,6 @@ const DashboardControlCenter = () => {
         return <div className={styles.error}>{error}</div>;
     }
 
-    // FIX: Helper functions ko dobara define kiya (TypeScript compatibility ke liye)
     const getStudentClass = (student: Student | any) => student.class || student.details?.class || 'N/A';
     const getTeacherSubject = (teacher: Teacher | any) => teacher.subject || teacher.details?.subject || 'N/A';
     const getStaffRole = (staff: RecentStaff | any) => staff.role || staff.details?.role || 'N/A';
@@ -216,7 +214,7 @@ const DashboardControlCenter = () => {
 
 // Main Page Component
 const SchoolPage = () => {
-    // FIX: सिर्फ DashboardControlCenter को रिटर्न करें ताकि layout.tsx का CSS काम करे
+    // === FIX 2: Layout tags (Sidebar, mainContent) hata diye gaye ===
     return <DashboardControlCenter />;
 };
 
