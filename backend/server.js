@@ -13,6 +13,7 @@ const prisma = require('./config/prisma');
 const paymentRoutes = require('./routes/payment'); // <-- 1. PRISMA CLIENT IMPORT KAREIN
 const couponRoutes = require('./routes/couponRoutes');
 const planRoutes = require('./routes/planRoutes');
+const planRoutes = require('./routes/plan');
 // --- Allowed URLs ki list (No Change) ---
 const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:3000", 
@@ -111,6 +112,7 @@ app.use('/api/timetable', timetableRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/plans', planRoutes);
+app.use('/api/plans', plan);
 // app.use('/api/dashboard', dashboardRoutes);
 
 // --- Socket.IO Connection Handler (No Change) ---
