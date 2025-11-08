@@ -3,14 +3,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Logo from './Logo'; // Assume Logo component exists
 import Link from 'next/link';
-// === NAYE IMPORTS ===
-import { useTheme } from '@/app/context/ThemeContext';
-import { FiSun, FiMoon } from 'react-icons/fi';
-// ====================
 
 type NavbarProps = {
   showLogin: () => void;
-  showSignup: () => void;
+  showSignup: () => void; // हम इस prop का इस्तेमाल अब नहीं करेंगे, पर इसे रख सकते हैं
   showFeatures: () => void;
   activeSection: string;
 };
@@ -19,9 +15,6 @@ function Navbar({ showLogin, showSignup, showFeatures, activeSection }: NavbarPr
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
-  
-  // === THEME HOOK USE KAREIN ===
-  const { theme, toggleTheme } = useTheme();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -62,17 +55,10 @@ function Navbar({ showLogin, showSignup, showFeatures, activeSection }: NavbarPr
             <li><a href="#" onClick={(e) => { e.preventDefault(); showFeatures(); }}>Features</a></li>
             <li><Link href="#pricing-section" className={activeSection === 'pricing' ? 'active-link' : ''}>Pricing</Link></li>
             <li><Link href="#impact-section" className={activeSection === 'impact' ? 'active-link' : ''}>Impact</Link></li>
-            
-            {/* === FIX 2: DESKTOP THEME TOGGLE (Impact ke baad) === */}
-            <li>
-              <button onClick={toggleTheme} className="theme-toggle-btn" aria-label="Toggle dark mode">
-                {theme === 'light' ? <FiMoon /> : <FiSun />}
-              </button>
-            </li>
-            {/* ==================================================== */}
           </ul>
           <div className="buttons">
             <Link href="/login" className="login-btn">Login</Link>
+            {/* CHANGE HERE: 'Book Demo' button ab seedhe /signup page par le jayega */}
             <Link href="/signup" className="demo-btn">Book Demo</Link>
           </div>
         </div>
@@ -89,15 +75,8 @@ function Navbar({ showLogin, showSignup, showFeatures, activeSection }: NavbarPr
           <Link href="#pricing-section" className={activeSection === 'pricing' ? 'active-link' : ''} onClick={toggleMobileMenu}>Pricing</Link>
           <Link href="#impact-section" className={activeSection === 'impact' ? 'active-link' : ''} onClick={toggleMobileMenu}>Impact</Link>
           <hr />
-          
-          {/* === FIX 3: MOBILE THEME TOGGLE === */}
-          <button onClick={toggleTheme} className="theme-toggle-btn mobile-full-btn" aria-label="Toggle theme">
-            {theme === 'light' ? <><FiMoon style={{marginRight: '8px'}} /> Dark Mode</> : <><FiSun style={{marginRight: '8px'}} /> Light Mode</>}
-          </button>
-          <hr />
-          {/* ================================== */}
-          
           <Link href="/login" className="login-btn" onClick={toggleMobileMenu}>Login</Link>
+          {/* CHANGE HERE: Mobile menu mein bhi 'Book Demo' button ab seedhe /signup page par le jayega */}
           <Link href="/signup" className="demo-btn" onClick={toggleMobileMenu}>Book Demo</Link>
         </div>
       </nav>

@@ -1,11 +1,10 @@
+// File: app/layout.tsx (Updated)
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script"; // Import next/script
 import "./globals.scss";
 import { AuthProvider } from './context/AuthContext';
-// === FIX 1: ThemeProvider import karein ===
-import { ThemeProvider } from './context/ThemeContext';
-
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -32,15 +31,10 @@ export default function RootLayout({
           strategy="lazyOnload"
         />
       </head>
-      {/* body tag ko chhod dein, kyunki ThemeContext khud hi class add kar dega */}
       <body className={inter.className}>
-        {/* === FIX 2: ThemeProvider ko AuthProvider ke upar wrap karein === */}
-        <ThemeProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </ThemeProvider>
-        {/* === END FIX === */}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

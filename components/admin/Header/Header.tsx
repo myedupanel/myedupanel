@@ -1,12 +1,12 @@
 "use client";
 // --- useState aur useEffect ko React se import karein ---
 import React, { useState, useEffect } from 'react';
+// Image component ab zaroori nahi agar hum hamesha icon use kar rahe hain, hata sakte hain
+// import Image from 'next/image'; 
 import Link from 'next/link';
 import { MdEdit } from 'react-icons/md';
-import { FaGraduationCap } from 'react-icons/fa'; // School Icon
-// === NAYE IMPORTS ===
-import { useTheme } from '@/app/context/ThemeContext'; // Theme context hook
-import { FiSun, FiMoon } from 'react-icons/fi'; // Theme icons
+// === NAYA IMPORT ===
+import { FaGraduationCap } from 'react-icons/fa'; // Ek professional icon
 // === END NAYA IMPORT ===
 import styles from './Header.module.scss';
 
@@ -17,6 +17,15 @@ const formatTime = (date: Date) => {
 const formatDate = (date: Date) => {
   return date.toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 };
+
+// getInitials helper function ab zaroori nahi agar hum hamesha icon use kar rahe hain, hata sakte hain
+// const getInitials = (name: string) => {
+//   if (!name) return '?'; 
+//   const names = name.split(' ');
+//   const firstInitial = names[0]?.[0] || '';
+//   const lastInitial = names.length > 1 ? names[names.length - 1]?.[0] : '';
+//   return `${firstInitial}${lastInitial}`.toUpperCase();
+// };
 
 // HeaderProps (koi badlaav nahi)
 interface HeaderProps {
@@ -30,9 +39,6 @@ interface HeaderProps {
 
 const Header = ({ admin }: HeaderProps) => {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
-  
-  // === THEME HOOK USE KAREIN ===
-  const { theme, toggleTheme } = useTheme();
 
   // Animation wala code (koi badlaav nahi)
   const [headerTitle, setHeaderTitle] = useState(`Welcome to ${admin.schoolName}`);
@@ -73,23 +79,13 @@ const Header = ({ admin }: HeaderProps) => {
         </h1>
 
         <div className={styles.profileSection}>
-          
-          {/* === FIX 1: THEME TOGGLE BUTTON (School Icon ke pehle) === */}
-          <button 
-            onClick={toggleTheme} 
-            className={`${styles.themeToggleButton} ${styles.premiumIcon}`} 
-            aria-label="Toggle dark mode"
-          >
-            {theme === 'light' ? <FiMoon size={20} /> : <FiSun size={20} />}
-          </button>
-          {/* === END FIX 1 === */}
-
-          {/* School Icon (Bina Badlaav) */}
+          {/* === YAHAN BADLAAV KIYA GAYA HAI: Ab hamesha icon dikhega === */}
           <div className={styles.avatarContainer}>
             <div className={`${styles.defaultAvatar} ${styles.premiumIcon}`}>
-              <FaGraduationCap size={24} color="white" />
+              <FaGraduationCap size={24} color="white" /> {/* Icon aur uska size/color */}
             </div>
           </div>
+          {/* === END BADLAAV === */}
 
           <div className={styles.profileInfo}>
             <span className={styles.profileName}>School Profile</span>

@@ -1,23 +1,21 @@
 /* ==============================================
-   FINAL & COMPLETE SCSS FOR SCHOOLPRO (UPDATED WITH THEME)
+   FINAL & COMPLETE SCSS FOR SCHOOLPRO
    ============================================== */
 
-// --- 1. THEME VARIABLES (Default: Light) ---
+// --- 1. Naya Design System ---
 :root {
-  /* LIGHT THEME VARIABLES */
   --color-primary: #0ea5e9;
   --color-primary-light: #f0f9ff;
   --color-secondary: #22c55e;
   --color-accent-yellow: #facc15;
   --color-accent-red: #f87171;
-  --color-text-heading: #1e293b; /* Dark Blue */
-  --color-text-body: #475569;   /* Medium Grey */
-  --color-background: #ffffff;  /* White */
-  --color-background-alt: #f8fafc; /* Off-White */
+  --color-text-heading: #1e293b;
+  --color-text-body: #475569;
+  --color-background: #ffffff;
+  --color-background-alt: #f8fafc;
   --color-border: #e2e8f0;
   --color-white: #ffffff;
   --color-shadow: rgba(14, 165, 233, 0.1);
-  /* --- UI / Spacing (Bina Badlaav) --- */
   --font-family-sans: 'Poppins', sans-serif;
   --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
   --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
@@ -29,31 +27,6 @@
   --box-shadow-lg: 0 20px 25px -5px var(--color-shadow), 0 10px 10px -5px var(--color-shadow);
   --transition: all 0.3s ease-in-out;
 }
-
-// --- DARK THEME OVERRIDES ---
-body.dark {
-  --color-text-heading: #f1f5f9;      /* Light Text */
-  --color-text-body: #94a3b8;         /* Lighter Grey Body Text */
-  --color-background: #1e293b;        /* Dark Blue Background */
-  --color-background-alt: #0f172a;    /* Even Darker for Sections/Cards */
-  --color-border: #334155;            /* Dark Border */
-  --color-white: #0f172a;             /* Dark Modal/Card BG (Jahaan white tha) */
-  --color-shadow: rgba(0, 0, 0, 0.5); /* Darker Shadow */
-
-  /* Header (Darker Glass) */
-  header {
-    background: rgba(30, 41, 59, 0.9);
-  }
-  
-  /* Cards/Tables (Jo white the) */
-  .features-modal-content, .pricing-card, .trusted-by-section .marquee-track span {
-    background-color: var(--color-background-alt);
-    color: var(--color-text-body);
-    border-color: var(--color-border);
-  }
-}
-/* --- END THEME VARIABLES --- */
-
 
 // --- 2. Global Styles & Resets ---
 *, *::before, *::after {
@@ -68,7 +41,6 @@ body {
   color: var(--color-text-body);
   background-color: var(--color-background);
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.5s ease; /* Theme switch smooth banane ke liye */
 }
 section {
   padding-top: var(--space-16);
@@ -107,8 +79,7 @@ header {
   border-bottom: 1px solid var(--color-border);
   position: sticky; top: 0; z-index: 1000;
   padding: var(--space-4) var(--space-8);
-  transition: background 0.5s ease; /* Theme switch smooth banane ke liye */
-
+  
   nav {
     max-width: 1280px; 
     margin: 0 auto;
@@ -1226,6 +1197,20 @@ html, body, #__next {
 
 body {
   overflow-x: hidden; /* Horizontal scroll ko rokne ke liye */
+}
+/* --- Variables --- */
+:root {
+  --primary-blue: #4F46E5;
+  --primary-blue-hover: #4338CA;
+  --text-dark: #111827;
+  --text-medium: #374151;
+  --text-light: #6B7280;
+  --border-color: #D1D5DB;
+  --background-light: #FFFFFF;
+  --page-bg: #F9FAFB;
+  --fb-blue: #1877F2;
+  --light-black: #333333;
+  --sky-blue: #f0f5ff;
 }
 /* Global Print Styles */
 @media print {
