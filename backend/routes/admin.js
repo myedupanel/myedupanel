@@ -1,4 +1,5 @@
-// backend/routes/admin.js
+// File: backend/routes/admin.js (SUPREME SECURE with Sanitization)
+
 const express = require('express');
 const router = express.Router();
 const prisma = require('../config/prisma'); 
@@ -8,8 +9,19 @@ const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
 const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware'); 
 const userController = require('../controllers/userController'); 
+const { Prisma } = require('@prisma/client'); // Prisma errors ke liye
 
-// Helper: Get Full Name (Student ke liye)
+// === FIX 1: THE SANITIZER FUNCTION (XSS Prevention) ===
+function removeHtmlTags(str) {
+  if (!str || typeof str !== 'string') {
+    return str;
+  }
+  return str.replace(/<[^>]*>/g, '').trim(); 
+}
+// === END FIX 1 ===
+
+
+// Helper: Get Full Name (Student ke liye) (No Change)
 const getFullName = (student) => {
   return [student?.first_name, student?.father_name, student?.last_name].filter(Boolean).join(' ');
 }
@@ -21,11 +33,11 @@ const generateToken = (userId, schoolId) => {
   });
 };
 
-// @route POST /api/admin/create-user
+// @route POST /api/admin/create-user (No Change - Controller mein sanitization hai)
 router.post('/create-user', [authMiddleware, adminMiddleware], userController.createUserByAdmin);
 
 
-// @route GET /api/admin/dashboard-data (FIXED)
+// @route GET /api/admin/dashboard-data (No Change)
 router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res) => {
     console.log("[GET /dashboard-data] Request received.");
     try {
@@ -36,11 +48,10 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
         }
         console.log(`[GET /dashboard-data] Fetching data for schoolId: ${schoolId}`);
         
-        // Current month ka revenue calculate karne ke liye dates set ki
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        const currentMonthName = now.toLocaleString('default', { month: 'long' }); // Jaise "November"
+        const currentMonthName = now.toLocaleString('default', { month: 'long' }); 
 
         const staffRoles = ['Accountant', 'Office Admin', 'Librarian', 'Security', 'Transport Staff', 'Other', 'Staff']; 
 
@@ -53,18 +64,18 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             recentTeachersRaw,
             recentParents,
             recentStaff,
-            recentPaidTransactions, // <-- YAHAN FIX KIYA: Naam badla
+            recentPaidTransactions, 
             admissionsDataRaw,
             classCountsRaw,
             monthlyRevenueRaw 
         ] = await Promise.all([
-            // Total Counts (No Change)
+            // Total Counts 
             prisma.students.count({ where: { schoolId: schoolId } }), 
             prisma.teachers.count({ where: { schoolId: schoolId } }),
             prisma.parent.count({ where: { schoolId: schoolId } }),   
             prisma.user.count({ where: { role: { in: staffRoles }, schoolId: schoolId } }),
 
-            // --- RECENT STUDENTS (No Change) ---
+            // --- RECENT STUDENTS ---
             prisma.students.findMany({ 
                 where: { schoolId }, 
                 orderBy: { studentid: 'desc' }, 
@@ -89,23 +100,21 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             prisma.parent.findMany({ where: { schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, id: true } }), 
             prisma.user.findMany({ where: { role: { in: staffRoles }, schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, role: true, id: true } }), 
 
-            // --- YAHAN FIX KIYA: 'FeeRecord' ki jagah 'Transaction' se fetch kiya ---
+            // --- RECENT FEES ---
             prisma.transaction.findMany({
                 where: { schoolId: schoolId, status: 'Success' },
-                orderBy: { paymentDate: 'desc' }, // Asli date se sort kiya
+                orderBy: { paymentDate: 'desc' }, 
                 take: 5,
                 select: { 
                     id: true, 
-                    amountPaid: true, // 'amount' ki jagah 'amountPaid'
-                    paymentDate: true, // <-- Asli date fetch ki
+                    amountPaid: true, 
+                    paymentDate: true, 
                     student: { 
                         select: { first_name: true, father_name: true, last_name: true } 
                     }
                 }
             }),
-            // --- FIX ENDS ---
-
-            // Aggregations (No Change)
+            // Aggregations 
              prisma.students.groupBy({
                  by: ['admission_date'], 
                  where: { schoolId: schoolId, admission_date: { not: null } },
@@ -119,7 +128,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
                 _count: { studentid: true }, 
             }),
             
-            // Monthly Revenue (No Change from last fix)
+            // Monthly Revenue
             prisma.transaction.aggregate({
                 _sum: { amountPaid: true }, 
                 where: {
@@ -167,23 +176,20 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
              }
          }).sort((a, b) => a.name.localeCompare(b.name)); 
 
-        // --- YAHAN FIX KIYA: Date ko format karne ke liye helper function ---
         const formatRecentDate = (date) => {
             if (!date) return '';
             return new Date(date).toLocaleDateString('en-GB', {
                 day: 'numeric', month: 'short', year: 'numeric'
-            }); // Jaise "05 Nov 2025"
+            }); 
         };
-        // --- FIX ENDS ---
 
-        // --- YAHAN FIX KIYA: Recent Payments ko format kiya ---
+        // --- Recent Payments format (No Change) ---
         const recentFees = recentPaidTransactions.map(tx => ({
             id: tx.id, 
             student: getFullName(tx.student) || 'Unknown Student', 
             amount: `₹${tx.amountPaid?.toLocaleString('en-IN') || 0}`,
-            date: formatRecentDate(tx.paymentDate) // <-- 'ID: ...' ki jagah asli date
+            date: formatRecentDate(tx.paymentDate)
         }));
-        // --- FIX ENDS ---
 
         // --- Format Recent Lists (No Change) ---
          const formattedRecentStudents = recentStudentsRaw.map(s => ({ 
@@ -227,9 +233,16 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
     }
 });
 
-// @route PUT /api/admin/profile (No Change)
+// @route PUT /api/admin/profile (UPDATED with Sanitization)
 router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => { 
-    const { adminName, schoolName } = req.body;
+    // === FIX 2: Sanitization ===
+    const sanitizedBody = {};
+    for (const key in req.body) {
+        sanitizedBody[key] = removeHtmlTags(req.body[key]);
+    }
+    const { adminName, schoolName } = sanitizedBody;
+    // === END FIX 2 ===
+    
     const userId = req.user.id; 
     console.log(`[PUT /profile] START - User ID: ${userId} requested update. Name: '${adminName}', School: '${schoolName}'`);
 
@@ -329,7 +342,7 @@ router.put('/profile', [authMiddleware, adminMiddleware], async (req, res) => {
 });
 
 
-// @route POST /api/admin/seed-standard-classes (No Change)
+// @route POST /api/admin/seed-standard-classes (UPDATED with Sanitization)
 const seedStandardClasses = async (req, res) => {
     console.log("[POST /seed-standard-classes] Request received.");
     try {
@@ -339,7 +352,11 @@ const seedStandardClasses = async (req, res) => {
             return res.status(400).json({ msg: 'Admin school information missing.' });
         }
 
-        const standardClasses = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+        // Standard class names
+        const rawStandardClasses = ["Nursery", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+        // === FIX 3: Standard class names ko SANITIZE karein (Safety) ===
+        const standardClasses = rawStandardClasses.map(name => removeHtmlTags(name));
+        // === END FIX 3 ===
 
         const existingClasses = await prisma.classes.findMany({
             where: { schoolId: schoolId, class_name: { in: standardClasses } },
