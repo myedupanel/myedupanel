@@ -1,11 +1,12 @@
-// File: app/superadmin/coupons/page.tsx (UPDATED)
+// File: app/superadmin/coupons/page.tsx (UPDATED for Header Button & Text)
 
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import api from '@/backend/utils/api'; // !! Path check karein
+import api from '@/backend/utils/api'; 
 import styles from './CouponsPage.module.scss'; 
-import { FiRefreshCw, FiPlus } from 'react-icons/fi'; // FiPlus icon add kiya
+import { FiRefreshCw, FiPlus, FiGrid } from 'react-icons/fi'; // FiGrid icon import kiya
+import { useRouter } from 'next/navigation'; // useRouter import kiya
 
 // Interface (Bina Badlaav)
 export interface Coupon {
@@ -25,18 +26,19 @@ const CouponsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Form state (Bina Badlaav)
+  // Form state
   const [code, setCode] = useState('');
   const [discountType, setDiscountType] = useState<'PERCENTAGE' | 'FIXED_AMOUNT'>('PERCENTAGE');
   const [discountValue, setDiscountValue] = useState(10);
   const [expiryDate, setExpiryDate] = useState('');
   const [maxUses, setMaxUses] = useState('');
 
-  // Sync state (Bina Badlaav)
+  // Sync state
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
+  
+  const router = useRouter(); // useRouter hook initialize kiya
 
-  // fetchCoupons (Bina Badlaav)
   const fetchCoupons = async () => {
     try {
       setIsLoading(true);
@@ -53,7 +55,6 @@ const CouponsPage = () => {
     fetchCoupons();
   }, []);
 
-  // handleSubmit (Bina Badlaav)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -75,14 +76,13 @@ const CouponsPage = () => {
     }
   };
 
-  // handleSyncPayments (Bina Badlaav)
   const handleSyncPayments = async () => {
     if (isSyncing) return;
     setIsSyncing(true);
     setSyncMessage('Syncing with Razorpay... (This may take a minute)');
     try {
       const { data } = await api.post('/payment/sync-payments');
-      setSyncMessage(`✅ ${data.message}`);
+      setSyncMessage(`✅ Sync complete! ${data.fixed} new/mismatched payments fixed, ${data.skipped} payments already synced, ${data.failed} payments failed.`);
     } catch (err: any) {
       console.error(err);
       setSyncMessage(`❌ Error: ${err.response?.data?.message || 'Sync failed.'}`);
@@ -94,21 +94,28 @@ const CouponsPage = () => {
   return (
     <div className={styles.couponsPage}>
       <header className={styles.header}>
+        {/* === FIX 1: Header aur Button === */}
         <h1>Manage Coupons (SuperAdmin)</h1>
+        <button 
+            onClick={() => router.push('/admin/dashboard')} 
+            className={styles.dashboardLinkButton}
+        >
+            <FiGrid /> Go to Dashboard
+        </button>
+        {/* === END FIX 1 === */}
       </header>
-
-      {/* === NAYA STRUCTURE SHURU === */}
 
       {/* Block 1: Sync Section */}
       <div className={`${styles.pageSection} ${styles.syncContainer}`}>
         <div className={styles.sectionHeader}>
           <h3><FiRefreshCw /> Payment Reconciliation</h3>
         </div>
+        {/* === FIX 2: Text Conversion to English === */}
         <p>
-          Agar kisi user ne payment ki hai lekin uska plan 'TRIAL' hi dikha raha hai, 
-          yeh button dabane se system Razorpay se data check karke sabhi phanse hue 
-          payments ko 'auto-fix' kar dega.
+          If a user has paid but their plan still shows 'TRIAL', this button initiates 
+          a synchronization with Razorpay to check all missing payments and **auto-fix** the user's plan status in the database.
         </p>
+        {/* === END FIX 2 === */}
         <button 
           onClick={handleSyncPayments} 
           disabled={isSyncing} 
@@ -121,12 +128,13 @@ const CouponsPage = () => {
         )}
       </div>
 
-      {/* Block 2: Create Form Section */}
+      {/* Block 2: Create Form Section (Bina Badlaav) */}
       <div className={styles.pageSection}>
         <div className={styles.sectionHeader}>
           <h3><FiPlus /> Create New Coupon</h3>
         </div>
         <form onSubmit={handleSubmit} className={styles.couponForm}>
+          {/* ... Poora Form ... */}
           <div className={styles.formGroup}>
             <label>Coupon Code</label>
             <input
@@ -171,22 +179,21 @@ const CouponsPage = () => {
               placeholder="e.g., 100 (Blank = unlimited)"
             />
           </div>
-          {/* Submit Button ko grid mein alag se rakha hai */}
           <div className={styles.formGroup}>
-            <label>&nbsp;</label> {/* Khaali label spacing ke liye */}
+            <label>&nbsp;</label>
             <button type="submit" className={styles.submitButton}>Create Coupon</button>
           </div>
         </form>
         {error && <p className={styles.error}>{error}</p>}
       </div>
 
-      {/* Block 3: Table Section */}
+      {/* Block 3: Table Section (Bina Badlaav) */}
       <div className={styles.pageSection}>
         <div className={styles.sectionHeader}>
           <h3>Existing Coupons</h3>
         </div>
         {isLoading ? <p>Loading coupons...</p> : (
-          <div className={styles.tableWrapper}> {/* Table ko scrollable banane ke liye wrapper */}
+          <div className={styles.tableWrapper}>
             <table className={styles.couponsTable}>
               <thead>
                 <tr>
@@ -220,8 +227,6 @@ const CouponsPage = () => {
           </div>
         )}
       </div>
-      
-      {/* === END NAYA STRUCTURE === */}
     </div>
   );
 };
