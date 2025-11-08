@@ -1,5 +1,7 @@
+// File: LeavingCertificatePreview.tsx (FINAL PREMIUM STRUCTURE)
+
 import React from 'react';
-import styles from './LeavingCertificatePreview.module.scss'; // Import the SCSS file
+import styles from './LeavingCertificatePreview.module.scss'; 
 
 // --- Interfaces (No Change) ---
 interface Student {
@@ -77,7 +79,6 @@ interface LeavingCertificatePreviewProps {
 
 // --- Helper Components (Modified to include noLine flag) ---
 const fill = (value: string | undefined | null, noLine = false) => {
-  // .fillNoLine class added to SCSS
   const className = noLine ? styles.fillNoLine : (value ? styles.fill : styles.fillBlank); 
   if (value) {
     return <span className={className}>{value}</span>;
@@ -85,10 +86,8 @@ const fill = (value: string | undefined | null, noLine = false) => {
   return <span className={className}>&nbsp;</span>; 
 }
 
-// SubField function updated to check for label
 const SubField: React.FC<{ label: string, value: string | undefined | null, noLine?: boolean }> = ({ label, value, noLine = false }) => (
   <span className={styles.subField}>
-    {/* Only show label if it is provided */}
     {label && <span className={styles.subLabel}>{label}:</span>} 
     {fill(value, noLine)}
   </span>
@@ -169,33 +168,33 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {fill(formData.motherName)}
           </GridRow>
 
-          {/* === ROW 4 MODIFICATION: Line removed under Nationality value, Mother Tongue shifted right === */}
+          {/* === ROW 4: Nationality & Mother Tongue === */}
           <GridRow num="4" label="Nationality">
             <div className={styles.multiFieldRow}>
-              {/* Nationality value, no line, no colon */}
+              {/* Nationality value, no line */}
               <SubField label="" value={formData.nationality || 'Indian'} noLine={true} />
               
-              {/* Mother Tongue subfield, shifted right (via multiFieldRow gap) */}
+              {/* Mother Tongue subfield */}
               <SubField label="Mother Tongue" value={formData.motherTongue} />
             </div>
           </GridRow>
           
-          {/* === ROW 5 MODIFICATION: Left=Religion, Right=Religion Value + Caste Label/Value === */}
+          {/* === ROW 5: Religion & Caste === */}
           <GridRow num="5" label="Religion"> 
             <div className={styles.multiFieldRow}>
-                {/* 1. Religion Value (will take fixed space) */}
+                {/* 1. Religion Value (fixed space) */}
                 {fill(formData.religion)}
                 
-                {/* 2. Caste Field (clean structure for Caste: [Value]) */}
+                {/* 2. Caste Field */}
                 <span className={styles.casteField}>
-                    <span className={styles.subLabel}>Caste:</span>
-                    {fill(formData.caste)}
+                    <SubField label="Caste" value={formData.caste} />
                 </span>
             </div>
           </GridRow>
 
+          {/* === ROW 6: Birth Place SubGrid === */}
           <GridRow num="6" label="Birth place (State/City)">
-             <div className={styles.subGrid}> {/* Yeh 2x2 grid hai */}
+             <div className={styles.subGrid}> 
                 <SubField label="Place" value={formData.birthPlace} />
                 <SubField label="Taluka" value={formData.birthTaluka} />
                 <SubField label="Dist" value={formData.birthDistrict} />
@@ -215,6 +214,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {fill(formData.previousSchool)}
           </GridRow>
 
+          {/* === ROW 10: Admission Date & Standard === */}
           <GridRow num="10" label="Date of Admission">
              <div className={styles.multiFieldRow}>
                 <SubField label="Date" value={dateOfAdmission} />
@@ -222,6 +222,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
              </div>
           </GridRow>
 
+          {/* === ROW 11: Progress & Conduct === */}
           <GridRow num="11" label="Progress of Study">
              <div className={styles.multiFieldRow}>
                 <SubField label="Progress" value={formData.progress} /> 
@@ -233,6 +234,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {fill(dateOfLeaving)}
           </GridRow>
           
+          {/* === ROW 13: Standard Leaving & Since When === */}
           <GridRow num="13" label="Standard in which studying and since when (in Words)">
             <div className={styles.multiFieldRow}>
               <SubField label="Std" value={formData.standardLeaving} />
@@ -251,7 +253,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
         {/* === BLUEPRINT KHATM === */}
 
 
-        {/* Certification Text (No Change) */}
+        {/* Certification Text */}
         <p className={styles.certText}>
           This is to certify that, Above mentioned information is as per 
           School General Register No. {fill(formData.genRegNo)}
@@ -260,7 +262,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
         {/* Footer (Spacing Adjusted via SCSS) */}
         <footer className={styles.certFooterWrapper}>
           <div className={styles.datePlace}>
-            <span>Date: {fill(null)}</span>
+            <span>Date: {fill(formData.issueDate)}</span>
             <span>Place: {fill(schoolDetails.place)}</span>
           </div>
           <div className={styles.signatures}>
