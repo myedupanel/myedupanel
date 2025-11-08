@@ -275,3 +275,40 @@
   align-items: center;
   justify-content: center;
 }
+.themeToggleButton {
+    /* Button reset */
+    background: none;
+    border: none;
+    padding: 0;
+    margin-right: 15px; /* School icon se thodi jagah */
+    cursor: pointer;
+    transition: color 0.3s ease;
+
+    /* Theme-specific colors */
+    color: var(--color-text-body); 
+    
+    &:hover {
+        color: var(--color-primary);
+    }
+}
+
+/* Agar aap theme toggle ko bhi premium icon style mein rakhna chahte hain */
+.themeToggleButton.premiumIcon {
+    /* Style jaisa aapka .defaultAvatar ka background tha */
+    background-color: var(--color-primary); /* Ya koi aur dark color */
+    color: var(--color-white);
+    padding: 10px;
+    border-radius: 50%;
+    height: 40px;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--box-shadow-sm);
+    
+    /* Dark mode mein icon ka color adjust karein */
+    body.dark & {
+        background-color: var(--color-background-alt);
+        color: var(--color-text-heading);
+    }
+  }
