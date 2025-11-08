@@ -1,70 +1,74 @@
-// File: components/Footer.js (ya jahaan bhi aapki file hai)
-// Ismein humne CSS Modules ka istemaal kiya hai
 import React from 'react';
-import styles from './Footer.module.scss'; // Hum yeh CSS file agle step mein banayenge
 import Link from 'next/link';
-import { FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
+import styles from './Footer.module.scss'; // Assuming you have an SCSS file for styling
+import { FiMail, FiPhone, FiLinkedin, FiTwitter } from 'react-icons/fi'; // Icons for contact
 
-function Footer() {
-  return (
-    <footer className={styles.footerWrapper}>
-      <div className="container"> {/* Yeh 'container' class aapki global CSS se aani chahiye */}
-        <div className={styles.footerGrid}>
-          
-          {/* Column 1: Company */}
-          <div className={styles.footerColumn}>
-            <h4>Company</h4>
-            <Link href="/about">About Us</Link>
-            <Link href="/careers">Careers</Link>
-            <Link href="/impact">Impact</Link>
-            <Link href="/contact">Contact Us</Link>
-          </div>
+const Footer = () => {
+    // We assume the main marketing pages are relative to the root '/'
 
-          {/* Column 2: Product */}
-          <div className={styles.footerColumn}>
-            <h4>Product</h4>
-            <Link href="/#features">Features</Link> {/* Landiing page ke features section par link karein */}
-            <Link href="/plans">Pricing</Link> {/* Existing link */}
-            <Link href="/book-demo">Book a Demo</Link> {/* Yeh ek SaaS ke liye zaroori hai */}
-            <Link href="/login">Admin Login</Link> {/* Existing link */}
-          </div>
+    return (
+        <footer className={styles.footerContainer}>
+            <div className={styles.footerContent}>
+                <div className={styles.logoSection}>
+                    <h2>My EduPanel</h2>
+                    <p>Transforming Education, One Click at a Time.</p>
+                </div>
 
-          {/* Column 3: Resources */}
-          <div className={styles.footerColumn}>
-            <h4>Resources</h4>
-            <Link href="/faqs">FAQs</Link> {/* Existing link */}
-            <Link href="/blog">Blog</Link> {/* Professional look ke liye accha hai */}
-            <Link href="/newsletter">Newsletter</Link> {/* Existing link */}
-          </div>
+                {/* Company Links */}
+                <div className={styles.footerColumn}>
+                    <h3>Company</h3>
+                    <ul className={styles.linkList}>
+                        {/* === YEH HAI NAYE LINKS === */}
+                        <li><Link href="/about" className={styles.footerLink}>About Us</Link></li>
+                        <li><Link href="/careers" className={styles.footerLink}>Careers</Link></li>
+                        <li><Link href="/impact" className={styles.footerLink}>Impact</Link></li>
+                        <li><Link href="/contact" className={styles.footerLink}>Contact Us</Link></li>
+                        {/* ========================== */}
+                    </ul>
+                </div>
 
-          {/* Column 4: Legal & Support */}
-          <div className={styles.footerColumn}>
-            <h4>Get In Touch</h4>
-            <a href="mailto:myedupanel@gmail.com" className={styles.contactLink}>myedupanel@gmail.com</a>
-            <a href="tel:+917776041548" className={styles.contactLink}>+91 7776041548</a>
-            <Link href="/privacy-policy">Privacy Policy</Link> {/* Trust ke liye zaroori */}
-            <Link href="/terms-of-service">Terms of Service</Link> {/* Trust ke liye zaroori */}
-          </div>
+                {/* Product Links */}
+                <div className={styles.footerColumn}>
+                    <h3>Product</h3>
+                    <ul className={styles.linkList}>
+                        <li><Link href="/#features" className={styles.footerLink}>Features</Link></li>
+                        <li><Link href="/#pricing-section" className={styles.footerLink}>Pricing</Link></li>
+                        <li><Link href="/book-demo" className={styles.footerLink}>Book a Demo</Link></li>
+                        <li><Link href="/admin-login" className={styles.footerLink}>Admin Login</Link></li>
+                    </ul>
+                </div>
 
-        </div>
-        
-        <div className={styles.footerBottom}>
-          <p>Copyright © {new Date().getFullYear()} All Right Reserved by My EduPanel.</p>
-          <div className={styles.socialIcons}>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-              <FaLinkedin />
-            </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-              <FaTwitter />
-            </a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-              <FaInstagram />
-            </a>
-          </div>
-        </div>
-      </div>
-    </footer>
-  );
+                {/* Resources Links */}
+                <div className={styles.footerColumn}>
+                    <h3>Resources</h3>
+                    <ul className={styles.linkList}>
+                        <li><Link href="/faqs" className={styles.footerLink}>FAQs</Link></li>
+                        <li><Link href="/blog" className={styles.footerLink}>Blog</Link></li>
+                        <li><Link href="/newsletter" className={styles.footerLink}>Newsletter</Link></li>
+                    </ul>
+                </div>
+
+                {/* Get In Touch */}
+                <div className={styles.footerColumn}>
+                    <h3>Get In Touch</h3>
+                    <p className={styles.contactItem}><FiMail /> myedupanel@gmail.com</p>
+                    <p className={styles.contactItem}><FiPhone /> +91 7776041548</p>
+                    <ul className={styles.socialLinks}>
+                        <li><Link href="/privacy" className={styles.footerLink}>Privacy Policy</Link></li>
+                        <li><Link href="/terms" className={styles.footerLink}>Terms of Service</Link></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div className={styles.copyrightBar}>
+                <p>Copyright © {new Date().getFullYear()} All Right Reserved by My EduPanel.</p>
+                <div className={styles.socialIcons}>
+                    <FiLinkedin className={styles.socialIcon} />
+                    <FiTwitter className={styles.socialIcon} />
+                </div>
+            </div>
+        </footer>
+    );
 }
 
 export default Footer;
