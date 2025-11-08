@@ -1,4 +1,4 @@
-// File: backend/routes/auth.js (FINAL FIX: Cleanup & Error Handling)
+// File: backend/routes/auth.js (FINAL SECURE CODE with Sanitization FIX)
 
 const express = require('express');
 const router = express.Router();
@@ -9,22 +9,31 @@ const prisma = require('../config/prisma'); // Prisma client
 const sendEmail = require('../utils/sendEmail');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { Prisma } = require('@prisma/client'); // Prisma errors ke liye
-// === NAYA IMPORT (Rate Limiter) ===
 const { authLimiter } = require('../middleware/rateLimiter');
-// ===================================
 
-// ===== SIGNUP ROUTE (UPDATED for Safe Cleanup) =====
+// === FIX 1: SANITIZER FUNCTION को वापस define करें (Missing Reference Fix) ===
+function removeHtmlTags(str) {
+  if (!str || typeof str !== 'string') {
+    return str;
+  }
+  return str.replace(/<[^>]*>/g, '').trim(); 
+}
+// === END FIX 1 ===
+
+// ===== SIGNUP ROUTE (UPDATED for Sanitization & Safe Cleanup) =====
 router.post('/signup', authLimiter, async (req, res) => {
-  const { schoolName, adminName, email, password } = req.body;
-  const lowerCaseEmail = email.toLowerCase(); // Consistent casing
+  // === FIX 2: INPUT SANITIZATION ===
+  const sanitizedBody = {};
+  for (const key in req.body) {
+      sanitizedBody[key] = removeHtmlTags(req.body[key]); // अब removeHtmlTags मिल जाएगा
+  }
+  const { schoolName, adminName, email, password } = sanitizedBody;
+  const lowerCaseEmail = email.toLowerCase(); 
+  // === END FIX 2 ===
 
-  // Basic validation
+  // Basic validation (No Change)
   if (!schoolName || !adminName || !lowerCaseEmail || !password) {
-    return res
-      .status(400)
-      .json({
-        message: 'School name, admin name, email, and password are required.',
-      });
+    return res.status(400).json({ message: 'School name, admin name, email, and password are required.' });
   }
 
   try {
@@ -84,8 +93,7 @@ router.post('/signup', authLimiter, async (req, res) => {
     } catch (emailError) {
       console.error('Could not send OTP email:', emailError);
       
-      // === FIX 4: SAFE CLEANUP - USER को पहले डिलीट करें (Foreign Key Fix) ===
-      // Foreign key error से बचने के लिए User को पहले हटाएँ, फिर School को।
+      // === SAFE CLEANUP (No Change) ===
       if (result.user) {
         await prisma.user
           .delete({ where: { id: result.user.id } })
@@ -100,7 +108,7 @@ router.post('/signup', authLimiter, async (req, res) => {
             console.error('Cleanup Error: Failed to delete school:', delErr)
           );
       }
-      // === END FIX 4 ===
+      // === END SAFE CLEANUP ===
 
       // Status 500 भेजने से पहले user को Google Token issue बताएँ
       return res
@@ -111,7 +119,6 @@ router.post('/signup', authLimiter, async (req, res) => {
     // Step 5: Success response
     res.status(201).json({ success: true, message: 'OTP sent to your email. Please verify to continue.' });
   } catch (error) {
-    // ... (Error handling logic - No Change) ...
     console.error('Signup Error:', error.message);
     if (error.message === 'A user with this email is already registered.' || error.message === 'This school name is already registered.') {
       return res.status(400).json({ message: error.message });
@@ -164,7 +171,7 @@ router.post('/login', authLimiter, async (req, res) => {
   }
 });
 
-// ... (Baaki routes waisa hi rakhein) ...
+// ... (Baaki saare routes waisa hi rakhein) ...
 
 // ===== ME ROUTE (No Change) =====
 router.get('/me', authMiddleware, async (req, res) => {
@@ -236,7 +243,7 @@ router.post('/verify-otp', async (req, res) => {
       const message = `<h1>Welcome to SchoolPro, ${updatedUser.name}!</h1><p>Your account has been successfully verified.</p><p>You can now log in and start managing your school.</p><p>Thank you for joining us!</p>`;
       await sendEmail({
         to: updatedUser.email,
-        subject: 'Welcome to SchoolPro!',
+        subject: 'SchoolPro - Verify Your Email',
         html: message,
       });
     } catch (emailError) {
@@ -305,7 +312,6 @@ router.post('/forgot-password', async (req, res) => {
           'If a user with that email exists, a password reset link has been sent.',
       });
   } catch (err) {
-    console.error('FORGOT PASSWORD ERROR:', err);
     res.status(500).send('Server Error: Could not process password reset request.');
   }
 });
@@ -344,8 +350,8 @@ router.put('/reset-password/:token', async (req, res) => {
     });
 
     res.status(200).json({ success: true, message: 'Password reset successful!' });
-  } catch (err) {
-    console.error('RESET PASSWORD ERROR:', err.message);
+  } catch (error) {
+    console.error('RESET PASSWORD ERROR:', error.message);
     res.status(500).send('Server Error during password reset.');
   }
 });

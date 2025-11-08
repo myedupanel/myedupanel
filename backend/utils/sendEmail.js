@@ -2,27 +2,27 @@
 
 const nodemailer = require('nodemailer');
 const { google } = require('googleapis');
-// FIX 1: Buffer Module को Import करें (decoding के लिए आवश्यक)
+// FIX 1: Buffer Module को Import करें 
 const { Buffer } = require('buffer'); 
 
 const sendEmail = async (options) => {
   console.log('--- Email (Nodemailer Service Account) bhejne ki koshish... ---');
 
   // Environment variables fetch karein
+  // G_PRIVATE_KEY, G_SERVICE_ACCOUNT_EMAIL, G_USER_TO_IMPERSONATE
   const SERVICE_ACCOUNT_EMAIL = process.env.G_SERVICE_ACCOUNT_EMAIL;
-  // FIX 2: RAW Base64 स्ट्रिंग को सीधे उठाओ
   const RAW_PRIVATE_KEY = process.env.G_PRIVATE_KEY; 
   const USER_EMAIL = process.env.G_USER_TO_IMPERSONATE; 
   const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
   const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
   if (!SERVICE_ACCOUNT_EMAIL || !RAW_PRIVATE_KEY || !USER_EMAIL || !CLIENT_ID || !CLIENT_SECRET) {
-      console.error('--- EMAIL FAILED ---: Service Account credentials missing.');
+      console.error('--- EMAIL FAILED ---: Critical Service Account credentials missing.');
       throw new Error('Email sending failed: Server configuration incomplete.');
   }
 
-  // === FIX 3: Base64 Decoding लॉजिक ===
-  // Raw Base64 स्ट्रिंग को वापस multi-line Private Key Text में बदलता है।
+  // FIX 3: Base64 Decoding लॉजिक
+  // यह Raw Base64 स्ट्रिंग को वापस multi-line Private Key Text में बदलता है।
   const decodedPrivateKey = Buffer.from(RAW_PRIVATE_KEY, 'base64').toString('utf8');
   // === END FIX 3 ===
 
