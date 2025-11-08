@@ -1,4 +1,4 @@
-// File: backend/controllers/paymentController.js (UPDATED with Sync Fix)
+// File: backend/controllers/paymentController.js (FINAL "Super Intelligent" UPDATE)
 
 const prisma = require('../config/prisma');
 const Razorpay = require('razorpay');
@@ -294,9 +294,7 @@ exports.verifySubscriptionWebhook = async (req, res) => {
 };
 
 
-// === FUNCTION 4: SYNC PAYMENTS (UPDATED WITH FIX) ===
-// @desc    SuperAdmin ke liye Razorpay se payments sync karna
-// @route   POST /api/payment/sync-payments
+// === FUNCTION 4: SYNC PAYMENTS (SUPER-SUPER-INTELLIGENT FIX) ===
 exports.syncRazorpayPayments = async (req, res) => {
   if (!razorpay) {
     return res.status(500).json({ message: "Payment gateway is not configured." });
@@ -308,9 +306,7 @@ exports.syncRazorpayPayments = async (req, res) => {
   let paymentsFailed = 0;
 
   try {
-    // 1. Razorpay se saare successful payments fetch karein
     const razorpayPayments = await razorpay.payments.all({ count: 100 });
-
     const capturedPayments = razorpayPayments.items.filter(
       (p) => p.status === 'captured' && p.notes.type === 'APP_SUBSCRIPTION'
     );
@@ -319,55 +315,75 @@ exports.syncRazorpayPayments = async (req, res) => {
 
     for (const payment of capturedPayments) {
       const paymentId = payment.id;
-
-      // 2. Check karein ki yeh payment hamare database mein pehle se hai ya nahi
-      const existingSubscription = await prisma.appSubscription.findUnique({
-        where: { paymentId: paymentId }
-      });
-
-      if (existingSubscription) {
-        paymentsSkipped++;
-        continue; // Payment pehle se hai, kuch mat karo
-      }
-
-      // 3. NAYI PAYMENT MILI! Isse database mein add karo
-      console.log(`NEW PAYMENT FOUND: ${paymentId}. Fixing database...`);
       const { schoolId, userId, planName, originalAmount, couponId: couponIdFromNotes } = payment.notes;
-      
-      // Safety checks
+
+      // Safety check
       if (!schoolId || !userId || !planName) {
         console.error(`Payment ${paymentId} is missing critical notes (schoolId, userId, or planName). Skipping.`);
         paymentsFailed++;
         continue;
       }
       
+      // Data extract
       const amountPaid = Number(payment.amount) / 100;
       const planStartDate = new Date(payment.created_at * 1000);
-      const planEndDate = new Date();
-      planEndDate.setFullYear(planEndDate.getFullYear() + 1);
+      const planEndDate = new Date(planStartDate); // Start date se copy karein
+      planEndDate.setFullYear(planEndDate.getFullYear() + 1); // 1 saal add karein
+
+      // --- YAHI HAI NAYA "SUPER-SUPER INTELLIGENT" LOGIC ---
+      
+      // 1. Check karein ki payment record hamare DB mein hai ya nahi
+      const existingSubscription = await prisma.appSubscription.findUnique({
+        where: { paymentId: paymentId }
+      });
+
+      if (existingSubscription) {
+        // 2. PAYMENT RECORD MIL GAYA. Ab check karo ki School ka plan sahi hai ya nahi.
+        const school = await prisma.school.findUnique({ where: { id: schoolId } });
+
+        // Check karo ki plan 'TRIAL' par (ya galat date par) toh phansa nahi hai
+        if (school && (school.plan !== planName.toUpperCase() || school.planExpiryDate.getTime() !== planEndDate.getTime())) {
+          
+          console.log(`MISMATCH FOUND for School ${schoolId}. Plan is '${school.plan}', but should be '${planName.toUpperCase()}'. Fixing...`);
+          
+          await prisma.school.update({
+            where: { id: schoolId },
+            data: {
+              plan: planName.toUpperCase(),
+              planStartDate: planStartDate,
+              planExpiryDate: planEndDate
+            }
+          });
+          paymentsFixed++; // Ise bhi 'fixed' mein gino
+        } else {
+          // School ka plan pehle se hi sahi hai. Skip karo.
+          paymentsSkipped++;
+        }
+        
+        continue; // Agle payment par jao
+      }
+
+      // 3. PAYMENT RECORD MILA HI NAHI. Yeh ek naya/missing payment hai.
+      console.log(`NEW PAYMENT FOUND: ${paymentId}. Creating new record...`);
       
       try {
         await prisma.$transaction(async (tx) => {
           
-          let validCouponId = null; // Default to null
+          let validCouponId = null;
 
-          // --- YAHI HAI NAYA "SUPER-INTELLIGENT" FIX ---
+          // 4. (Foreign Key Fix) Check karein ki coupon delete toh nahi ho gaya
           if (couponIdFromNotes) {
-            // Check karein ki coupon database mein hai ya nahi
             const couponExists = await tx.coupon.findUnique({
               where: { id: Number(couponIdFromNotes) }
             });
             
             if (couponExists) {
-              // Coupon abhi bhi database mein hai, ise istemaal karo
               validCouponId = Number(couponIdFromNotes);
             } else {
-              // Coupon notes mein tha, lekin ab delete ho chuka hai.
-              console.warn(`Payment ${payment.id} had couponId ${couponIdFromNotes}, but it no longer exists in DB. Saving without coupon link.`);
-              validCouponId = null; // Link ko 'null' kar dein
+              console.warn(`Payment ${payment.id} had couponId ${couponIdFromNotes}, but it no longer exists. Saving without link.`);
+              validCouponId = null; // 'null' save karein taaki crash na ho
             }
           }
-          // --- END FIX ---
 
           // School update karein
           await tx.school.update({
@@ -390,29 +406,32 @@ exports.syncRazorpayPayments = async (req, res) => {
               paymentId: payment.id,
               orderId: payment.order_id,
               createdAt: planStartDate,
+              endDate: planEndDate, // <-- YEH ZAROORI HAI
               schoolId: schoolId,
               userId: Number(userId),
-              couponId: validCouponId // <-- FIXED (Ab 'null' ya valid ID hi jaayega)
+              couponId: validCouponId 
             }
           });
 
-          // Coupon count update karein (agar use hua hai aur valid hai)
-          if (validCouponId) { // <-- FIXED
+          // Coupon count update karein (agar valid hai)
+          if (validCouponId) { 
             await tx.coupon.update({
-              where: { id: validCouponId }, // <-- FIXED
+              where: { id: validCouponId },
               data: { timesUsed: { increment: 1 } }
             });
           }
         });
         paymentsFixed++;
       } catch (dbError) {
+        // Is specific payment ko sync karne mein error aaya
         console.error(`Failed to sync payment ${paymentId} for school ${schoolId}:`, dbError.message);
         paymentsFailed++;
       }
-    }
+    } // Loop yahaan khatam
 
+    console.log(`Sync complete. Fixed: ${paymentsFixed}, Skipped: ${paymentsSkipped}, Failed: ${paymentsFailed}`);
     res.status(200).json({ 
-      message: `Sync complete! ${paymentsFixed} new payments fixed, ${paymentsSkipped} payments already synced, ${paymentsFailed} payments failed.`,
+      message: `Sync complete! ${paymentsFixed} new/mismatched payments fixed, ${paymentsSkipped} payments already correct, ${paymentsFailed} payments failed.`,
       fixed: paymentsFixed,
       skipped: paymentsSkipped,
       failed: paymentsFailed
