@@ -1,17 +1,19 @@
-// File: backend/controllers/studentController.js (SUPREME SECURE & SUPERFAST)
+// File: backend/controllers/studentController.js (SUPREME SECURE)
 
-// 1. IMPORTS
+// 1. IMPORTS (No Change)
 const prisma = require('../config/prisma');
 const bcrypt = require('bcryptjs'); 
 const crypto = require('crypto'); 
 const sendEmail = require('../utils/sendEmail'); 
-const { Prisma } = require('@prisma/client');
+const { Prisma } = require('@prisma/client'); // Prisma errors ke liye
 
-// === FIX 1: THE SANITIZER FUNCTION (XSS Prevention) ===
+// === NAYA FIX 1: THE SANITIZER FUNCTION (XSS Prevention) ===
+// यह फंक्शन किसी भी स्ट्रिंग से सभी HTML टैग्स को हटा देगा।
 function removeHtmlTags(str) {
   if (!str || typeof str !== 'string') {
     return str;
   }
+  // रेगुलर एक्सप्रेशन का उपयोग करके HTML टैग्स को हटाएँ
   return str.replace(/<[^>]*>/g, '').trim(); 
 }
 // === END FIX 1 ===
@@ -47,7 +49,7 @@ function getCanonicalKey(header) {
   return null;
 }
 
-// 4. FUNCTION 1: addStudentsInBulk (SUPERFAST BATCH PROCESSING)
+// 4. FUNCTION 1: addStudentsInBulk (UPDATED)
 const addStudentsInBulk = async (req, res) => {
   try {
     const schoolId = req.user.schoolId;
@@ -56,143 +58,150 @@ const addStudentsInBulk = async (req, res) => {
     }
 
     const studentsData = req.body;
-    if (!studentsData || !Array.isArray(studentsData) || studentsData.length === 0) {
-      return res.status(400).json({ message: 'No student data provided.' });
+    
+    if (!studentsData || !Array.isArray(studentsData)) {
+      return res.status(400).json({ message: 'No student data provided. Expected an array for bulk import.' });
     }
 
-    // 1. Raw Data Processing और Sanitization
+    // 1. Rows ko process karein
     const processedStudents = studentsData.map(row => {
       const newStudent = {};
       for (const rawHeader in row) {
         const canonicalKey = getCanonicalKey(rawHeader);
         if (canonicalKey) {
           const value = row[rawHeader];
-          // Value ko sanitize karte hain (FIX 2: XSS Safety)
+          // === FIX 2: VALUE KO SANITIZE KAREIN ===
           newStudent[canonicalKey] = removeHtmlTags(typeof value === 'string' ? value.trim() : value);
+          // === END FIX 2 ===
         }
       }
       return newStudent;
-    }).filter(s => s.first_name && s.last_name && s.class_name && s.roll_number); // Required fields check
-
-    if (processedStudents.length === 0) {
-         return res.status(400).json({ message: 'No valid student data found with required fields.' });
-    }
-
-    // 2. BATCH 1: Classes ko Pre-Process aur Create karein
-    const uniqueClassNames = Array.from(new Set(processedStudents.map(s => s.class_name)));
-    
-    const existingClasses = await prisma.classes.findMany({
-        where: { schoolId, class_name: { in: uniqueClassNames } },
-        select: { class_name: true, classid: true }
     });
-
-    const existingClassNames = new Set(existingClasses.map(c => c.class_name));
-    const missingClassNames = uniqueClassNames.filter(name => !existingClassNames.has(name));
-
-    // Nayi classes ko createMany se banao
-    if (missingClassNames.length > 0) {
-        const classesToCreate = missingClassNames.map(name => ({
-            class_name: name,
-            schoolId: schoolId
-        }));
-        await prisma.classes.createMany({ data: classesToCreate });
-    }
     
-    // Nayi aur puraani saari classes ki ID fetch karein
-    const allClasses = await prisma.classes.findMany({
-        where: { schoolId, class_name: { in: uniqueClassNames } },
-        select: { class_name: true, classid: true }
-    });
+    let createdCount = 0;
+    const errors = [];
 
-    const classMap = new Map(allClasses.map(c => [c.class_name, c.classid]));
-
-
-    // 3. BATCH 2 & 3: Student aur User Data Arrays ko taiyaar karein
-    const studentsToCreate = [];
-    const usersToCreate = [];
-
-    const salt = await bcrypt.genSalt(10); // Hash ke liye salt ek baar generate karein
-
+    // 3. Ek-ek karke student create karein
     for (const student of processedStudents) {
-        const classid = classMap.get(student.class_name);
-        if (!classid) continue;
-
-        // Date Handling (Excel number-based date ko handle karein)
-        const dateFields = ['dob', 'admission_date'];
-        for (const field of dateFields) {
-            if (student[field]) {
-                try {
-                    if (typeof student[field] === 'number') {
-                        const parsedDate = new Date(Date.UTC(1899, 11, 30 + student[field]));
-                        student[field] = !isNaN(parsedDate.getTime()) ? parsedDate : null;
-                    } else {
-                        const parsedDate = new Date(student[field]);
-                        student[field] = !isNaN(parsedDate.getTime()) ? parsedDate : null;
-                    }
-                } catch (e) { student[field] = null; }
-            } else if (field === 'admission_date') {
-                 student[field] = new Date(); 
-            }
+      try {
+        // 4. Zaroori fields ko check karein
+        const { first_name, last_name, class_name, roll_number, father_name, guardian_contact } = student;
+        if (!first_name || !last_name || !class_name || !roll_number || !father_name || !guardian_contact) {
+          errors.push(`Skipped row: Missing required data for student '${first_name || 'N/A'}' (Roll No: ${roll_number || 'N/A'}). Required: first_name, last_name, class_name, roll_number, father_name, guardian_contact.`);
+          continue; 
         }
 
-        // Student data for createMany
-        const studentData = {
-            ...student, 
-            roll_number: String(student.roll_number || ''),
-            classid: classid,
-            schoolId: schoolId,
-            class_name: undefined, 
-        };
-        studentsToCreate.push(studentData);
+        const className = student.class_name;
+        
+        // 4. Class ko find/create karein (No Change)
+        let classRecord = await prisma.classes.findUnique({
+          where: { schoolId_class_name: { schoolId: schoolId, class_name: className } },
+        });
+        if (!classRecord) {
+          classRecord = await prisma.classes.create({
+            data: { class_name: className, schoolId: schoolId },
+          });
+        }
+        
+        // 5. Student data ko Prisma ke liye taiyaar karein
+        const { class_name: cn, ...studentData } = student; 
+        studentData.classid = classRecord.classid; 
+        studentData.schoolId = schoolId; 
+        
+        // roll_number को string में convert karein (Safety)
+        studentData.roll_number = String(studentData.roll_number || '');
 
+        // 6. Date fields ko handle karein (No Change)
+        if (studentData.dob) {
+           try {
+            if (typeof studentData.dob === 'number') {
+                const parsedDate = new Date(Date.UTC(1899, 11, 30 + studentData.dob));
+                if (!isNaN(parsedDate)) { studentData.dob = parsedDate; } else { studentData.dob = null; }
+            } else {
+                const parsedDate = new Date(studentData.dob);
+                if (!isNaN(parsedDate)) { studentData.dob = parsedDate; } else { studentData.dob = null; }
+            }
+          } catch (e) { studentData.dob = null; }
+        }
+        if (studentData.admission_date) {
+           try {
+             if (typeof studentData.admission_date === 'number') {
+                const parsedDate = new Date(Date.UTC(1899, 11, 30 + studentData.admission_date));
+                studentData.admission_date = !isNaN(parsedDate) ? parsedDate : new Date();
+             } else {
+                const parsedDate = new Date(studentData.admission_date);
+                studentData.admission_date = !isNaN(parsedDate) ? parsedDate : new Date(); 
+             }
+           } catch (e) { 
+             studentData.admission_date = new Date(); 
+           }
+        } else {
+           studentData.admission_date = new Date(); 
+        }
 
-        // User data for createMany 
-        const tempPassword = crypto.randomBytes(8).toString('hex');
-        const hashedPassword = await bcrypt.hash(tempPassword, salt);
-        const studentFullName = `${student.first_name} ${student.last_name}`;
-        const realEmail = student.email ? student.email.toLowerCase() : null;
-        const safeRollNumber = String(student.roll_number || '').replace(/[\s\W]+/g, '');
-        const dummyEmail = `${safeRollNumber}@${schoolId.substring(0, 8)}.local`; 
+        // 7. Student aur User Transaction
+        const studentFullName = `${studentData.first_name} ${studentData.last_name}`;
+        // email bhi sanitize ho chuka hai
+        const realEmail = studentData.email ? studentData.email.toLowerCase() : null; 
+        
+        const rollNumberStr = String(studentData.roll_number || '');
+        const safeRollNumber = rollNumberStr.replace(/[\s\W]+/g, '');
+        
+        const dummyEmail = `${safeRollNumber}@${schoolId}.local`;
         const emailForUserTable = realEmail || dummyEmail;
 
-        usersToCreate.push({
-            schoolId: schoolId,
-            name: studentFullName,
-            email: emailForUserTable,
-            password: hashedPassword,
-            role: 'student',
-            isVerified: true,
+        await prisma.$transaction(async (tx) => {
+          // 7a: Student create karein
+          await tx.students.create({
+            data: studentData, 
+          });
+
+          // 7b: Hamesha User (login) create karein
+          const tempPassword = crypto.randomBytes(8).toString('hex');
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(tempPassword, salt);
+          
+          await tx.user.create({
+            data: {
+              schoolId: schoolId,
+              name: studentFullName,
+              email: emailForUserTable,
+              password: hashedPassword,
+              role: 'student',
+              isVerified: true,
+            }
+          });
         });
-    }
+        
+        createdCount++;
 
-    // 4. BATCH EXECUTION: Student aur User ko createMany se banao
-    
-    // BATCH 1: STUDENTS CREATE KAREIN
-    const studentResult = await prisma.students.createMany({ 
-        data: studentsToCreate,
-        skipDuplicates: true 
-    });
+      } catch (error) {
+         // (Error handling - No Change)
+         console.error("Error creating individual student:", error);
+        if (error.code === 'P2002') { 
+           const target = error.meta?.target || [];
+           if (target.includes('email')) {
+               errors.push(`Duplicate email for student: ${student.first_name || 'N/A'} (Email: ${student.email || 'dummy'})`);
+           } else {
+               errors.push(`Duplicate entry for student: ${student.first_name || 'N/A'} (Roll No: ${student.roll_number || 'N/A'})`);
+           }
+        } else {
+           errors.push(`Error for student ${student.first_name || 'N/A'}: ${error.message}`);
+        }
+      }
+    } // End of for...of loop
 
-    // BATCH 2: USERS CREATE KAREIN (Email Unique hona chahiye)
-    const userResult = await prisma.user.createMany({ 
-        data: usersToCreate,
-        skipDuplicates: true
-    });
-    
-    const createdCount = studentResult.count;
-    
-    // 5. Final Response
+    // 8. Final response (No Change)
     res.status(201).json({
-      message: `${createdCount} students were added successfully! (Superfast Mode)`,
-      studentsCreated: createdCount,
-      usersCreated: userResult.count,
-      totalProcessed: studentsData.length,
+      message: `${createdCount} of ${processedStudents.length} students were added successfully.`,
+      errors: errors,
+      totalProcessed: processedStudents.length,
     });
 
   } catch (error) {
-    console.error("---!!!--- CRITICAL ERROR DURING BULK IMPORT (SUPERFAST) ---!!!---");
+    console.error("---!!!--- CRITICAL ERROR DURING BULK IMPORT ---!!!---");
     console.error(error);
-    res.status(500).json({ message: 'Server error while importing students. Check logs for details.' });
+    res.status(500).json({ message: 'Server error while importing students.' });
   }
 };
 
@@ -216,7 +225,7 @@ const getAllStudents = async (req, res) => {
 };
 
 
-// 6. FUNCTION 3: addSingleStudent (UPDATED: Sanitization Applied)
+// 6. FUNCTION 3: addSingleStudent (UPDATED)
 const addSingleStudent = async (req, res) => {
   try {
     // 1. School ID (No Change)
@@ -225,7 +234,8 @@ const addSingleStudent = async (req, res) => {
       return res.status(401).json({ message: 'User not authorized or missing school ID.' });
     }
 
-    // 2. Data ko req.body se lein (Sanitization Applied)
+    // 2. Data ko req.body se lein
+    // === FIX 3: Data ko sanitize karein jab woh req.body se aaye ===
     const sanitizedBody = {};
     for (const key in req.body) {
         sanitizedBody[key] = removeHtmlTags(req.body[key]);
@@ -240,6 +250,7 @@ const addSingleStudent = async (req, res) => {
       guardian_contact,
       ...otherDetails
     } = sanitizedBody;
+    // === END FIX 3 ===
 
     // 3. Zaroori fields check karein (No Change)
     if (!first_name || !last_name || !class_name || !roll_number || !father_name || !guardian_contact) {
