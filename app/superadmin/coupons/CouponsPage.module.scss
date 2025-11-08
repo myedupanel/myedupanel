@@ -189,3 +189,43 @@
     color: #fff;
   }
 }
+.syncContainer {
+  background: #fdf8e6; // Halka peela background
+  border: 1px solid #f0e0b0;
+  
+  p {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+}
+
+.syncButton {
+  padding: 0.8rem 1.2rem;
+  border: none;
+  border-radius: 5px;
+  background-color: #f97316; // Orange color
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  display: inline-flex; // Icon aur text ko align karega
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #ea580c;
+  }
+
+  &:disabled {
+    background-color: #fb923c;
+    cursor: not-allowed;
+  }
+}
+
+.syncMessage {
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 1rem;
+}

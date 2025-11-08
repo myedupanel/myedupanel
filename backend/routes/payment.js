@@ -1,4 +1,4 @@
-// File: backend/routes/payment.js
+// File: backend/routes/payment.js (UPDATED)
 
 const express = require('express');
 const router = express.Router();
@@ -7,7 +7,8 @@ const { authMiddleware, authorize } = require('../middleware/authMiddleware');
 const { 
     createSubscriptionOrder, 
     verifySubscriptionWebhook,
-    validateCoupon // === NAYA FUNCTION IMPORT KAREIN ===
+    validateCoupon,
+    syncRazorpayPayments // === NAYA FUNCTION IMPORT KAREIN ===
 } = require('../controllers/paymentController');
 
 // --- Route 1: Create Order (Bina Badlaav) ---
@@ -23,14 +24,21 @@ router.post(
     verifySubscriptionWebhook
 );
 
-// === NAYA ROUTE (STEP 1) ===
-// @route   POST /api/payment/validate-coupon
-// @desc    Coupon code ko validate karta hai aur naya price batata hai
-// @access  Private (Sirf Admin)
+// --- Route 3: Validate Coupon (Bina Badlaav) ---
 router.post(
     '/validate-coupon',
     [authMiddleware, authorize('Admin')],
     validateCoupon
+);
+
+// === NAYA ROUTE (STEP 2) ===
+// @route   POST /api/payment/sync-payments
+// @desc    Razorpay se puraane phanse hue payments ko sync karta hai
+// @access  Private (Sirf SuperAdmin)
+router.post(
+    '/sync-payments',
+    [authMiddleware, authorize('SuperAdmin')], // Sirf SuperAdmin ise chala sakta hai
+    syncRazorpayPayments
 );
 // === END NAYA ROUTE ===
 
