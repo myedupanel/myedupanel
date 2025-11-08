@@ -7,7 +7,9 @@ import api from '@/backend/utils/api'; // !! Path check karein
 import styles from './CouponsPage.module.scss'; 
 import { FiRefreshCw } from 'react-icons/fi'; // Naya icon
 
-interface Coupon {
+// === YAHI HAI FIX ===
+// Interface ko 'export' karein taaki 'CouponForm.tsx' ise import kar sake
+export interface Coupon {
   id: number;
   code: string;
   discountType: 'PERCENTAGE' | 'FIXED_AMOUNT';
@@ -18,6 +20,7 @@ interface Coupon {
   expiryDate: string | null;
   createdAt: string;
 }
+// === END FIX ===
 
 const CouponsPage = () => {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -31,10 +34,9 @@ const CouponsPage = () => {
   const [expiryDate, setExpiryDate] = useState('');
   const [maxUses, setMaxUses] = useState('');
 
-  // === NAYA SYNC STATE ===
+  // Sync state
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
-  // =======================
 
   // Page load par saare coupons fetch karein
   const fetchCoupons = async () => {
@@ -75,7 +77,7 @@ const CouponsPage = () => {
     }
   };
 
-  // === NAYA SYNC FUNCTION ===
+  // Sync function
   const handleSyncPayments = async () => {
     if (isSyncing) return;
     setIsSyncing(true);
@@ -90,7 +92,6 @@ const CouponsPage = () => {
       setIsSyncing(false);
     }
   };
-  // ==========================
 
   return (
     <div className={styles.couponsPage}>
@@ -98,7 +99,7 @@ const CouponsPage = () => {
         <h1>Manage Coupons (SuperAdmin)</h1>
       </header>
 
-      {/* === NAYA SYNC SECTION === */}
+      {/* Sync Section */}
       <div className={`${styles.formContainer} ${styles.syncContainer}`}>
         <h3>Payment Reconciliation</h3>
         <p>
@@ -122,8 +123,6 @@ const CouponsPage = () => {
           <p className={styles.syncMessage}>{syncMessage}</p>
         )}
       </div>
-      {/* ========================== */}
-
 
       {/* 1. Naya Coupon Banane ka Form */}
       <div className={styles.formContainer}>
