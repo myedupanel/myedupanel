@@ -1,4 +1,4 @@
-// File: LeavingCertificatePreview.tsx (FINAL PREMIUM STRUCTURE)
+// File: LeavingCertificatePreview.tsx (FINAL PREMIUM STRUCTURE - SNS Template Match)
 
 import React from 'react';
 import styles from './LeavingCertificatePreview.module.scss'; 
@@ -56,16 +56,12 @@ const formatDate = (dateString: string | undefined): string => {
   if (!dateString) return '';
   try {
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      console.warn("Invalid date object created from:", dateString);
-      return dateString;
-    }
+    if (isNaN(date.getTime())) return dateString;
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   } catch (e) {
-      console.warn("Invalid date format for formatDate:", dateString);
       return dateString;
    }
 };
@@ -77,7 +73,7 @@ interface LeavingCertificatePreviewProps {
   schoolDetails: SchoolDetails;
 }
 
-// --- Helper Components (Modified to include noLine flag) ---
+// --- Helper Components (Simplified for 2-Column Table Structure) ---
 const fill = (value: string | undefined | null, noLine = false) => {
   const className = noLine ? styles.fillNoLine : (value ? styles.fill : styles.fillBlank); 
   if (value) {
@@ -88,22 +84,11 @@ const fill = (value: string | undefined | null, noLine = false) => {
 
 const SubField: React.FC<{ label: string, value: string | undefined | null, noLine?: boolean }> = ({ label, value, noLine = false }) => (
   <span className={styles.subField}>
-    {/* Label ko tabhi dikhayein jab woh blank na ho */}
     {label && <span className={styles.subLabel}>{label}:</span>} 
     {fill(value, noLine)}
   </span>
 );
 
-// Yeh naya GridRow component blueprint banayega
-const GridRow: React.FC<{ num: string, label: string, children: React.ReactNode, className?: string }> = ({ num, label, children, className }) => {
-  return (
-    <>
-      <div className={`${styles.rowNum} ${className || ''}`}>{num}</div>
-      <div className={`${styles.rowLabel} ${className || ''}`}>{label}</div>
-      <div className={`${styles.rowValue} ${className || ''}`}>{children}</div>
-    </>
-  );
-};
 // --- End Helper Components ---
 
 
@@ -116,6 +101,15 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
   const dateOfAdmission = formatDate(formData.dateOfAdmission);
   const dateOfLeaving = formatDate(formData.dateOfLeaving);
   const studentDobFormatted = formatDate(student?.dob);
+
+  // Helper component to render table rows based on SNS blueprint
+  const RenderRow = ({ label, children, isLast = false, labelClass = '' }: { label: string, children: React.ReactNode, isLast?: boolean, labelClass?: string }) => (
+    <>
+      <div className={`${styles.labelCell} ${isLast ? styles.lastRow : ''} ${labelClass}`}>{label}</div>
+      <div className={`${styles.valueCell} ${isLast ? styles.lastRow : ''}`}>{children}</div>
+    </>
+  );
+
 
   return (
     <div className={styles.certificatePaper}>
@@ -133,133 +127,137 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             </div>
           )}
           <div className={styles.schoolInfoBlock}>
-            {/* School Name - First Line (if needed for Trust/Est. info) */}
-            <div className={styles.schoolNameMyEdu}>{schoolDetails.name || 'My EduPanel Trust'}</div> 
-            {/* School Name - Main Bold Line */}
-            <div className={styles.schoolName1}>{schoolDetails.name2 || 'Prime International School'}</div>
+            {/* Template Top Info */}
+            <div className={styles.schoolNameMyEdu}>Estd. {fill('1999', true)} | {schoolDetails.name || 'My EduPanel Education Foundation\'s'}</div> 
+            
+            {/* Main Name */}
+            <div className={styles.schoolName1}>{schoolDetails.name2 || 'SURVADATTA NATIONAL SCHOOL (SNS) PUNE'}</div>
+            
+            {/* Affiliated / UDISE / Address */}
             <div className={styles.schoolAddressCode}>
-              {schoolDetails.address || 'Hinjewadi, Pune, 411057'}
+              Affiliated to CBSE Board (Affiliation No.: {fill('1130572', true)})
               <br/>
-              UDISE NO: {schoolDetails.udiseNo || '987654321012'}
+              (SURYA KIDS - PRE PRIMARY SECTION)
+              <br/>
+              (U-DISE Code No. {schoolDetails.udiseNo || '27251014726'})
+              <br/>
+              Suryabhavan, Wing - A, S. No. 342, Bavdhan, Pune - 411021
             </div>
           </div>
         </header>
           
-        {/* Title Row (Sr. No / Title / Reg. No) */}
-        <div className={styles.titleRow}>
-          <div className={styles.headerSrNo}>
-            Sr. No: {fill(formData.genRegNo)}
-          </div>
+        {/* === PRE-HEADER SERIAL & GR NO. ROW (SNS Layout) === */}
+        <div className={styles.preHeaderRow}>
+            <div className={styles.serialBox}>
+                Serial No: {fill(formData.genRegNo, true)}
+            </div>
+            <div className={styles.uidBox}>
+                UID Adhar Card No.: {fill(student?.aadhaarNo, true)}
+            </div>
+            <div className={styles.grBox}>
+                G. R. No: {fill(formData.regNo, true)}
+            </div>
+        </div>
+        {/* === END PRE-HEADER === */}
+        
+        {/* Title Block */}
+        <div className={styles.titleBlock}>
           <h2>LEAVING CERTIFICATE</h2>
-          <div className={styles.headerRegNo}>
-            Reg. No: {fill(formData.regNo)}
-          </div>
         </div>
 
-        {/* === MAIN BLUEPRINT (GRID) === */}
+        {/* === MAIN BLUEPRINT (TABULAR GRID) === */}
         <div className={styles.certificateGrid}>
           
-          <GridRow num="1" label="Student's Full Name">
+          <RenderRow label="Full Name:">
             {fill(student?.name)}
-          </GridRow>
+          </RenderRow>
           
-          <GridRow num="2" label="UID No (Aadhar card No.)">
-            {fill(student?.aadhaarNo)}
-          </GridRow>
-
-          <GridRow num="3" label="Mother's Name">
+          <RenderRow label="Mother's Name:">
             {fill(formData.motherName)}
-          </GridRow>
+          </RenderRow>
 
-          {/* === ROW 4: Nationality & Mother Tongue === */}
-          <GridRow num="4" label="Nationality">
+          {/* === ROW: Religion, Caste & Sub-Caste === */}
+          <RenderRow label="Religion and Caste with sub caste:">
+            {/* 1. Religion Value */}
             <div className={styles.multiFieldRow}>
-              {/* Nationality value (No label, no line needed for value) */}
-              <SubField label="" value={formData.nationality || 'Indian'} noLine={true} />
-              
-              {/* Mother Tongue subfield */}
-              <SubField label="Mother Tongue" value={formData.motherTongue} />
-            </div>
-          </GridRow>
-          
-          {/* === ROW 5: Religion & Caste === */}
-          <GridRow num="5" label="Religion"> 
-            <div className={styles.multiFieldRow}>
-                {/* 1. Religion Value */}
                 {fill(formData.religion)}
                 
                 {/* 2. Caste Field */}
                 <span className={styles.casteField}>
-                    <SubField label="Caste" value={formData.caste} />
+                    Caste: {fill(formData.caste)}
                 </span>
             </div>
-          </GridRow>
+          </RenderRow>
 
-          {/* === ROW 6: Birth Place SubGrid === */}
-          <GridRow num="6" label="Birth place (State/City)">
-             <div className={styles.subGrid}> 
+          <RenderRow label="Nationality:">
+            {fill(formData.nationality || 'Indian')}
+          </RenderRow>
+          
+          <RenderRow label="Place of Birth:">
+            {/* Combine Birth Place fields into one line */}
+            <div className={styles.multiFieldRow}>
                 <SubField label="Place" value={formData.birthPlace} />
                 <SubField label="Taluka" value={formData.birthTaluka} />
                 <SubField label="Dist" value={formData.birthDistrict} />
                 <SubField label="State" value={formData.birthState} />
-             </div>
-          </GridRow>
-
-          <GridRow num="7" label="Date of Birth (Figures)">
-            {fill(studentDobFormatted)}
-          </GridRow>
+            </div>
+          </RenderRow>
           
-          <GridRow num="8" label="Date of Birth (in Words)">
+          <RenderRow label="Date of Birth (in figures):">
+            {fill(studentDobFormatted)}
+          </RenderRow>
+          
+          <RenderRow label="Date of Birth (in words):">
             {fill(formData.dobWords)}
-          </GridRow>
+          </RenderRow>
 
-          <GridRow num="9" label="Previous School Name">
+          <RenderRow label="Last School Attended:">
             {fill(formData.previousSchool)}
-          </GridRow>
+          </RenderRow>
 
-          {/* === ROW 10: Admission Date & Standard === */}
-          <GridRow num="10" label="Date of Admission">
+          {/* === ROW: Date of Admission & Class === */}
+          <RenderRow label="Date of Admission & Class:">
              <div className={styles.multiFieldRow}>
                 <SubField label="Date" value={dateOfAdmission} />
-                <SubField label="Std" value={formData.standardAdmitted} />
+                <SubField label="Class" value={formData.standardAdmitted} />
              </div>
-          </GridRow>
+          </RenderRow>
 
-          {/* === ROW 11: Progress & Conduct === */}
-          <GridRow num="11" label="Progress of Study">
-             <div className={styles.multiFieldRow}>
-                <SubField label="Progress" value={formData.progress} /> 
-                <SubField label="Conduct" value={formData.conduct} />
-             </div>
-          </GridRow>
+          <RenderRow label="Progress:">
+            {fill(formData.progress)}
+          </RenderRow>
 
-          <GridRow num="12" label="Date of School Leaving">
+          <RenderRow label="Conduct:">
+            {fill(formData.conduct)}
+          </RenderRow>
+
+          <RenderRow label="Date of Leaving School:">
             {fill(dateOfLeaving)}
-          </GridRow>
+          </RenderRow>
           
-          {/* === ROW 13: Standard Leaving & Since When === */}
-          <GridRow num="13" label="Standard in which studying and since when (in Words)">
+          {/* === ROW: Standard Leaving & Since When === */}
+          <RenderRow label="Standard in which studying and since when:">
             <div className={styles.multiFieldRow}>
               <SubField label="Std" value={formData.standardLeaving} />
               <SubField label="Since" value={formData.sinceWhenLeaving} />
             </div>
-          </GridRow>
+          </RenderRow>
 
-          <GridRow num="14" label="Reason for leaving school">
+          <RenderRow label="Reason for Leaving School:">
             {fill(formData.reasonForLeaving)}
-          </GridRow>
+          </RenderRow>
           
-          <GridRow num="15" label="Remarks" className={styles.lastRow}>
+          <RenderRow label="Remarks:" isLast={true}>
             {fill(formData.remarks)}
-          </GridRow>
+          </RenderRow>
+          
         </div>
         {/* === BLUEPRINT KHATM === */}
 
 
         {/* Certification Text */}
         <p className={styles.certText}>
-          This is to certify that, Above mentioned information is as per 
-          School General Register No. {fill(formData.genRegNo)}
+          Certified that the above information is in accordance with school register.
         </p>
 
         {/* Footer (Signatures and Place/Date) */}
@@ -273,10 +271,10 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               <span>Class Teacher</span>
             </div>
             <div className={styles.sigBox}>
-              <span>Clerk</span>
+              <span>School Seal</span>
             </div>
             <div className={styles.sigBox}>
-              <span>{formData.signatoryRole || 'Head Master'}</span>
+              <span>{formData.signatoryRole || 'Head Mistress / Principal'}</span>
             </div>
           </div>
         </footer>
