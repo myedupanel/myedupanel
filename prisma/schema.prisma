@@ -620,7 +620,7 @@ model Coupon {
   maxUses       Int? // null = unlimited
   timesUsed     Int          @default(0)
   expiryDate    DateTime?
-  createdAt     DateTime     @default(now()) // Coupon kab bana
+  createdAt     DateTime     @default(now()) // Tracks when the coupon was created
   // Relation
   subscriptions AppSubscription[]
 
