@@ -258,3 +258,38 @@
         border-color: #ffccc7;
     }
 }
+.createButton {
+  /* Button reset and base style */
+  display: inline-flex; /* Icon aur text ko align karne ke liye */
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  
+  /* Primary Theme Colors */
+  background-color: #007bff; /* Primary Blue */
+  color: #fff;
+  border: none;
+  cursor: pointer;
+
+  svg {
+    font-size: 1.2rem;
+  }
+
+  &:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+  }
+}
+
+/* --- Ensure alignment within the header section --- */
+.sectionHeader {
+  display: flex;
+  justify-content: space-between; /* Button aur H3 ko kinare rakhega */
+  align-items: center;
+  /* ... (Baaki styles jaisa tha waisa hi rakhein) ... */
+}
