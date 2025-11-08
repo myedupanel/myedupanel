@@ -88,7 +88,7 @@ const CouponsPage = () => {
       <header className={styles.header}>
         <h1>Manage Coupons (SuperAdmin)</h1>
         {/* === GO TO DASHBOARD LINK BADLA GAYA === */}
-        <Link href="/superadmin/dashboard" className={styles.dashboardLinkButton}>
+        <Link href="/admin/dashboard" className={styles.dashboardLinkButton}>
           <MdGridView />
           <span>Go to Dashboard</span>
         </Link>
