@@ -1,27 +1,45 @@
-// backend/controllers/userController.js
+// File: backend/controllers/userController.js (CRASH FIX & SECURE)
 
-// --- 1. Imports (Updated) ---
-const prisma = require('../config/prisma'); // Prisma client
+// --- 1. Imports ---
+const prisma = require('../config/prisma'); 
 const sendEmail = require('../utils/sendEmail');
 const crypto = require('crypto');
-const bcrypt = require('bcryptjs'); // Naya import password hashing ke liye
+const bcrypt = require('bcryptjs'); 
+const { Prisma } = require('@prisma/client');
+
+// === FIX 1: THE SANITIZER FUNCTION (XSS Prevention) ===
+function removeHtmlTags(str) {
+  if (!str || typeof str !== 'string') {
+    return str;
+  }
+  return str.replace(/<[^>]*>/g, '').trim(); 
+}
+// === END FIX 1 ===
+
 
 // --- 2. FUNCTION 1: createUserByAdmin (Prisma Version) ---
-exports.createUserByAdmin = async (req, res) => {
-    // Logged-in admin ki details (req.user mein Prisma ID honi chahiye)
-    const admin = req.user; // e.g., { id: 1, schoolId: "school-abc", name: "Admin" }
+// FIX: फ़ंक्शन को const के रूप में परिभाषित किया (CRASH FIX)
+const createUserByAdmin = async (req, res) => {
+    // Logged-in admin ki details 
+    const admin = req.user; 
 
-    // Naye user ki details
+    // Naye user ki details (Request Body se, lekin Sanitization ke saath)
     const { name, email, role, details } = req.body;
-
-    if (!name || !email || !role) {
+    
+    // === Sanitization (Same as previous fix plan) ===
+    const sanitizedName = removeHtmlTags(name);
+    const sanitizedRole = removeHtmlTags(role);
+    const lowerCaseEmail = email ? email.toLowerCase() : null; 
+    // ===============================================
+    
+    if (!sanitizedName || !lowerCaseEmail || !sanitizedRole) {
         return res.status(400).json({ msg: 'Please provide name, email, and role.' });
     }
 
     try {
         // Check karein ki user pehle se hai ya nahi
         let existingUser = await prisma.user.findUnique({ 
-            where: { email: email.toLowerCase() } 
+            where: { email: lowerCaseEmail } 
         });
         if (existingUser) {
             return res.status(400).json({ msg: 'User with this email already exists.' });
@@ -30,7 +48,7 @@ exports.createUserByAdmin = async (req, res) => {
         // 1. Temporary password generate karein (Same)
         const temporaryPassword = crypto.randomBytes(8).toString('hex');
 
-        // 2. NAYA: Password ko hash karein
+        // 2. Password ko hash karein
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(temporaryPassword, salt);
 
@@ -41,35 +59,35 @@ exports.createUserByAdmin = async (req, res) => {
         });
         const schoolName = school?.name || "Your School";
 
-        // 4. Naya user database mein banayein (Prisma 'create')
+        // 4. Naya user database mein banayein
         const newUser = await prisma.user.create({
             data: {
-                name,
-                email: email.toLowerCase(),
-                role,
-                password: hashedPassword, // Hash kiya hua password save karein
+                name: sanitizedName, // Sanitized
+                email: lowerCaseEmail, // Sanitized
+                role: sanitizedRole, // Sanitized
+                password: hashedPassword,
                 schoolId: admin.schoolId,
-                createdById: admin.id, // Admin ki Prisma ID
+                createdById: admin.id, 
                 details: details || {},
                 status: 'active' 
             }
         });
 
-        // 5. Dashboard ko update karein (Same)
+        // 5. Dashboard ko update karein (No Change)
         if (req.io) { 
             console.log('Emitting updateDashboard after creating user.');
             req.io.emit('updateDashboard'); 
         }
 
-        // 6. Naye user ko email bhejein (Same)
+        // 6. Naye user ko email bhejein (No Change)
         try {
             const subject = `Welcome to ${schoolName}! Your account is ready.`;
             const message = `
-                <h1>Welcome, ${name}!</h1>
+                <h1>Welcome, ${sanitizedName}!</h1>
                 <p>An account has been created for you at ${schoolName}.</p>
                 <p>You can log in using the following credentials:</p>
                 <ul>
-                    <li><strong>Email:</strong> ${email}</li>
+                    <li><strong>Email:</strong> ${lowerCaseEmail}</li>
                     <li><strong>Password:</strong> ${temporaryPassword}</li>
                 </ul>
                 <p>We recommend you change your password after your first login.</p>
@@ -79,7 +97,6 @@ exports.createUserByAdmin = async (req, res) => {
             await sendEmail({ to: newUser.email, subject, html: message });
         } catch (emailError) {
             console.error("Could not send welcome email:", emailError);
-            // Agar email fail ho, tab bhi response success ka dein
             return res.status(201).json({ 
                 msg: `User created, but failed to send email. Please share password manually: ${temporaryPassword}` 
             });
@@ -90,9 +107,16 @@ exports.createUserByAdmin = async (req, res) => {
 
     } catch (err) {
         console.error("Error in createUserByAdmin:", err.message);
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+             return res.status(400).json({ msg: 'User with this email already exists.' });
+        }
         res.status(500).send('Server Error');
     }
 };
 
-// --- Baaki functions (login, etc.) yahaan add honge ---
-// module.exports = { ... }
+// --- Baaki functions yahaan add honge (Agar hon toh) ---
+
+// === FIX 3: Clean Export (CRASH FIX) ===
+module.exports = { 
+    createUserByAdmin 
+};
