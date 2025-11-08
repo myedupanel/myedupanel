@@ -1,21 +1,28 @@
+// components/admin/AddStaffForm/AddStaffForm.tsx
 "use client";
-import React, { useState, FormEvent } from 'react'; // Added FormEvent
+import React, { useState, FormEvent } from 'react';
 import styles from './AddStaffForm.module.scss';
+import api from '@/backend/utils/api'; // Ensure correct path
 
 interface StaffFormData {
   staffId: string;
   name: string;
   role: string;
   contactNumber: string;
-  email: string;
+  // FIX 1: Email को optional बनाएं, क्योंकि हम इसे नहीं भेजेंगे
+  email?: string; 
   joiningDate: string;
   leavingDate?: string;
 }
 
 interface AddStaffFormProps {
   onClose: () => void;
-  onSave: (staffData: StaffFormData) => Promise<void>; // Make onSave return a Promise
+  onSave: (staffData: StaffFormData) => Promise<void>;
 }
+
+// === FIX 2: Email Lock Constant ===
+const IS_EMAIL_LOCKED = true; // Temporary lock while staff/teacher dashboards are not ready
+// ==================================
 
 const AddStaffForm = ({ onClose, onSave }: AddStaffFormProps) => {
   const [formData, setFormData] = useState<StaffFormData>({
@@ -28,41 +35,43 @@ const AddStaffForm = ({ onClose, onSave }: AddStaffFormProps) => {
     leavingDate: '',
   });
   const [error, setError] = useState('');
-  // --- ADD isLoading state ---
   const [isLoading, setIsLoading] = useState(false);
-  // --- END ---
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    // FIX 3: अगर ईमेल लॉक्ड है, तो इनपुट चेंज को इग्नोर करें
+    if (IS_EMAIL_LOCKED && name === 'email') {
+        return; 
+    }
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: FormEvent) => { // Make async
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
-        setError('Please enter a valid email address.');
-        return;
+    // FIX 4: Backend में भेजने से पहले Email को हटा दें
+    const dataToSubmit: Partial<StaffFormData> = { ...formData };
+    if (IS_EMAIL_LOCKED) {
+        // Email फ़ील्ड को हटा दें ताकि वह backend logic को ट्रिगर न करे
+        delete dataToSubmit.email; 
+    } else {
+        // अगर Email Lock नहीं है, तो वैलिडेशन चेक करें
+        if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
+            setError('Please enter a valid email address.');
+            return;
+        }
     }
 
-    // --- Disable button ---
     setIsLoading(true);
-    // --- END ---
 
     try {
-        // --- Wait for onSave to complete ---
-        await onSave(formData);
-        // onClose(); // Let parent handle closing on success maybe via socket?
-        // If onSave throws error, it will be caught below
+        // dataToSubmit को भेजें
+        await onSave(dataToSubmit as StaffFormData);
     } catch (err) {
-        // Error is already handled in StaffPage's onSave, maybe just log here
         console.error("Error passed back to AddStaffForm:", err);
-        // setError("Failed to add staff. Please try again."); // Or show specific error?
     } finally {
-        // --- Re-enable button ---
         setIsLoading(false);
-        // --- END ---
     }
   };
 
@@ -96,11 +105,26 @@ const AddStaffForm = ({ onClose, onSave }: AddStaffFormProps) => {
           <label htmlFor="contactNumber">Contact Number</label>
           <input type="tel" id="contactNumber" name="contactNumber" value={formData.contactNumber} onChange={handleInputChange} required disabled={isLoading}/>
         </div>
-        {/* Email Address */}
+        
+        {/* FIX 5: Email Address Field (DISABLED UI) */}
         <div className={styles.formGroup}>
-          <label htmlFor="email">Email Address</label>
-          <input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} required placeholder="staff@example.com" disabled={isLoading}/>
-          <small>Login details will be sent here.</small>
+          <label htmlFor="email">Email Address (Login Disabled)</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            // Value को force खाली रखें जब तक लॉक्ड है
+            value={IS_EMAIL_LOCKED ? '' : formData.email || ''} 
+            // required हटा दिया गया क्योंकि यह अब conditional है
+            onChange={handleInputChange} 
+            placeholder={IS_EMAIL_LOCKED ? 'Staff login feature upcoming...' : 'staff@example.com'} 
+            disabled={IS_EMAIL_LOCKED || isLoading} // फील्ड को disable करें
+          />
+          {IS_EMAIL_LOCKED && (
+            <small style={{ color: '#fa8c16', fontWeight: 500 }}>
+                Temporary Disabled: Staff/Teacher Login is currently under development.
+            </small>
+          )}
         </div>
         {/* Joining Date */}
         <div className={styles.formGroup}>
@@ -117,12 +141,10 @@ const AddStaffForm = ({ onClose, onSave }: AddStaffFormProps) => {
       {error && <p className={styles.errorMessage}>{error}</p>}
 
       <div className={styles.buttonGroup}>
-        {/* --- Disable buttons when loading --- */}
         <button type="button" className={styles.cancelButton} onClick={onClose} disabled={isLoading}>Cancel</button>
         <button type="submit" className={styles.saveButton} disabled={isLoading}>
             {isLoading ? "Adding..." : "Add Staff"}
         </button>
-        {/* --- END --- */}
       </div>
     </form>
   );

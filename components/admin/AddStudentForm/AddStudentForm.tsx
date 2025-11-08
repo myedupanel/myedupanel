@@ -1,5 +1,3 @@
-// src/components/admin/students/AddStudentForm.tsx
-
 "use client";
 import React, { useState, useEffect } from 'react';
 import styles from './AddStudentForm.module.scss';
@@ -48,6 +46,10 @@ interface SchoolClass {
 
 const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onUpdate, existingStudent }) => {
   
+  // === FIX 9: Email Lock Constant ===
+  const IS_EMAIL_LOCKED = true; // Temporary lock while student dashboard is not ready
+  // ==================================
+
   // --- FIX 3: Naya state add kiya classes fetch karne ke liye ---
   const [fetchedClasses, setFetchedClasses] = useState<SchoolClass[]>([]);
   const [isClassLoading, setIsClassLoading] = useState(true); // Classes ke liye alag loading state
@@ -152,8 +154,15 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
 
     const dataToSend: Partial<FormData> = { ...formData };
     
+    // === FIX 10: Email data ko forcefully hata dein jab tak feature lock hai ===
+    if (IS_EMAIL_LOCKED) {
+        delete dataToSend.email;
+    }
+    // ======================================================================
+
     (Object.keys(dataToSend) as Array<keyof FormData>).forEach(key => {
         if (key !== 'first_name' && key !== 'last_name' && key !== 'class_name' && key !== 'roll_number' && key !== 'father_name' && key !== 'guardian_contact') {
+            // Agar field empty hai, toh use delete kar do taaki backend mein null jaaye
             if (!dataToSend[key] || dataToSend[key] === '') {
                 delete dataToSend[key];
             }
@@ -170,6 +179,7 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
 
     try {
       if (existingStudent && onUpdate) {
+        // onUpdate ke andar 'dataToSend' jaana chahiye
         await onUpdate(dataToSend);
         onClose();
       } else {
@@ -243,7 +253,7 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
         <input type="tel" id="guardian_contact" name="guardian_contact" value={formData.guardian_contact} onChange={handleChange} required disabled={isLoading} />
       </div>
 
-      {/* --- Optional Fields (No Changes) --- */}
+      {/* --- Optional Fields --- */}
       <div className={styles.inputGroup}>
         <label htmlFor="mother_name">Mother's Name</label>
         <input type="text" id="mother_name" name="mother_name" value={formData.mother_name || ''} onChange={handleChange} disabled={isLoading} />
@@ -256,11 +266,28 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
         <label htmlFor="admission_date">Admission Date</label>
         <input type="date" id="admission_date" name="admission_date" value={formData.admission_date || ''} onChange={handleChange} disabled={isLoading} className={styles.dateInput} />
       </div>
+      
+      {/* === FIX 11: Student Email Field (Locked) === */}
       <div className={styles.inputGroup}>
-        <label htmlFor="email">Student Email (Optional)</label>
-        <input type="email" id="email" name="email" value={formData.email || ''} onChange={handleChange} disabled={isLoading} />
-        <small>If provided, login details will be sent here.</small>
+        <label htmlFor="email">Student Email (Locked)</label>
+        <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            // Value ko clear rakhein taaki koi data na jaaye
+            value={''} 
+            onChange={handleChange} 
+            disabled={IS_EMAIL_LOCKED || isLoading} 
+            placeholder="Student Dashboard feature coming soon."
+        />
+        <small style={{ color: IS_EMAIL_LOCKED ? '#dc3545' : 'inherit' }}>
+            {IS_EMAIL_LOCKED 
+                ? "Feature Locked: Email functionality is disabled until the Student Dashboard is deployed." 
+                : "If provided, login details will be sent here."}
+        </small>
       </div>
+      {/* === END FIX 11 === */}
+
       <div className={styles.inputGroup}>
         <label htmlFor="uid_number">Aadhar / UID Number</label>
         <input type="text" id="uid_number" name="uid_number" value={formData.uid_number || ''} onChange={handleChange} disabled={isLoading} />
