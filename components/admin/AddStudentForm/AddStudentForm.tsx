@@ -278,11 +278,11 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
             value={''} 
             onChange={handleChange} 
             disabled={IS_EMAIL_LOCKED || isLoading} 
-            placeholder="Student Dashboard feature coming soon."
+            placeholder="Temporary Disabled."
         />
         <small style={{ color: IS_EMAIL_LOCKED ? '#dc3545' : 'inherit' }}>
             {IS_EMAIL_LOCKED 
-                ? "Feature Locked: Email functionality is disabled until the Student Dashboard is deployed." 
+                ? "Temporary Disabled: Email functionality is disabled until the Student Dashboard is Ready." 
                 : "If provided, login details will be sent here."}
         </small>
       </div>
