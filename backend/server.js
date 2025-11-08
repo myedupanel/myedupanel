@@ -114,7 +114,7 @@ app.use('/api/timetable', timetableRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/plans', planRoutes);
-
+app.set('trust proxy', 1);
 // --- Socket.IO Connection Handler (No Change) ---
 io.on('connection', (socket) => {
   console.log('A user connected via Socket.IO:', socket.id);

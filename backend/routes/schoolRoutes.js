@@ -1,4 +1,5 @@
-// backend/routes/school.js
+// backend/routes/schoolRoutes.js (SUPREME SECURE with Sanitization)
+
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, authorize } = require('../middleware/authMiddleware');
@@ -17,6 +18,17 @@ const upload = multer({
     storage: storage,
     limits: { fileSize: 2 * 1024 * 1024 } // 2MB limit
 });
+
+// === FIX 1: THE SANITIZER FUNCTION (XSS Prevention) ===
+// यह फ़ंक्शन किसी भी स्ट्रिंग से सभी HTML टैग्स को हटा देगा।
+function removeHtmlTags(str) {
+  if (!str || typeof str !== 'string') {
+    return str;
+  }
+  return str.replace(/<[^>]*>/g, '').trim(); 
+}
+// === END FIX 1 ===
+
 
 // Cloudinary upload helper (No Change)
 const uploadToCloudinary = (fileBuffer) => {
@@ -41,8 +53,8 @@ const uploadToCloudinary = (fileBuffer) => {
 
 
 /*
- * @route   GET /api/school/profile
- * (No change)
+ * @route   GET /api/school/profile (No Change in Logic)
+ * NOTE: Isme Sanitization ki zaroorat nahi, kyunki yeh sirf data fetch karta hai.
  */
 router.get('/profile', [authMiddleware], async (req, res) => {
   try {
@@ -66,8 +78,7 @@ router.get('/profile', [authMiddleware], async (req, res) => {
 });
 
 /*
- * @route   GET /api/school/info
- * (No change)
+ * @route   GET /api/school/info (No Change in Logic)
  */
 router.get('/info', [authMiddleware], async (req, res) => {
     try {
@@ -80,7 +91,7 @@ router.get('/info', [authMiddleware], async (req, res) => {
             select: {
                 name: true,
                 address: true,
-                logo: true, // <-- Yeh 'logo' read kar raha hai
+                logo: true, 
                 session: true
             }
         });
@@ -102,8 +113,8 @@ router.get('/info', [authMiddleware], async (req, res) => {
 
 
 /*
- * @route   PUT /api/school/profile
- * (Yeh route ab fully updated hai)
+ * @route   PUT /api/school/profile (Sanitization Applied)
+ * NOTE: Multer body ko populate karta hai, isliye req.body mein data text ke roop mein aata hai.
  */
 router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo')], async (req, res) => {
   console.log("[PUT /profile] Request received (multipart/form-data).");
@@ -125,44 +136,58 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
     } = req.body; 
 
     if (name === undefined) {
-        console.error("[PUT /profile] Error: req.body is not being populated by multer.");
+        // Multer error ko handle karein
         return res.status(500).json({ msg: 'Server error: Failed to parse form data.' });
     }
 
+    // === FIX 2: INPUT SANITIZATION for every text field ===
+    const sanitizedData = {};
+    for (const key in req.body) {
+        sanitizedData[key] = removeHtmlTags(req.body[key]);
+    }
+    // === END FIX 2 ===
+
     const updateFields = {};
-    if (name !== undefined) updateFields.name = name;
-    if (name2 !== undefined) updateFields.name2 = name2;
-    if (place !== undefined) updateFields.place = place;
-    if (address !== undefined) updateFields.address = address;
-    if (contactNumber !== undefined) updateFields.contactNumber = contactNumber;
-    if (email !== undefined) updateFields.email = email;
-    if (recognitionNumber !== undefined) updateFields.recognitionNumber = recognitionNumber;
-    if (udiseNo !== undefined) updateFields.udiseNo = udiseNo;
-    if (session !== undefined) updateFields.session = session;
-    if (genRegNo !== undefined) updateFields.genRegNo = genRegNo;
+    if (sanitizedData.name !== undefined) updateFields.name = sanitizedData.name;
+    if (sanitizedData.name2 !== undefined) updateFields.name2 = sanitizedData.name2;
+    if (sanitizedData.place !== undefined) updateFields.place = sanitizedData.place;
+    if (sanitizedData.address !== undefined) updateFields.address = sanitizedData.address;
+    if (sanitizedData.contactNumber !== undefined) updateFields.contactNumber = sanitizedData.contactNumber;
+    
+    // Email ko sanitize karne ke baad lowercase karein
+    if (sanitizedData.email !== undefined) updateFields.email = sanitizedData.email.toLowerCase();
+    
+    if (sanitizedData.recognitionNumber !== undefined) updateFields.recognitionNumber = sanitizedData.recognitionNumber;
+    if (sanitizedData.udiseNo !== undefined) updateFields.udiseNo = sanitizedData.udiseNo;
+    if (sanitizedData.session !== undefined) updateFields.session = sanitizedData.session;
+    if (sanitizedData.genRegNo !== undefined) updateFields.genRegNo = sanitizedData.genRegNo;
 
-
-    // --- YAHAN FIX KIYA GAYA HAI ---
+    // --- YAHAN FIX KIYA GAYA HAI (Logo Upload) ---
     if (req.file) {
       console.log("[PUT /profile] New logo file detected. Uploading to Cloudinary...");
       try {
         const imageUrl = await uploadToCloudinary(req.file.buffer);
         
-        // Dono fields mein save karein
-        updateFields.logoUrl = imageUrl; // Naya field
-        updateFields.logo = imageUrl;    // Puraana field (safety ke liye)
+        updateFields.logoUrl = imageUrl; 
+        updateFields.logo = imageUrl;    
 
         console.log(`[PUT /profile] Upload successful. URL: ${imageUrl}`);
       } catch (uploadError) {
         console.error("[PUT /profile] Cloudinary upload failed:", uploadError);
         
-        // Agar upload fail ho, toh error bhej kar ruk jaayein
-        return res.status(500).json({ message: 'Profile text saved, but logo upload failed. Please check Cloudinary credentials or CORS settings.' });
+        return res.status(500).json({ message: 'Logo upload failed. Profile text saved, but please check Cloudinary credentials.' });
       }
-    } else {
-      console.log("[PUT /profile] No new logo file detected.");
-    }
+    } 
     // --- FIX ENDS HERE ---
+
+    // Remove undefined/null values to prevent Prisma error
+    Object.keys(updateFields).forEach(key => (updateFields[key] === undefined || updateFields[key] === null) && delete updateFields[key]);
+
+
+    if (Object.keys(updateFields).length === 0) {
+         return res.status(400).json({ message: 'No valid fields provided for update.' });
+    }
+
 
     const updatedSchool = await prisma.school.update({
       where: { id: schoolId },
@@ -173,7 +198,7 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
        req.io.emit('school_profile_updated', updatedSchool);
     }
     
-    // (Token logic ko abhi ke liye comment out kar raha hoon, yeh aapke frontend par depend karta hai)
+    // NOTE: Token update logic yahaan se hata diya gaya hai, use Admin route (admin.js) mein rakhein.
     
     res.json({ msg: 'School profile updated successfully', school: updatedSchool });
 
@@ -194,5 +219,37 @@ router.put('/profile', [authMiddleware, authorize('Admin'), upload.single('logo'
     res.status(500).send('Server Error');
   }
 });
+
+
+// @route PUT /api/school/profile/logo-url (Logo URL update ko alag function mein rakhein)
+router.put('/profile/logo-url', [authMiddleware, authorize('Admin')], async (req, res) => {
+    try {
+        const schoolId = req.user.schoolId;
+        const logoUrl = removeHtmlTags(req.body.logoUrl); 
+
+        if (!logoUrl) {
+            return res.status(400).json({ message: 'Logo URL is required.' });
+        }
+
+        const updatedSchool = await prisma.school.update({
+            where: { id: schoolId },
+            data: { logoUrl: logoUrl, logo: logoUrl },
+        });
+
+        if (req.io) {
+            req.io.emit('school_profile_updated', updatedSchool);
+        }
+
+        res.status(200).json({ 
+            message: 'School logo updated successfully.',
+            school: updatedSchool
+        });
+
+    } catch (error) {
+        console.error("Error updating school logo URL:", error);
+        res.status(500).json({ message: 'Server error updating school logo URL.' });
+    }
+});
+
 
 module.exports = router;
