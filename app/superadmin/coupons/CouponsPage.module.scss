@@ -1,94 +1,11 @@
-/* File: app/superadmin/coupons/CouponsPage.module.scss */
+/* app/superadmin/coupons/CouponsPage.module.scss */
 
 .couponsPage {
-  padding: 2rem;
-  font-family: Arial, sans-serif;
-  
-  h1 {
-    border-bottom: 2px solid #eee;
-    padding-bottom: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  h3 {
-    margin-bottom: 1rem;
-  }
+  padding: 1.5rem 2rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
 }
 
-.formContainer {
-  background: #f9f9f9;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.couponForm {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.formGroup {
-  display: flex;
-  flex-direction: column;
-  
-  label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 5px;
-  }
-  
-  input, select {
-    padding: 0.7rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-  }
-}
-
-.submitButton {
-  padding: 0.7rem;
-  border: none;
-  border-radius: 5px;
-  background-color: #007bff;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 1rem;
-  align-self: flex-end; // Button ko form inputs ke saath align rakhega
-}
-
-.error {
-  color: red;
-  margin-top: 1rem;
-}
-
-/* Table Styles */
-.tableContainer {
-  width: 100%;
-  overflow-x: auto; // Mobile par scroll hoga
-}
-
-.couponsTable {
-  width: 100%;
-  border-collapse: collapse;
-  
-  th, td {
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-    text-align: left;
-    font-size: 0.95rem;
-  }
-  
-  th {
-    background-color: #f4f4f4;
-  }
-  
-  tbody tr:nth-of-type(even) {
-    background-color: #f9f9f9;
-  }
-}
 .header {
   display: flex;
   justify-content: space-between;
@@ -100,6 +17,7 @@
   h1 {
     margin: 0;
     font-size: 1.8rem;
+    color: #343a40;
   }
 }
 
@@ -110,12 +28,12 @@
   padding: 0.6rem 1rem;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #343a40;
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
   border-radius: 6px;
   text-decoration: none;
-  transition: background-color 0.2s, color 0.2s;
+  transition: all 0.2s ease;
+  border: 1px solid #dee2e6;
+  color: #343a40;
+  background-color: #f8f9fa;
 
   &:hover {
     background-color: #e9ecef;
@@ -123,10 +41,151 @@
   }
 }
 
-/* Error message ke liye style (jo 'Failed to fetch' dikha raha hai) */
+/* === FORM CONTAINER STYLE HATA DIYA GAYA === */
+/* .formContainer { ... } (Yeh poora delete kar dein) */
+/* .couponForm { ... } (Yeh poora delete kar dein) */
+/* .formGroup { ... } (Yeh poora delete kar dein) */
+/* .submitButton { ... } (Yeh poora delete kar dein) */
+
+/* === NAYI STYLING === */
+.tableContainer {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  h3 {
+    font-size: 1.25rem;
+    color: #495057;
+    margin: 0;
+  }
+}
+
+.createButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1px solid #007bff;
+  color: #fff;
+  background-color: #007bff;
+  cursor: pointer;
+
+  svg {
+    font-size: 1.2rem;
+  }
+
+  &:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+  }
+}
+
 .error {
   color: #dc3545;
   font-weight: 500;
   font-size: 0.9rem;
   margin-top: 1rem;
+  padding: 0.5rem;
+  background-color: #f8d7da;
+  border: 1px solid #f5c2c7;
+  border-radius: 4px;
+}
+
+.couponsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+
+  thead tr {
+    border-bottom: 2px solid #dee2e6;
+  }
+  
+  th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    color: #6c757d;
+    font-weight: 600;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #e9ecef;
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  td {
+    padding: 1rem;
+    color: #343a40;
+    vertical-align: middle;
+    font-size: 0.9rem;
+  }
+}
+
+.statusActive {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.statusInactive {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid #ced4da;
+  background-color: #fff;
+  color: #495057;
+  transition: all 0.2s ease;
+
+  svg {
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    background-color: #e9ecef;
+  }
+}
+
+.deleteButton {
+  color: #dc3545;
+  border-color: #f1b0b7;
+
+  &:hover {
+    background-color: #dc3545;
+    color: #fff;
+  }
 }

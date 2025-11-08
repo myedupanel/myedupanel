@@ -3,13 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/backend/utils/api'; 
 import styles from './CouponsPage.module.scss'; 
-// === YEH IMPORTS ADD KAREIN ===
 import Link from 'next/link';
-import { MdGridView } from 'react-icons/md';
-// =============================
+// === NAYE ICONS IMPORT KAREIN ===
+import { MdGridView, MdAdd, MdEdit, MdDelete } from 'react-icons/md';
+// === NAYE COMPONENTS IMPORT KAREIN ===
+import Modal from '@/components/common/Modal/Modal';
+import CouponForm from './CouponForm';
 
 // Coupon ki type (Prisma se match karti hui)
-interface Coupon {
+// === 'export' ADD KIYA TAAKI FORM USE KAR SAKE ===
+export interface Coupon {
   id: number;
   code: string;
   discountType: 'PERCENTAGE' | 'FIXED_AMOUNT';
@@ -18,30 +21,38 @@ interface Coupon {
   timesUsed: number;
   maxUses: number | null;
   expiryDate: string | null;
-  createdAt: string;
+  createdAt: string; // Yeh ab schema fix ke baad kaam karega
 }
+
+// === NAYA HELPER FUNCTION DATE FORMAT KE LIYE ===
+const formatDate = (dateString: string | null | undefined) => {
+  if (!dateString) return 'Never';
+  try {
+    // Yahaan 'en-GB' (DD/MM/YYYY) format use kar rahe hain, aap 'en-IN' bhi kar sakte hain
+    return new Date(dateString).toLocaleDateString('en-GB');
+  } catch (e) {
+    return 'Invalid Date';
+  }
+};
 
 const CouponsPage = () => {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Form state
-  const [code, setCode] = useState('');
-  const [discountType, setDiscountType] = useState<'PERCENTAGE' | 'FIXED_AMOUNT'>('PERCENTAGE');
-  const [discountValue, setDiscountValue] = useState(10); // Default 10%
-  const [expiryDate, setExpiryDate] = useState('');
-  const [maxUses, setMaxUses] = useState('');
+  // === NAYE MODAL STATES ===
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [couponToEdit, setCouponToEdit] = useState<Coupon | null>(null);
 
   // Page load par saare coupons fetch karein
   const fetchCoupons = async () => {
     try {
       setIsLoading(true);
-      setError(''); // Purana error clear karein
+      setError(''); 
       const { data } = await api.get('/coupons');
       setCoupons(data);
     } catch (err) {
-      setError('Failed to fetch coupons.'); // YEH AAPKE ERROR MESSAGE SE MATCH HOTA HAI
+      setError('Failed to fetch coupons.');
     } finally {
       setIsLoading(false);
     }
@@ -51,102 +62,51 @@ const CouponsPage = () => {
     fetchCoupons();
   }, []);
 
-  // Form submit par naya coupon banayein
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    
-    try {
-      await api.post('/coupons', {
-        code: code.toUpperCase(),
-        discountType,
-        discountValue: Number(discountValue),
-        expiryDate: expiryDate || null, // Khaali string ko null bhejein
-        maxUses: maxUses ? Number(maxUses) : null,
-      });
-      
-      // Form reset karein aur list refresh karein
-      setCode('');
-      setDiscountValue(10);
-      setExpiryDate('');
-      setMaxUses('');
-      fetchCoupons(); // List ko refresh karein
-      
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create coupon.');
+  // === NAYA DELETE HANDLER ===
+  const handleDelete = async (couponId: number, couponCode: string) => {
+    if (window.confirm(`Are you sure you want to delete coupon "${couponCode}"?`)) {
+      try {
+        setError('');
+        await api.delete(`/coupons/${couponId}`);
+        fetchCoupons(); // List refresh karein
+      } catch (err: any) {
+        console.error("Failed to delete coupon:", err);
+        setError(err.response?.data?.message || 'Failed to delete coupon.');
+      }
     }
+  };
+
+  // Jab form save ho (Create ya Edit), modal band karo aur list refresh karo
+  const handleSaveSuccess = () => {
+    fetchCoupons();
+    setIsCreateModalOpen(false);
+    setCouponToEdit(null);
   };
 
   return (
     <div className={styles.couponsPage}>
-      {/* === HEADER KO UPDATE KIYA GAYA HAI === */}
       <header className={styles.header}>
         <h1>Manage Coupons (SuperAdmin)</h1>
-        <Link href="/admin/dashboard" className={styles.dashboardLinkButton}>
+        {/* === GO TO DASHBOARD LINK BADLA GAYA === */}
+        <Link href="/superadmin/dashboard" className={styles.dashboardLinkButton}>
           <MdGridView />
           <span>Go to Dashboard</span>
         </Link>
       </header>
-      {/* =================================== */}
 
-      {/* 1. Naya Coupon Banane ka Form */}
-      <div className={styles.formContainer}>
-        <h3>Create New Coupon</h3>
-        <form onSubmit={handleSubmit} className={styles.couponForm}>
-          {/* ...baaki form groups jaise the waise hi... */}
-          <div className={styles.formGroup}>
-            <label>Coupon Code</label>
-            <input 
-              type="text" 
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="e.g., WELCOME50"
-              required 
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Discount Type</label>
-            <select value={discountType} onChange={(e) => setDiscountType(e.target.value as any)}>
-              <option value="PERCENTAGE">Percentage (%)</option>
-              <option value="FIXED_AMOUNT">Fixed Amount (₹)</option>
-            </select>
-          </div>
-          <div className={styles.formGroup}>
-            <label>Discount Value</label>
-            <input 
-              type="number" 
-              value={discountValue}
-              onChange={(e) => setDiscountValue(Number(e.target.value))}
-              placeholder="e.g., 50"
-              required 
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Expiry Date (Optional)</label>
-            <input 
-              type="date"
-              value={expiryDate}
-              onChange={(e) => setExpiryDate(e.target.value)} 
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Max Uses (Optional)</label>
-            <input 
-              type="number" 
-              value={maxUses}
-              onChange={(e) => setMaxUses(e.target.value)}
-              placeholder="e.g., 100 (Blank = unlimited)" 
-            />
-          </div>
-          <button type="submit" className={styles.submitButton}>Create Coupon</button>
-        </form>
-        {/* Error message ab form ke neeche dikhega (frontend aur backend donon ke liye) */}
-        {error && <p className={styles.error}>{error}</p>}
-      </div>
-
-      {/* 2. Puraane Coupons ki Table */}
+      {/* 1. Naya Coupon Banane ka Form HATA KAR BUTTON ADD KIYA GAYA */}
       <div className={styles.tableContainer}>
-        <h3>Existing Coupons</h3>
+        <div className={styles.tableHeader}>
+          <h3>Existing Coupons</h3>
+          <button onClick={() => setIsCreateModalOpen(true)} className={styles.createButton}>
+            <MdAdd />
+            Create New Coupon
+          </button>
+        </div>
+        
+        {/* Error message ab table ke upar dikhega */}
+        {error && <p className={styles.error}>{error}</p>}
+
         {isLoading ? <p>Loading coupons...</p> : (
           <table className={styles.couponsTable}>
             <thead>
@@ -158,6 +118,8 @@ const CouponsPage = () => {
                 <th>Used / Max</th>
                 <th>Expires On</th>
                 <th>Created On</th>
+                {/* === NAYA "ACTIONS" COLUMN === */}
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -166,16 +128,56 @@ const CouponsPage = () => {
                   <td>{coupon.code}</td>
                   <td>{coupon.discountType}</td>
                   <td>{coupon.discountType === 'PERCENTAGE' ? `${coupon.discountValue}%` : `₹${coupon.discountValue}`}</td>
-                  <td>{coupon.isActive ? 'Active' : 'Inactive'}</td>
+                  <td>
+                    {/* === NAYI STATUS STYLING === */}
+                    <span className={coupon.isActive ? styles.statusActive : styles.statusInactive}>
+                      {coupon.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
                   <td>{coupon.timesUsed} / {coupon.maxUses || '∞'}</td>
-                  <td>{coupon.expiryDate ? new Date(coupon.expiryDate).toLocaleDateString() : 'Never'}</td>
-                  <td>{new Date(coupon.createdAt).toLocaleDateString()}</td>
+                  {/* === DATE FORMATTING FIX === */}
+                  <td>{formatDate(coupon.expiryDate)}</td>
+                  <td>{formatDate(coupon.createdAt)}</td>
+                  {/* === NAYE "ACTIONS" BUTTONS === */}
+                  <td className={styles.actions}>
+                    <button onClick={() => setCouponToEdit(coupon)} className={styles.actionButton}>
+                      <MdEdit />
+                    </button>
+                    <button onClick={() => handleDelete(coupon.id, coupon.code)} className={`${styles.actionButton} ${styles.deleteButton}`}>
+                      <MdDelete />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
       </div>
+
+      {/* === NAYE MODALS (POPUPS) === */}
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        title="Create New Coupon"
+      >
+        <CouponForm 
+          onSave={handleSaveSuccess} 
+          onClose={() => setIsCreateModalOpen(false)} 
+        />
+      </Modal>
+
+      <Modal
+        isOpen={!!couponToEdit}
+        onClose={() => setCouponToEdit(null)}
+        title={`Edit Coupon: ${couponToEdit?.code}`}
+      >
+        <CouponForm 
+          initialData={couponToEdit} 
+          onSave={handleSaveSuccess} 
+          onClose={() => setCouponToEdit(null)} 
+        />
+      </Modal>
+      {/* ========================= */}
     </div>
   );
 };
