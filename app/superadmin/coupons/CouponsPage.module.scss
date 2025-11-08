@@ -1,215 +1,76 @@
-/* app/superadmin/coupons/CouponsPage.module.scss */
+/* File: app/superadmin/coupons/CouponsPage.module.scss (PREMIUM UPDATE) */
 
+/* === Main Page Layout === */
 .couponsPage {
-  padding: 1.5rem 2rem;
-  background-color: #f8f9fa;
+  padding: 2rem;
+  background-color: #f8f9fa; /* Halka grey background */
   min-height: 100vh;
 }
 
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #dee2e6;
-
   h1 {
     margin: 0;
-    font-size: 1.8rem;
-    color: #343a40;
+    font-size: 2.2rem;
+    color: #212529;
+    font-weight: 700;
   }
 }
 
-.dashboardLinkButton {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1rem;
-  font-size: 0.95rem;
-  font-weight: 500;
-  border-radius: 6px;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  border: 1px solid #dee2e6;
-  color: #343a40;
-  background-color: #f8f9fa;
-
-  &:hover {
-    background-color: #e9ecef;
-    color: #000;
-  }
-}
-
-/* === FORM CONTAINER STYLE HATA DIYA GAYA === */
-/* .formContainer { ... } (Yeh poora delete kar dein) */
-/* .couponForm { ... } (Yeh poora delete kar dein) */
-/* .formGroup { ... } (Yeh poora delete kar dein) */
-/* .submitButton { ... } (Yeh poora delete kar dein) */
-
-/* === NAYI STYLING === */
-.tableContainer {
+/* === Naya "Card" Wrapper === */
+.pageSection {
   background-color: #ffffff;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
 }
 
-.tableHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-
+.sectionHeader {
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
   h3 {
-    font-size: 1.25rem;
-    color: #495057;
+    font-size: 1.4rem;
+    color: #343a40;
     margin: 0;
-  }
-}
-
-.createButton {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1rem;
-  font-size: 0.95rem;
-  font-weight: 500;
-  border-radius: 6px;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  border: 1px solid #007bff;
-  color: #fff;
-  background-color: #007bff;
-  cursor: pointer;
-
-  svg {
-    font-size: 1.2rem;
-  }
-
-  &:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
-  }
-}
-
-.error {
-  color: #dc3545;
-  font-weight: 500;
-  font-size: 0.9rem;
-  margin-top: 1rem;
-  padding: 0.5rem;
-  background-color: #f8d7da;
-  border: 1px solid #f5c2c7;
-  border-radius: 4px;
-}
-
-.couponsTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.95rem;
-
-  thead tr {
-    border-bottom: 2px solid #dee2e6;
-  }
-  
-  th {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    color: #6c757d;
-    font-weight: 600;
-  }
-
-  tbody tr {
-    border-bottom: 1px solid #e9ecef;
-    &:last-child {
-      border-bottom: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    
+    svg {
+      color: #007bff; // Primary icon color
     }
   }
-
-  td {
-    padding: 1rem;
-    color: #343a40;
-    vertical-align: middle;
-    font-size: 0.9rem;
-  }
 }
 
-.statusActive {
-  background-color: #d4edda;
-  color: #155724;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-weight: 500;
-  font-size: 0.85rem;
-}
-
-.statusInactive {
-  background-color: #f8d7da;
-  color: #721c24;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-weight: 500;
-  font-size: 0.85rem;
-}
-
-.actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.actionButton {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.35rem 0.5rem;
-  font-size: 0.9rem;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid #ced4da;
-  background-color: #fff;
-  color: #495057;
-  transition: all 0.2s ease;
-
-  svg {
-    font-size: 1.1rem;
-  }
-
-  &:hover {
-    background-color: #e9ecef;
-  }
-}
-
-.deleteButton {
-  color: #dc3545;
-  border-color: #f1b0b7;
-
-  &:hover {
-    background-color: #dc3545;
-    color: #fff;
-  }
-}
+/* === Sync Section (Block 1) === */
 .syncContainer {
-  background: #fdf8e6; // Halka peela background
-  border: 1px solid #f0e0b0;
+  background: #fffbe6; // Halka peela
+  border: 1px solid #ffe58f;
+  
+  .sectionHeader h3 svg {
+    color: #f97316; // Orange icon
+  }
   
   p {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     font-size: 0.95rem;
-    line-height: 1.5;
+    line-height: 1.6;
+    color: #555;
   }
 }
 
 .syncButton {
-  padding: 0.8rem 1.2rem;
+  padding: 0.75rem 1.25rem;
   border: none;
-  border-radius: 5px;
-  background-color: #f97316; // Orange color
+  border-radius: 6px;
+  background-color: #f97316; // Orange
   color: white;
   font-weight: 600;
   cursor: pointer;
   font-size: 1rem;
-  display: inline-flex; // Icon aur text ko align karega
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease;
@@ -227,5 +88,125 @@
 .syncMessage {
   margin-top: 1rem;
   font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* === Form Section (Block 2) === */
+.couponForm {
+  display: grid;
+  /* Responsive grid: 200px se kam nahi, 1fr (equal space) tak expand */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  
+  label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+  }
+  
+  input, select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
+    }
+  }
+}
+
+.submitButton {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #007bff; // Blue
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
   font-size: 1rem;
+  align-self: flex-end; // Button ko neeche align karega
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+}
+
+.error {
+  color: #dc3545;
+  font-weight: 500;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #f8d7da;
+  border: 1px solid #f5c2c7;
+  border-radius: 6px;
+}
+
+
+/* === Table Section (Block 3) === */
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto; /* Mobile par table ko scrollable banayega */
+}
+
+.couponsTable {
+  width: 100%;
+  border-collapse: collapse;
+  
+  thead tr {
+    border-bottom: 2px solid #dee2e6;
+  }
+  
+  th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #e9ecef;
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  td {
+    padding: 1rem;
+    color: #343a40;
+    vertical-align: middle;
+    font-size: 0.95rem;
+  }
+}
+
+.statusActive {
+  display: inline-block;
+  background-color: #d1e7dd;
+  color: #0f5132;
+  padding: 0.25rem 0.6rem;
+  border-radius: 50px; // Pill shape
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.statusInactive {
+  display: inline-block;
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 0.25rem 0.6rem;
+  border-radius: 50px; // Pill shape
+  font-weight: 600;
+  font-size: 0.85rem;
 }

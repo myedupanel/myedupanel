@@ -5,10 +5,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/backend/utils/api'; // !! Path check karein
 import styles from './CouponsPage.module.scss'; 
-import { FiRefreshCw } from 'react-icons/fi'; // Naya icon
+import { FiRefreshCw, FiPlus } from 'react-icons/fi'; // FiPlus icon add kiya
 
-// === YAHI HAI FIX ===
-// Interface ko 'export' karein taaki 'CouponForm.tsx' ise import kar sake
+// Interface (Bina Badlaav)
 export interface Coupon {
   id: number;
   code: string;
@@ -20,25 +19,24 @@ export interface Coupon {
   expiryDate: string | null;
   createdAt: string;
 }
-// === END FIX ===
 
 const CouponsPage = () => {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Form state
+  // Form state (Bina Badlaav)
   const [code, setCode] = useState('');
   const [discountType, setDiscountType] = useState<'PERCENTAGE' | 'FIXED_AMOUNT'>('PERCENTAGE');
   const [discountValue, setDiscountValue] = useState(10);
   const [expiryDate, setExpiryDate] = useState('');
   const [maxUses, setMaxUses] = useState('');
 
-  // Sync state
+  // Sync state (Bina Badlaav)
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
 
-  // Page load par saare coupons fetch karein
+  // fetchCoupons (Bina Badlaav)
   const fetchCoupons = async () => {
     try {
       setIsLoading(true);
@@ -55,7 +53,7 @@ const CouponsPage = () => {
     fetchCoupons();
   }, []);
 
-  // Form submit par naya coupon banayein
+  // handleSubmit (Bina Badlaav)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -77,7 +75,7 @@ const CouponsPage = () => {
     }
   };
 
-  // Sync function
+  // handleSyncPayments (Bina Badlaav)
   const handleSyncPayments = async () => {
     if (isSyncing) return;
     setIsSyncing(true);
@@ -95,13 +93,17 @@ const CouponsPage = () => {
 
   return (
     <div className={styles.couponsPage}>
-      <header>
+      <header className={styles.header}>
         <h1>Manage Coupons (SuperAdmin)</h1>
       </header>
 
-      {/* Sync Section */}
-      <div className={`${styles.formContainer} ${styles.syncContainer}`}>
-        <h3>Payment Reconciliation</h3>
+      {/* === NAYA STRUCTURE SHURU === */}
+
+      {/* Block 1: Sync Section */}
+      <div className={`${styles.pageSection} ${styles.syncContainer}`}>
+        <div className={styles.sectionHeader}>
+          <h3><FiRefreshCw /> Payment Reconciliation</h3>
+        </div>
         <p>
           Agar kisi user ne payment ki hai lekin uska plan 'TRIAL' hi dikha raha hai, 
           yeh button dabane se system Razorpay se data check karke sabhi phanse hue 
@@ -112,28 +114,25 @@ const CouponsPage = () => {
           disabled={isSyncing} 
           className={styles.syncButton}
         >
-          {isSyncing ? 'Syncing...' : (
-            <>
-              <FiRefreshCw style={{ marginRight: '8px' }} />
-              Sync Razorpay Payments
-            </>
-          )}
+          {isSyncing ? 'Syncing...' : 'Sync Razorpay Payments'}
         </button>
         {syncMessage && (
           <p className={styles.syncMessage}>{syncMessage}</p>
         )}
       </div>
 
-      {/* 1. Naya Coupon Banane ka Form */}
-      <div className={styles.formContainer}>
-        <h3>Create New Coupon</h3>
+      {/* Block 2: Create Form Section */}
+      <div className={styles.pageSection}>
+        <div className={styles.sectionHeader}>
+          <h3><FiPlus /> Create New Coupon</h3>
+        </div>
         <form onSubmit={handleSubmit} className={styles.couponForm}>
           <div className={styles.formGroup}>
             <label>Coupon Code</label>
             <input
               type="text"
               value={code}
-              onChange={(e) => setCode(e.target.value)}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="e.g., WELCOME50"
               required
             />
@@ -172,43 +171,57 @@ const CouponsPage = () => {
               placeholder="e.g., 100 (Blank = unlimited)"
             />
           </div>
-          <button type="submit" className={styles.submitButton}>Create Coupon</button>
+          {/* Submit Button ko grid mein alag se rakha hai */}
+          <div className={styles.formGroup}>
+            <label>&nbsp;</label> {/* Khaali label spacing ke liye */}
+            <button type="submit" className={styles.submitButton}>Create Coupon</button>
+          </div>
         </form>
         {error && <p className={styles.error}>{error}</p>}
       </div>
 
-      {/* 2. Puraane Coupons ki Table */}
-      <div className={styles.tableContainer}>
-        <h3>Existing Coupons</h3>
+      {/* Block 3: Table Section */}
+      <div className={styles.pageSection}>
+        <div className={styles.sectionHeader}>
+          <h3>Existing Coupons</h3>
+        </div>
         {isLoading ? <p>Loading coupons...</p> : (
-          <table className={styles.couponsTable}>
-            <thead>
-              <tr>
-                <th>Code</th>
-                <th>Type</th>
-                <th>Value</th>
-                <th>Status</th>
-                <th>Used / Max</th>
-                <th>Expires On</th>
-                <th>Created On</th>
-              </tr>
-            </thead>
-            <tbody>
-              {coupons.map((coupon) => (
-                <tr key={coupon.id}>
-                  <td>{coupon.code}</td>
-                  <td>{coupon.discountType}</td>
-                  <td>{coupon.discountType === 'PERCENTAGE' ? `${coupon.discountValue}%` : `₹${coupon.discountValue}`}</td>
-                  <td>{coupon.isActive ? 'Active' : 'Inactive'}</td>
-                  <td>{coupon.timesUsed} / {coupon.maxUses || '∞'}</td>
-                  <td>{coupon.expiryDate ? new Date(coupon.expiryDate).toLocaleDateString() : 'Never'}</td>
-                  <td>{new Date(coupon.createdAt).toLocaleDateString()}</td>
+          <div className={styles.tableWrapper}> {/* Table ko scrollable banane ke liye wrapper */}
+            <table className={styles.couponsTable}>
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Type</th>
+                  <th>Value</th>
+                  <th>Status</th>
+                  <th>Used / Max</th>
+                  <th>Expires On</th>
+                  <th>Created On</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {coupons.map((coupon) => (
+                  <tr key={coupon.id}>
+                    <td data-label="Code">{coupon.code}</td>
+                    <td data-label="Type">{coupon.discountType}</td>
+                    <td data-label="Value">{coupon.discountType === 'PERCENTAGE' ? `${coupon.discountValue}%` : `₹${coupon.discountValue}`}</td>
+                    <td data-label="Status">
+                      <span className={coupon.isActive ? styles.statusActive : styles.statusInactive}>
+                        {coupon.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td data-label="Used / Max">{coupon.timesUsed} / {coupon.maxUses || '∞'}</td>
+                    <td data-label="Expires On">{coupon.expiryDate ? new Date(coupon.expiryDate).toLocaleDateString() : 'Never'}</td>
+                    <td data-label="Created On">{new Date(coupon.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
+      
+      {/* === END NAYA STRUCTURE === */}
     </div>
   );
 };
