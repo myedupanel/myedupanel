@@ -207,24 +207,24 @@ export default function Home() {
           <div className="pricing-box">
             {/* --- PRICING DETAILS (LEFT SIDE) (No Change) --- */}
             <div className="pricing-details">
-              <h2>Complete School Plan</h2>
-              <p>Get complete access to our comprehensive school management system. One price, all features, unlimited users.</p>
+              <h2>Starter School Plan</h2>
+              <p>Get  access to our comprehensive school management system. One price, all Basic Features, unlimited users.</p>
               <h3>All features, unlimited users:</h3>
               <ul className="features-list">
+                <li><span className="checkmark">✓</span> Admin Dashboard (Basic)</li>
                 <li><span className="checkmark">✓</span> Unlimited Student Management</li>
-                <li><span className="checkmark">✓</span> Unlimited Teacher & Staff Accounts</li>
-                <li><span className="checkmark">✓</span> Complete Admin Dashboard</li>
-                <li><span className="checkmark">✓</span> Fee Management & Online Payment</li>
-                <li><span className="checkmark">✓</span> Student Attendance Tracking</li>
-                <li><span className="checkmark">✓</span> Timetable Management</li>
-                <li><span className="checkmark">✓</span> Parent & Student Login Portals</li>
-                <li><span className="checkmark">✓</span> 24/7 Customer Support</li>
+                <li><span className="checkmark">✓</span> Unlimited Staff Management</li>
+                <li><span className="checkmark">✓</span> Unlimited Teachers Management</li>
+                <li><span className="checkmark">✓</span> Fee Counter</li>
+                <li><span className="checkmark">✓</span> Bonafide Generator</li>
+                <li><span className="checkmark">✓</span> LC Generator</li>
+                <li><span className="checkmark">✓</span> Fee Receipt Generator</li>
               </ul>
             </div>
             
             {/* === PRICING CARD (RIGHT SIDE) UPDATED === */}
             <div className="pricing-card">
-              <h4>Include All Features</h4>
+              <h4>Include All Basic Features</h4>
               
               {/* 1. Price layout fixed with inline styles */}
               <div 
