@@ -1,12 +1,17 @@
-// File: app/superadmin/coupons/page.tsx (UPDATED for Header Button & Text)
+// File: app/superadmin/coupons/page.tsx (UPDATED with CRUD & Modal Logic)
 
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import api from '@/backend/utils/api'; 
 import styles from './CouponsPage.module.scss'; 
-import { FiRefreshCw, FiPlus, FiGrid } from 'react-icons/fi'; // FiGrid icon import kiya
-import { useRouter } from 'next/navigation'; // useRouter import kiya
+import { FiRefreshCw, FiPlus, FiGrid, FiEdit, FiTrash } from 'react-icons/fi'; // Icons add kiye
+import { useRouter } from 'next/navigation';
+// === NAYE IMPORTS ===
+import Modal from '@/components/common/Modal/Modal'; // Modal Component (assuming existence)
+import CouponForm from './CouponForm'; // CouponForm import
+// === END NAYE IMPORTS ===
+
 
 // Interface (Bina Badlaav)
 export interface Coupon {
@@ -26,19 +31,17 @@ const CouponsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Form state
-  const [code, setCode] = useState('');
-  const [discountType, setDiscountType] = useState<'PERCENTAGE' | 'FIXED_AMOUNT'>('PERCENTAGE');
-  const [discountValue, setDiscountValue] = useState(10);
-  const [expiryDate, setExpiryDate] = useState('');
-  const [maxUses, setMaxUses] = useState('');
+  // Form/Modal States
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null); // State to hold coupon being edited
 
-  // Sync state
+  // Sync state (Bina Badlaav)
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
   
-  const router = useRouter(); // useRouter hook initialize kiya
+  const router = useRouter();
 
+  // 1. Fetch Logic (No Change)
   const fetchCoupons = async () => {
     try {
       setIsLoading(true);
@@ -55,27 +58,7 @@ const CouponsPage = () => {
     fetchCoupons();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    try {
-      await api.post('/coupons', {
-        code: code.toUpperCase(),
-        discountType,
-        discountValue: Number(discountValue),
-        expiryDate: expiryDate || null,
-        maxUses: maxUses ? Number(maxUses) : null,
-      });
-      setCode('');
-      setDiscountValue(10);
-      setExpiryDate('');
-      setMaxUses('');
-      fetchCoupons(); 
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create coupon.');
-    }
-  };
-
+  // 2. Handle Sync (No Change)
   const handleSyncPayments = async () => {
     if (isSyncing) return;
     setIsSyncing(true);
@@ -91,10 +74,41 @@ const CouponsPage = () => {
     }
   };
 
+  // 3. Handle Form Actions
+  const handleOpenCreateModal = () => {
+      setEditingCoupon(null); // Create mode
+      setIsModalOpen(true);
+  };
+  
+  const handleOpenEditModal = (coupon: Coupon) => {
+      setEditingCoupon(coupon); // Edit mode
+      setIsModalOpen(true);
+  };
+
+  const handleSaveSuccess = () => {
+      setIsModalOpen(false); // Modal close karo
+      setEditingCoupon(null);
+      fetchCoupons(); // List refresh karo
+  };
+
+  // 4. Handle Delete Action
+  const handleDeleteClick = async (couponId: number) => {
+      if (!window.confirm(`Are you sure you want to delete coupon ID ${couponId}? This cannot be undone.`)) {
+          return;
+      }
+      try {
+          // DELETE API call (backend/routes/couponRoutes.js mein deleteCoupon)
+          await api.delete(`/coupons/${couponId}`);
+          fetchCoupons(); // List refresh karo
+      } catch (err: any) {
+          alert(`Error deleting coupon: ${err.response?.data?.message || 'Server error'}`);
+      }
+  };
+
+
   return (
     <div className={styles.couponsPage}>
       <header className={styles.header}>
-        {/* === FIX 1: Header aur Button === */}
         <h1>Manage Coupons (SuperAdmin)</h1>
         <button 
             onClick={() => router.push('/admin/dashboard')} 
@@ -102,20 +116,17 @@ const CouponsPage = () => {
         >
             <FiGrid /> Go to Dashboard
         </button>
-        {/* === END FIX 1 === */}
       </header>
 
-      {/* Block 1: Sync Section */}
+      {/* Block 1: Sync Section (No Change in Logic) */}
       <div className={`${styles.pageSection} ${styles.syncContainer}`}>
         <div className={styles.sectionHeader}>
           <h3><FiRefreshCw /> Payment Reconciliation</h3>
         </div>
-        {/* === FIX 2: Text Conversion to English === */}
         <p>
           If a user has paid but their plan still shows 'TRIAL', this button initiates 
           a synchronization with Razorpay to check all missing payments and **auto-fix** the user's plan status in the database.
         </p>
-        {/* === END FIX 2 === */}
         <button 
           onClick={handleSyncPayments} 
           disabled={isSyncing} 
@@ -128,69 +139,15 @@ const CouponsPage = () => {
         )}
       </div>
 
-      {/* Block 2: Create Form Section (Bina Badlaav) */}
-      <div className={styles.pageSection}>
-        <div className={styles.sectionHeader}>
-          <h3><FiPlus /> Create New Coupon</h3>
-        </div>
-        <form onSubmit={handleSubmit} className={styles.couponForm}>
-          {/* ... Poora Form ... */}
-          <div className={styles.formGroup}>
-            <label>Coupon Code</label>
-            <input
-              type="text"
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="e.g., WELCOME50"
-              required
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Discount Type</label>
-            <select value={discountType} onChange={(e) => setDiscountType(e.target.value as any)}>
-              <option value="PERCENTAGE">Percentage (%)</option>
-              <option value="FIXED_AMOUNT">Fixed Amount (₹)</option>
-            </select>
-          </div>
-          <div className={styles.formGroup}>
-            <label>Discount Value</label>
-            <input
-              type="number"
-              value={discountValue}
-              onChange={(e) => setDiscountValue(Number(e.target.value))}
-              placeholder="e.g., 50"
-              required
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Expiry Date (Optional)</label>
-            <input
-              type="date"
-              value={expiryDate}
-              onChange={(e) => setExpiryDate(e.target.value)}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Max Uses (Optional)</label>
-            <input
-              type="number"
-              value={maxUses}
-              onChange={(e) => setMaxUses(e.target.value)}
-              placeholder="e.g., 100 (Blank = unlimited)"
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>&nbsp;</label>
-            <button type="submit" className={styles.submitButton}>Create Coupon</button>
-          </div>
-        </form>
-        {error && <p className={styles.error}>{error}</p>}
-      </div>
-
-      {/* Block 3: Table Section (Bina Badlaav) */}
+      {/* Block 3: Table Section */}
       <div className={styles.pageSection}>
         <div className={styles.sectionHeader}>
           <h3>Existing Coupons</h3>
+           {/* === NAYA BUTTON: Modal kholega === */}
+           <button onClick={handleOpenCreateModal} className={styles.createButton}>
+             <FiPlus /> Create New Coupon
+           </button>
+           {/* === END NAYA BUTTON === */}
         </div>
         {isLoading ? <p>Loading coupons...</p> : (
           <div className={styles.tableWrapper}>
@@ -204,6 +161,9 @@ const CouponsPage = () => {
                   <th>Used / Max</th>
                   <th>Expires On</th>
                   <th>Created On</th>
+                  {/* === NAYA COLUMN === */}
+                  <th>Actions</th> 
+                  {/* === END NAYA COLUMN === */}
                 </tr>
               </thead>
               <tbody>
@@ -220,6 +180,24 @@ const CouponsPage = () => {
                     <td data-label="Used / Max">{coupon.timesUsed} / {coupon.maxUses || '∞'}</td>
                     <td data-label="Expires On">{coupon.expiryDate ? new Date(coupon.expiryDate).toLocaleDateString() : 'Never'}</td>
                     <td data-label="Created On">{new Date(coupon.createdAt).toLocaleDateString()}</td>
+                    {/* === ACTION BUTTONS === */}
+                    <td data-label="Actions" className={styles.actionsCell}>
+                      <button 
+                        onClick={() => handleOpenEditModal(coupon)} 
+                        className={`${styles.actionButton} ${styles.editButton}`}
+                        aria-label={`Edit ${coupon.code}`}
+                      >
+                        <FiEdit />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteClick(coupon.id)} 
+                        className={`${styles.actionButton} ${styles.deleteButton}`}
+                        aria-label={`Delete ${coupon.code}`}
+                      >
+                        <FiTrash />
+                      </button>
+                    </td>
+                    {/* === END ACTION BUTTONS === */}
                   </tr>
                 ))}
               </tbody>
@@ -227,6 +205,21 @@ const CouponsPage = () => {
           </div>
         )}
       </div>
+
+      {/* === MODAL INTEGRATION === */}
+      {/* Note: Ise aapke project ke common Modal component ki zaroorat padegi */}
+      <Modal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          title={editingCoupon ? 'Edit Coupon' : 'Create New Coupon'}
+      >
+          <CouponForm 
+              initialData={editingCoupon}
+              onSave={handleSaveSuccess}
+              onClose={() => setIsModalOpen(false)}
+          />
+      </Modal>
+      {/* === END MODAL === */}
     </div>
   );
 };

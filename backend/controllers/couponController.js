@@ -1,10 +1,9 @@
-// File: backend/controllers/couponController.js (SUPREME SECURE)
+// File: backend/controllers/couponController.js (FIXED: Coupon Default Active)
 
 const prisma = require('../config/prisma');
 const { Prisma } = require('@prisma/client');
 
 // === FIX 1: THE SANITIZER FUNCTION (XSS Prevention) ===
-// यह फंक्शन किसी भी स्ट्रिंग से सभी HTML टैग्स को हटा देगा।
 function removeHtmlTags(str) {
   if (!str || typeof str !== 'string') {
     return str;
@@ -14,12 +13,11 @@ function removeHtmlTags(str) {
 // === END FIX 1 ===
 
 
-// === 1. Naya Coupon Banane ka Function (Sanitized) ===
+// === 1. Naya Coupon Banane ka Function (FIXED) ===
 exports.createCoupon = async (req, res) => {
   try {
     const { code, discountType, discountValue, expiryDate, maxUses, isActive } = req.body; 
     
-    // === FIX 2: Code को Sanitize करें ===
     const sanitizedCode = removeHtmlTags(code);
 
     // Basic Validation
@@ -40,7 +38,9 @@ exports.createCoupon = async (req, res) => {
         code: sanitizedCode.toUpperCase(),
         discountType: discountType,
         discountValue: parseFloat(discountValue),
-        isActive: isActive || false,
+        // === FIX 2: Default to TRUE अगर frontend से नहीं आता ===
+        isActive: isActive === undefined ? true : isActive, 
+        // === END FIX 2 ===
         timesUsed: 0,
         expiryDate: expiryDate ? new Date(expiryDate) : null,
         maxUses: maxUses ? parseInt(maxUses) : null,
@@ -71,11 +71,11 @@ exports.getAllCoupons = async (req, res) => {
 };
 
 // === 3. NAYA: Coupon Update Function (Sanitized) ===
+// हाँ, इसमें EDIT Logic है।
 exports.updateCoupon = async (req, res) => {
   const { id } = req.params;
   const { code, discountType, discountValue, expiryDate, maxUses, isActive } = req.body;
 
-  // === FIX 3: Code को Sanitize करें ===
   const sanitizedCode = removeHtmlTags(code);
   
   try {
@@ -96,11 +96,13 @@ exports.updateCoupon = async (req, res) => {
     if (error.code === 'P2002') { 
       return res.status(400).json({ message: 'This coupon code already exists.' });
     }
+    // P2025: Not Found error भी हैंडल करता है
     res.status(500).json({ message: "Server error while updating coupon." });
   }
 };
 
 // === 4. NAYA: Coupon Delete Function (No Change in Logic) ===
+// हाँ, इसमें DELETE Logic है।
 exports.deleteCoupon = async (req, res) => {
   const { id } = req.params;
 
@@ -114,6 +116,7 @@ exports.deleteCoupon = async (req, res) => {
      if (error.code === 'P2025') {
       return res.status(404).json({ message: 'Coupon not found.' });
     }
+    // P2003: Foreign key constraint error भी हैंडल करता है
     if (error.code === 'P2003') { 
         return res.status(400).json({ message: 'Cannot delete coupon. It is already used in subscriptions.' });
     }
