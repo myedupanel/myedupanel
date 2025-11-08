@@ -1,15 +1,14 @@
-// File: backend/utils/sendEmail.js (PERMANENT FIX - Base64 Decoding)
+// File: backend/utils/sendEmail.js (FINAL DECODING FIX)
 
 const nodemailer = require('nodemailer');
 const { google } = require('googleapis');
-// FIX 1: Buffer Module को Import करें 
+// Fix 1: Buffer Module को Import करें 
 const { Buffer } = require('buffer'); 
 
 const sendEmail = async (options) => {
   console.log('--- Email (Nodemailer Service Account) bhejne ki koshish... ---');
 
   // Environment variables fetch karein
-  // G_PRIVATE_KEY, G_SERVICE_ACCOUNT_EMAIL, G_USER_TO_IMPERSONATE
   const SERVICE_ACCOUNT_EMAIL = process.env.G_SERVICE_ACCOUNT_EMAIL;
   const RAW_PRIVATE_KEY = process.env.G_PRIVATE_KEY; 
   const USER_EMAIL = process.env.G_USER_TO_IMPERSONATE; 
@@ -21,8 +20,7 @@ const sendEmail = async (options) => {
       throw new Error('Email sending failed: Server configuration incomplete.');
   }
 
-  // FIX 3: Base64 Decoding लॉजिक
-  // यह Raw Base64 स्ट्रिंग को वापस multi-line Private Key Text में बदलता है।
+  // === FIX 3: Base64 Decoding लॉजिक (यही वह लाइन है जिसकी Render को ज़रूरत है) ===
   const decodedPrivateKey = Buffer.from(RAW_PRIVATE_KEY, 'base64').toString('utf8');
   // === END FIX 3 ===
 
