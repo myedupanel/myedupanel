@@ -1,9 +1,8 @@
-// File: backend/controllers/classController.js (SUPREME SECURE)
+// File: backend/controllers/classController.js (CRASH FIX & SECURE)
 
 const prisma = require('../config/prisma');
 
 // === FIX 1: THE SANITIZER FUNCTION (XSS Prevention) ===
-// यह फंक्शन किसी भी स्ट्रिंग से सभी HTML टैग्स को हटा देगा।
 function removeHtmlTags(str) {
   if (!str || typeof str !== 'string') {
     return str;
@@ -18,8 +17,9 @@ const getFullName = (student) => {
   return [student.first_name, student.father_name, student.last_name].filter(Boolean).join(' ');
 }
 
-// GET Classes (No Change)
-exports.getClasses = async (req, res) => {
+// --- 1. GET Classes ---
+// FIX: अब 'const' का उपयोग करके परिभाषित किया गया
+const getClasses = async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
         if (!schoolId) {
@@ -44,12 +44,12 @@ exports.getClasses = async (req, res) => {
     }
 };
 
-// POST Class (UPDATED with Sanitization)
-exports.addClass = async (req, res) => {
+// --- 2. POST Class ---
+// FIX: अब 'const' का उपयोग करके परिभाषित किया गया
+const addClass = async (req, res) => {
     const { name } = req.body;
     const schoolId = req.user.schoolId;
 
-    // === FIX 2: Sanitization ===
     const sanitizedName = removeHtmlTags(name);
 
     if (!sanitizedName || sanitizedName.length === 0) {
@@ -71,15 +71,16 @@ exports.addClass = async (req, res) => {
         res.status(201).json(newClass); 
     } catch (err) {
         console.error("Error in addClass:", err);
-        if (err.code === 'P2002') { // Unique constraint failed
+        if (err.code === 'P2002') { 
             return res.status(400).json({ msg: `Class '${trimmedName}' already exists for this school.` });
         }
         res.status(500).send('Server Error');
     }
 };
 
-// PUT/UPDATE Class (UPDATED with Sanitization)
-exports.updateClass = async (req, res) => {
+// --- 3. PUT/UPDATE Class ---
+// FIX: अब 'const' का उपयोग करके परिभाषित किया गया
+const updateClass = async (req, res) => {
     const { name } = req.body;
     const classIdInt = parseInt(req.params.id);
     const schoolId = req.user.schoolId;
@@ -88,23 +89,20 @@ exports.updateClass = async (req, res) => {
         return res.status(400).json({ msg: 'Invalid Class ID.' });
     }
     
-    // === FIX 3: Sanitization ===
     const sanitizedName = removeHtmlTags(name);
     const trimmedName = sanitizedName;
 
     if (!trimmedName) {
         return res.status(400).json({ msg: 'Class name cannot be empty.' });
     }
-    // === END FIX 3 ===
 
     try {
-        // 1. Check karein ki naya naam pehle se toh nahi hai
         const existingClass = await prisma.classes.findFirst({
             where: {
                 class_name: trimmedName,
                 schoolId: schoolId,
                 NOT: {
-                    classid: classIdInt // Is class ke alawa
+                    classid: classIdInt 
                 }
             }
         });
@@ -113,11 +111,10 @@ exports.updateClass = async (req, res) => {
             return res.status(400).json({ msg: `A class with the name '${trimmedName}' already exists.` });
         }
 
-        // 2. Class ko update karein (updateMany use karke)
         const result = await prisma.classes.updateMany({
             where: {
-                classid: classIdInt,  // <-- Primary key
-                schoolId: schoolId    // <-- Security check
+                classid: classIdInt,
+                schoolId: schoolId
             },
             data: {
                 class_name: trimmedName
@@ -140,8 +137,9 @@ exports.updateClass = async (req, res) => {
     }
 };
 
-// DELETE Class (No Change in logic)
-exports.deleteClass = async (req, res) => {
+// --- 4. DELETE Class ---
+// FIX: अब 'const' का उपयोग करके परिभाषित किया गया
+const deleteClass = async (req, res) => {
     const classIdInt = parseInt(req.params.id);
     const schoolId = req.user.schoolId;
 
@@ -197,7 +195,8 @@ exports.deleteClass = async (req, res) => {
     }
 };
 
-// --- 7. Exports ---
+// --- 5. Clean Export ---
+// FIX: अब फ़ंक्शंस 'const' से परिभाषित हैं, इसलिए यह ब्लॉक सही काम करेगा।
 module.exports = {
   getClasses,
   addClass,
