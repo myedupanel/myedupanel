@@ -1,4 +1,4 @@
-/* File: app/superadmin/coupons/CouponsPage.module.scss (PREMIUM UPDATE) */
+/* File: app/superadmin/coupons/CouponsPage.module.scss (FINAL PREMIUM UPDATE) */
 
 /* === Main Page Layout === */
 .couponsPage {
@@ -8,7 +8,6 @@
 }
 
 .header {
-  /* FIX 3: Header ko justify-content: space-between diya */
   display: flex; 
   justify-content: space-between; 
   align-items: center;
@@ -24,7 +23,7 @@
   }
 }
 
-/* FIX 4: Dashboard Link Button Styling */
+/* Dashboard Link Button Styling */
 .dashboardLinkButton {
   display: flex;
   align-items: center;
@@ -48,7 +47,6 @@
 
 /* === Sync Section (Block 1) === */
 .syncContainer {
-  /* FIX 5: PREMIUM LIGHT BLUE COLOR PALETTE */
   background: #e6f7ff; /* Light Blue Background */
   border: 1px solid #91d5ff; /* Slightly Darker Blue Border */
   
@@ -199,6 +197,11 @@
     vertical-align: middle;
     font-size: 0.95rem;
   }
+  
+  /* ACTION BUTTONS CELL */
+  .actionsCell {
+    white-space: nowrap; /* Button ko ek line mein rakhein */
+  }
 }
 
 .statusActive {
@@ -219,4 +222,39 @@
   border-radius: 50px; 
   font-weight: 600;
   font-size: 0.85rem;
+}
+
+/* === CRUD ACTION BUTTONS STYLING === */
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  border: 1px solid #ced4da;
+  background-color: #ffffff;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 0.5rem;
+  transition: all 0.2s ease;
+  
+  svg {
+    font-size: 1.1rem;
+  }
+}
+
+.editButton {
+    color: #1890ff; /* Blue for Edit */
+    &:hover {
+        background-color: #e6f7ff;
+        border-color: #91d5ff;
+    }
+}
+
+.deleteButton {
+    color: #ff4d4f; /* Red for Delete */
+    &:hover {
+        background-color: #fff1f0;
+        border-color: #ffccc7;
+    }
 }

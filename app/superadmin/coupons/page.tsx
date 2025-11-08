@@ -1,4 +1,4 @@
-// File: app/superadmin/coupons/page.tsx (UPDATED with CRUD & Modal Logic)
+// File: app/superadmin/coupons/page.tsx (FINAL CRUD UI)
 
 "use client";
 
@@ -41,7 +41,7 @@ const CouponsPage = () => {
   
   const router = useRouter();
 
-  // 1. Fetch Logic (No Change)
+  // 1. Fetch Logic
   const fetchCoupons = async () => {
     try {
       setIsLoading(true);
@@ -93,7 +93,8 @@ const CouponsPage = () => {
 
   // 4. Handle Delete Action
   const handleDeleteClick = async (couponId: number) => {
-      if (!window.confirm(`Are you sure you want to delete coupon ID ${couponId}? This cannot be undone.`)) {
+      // FIX 1: Alert की जगह window.confirm का उपयोग करें
+      if (!window.confirm(`Are you sure you want to delete coupon ID ${couponId}? This cannot be undone if used in a subscription.`)) {
           return;
       }
       try {
@@ -118,7 +119,7 @@ const CouponsPage = () => {
         </button>
       </header>
 
-      {/* Block 1: Sync Section (No Change in Logic) */}
+      {/* Block 1: Sync Section */}
       <div className={`${styles.pageSection} ${styles.syncContainer}`}>
         <div className={styles.sectionHeader}>
           <h3><FiRefreshCw /> Payment Reconciliation</h3>
