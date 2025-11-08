@@ -218,7 +218,7 @@ exports.verifySubscriptionWebhook = async (req, res) => {
     }
     const amountPaid = Number(payment.amount) / 100;
     const planStartDate = new Date(payment.created_at * 1000); 
-    const planEndDate = new Date();
+    const planEndDate = new Date(planStartDate); // Start date se copy karein
     planEndDate.setFullYear(planEndDate.getFullYear() + 1);
     const durationDays = 365;
     try {
@@ -242,6 +242,7 @@ exports.verifySubscriptionWebhook = async (req, res) => {
             paymentId: payment.id,
             orderId: payment.order_id,
             createdAt: planStartDate,
+            endDate: planEndDate, // <-- Yeh field add kiya tha
             schoolId: schoolId,
             userId: Number(userId),
             couponId: couponId ? Number(couponId) : null
@@ -306,7 +307,9 @@ exports.syncRazorpayPayments = async (req, res) => {
   let paymentsFailed = 0;
 
   try {
+    // 1. Razorpay se saare successful payments fetch karein
     const razorpayPayments = await razorpay.payments.all({ count: 100 });
+
     const capturedPayments = razorpayPayments.items.filter(
       (p) => p.status === 'captured' && p.notes.type === 'APP_SUBSCRIPTION'
     );
@@ -337,95 +340,99 @@ exports.syncRazorpayPayments = async (req, res) => {
         where: { paymentId: paymentId }
       });
 
-      if (existingSubscription) {
-        // 2. PAYMENT RECORD MIL GAYA. Ab check karo ki School ka plan sahi hai ya nahi.
-        const school = await prisma.school.findUnique({ where: { id: schoolId } });
+      // 2. School ka current status check karo
+      const school = await prisma.school.findUnique({ where: { id: schoolId } });
 
-        // Check karo ki plan 'TRIAL' par (ya galat date par) toh phansa nahi hai
-        if (school && (school.plan !== planName.toUpperCase() || school.planExpiryDate.getTime() !== planEndDate.getTime())) {
-          
-          console.log(`MISMATCH FOUND for School ${schoolId}. Plan is '${school.plan}', but should be '${planName.toUpperCase()}'. Fixing...`);
-          
-          await prisma.school.update({
-            where: { id: schoolId },
-            data: {
-              plan: planName.toUpperCase(),
-              planStartDate: planStartDate,
-              planExpiryDate: planEndDate
-            }
-          });
-          paymentsFixed++; // Ise bhi 'fixed' mein gino
-        } else {
-          // School ka plan pehle se hi sahi hai. Skip karo.
-          paymentsSkipped++;
-        }
+      // 3. AGAR PAYMENT HAI, LEKIN SCHOOL 'TRIAL' PAR HAI (MISMATCH!)
+      //    (Ya plan name match nahi karta, ya expiry date match nahi karti)
+      if (existingSubscription && school && 
+          (school.plan !== planName.toUpperCase() || 
+           school.planExpiryDate.getTime() !== planEndDate.getTime())
+         ) {
         
-        continue; // Agle payment par jao
-      }
-
-      // 3. PAYMENT RECORD MILA HI NAHI. Yeh ek naya/missing payment hai.
-      console.log(`NEW PAYMENT FOUND: ${paymentId}. Creating new record...`);
-      
-      try {
-        await prisma.$transaction(async (tx) => {
-          
-          let validCouponId = null;
-
-          // 4. (Foreign Key Fix) Check karein ki coupon delete toh nahi ho gaya
-          if (couponIdFromNotes) {
-            const couponExists = await tx.coupon.findUnique({
-              where: { id: Number(couponIdFromNotes) }
-            });
-            
-            if (couponExists) {
-              validCouponId = Number(couponIdFromNotes);
-            } else {
-              console.warn(`Payment ${payment.id} had couponId ${couponIdFromNotes}, but it no longer exists. Saving without link.`);
-              validCouponId = null; // 'null' save karein taaki crash na ho
-            }
-          }
-
-          // School update karein
-          await tx.school.update({
-            where: { id: schoolId },
-            data: {
-              plan: planName.toUpperCase(),
-              planStartDate: planStartDate,
-              planExpiryDate: planEndDate
-            }
-          });
-
-          // Naya AppSubscription record banayein
-          await tx.appSubscription.create({
-            data: {
-              planName: planName.toUpperCase(),
-              originalAmount: Number(originalAmount) || amountPaid,
-              finalAmount: amountPaid,
-              durationInDays: 365,
-              status: "SUCCESS",
-              paymentId: payment.id,
-              orderId: payment.order_id,
-              createdAt: planStartDate,
-              endDate: planEndDate, // <-- YEH ZAROORI HAI
-              schoolId: schoolId,
-              userId: Number(userId),
-              couponId: validCouponId 
-            }
-          });
-
-          // Coupon count update karein (agar valid hai)
-          if (validCouponId) { 
-            await tx.coupon.update({
-              where: { id: validCouponId },
-              data: { timesUsed: { increment: 1 } }
-            });
+        console.log(`MISMATCH FOUND for School ${schoolId}. Plan is '${school.plan}', but should be '${planName.toUpperCase()}'. Fixing...`);
+        
+        await prisma.school.update({
+          where: { id: schoolId },
+          data: {
+            plan: planName.toUpperCase(),
+            planStartDate: planStartDate,
+            planExpiryDate: planEndDate
           }
         });
-        paymentsFixed++;
-      } catch (dbError) {
-        // Is specific payment ko sync karne mein error aaya
-        console.error(`Failed to sync payment ${paymentId} for school ${schoolId}:`, dbError.message);
-        paymentsFailed++;
+        paymentsFixed++; // Ise bhi 'fixed' mein gino
+
+      // 4. AGAR PAYMENT RECORD NAHI HAI (Yeh naya/missing payment hai)
+      } else if (!existingSubscription) {
+        console.log(`NEW PAYMENT FOUND: ${paymentId}. Creating new record...`);
+        
+        try {
+          await prisma.$transaction(async (tx) => {
+            
+            let validCouponId = null;
+
+            // 5. (Foreign Key Fix) Check karein ki coupon delete toh nahi ho gaya
+            if (couponIdFromNotes) {
+              const couponExists = await tx.coupon.findUnique({
+                where: { id: Number(couponIdFromNotes) }
+              });
+              
+              if (couponExists) {
+                validCouponId = Number(couponIdFromNotes);
+              } else {
+                console.warn(`Payment ${payment.id} had couponId ${couponIdFromNotes}, but it no longer exists. Saving without link.`);
+                validCouponId = null; // 'null' save karein taaki crash na ho
+              }
+            }
+
+            // School update karein
+            await tx.school.update({
+              where: { id: schoolId },
+              data: {
+                plan: planName.toUpperCase(),
+                planStartDate: planStartDate,
+                planExpiryDate: planEndDate
+              }
+            });
+
+            // Naya AppSubscription record banayein
+            await tx.appSubscription.create({
+              data: {
+                planName: planName.toUpperCase(),
+                originalAmount: Number(originalAmount) || amountPaid,
+                finalAmount: amountPaid,
+                durationInDays: 365,
+                status: "SUCCESS",
+                paymentId: payment.id,
+                orderId: payment.order_id,
+                createdAt: planStartDate,
+                // === FIX: `endDate` bhi add karein ===
+                endDate: planEndDate,
+                // ===================================
+                schoolId: schoolId,
+                userId: Number(userId),
+                couponId: validCouponId 
+              }
+            });
+
+            // Coupon count update karein (agar valid hai)
+            if (validCouponId) { 
+              await tx.coupon.update({
+                where: { id: validCouponId },
+                data: { timesUsed: { increment: 1 } }
+              });
+            }
+          });
+          paymentsFixed++;
+        } catch (dbError) {
+          // Is specific payment ko sync karne mein error aaya
+          console.error(`Failed to sync payment ${paymentId} for school ${schoolId}:`, dbError.message);
+          paymentsFailed++;
+        }
+      
+      // 6. AGAR PAYMENT HAI AUR SCHOOL KA PLAN BHI SAHI HAI
+      } else {
+        paymentsSkipped++;
       }
     } // Loop yahaan khatam
 
