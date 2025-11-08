@@ -1,51 +1,52 @@
-// File: backend/utils/sendEmail.js (PERMANENT FIX using Nodemailer & Service Account)
+// File: backend/utils/sendEmail.js (PERMANENT FIX - Base64 Decoding)
 
 const nodemailer = require('nodemailer');
 const { google } = require('googleapis');
-// (NOTE: Nodemailer installed hona chahiye)
-
-// --- Helper function (Ab zaroorat nahi kyunki Nodemailer khud MIME types handle karta hai) ---
-// function createEmailMessage(options, adminEmail) { ... } // YEH HATA DIYA GAYA
+// FIX 1: Buffer Module को Import करें (decoding के लिए आवश्यक)
+const { Buffer } = require('buffer'); 
 
 const sendEmail = async (options) => {
   console.log('--- Email (Nodemailer Service Account) bhejne ki koshish... ---');
 
   // Environment variables fetch karein
-  // G_PRIVATE_KEY को \n के साथ handle करें
   const SERVICE_ACCOUNT_EMAIL = process.env.G_SERVICE_ACCOUNT_EMAIL;
-  const PRIVATE_KEY = process.env.G_PRIVATE_KEY?.replace(/\\n/g, '\n'); 
+  // FIX 2: RAW Base64 स्ट्रिंग को सीधे उठाओ
+  const RAW_PRIVATE_KEY = process.env.G_PRIVATE_KEY; 
   const USER_EMAIL = process.env.G_USER_TO_IMPERSONATE; 
   const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
   const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
-
-  // Ab hum sirf Service Account keys ko check karenge
-  if (!SERVICE_ACCOUNT_EMAIL || !PRIVATE_KEY || !USER_EMAIL || !CLIENT_ID || !CLIENT_SECRET) {
-      console.error('--- EMAIL FAILED ---: Critical Service Account credentials missing in environment variables.');
+  if (!SERVICE_ACCOUNT_EMAIL || !RAW_PRIVATE_KEY || !USER_EMAIL || !CLIENT_ID || !CLIENT_SECRET) {
+      console.error('--- EMAIL FAILED ---: Service Account credentials missing.');
       throw new Error('Email sending failed: Server configuration incomplete.');
   }
 
+  // === FIX 3: Base64 Decoding लॉजिक ===
+  // Raw Base64 स्ट्रिंग को वापस multi-line Private Key Text में बदलता है।
+  const decodedPrivateKey = Buffer.from(RAW_PRIVATE_KEY, 'base64').toString('utf8');
+  // === END FIX 3 ===
+
   try {
-    // 1. JWT Client ka upyog (Refresh Token को permanent access token से बदलता है)
+    // 1. JWT Client ka upyog
     const jwtClient = new google.auth.JWT({
       email: SERVICE_ACCOUNT_EMAIL,
-      key: PRIVATE_KEY, 
+      key: decodedPrivateKey, // <-- अब DECODED KEY का उपयोग होगा
       scopes: ['https://mail.google.com/'], 
-      subject: USER_EMAIL, // Admin Email
+      subject: USER_EMAIL, 
     });
 
-    // 2. Access Token प्राप्त करें (यह हर बार नया generate होगा, लेकिन Refresh Token की ज़रूरत नहीं पड़ेगी)
+    // 2. Access Token प्राप्त करें
     const tokens = await jwtClient.authorize();
     
     // 3. Nodemailer Transporter set करें
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // Gmail service
+      service: 'gmail',
       auth: {
         type: 'OAuth2',
         user: USER_EMAIL,
         clientId: CLIENT_ID, 
         clientSecret: CLIENT_SECRET, 
-        accessToken: tokens.access_token, // नया एक्सेस टोकन
+        accessToken: tokens.access_token,
         expires: tokens.expiry_date,
       },
     });
@@ -64,9 +65,7 @@ const sendEmail = async (options) => {
     console.log('--- Email safaltapoorvak bhej diya gaya! ---', info.response);
   
   } catch (error) {
-    // Error Logging ko saaf rakhein
     console.error('--- CRITICAL EMAIL FAILURE ---:', error.message);
-    // इस पॉइंट पर fail होने पर, यह लगभग हमेशा Google API/Network issue होगी
     throw new Error(`Email delivery failed: ${error.message}`);
   }
 };
