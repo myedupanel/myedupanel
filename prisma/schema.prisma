@@ -639,6 +639,6 @@ model Plan {
   plusFeatures  Json?     // (Optional) ["Feature 3", "Feature 4"]
   isPopular     Boolean   @default(false)
   isActive      Boolean   @default(true)
-
+  createdAt     DateTime  @default(now()) // Plan kab bana, yeh store karega
   @@index([isActive])
 }
