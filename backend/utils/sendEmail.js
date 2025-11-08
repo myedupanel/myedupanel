@@ -1,54 +1,55 @@
-// File: backend/utils/sendEmail.js (FINAL PERMANENT SMTP FIX - Brevo/SendGrid)
+// File: backend/utils/sendEmail.js (FINAL WORKING SMTP FIX - Brevo/SendGrid)
 
 const nodemailer = require('nodemailer');
-// const { google } = require('googleapis'); // GOOGLE DEPENDENCIES HATA DIYA GAYA
-
-// --- Helper function (यह अब Nodemailer खुद संभालता है, इसलिए इसकी ज़रूरत नहीं) ---
-// function createEmailMessage(options, adminEmail) { ... } 
 
 const sendEmail = async (options) => {
   console.log('--- Email (SendGrid/Brevo SMTP) bhejne ki koshish... ---');
 
   // Environment variables fetch karein
-  const EMAIL_HOST = process.env.EMAIL_HOST; // e.g., smtp-relay.sendinblue.com
-  const EMAIL_PORT = process.env.EMAIL_PORT; // 587
-  const EMAIL_USER = process.env.EMAIL_USER; // Verified 'From' email address
-  const EMAIL_PASS = process.env.EMAIL_PASS; // SendGrid/Brevo API Key
+  const EMAIL_HOST = process.env.EMAIL_HOST; 
+  const EMAIL_PORT = process.env.EMAIL_PORT; 
+  const EMAIL_USER = process.env.EMAIL_USER; 
+  const EMAIL_PASS = process.env.EMAIL_PASS; 
 
   if (!EMAIL_HOST || !EMAIL_USER || !EMAIL_PASS) {
-      console.error('--- EMAIL FAILED ---: SendGrid/Brevo credentials (Host, User, Pass) missing.');
+      console.error('--- EMAIL FAILED ---: SendGrid/Brevo credentials missing.');
+      // Yahaan par code ko turant return karna chahiye taki Node ka event loop block na ho
       throw new Error('Email sending failed: Credentials incomplete.');
   }
 
   try {
-    // 1. Nodemailer Transporter set करें (SMTP का उपयोग)
+    // Nodemailer Transporter set करें (SMTP का उपयोग)
     const transporter = nodemailer.createTransport({
       host: EMAIL_HOST, 
       port: Number(EMAIL_PORT),
-      secure: false, // Port 587 के लिए
+      secure: false, // Port 587 ke liye sahi hai, yeh STARTTLS ka upyog karega
       auth: {
-        // SendGrid/Brevo के लिए अक्सर user 'apikey' होता है
-        user: "apikey", 
-        pass: EMAIL_PASS, // SendGrid/Brevo API Key
+        user: EMAIL_USER, // Brevo/SendGrid mein yeh verified email hota hai ya 'apikey'
+        pass: EMAIL_PASS, // API Key
       },
+      // Timeout ko स्पष्ट रूप से set karein (Debugging ke liye zaroori)
+      connectionTimeout: 10000, // 10 seconds timeout
+      greetingTimeout: 5000,
+      socketTimeout: 10000,
     });
 
-    // 2. Email options taiyar करें
+    // Email options taiyar करें
     const mailOptions = {
-      from: `"${options.from || 'My EduPanel'}" <${EMAIL_USER}>`, // verified user से भेजें
+      from: `"${options.from || 'My EduPanel'}" <${EMAIL_USER}>`, 
       to: options.to,
       subject: options.subject,
       html: options.html,
     };
 
-    // 3. Email भेजें
+    // Email भेजनें के लिए प्रतीक्षा करें
     const info = await transporter.sendMail(mailOptions);
 
     console.log('--- Email safaltapoorvak bhej diya gaya! ---', info.response);
   
   } catch (error) {
     console.error('--- CRITICAL EMAIL FAILURE ---:', error.message);
-    throw new Error(`Email delivery failed: ${error.message}. Please check SMTP host/key.`);
+    // Connection timeout ya authentication fail hone par
+    throw new Error(`Email delivery failed: Connection/Auth failed. Please check HOST/PORT/KEY.`);
   }
 };
 
