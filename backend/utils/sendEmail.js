@@ -1,55 +1,82 @@
-// File: backend/utils/sendEmail.js (FINAL WORKING SMTP FIX - Brevo/SendGrid)
+// backend/utils/sendEmail.js
+const { google } = require('googleapis');
 
-const nodemailer = require('nodemailer');
+// --- Helper function (Ise change nahi kiya) ---
+function createEmailMessage(options, adminEmail) {
+  const emailLines = [
+    `From: "My EduPanel" <${adminEmail}>`, // Bhejne waale ka naam
+    `To: ${options.to}`,
+    `Subject: ${options.subject}`,
+    'Content-Type: text/html; charset=utf-8',
+    'MIME-Version: 1.0',
+    '', // Blank line zaroori hai
+    options.html,
+  ];
+  const email = emailLines.join('\r\n');
+  return Buffer.from(email)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
 
+// --- Main SendEmail Function (Updated) ---
 const sendEmail = async (options) => {
-  console.log('--- Email (SendGrid/Brevo SMTP) bhejne ki koshish... ---');
+  console.log('--- Email (Seedha Gmail API se) bhejne ki koshish... ---');
 
-  // Environment variables fetch karein
-  const EMAIL_HOST = process.env.EMAIL_HOST; 
-  const EMAIL_PORT = process.env.EMAIL_PORT; 
-  const EMAIL_USER = process.env.EMAIL_USER; 
-  const EMAIL_PASS = process.env.EMAIL_PASS; 
+  // --- YEH HAI PERMANENT FIX ---
+  // Saari keys aur OAuth client ko function ke ANDAR initialize karein
+  const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+  const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+  const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
+  const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
+  const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
-  if (!EMAIL_HOST || !EMAIL_USER || !EMAIL_PASS) {
-      console.error('--- EMAIL FAILED ---: SendGrid/Brevo credentials missing.');
-      // Yahaan par code ko turant return karna chahiye taki Node ka event loop block na ho
-      throw new Error('Email sending failed: Credentials incomplete.');
+  // Ab hum pehle check kar sakte hain ki keys load hui ya nahi
+  if (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URI || !REFRESH_TOKEN || !ADMIN_EMAIL) {
+      console.error('--- EMAIL BHEJNE MEIN ERROR AAYA ---: Google API credentials (ID, Secret, Redirect URI, Refresh Token, ya Admin Email) environment variables mein missing hain.');
+      throw new Error('Email sending failed: Server configuration incomplete.');
   }
 
+  // Client ko ab yahaan (function ke andar) banayein
+  const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+  oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+  // --- END FIX ---
+
   try {
-    // Nodemailer Transporter set करें (SMTP का उपयोग)
-    const transporter = nodemailer.createTransport({
-      host: EMAIL_HOST, 
-      port: Number(EMAIL_PORT),
-      secure: false, // Port 587 ke liye sahi hai, yeh STARTTLS ka upyog karega
-      auth: {
-        user: EMAIL_USER, // Brevo/SendGrid mein yeh verified email hota hai ya 'apikey'
-        pass: EMAIL_PASS, // API Key
+    // 5. Naya "Access Token" haasil karein
+    const { token: accessToken } = await oAuth2Client.getAccessToken();
+
+    if (!accessToken) {
+      throw new Error('Access Token nahi mila');
+    }
+    
+    oAuth2Client.setCredentials({ access_token: accessToken });
+
+    // 6. Gmail API client ko taiyaar karein
+    const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+
+    // 7. Email message ko Base64 mein convert karein
+    const rawMessage = createEmailMessage(options, ADMIN_EMAIL);
+
+    // 8. Email Bhejein!
+    const info = await gmail.users.messages.send({
+      userId: 'me', // 'me' ka matlab hai ADMIN_EMAIL
+      requestBody: {
+        raw: rawMessage,
       },
-      // Timeout ko स्पष्ट रूप से set karein (Debugging ke liye zaroori)
-      connectionTimeout: 10000, // 10 seconds timeout
-      greetingTimeout: 5000,
-      socketTimeout: 10000,
     });
 
-    // Email options taiyar करें
-    const mailOptions = {
-      from: `"${options.from || 'My EduPanel'}" <${EMAIL_USER}>`, 
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-    };
-
-    // Email भेजनें के लिए प्रतीक्षा करें
-    const info = await transporter.sendMail(mailOptions);
-
-    console.log('--- Email safaltapoorvak bhej diya gaya! ---', info.response);
+    console.log('--- Email safaltapoorvak bhej diya gaya! ---', info.data);
   
   } catch (error) {
-    console.error('--- CRITICAL EMAIL FAILURE ---:', error.message);
-    // Connection timeout ya authentication fail hone par
-    throw new Error(`Email delivery failed: Connection/Auth failed. Please check HOST/PORT/KEY.`);
+    // Error ko aache se log karein
+    console.error('--- EMAIL BHEJNE MEIN ERROR AAYA ---:', error.response ? error.response.data : error.message);
+    if (error.response?.data?.error === 'invalid_grant') {
+         console.error(">>> FATAL: Google Refresh Token expire ho gaya hai. Please naya token generate karein. <<<");
+         throw new Error('Email Refresh Token expired.');
+    }
+    throw new Error('Email sending failed');
   }
 };
 
