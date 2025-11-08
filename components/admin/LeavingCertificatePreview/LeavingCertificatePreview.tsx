@@ -73,7 +73,7 @@ interface LeavingCertificatePreviewProps {
   schoolDetails: SchoolDetails;
 }
 
-// --- Helper Components (Simplified for 2-Column Table Structure) ---
+// --- Helper Components ---
 const fill = (value: string | undefined | null, noLine = false) => {
   const className = noLine ? styles.fillNoLine : (value ? styles.fill : styles.fillBlank); 
   if (value) {
@@ -89,7 +89,13 @@ const SubField: React.FC<{ label: string, value: string | undefined | null, noLi
   </span>
 );
 
-// --- End Helper Components ---
+// Helper component to render table rows based on SNS blueprint
+const RenderRow = ({ label, children, isLast = false, labelClass = '' }: { label: string, children: React.ReactNode, isLast?: boolean, labelClass?: string }) => (
+    <>
+      <div className={`${styles.labelCell} ${isLast ? styles.lastRow : ''} ${labelClass}`}>{label}</div>
+      <div className={`${styles.valueCell} ${isLast ? styles.lastRow : ''}`}>{children}</div>
+    </>
+  );
 
 
 const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
@@ -101,15 +107,6 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
   const dateOfAdmission = formatDate(formData.dateOfAdmission);
   const dateOfLeaving = formatDate(formData.dateOfLeaving);
   const studentDobFormatted = formatDate(student?.dob);
-
-  // Helper component to render table rows based on SNS blueprint
-  const RenderRow = ({ label, children, isLast = false, labelClass = '' }: { label: string, children: React.ReactNode, isLast?: boolean, labelClass?: string }) => (
-    <>
-      <div className={`${styles.labelCell} ${isLast ? styles.lastRow : ''} ${labelClass}`}>{label}</div>
-      <div className={`${styles.valueCell} ${isLast ? styles.lastRow : ''}`}>{children}</div>
-    </>
-  );
-
 
   return (
     <div className={styles.certificatePaper}>
@@ -151,9 +148,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             <div className={styles.serialBox}>
                 Serial No: {fill(formData.genRegNo, true)}
             </div>
-            <div className={styles.uidBox}>
-                UID Adhar Card No.: {fill(student?.aadhaarNo, true)}
-            </div>
+            {/* UID Adhar Card No. ko table ke andar move kiya gaya hai */}
             <div className={styles.grBox}>
                 G. R. No: {fill(formData.regNo, true)}
             </div>
@@ -171,6 +166,12 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           <RenderRow label="Full Name:">
             {fill(student?.name)}
           </RenderRow>
+          
+          {/* === FIX 1: UID/AADHAR CARD ROW === */}
+          <RenderRow label="UID Adhar Card No.:">
+            {fill(student?.aadhaarNo)}
+          </RenderRow>
+          {/* === END FIX 1 === */}
           
           <RenderRow label="Mother's Name:">
             {fill(formData.motherName)}

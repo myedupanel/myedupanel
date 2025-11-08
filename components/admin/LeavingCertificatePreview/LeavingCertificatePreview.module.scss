@@ -1,10 +1,10 @@
-/* File: src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss (FINAL OFFICIAL A4 GRID - CSS FIX) */
+/* File: src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss (FINAL A4 OPTIMIZED) */
 
-/* --- Base Styles (No Change) --- */
+/* --- Base Styles --- */
 .certificatePaper {
   width: 210mm;
-  min-height: 297mm;
-  margin: 20px auto;
+  /* Min-height हटा दिया ताकि A4 पर फिट हो */
+  margin: 10px auto;
   font-family: 'Times New Roman', Times, serif;
   font-size: 10.5pt; 
   color: #000;
@@ -17,7 +17,7 @@
 
 .outerBorder {
   border: 2px solid #000;
-  padding: 6mm 8mm 10mm 8mm; 
+  padding: 5mm 7mm 7mm 7mm; /* Tighter padding for A4 fit */
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -27,41 +27,24 @@
 }
 
 /* Fill styles */
-.fill {
-  font-weight: bold;
-  padding: 0 2px;
-  border-bottom: 1px dotted #333; 
-  display: inline-block;
-}
-.fillNoLine {
-  font-weight: bold;
-  padding: 0 2px;
-  border-bottom: none; 
-  display: inline-block;
-}
-.fillBlank {
-  display: inline-block;
-  border-bottom: 1px dotted #333;
-  width: 100%; 
-  flex-grow: 1; 
-  min-height: 1.1em;
-}
-/* --- End Base Styles --- */
+.fill { font-weight: bold; padding: 0 2px; border-bottom: 1px dotted #333; display: inline-block; }
+.fillNoLine { font-weight: bold; padding: 0 2px; border-bottom: none; display: inline-block; }
+.fillBlank { border-bottom: 1px dotted #333; width: 100%; flex-grow: 1; min-height: 1.1em; }
 
 
-/* --- Header Style (Matching SNS PUNE Template) --- */
+/* --- Header Style --- */
 .certHeader {
   display: flex;
   justify-content: center; 
   align-items: center;
   flex-direction: column;
   gap: 3px; 
-  padding-bottom: 15px; 
+  padding-bottom: 5px; 
   text-align: center;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #000; /* Dark border */
   margin-bottom: 5px; 
 
-  .logoContainer { flex-shrink: 0; width: 70px; height: 70px; }
+  .logoContainer { flex-shrink: 0; width: 60px; height: 60px; }
   .logo { width: 100%; height: 100%; object-fit: contain; }
   
   .schoolInfoBlock {
@@ -72,7 +55,7 @@
   }
 }
 
-/* --- Serial/GR No. & Title Row (Pre-Header) --- */
+/* --- Serial/GR No. & Title Row (Merged) --- */
 .preHeaderRow {
     display: flex;
     justify-content: space-between;
@@ -80,16 +63,10 @@
     margin-bottom: 8px;
     font-size: 9pt;
     
-    .serialBox, .grBox, .uidBox {
+    .serialBox, .grBox {
         display: flex;
         align-items: baseline;
-        
-        .fillBlank, .fill { 
-            border-bottom: 1px solid #000; 
-            min-width: 70px;
-            margin-left: 5px;
-            font-weight: normal;
-        }
+        .fillBlank, .fill { border-bottom: 1px solid #000; min-width: 70px; margin-left: 5px; font-weight: normal; }
     }
 }
 
@@ -99,16 +76,12 @@
     padding-bottom: 5px;
     margin-bottom: 0;
     
-    h2 {
-        font-size: 12pt;
-        font-weight: bold;
-        margin: 0;
-    }
+    h2 { font-size: 13pt; font-weight: bold; margin: 0; }
 }
 
 /*
   ======================================================================
-  === MAIN TABULAR GRID (CSS FIX: composes हटा दिया गया) ===
+  === MAIN TABULAR GRID (100% SNS MATCH - No composes error) ===
   ======================================================================
 */
 .certificateGrid {
@@ -120,7 +93,7 @@
   margin-top: 0; 
 }
 
-/* COMMON CELL STYLE - Yahan se properties nikali */
+/* COMMON CELL STYLE (Base) */
 .tableCell {
     padding: 3px 8px; 
     line-height: 1.3;
@@ -129,42 +102,38 @@
     display: flex;
     align-items: center; 
     font-weight: normal;
-    min-height: 25px; 
+    min-height: 20px; /* Reduced min-height */
 }
 
-/* LABEL CELL (Manual duplication) */
+/* LABEL CELL (White Background - Replicating Table Look) */
 .labelCell {
-    /* composes: tableCell की जगह properties */
     padding: 3px 8px; 
     line-height: 1.3;
     border-right: 1px solid #000; 
     border-bottom: 1px solid #000; 
     display: flex;
     align-items: center; 
-    font-weight: normal;
-    min-height: 25px; 
+    font-weight: 600; /* Labels ko bold rakhein */
+    min-height: 20px; 
     
-    font-weight: normal;
-    background-color: #f7f7f7; /* Slightly distinct background for labels */
+    background-color: #ffffff; /* White background */
 }
 
-/* VALUE CELL (Manual duplication) */
+/* VALUE CELL (White Background, Bold Value) */
 .valueCell {
-    /* composes: tableCell की जगह properties */
     padding: 3px 8px; 
     line-height: 1.3;
-    border-right: 1px solid #000; 
+    border-right: none; 
     border-bottom: 1px solid #000; 
     display: flex;
     align-items: center; 
-    font-weight: bold; /* Value field bold */
-    min-height: 25px; 
+    font-weight: bold; 
+    min-height: 20px; 
     
-    border-right: none; /* Right border हटा दिया गया */
     flex-wrap: wrap; 
     
     .fill, .fillBlank, .fillNoLine {
-        border-bottom: 1px dotted #333; /* Dotted line वापस लाना */
+        border-bottom: 1px dotted #333; 
     }
 }
 
@@ -174,46 +143,33 @@
     border-bottom: none !important;
 }
 
-/* === Multi-Field Formatting (No Change) === */
+/* --- Multi-Field Formatting --- */
 .multiFieldRow {
   display: flex;
   align-items: baseline;
   justify-content: space-between; 
   width: 100%;
-  gap: 5px 20px; 
+  gap: 5px 15px; 
   
   .subField { flex-grow: 1; display: flex; align-items: baseline; }
   .subLabel { flex-shrink: 0; margin-right: 5px; font-weight: normal; }
 }
 
-/* Row 5: Religion & Caste (Specific Alignment Fix) */
-.rowValue:nth-child(5) {
-    .multiFieldRow {
-        gap: 5px 10px;
-        & > .fill { flex-basis: 35%; min-width: 100px; }
-        .casteField {
-            flex-grow: 1; 
-            .fill, .fillBlank { border-bottom: 1px dotted #333; }
-        }
-    }
+
+/* --- Certification Text & Footer --- */
+.certText { font-size: 9pt; text-align: left; margin-top: 5px; line-height: 1.5; }
+
+.certFooterWrapper {
+  margin-top: auto;
+  padding-top: 15px; 
+  font-size: 10pt;
+  font-weight: normal;
 }
 
-/* Birth Place Sub-Grid (Row 6) */
-.subGrid { 
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr)); 
-  gap: 4px 8px;
-  width: 100%;
-  
-  .subField { flex-grow: 1; white-space: nowrap; }
-}
-
-
-/* --- Certification Text & Footer (No Change) --- */
-.certText { font-size: 10pt; text-align: left; margin-top: 10px; line-height: 1.5; }
-.certFooterWrapper { margin-top: 10px; padding-top: 15px; font-size: 10pt; font-weight: normal; }
 .datePlace {
   display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 20px; 
+  gap: 15px;
+  
   span {
     display: flex; gap: 5px; font-weight: bold; 
     .fill, .fillBlank { min-width: 100px; border-bottom: 1px solid #000; font-weight: normal; }
@@ -222,17 +178,24 @@
 
 .signatures { display: flex; justify-content: space-between; align-items: flex-end; }
 
-.sigBox { text-align: center; width: 30%; padding-top: 30px; border-top: 1px solid #000; font-size: 9pt; font-weight: 600; }
+.sigBox {
+  text-align: center;
+  width: 30%;
+  padding-top: 30px; 
+  border-top: 1px solid #000;
+  font-size: 8pt;
+  font-weight: 600;
+}
 
 /* --- Print Fix (A4 Density) --- */
 @media print {
-  .certificatePaper { font-size: 9pt !important; }
-  .outerBorder { padding: 3mm 5mm 5mm 5mm; } 
-  .tableCell { padding: 1px 3px !important; min-height: 20px; }
-  .certHeader { padding-bottom: 3px; }
-  .titleBlock h2 { font-size: 11pt; }
-  .preHeaderRow { margin-bottom: 3px; }
-  .certFooterWrapper { padding-top: 5px; }
-  .sigBox { padding-top: 10px; font-size: 8pt; }
-  .datePlace { margin-bottom: 10px; }
+  .certificatePaper { font-size: 8.5pt !important; }
+  .outerBorder { padding: 2mm 4mm 4mm 4mm; } 
+  .tableCell { padding: 1px 3px !important; min-height: 15px; }
+  .certHeader { padding-bottom: 2px; }
+  .titleBlock h2 { font-size: 10pt; }
+  .preHeaderRow { margin-bottom: 2px; }
+  .certFooterWrapper { padding-top: 3px; }
+  .sigBox { padding-top: 8px; font-size: 7pt; }
+  .datePlace { margin-bottom: 8px; }
 }
