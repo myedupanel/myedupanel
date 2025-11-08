@@ -46,6 +46,7 @@ const analyticsRoutes = require('./routes/analytics');
 const classRoutes = require('./routes/classes');
 const attendanceRoutes = require('./routes/attendance'); 
 const timetableRoutes = require('./routes/timetable');
+
 // const dashboardRoutes = require('./routes/dashboard'); 
 
 // --- Express App Setup (No Change) ---
