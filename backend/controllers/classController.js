@@ -1,5 +1,16 @@
-// backend/controllers/classController.js
+// File: backend/controllers/classController.js (SUPREME SECURE)
+
 const prisma = require('../config/prisma');
+
+// === FIX 1: THE SANITIZER FUNCTION (XSS Prevention) ===
+// यह फंक्शन किसी भी स्ट्रिंग से सभी HTML टैग्स को हटा देगा।
+function removeHtmlTags(str) {
+  if (!str || typeof str !== 'string') {
+    return str;
+  }
+  return str.replace(/<[^>]*>/g, '').trim(); 
+}
+// === END FIX 1 ===
 
 // Helper function (No Change)
 const getFullName = (student) => {
@@ -33,19 +44,22 @@ exports.getClasses = async (req, res) => {
     }
 };
 
-// POST Class (No Change)
+// POST Class (UPDATED with Sanitization)
 exports.addClass = async (req, res) => {
     const { name } = req.body;
     const schoolId = req.user.schoolId;
 
-    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+    // === FIX 2: Sanitization ===
+    const sanitizedName = removeHtmlTags(name);
+
+    if (!sanitizedName || sanitizedName.length === 0) {
         return res.status(400).json({ msg: 'Class name is required.' });
     }
     if (!schoolId) {
         return res.status(400).json({ msg: 'Invalid or missing school ID. Cannot save class.' });
     }
 
-    const trimmedName = name.trim();
+    const trimmedName = sanitizedName;
 
     try {
         const newClass = await prisma.classes.create({
@@ -64,7 +78,7 @@ exports.addClass = async (req, res) => {
     }
 };
 
-// PUT/UPDATE Class (No Change)
+// PUT/UPDATE Class (UPDATED with Sanitization)
 exports.updateClass = async (req, res) => {
     const { name } = req.body;
     const classIdInt = parseInt(req.params.id);
@@ -73,10 +87,15 @@ exports.updateClass = async (req, res) => {
     if (isNaN(classIdInt)) {
         return res.status(400).json({ msg: 'Invalid Class ID.' });
     }
-    const trimmedName = name ? name.trim() : '';
+    
+    // === FIX 3: Sanitization ===
+    const sanitizedName = removeHtmlTags(name);
+    const trimmedName = sanitizedName;
+
     if (!trimmedName) {
         return res.status(400).json({ msg: 'Class name cannot be empty.' });
     }
+    // === END FIX 3 ===
 
     try {
         // 1. Check karein ki naya naam pehle se toh nahi hai
@@ -121,7 +140,7 @@ exports.updateClass = async (req, res) => {
     }
 };
 
-// --- FIX: deleteClass function ko update kiya ---
+// DELETE Class (No Change in logic)
 exports.deleteClass = async (req, res) => {
     const classIdInt = parseInt(req.params.id);
     const schoolId = req.user.schoolId;
@@ -131,25 +150,22 @@ exports.deleteClass = async (req, res) => {
     }
 
     try {
-        // --- Pehle checks ---
-        
-        // 1. Check Students (FIXED: Ab 'classId' (camelCase) ke bajaye 'classid' (lowercase) use karega)
+        // 1. Check Students 
         const studentInClass = await prisma.students.findFirst({
             where: {
-                classid: classIdInt,  // <-- YEH HAI FIX
+                classid: classIdInt, 
                 schoolId: schoolId
             }
         });
 
         if (studentInClass) {
-            // Frontend ko yahi error message dikha raha tha
             return res.status(400).json({ msg: 'Cannot delete class. Students are still assigned to this class ID.' });
         }
 
-        // 2. Check FeeRecords (Yeh pehle se hi sahi tha, FeeRecord model 'classId' (camelCase) use karta hai)
+        // 2. Check FeeRecords 
         const feeRecordInClass = await prisma.feeRecord.findFirst({
             where: {
-                classId: classIdInt, // <-- Yeh 'classId' hi rahega
+                classId: classIdInt, 
                 schoolId: schoolId
             }
         });
@@ -157,9 +173,8 @@ exports.deleteClass = async (req, res) => {
         if (feeRecordInClass) {
             return res.status(400).json({ msg: 'Cannot delete class. Fee records are linked to this class ID.' });
         }
-        // --- End Checks ---
 
-        // --- Ab delete karein (Yeh pehle se hi sahi tha) ---
+        // 3. Delete karein 
         const result = await prisma.classes.deleteMany({
             where: {
                 classid: classIdInt,
@@ -181,4 +196,11 @@ exports.deleteClass = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
-// --- END FIX ---
+
+// --- 7. Exports ---
+module.exports = {
+  getClasses,
+  addClass,
+  updateClass,
+  deleteClass
+};

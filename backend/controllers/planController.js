@@ -1,13 +1,20 @@
-// File: backend/controllers/planController.js (Final Merged Code)
+// File: backend/controllers/planController.js (SUPREME SECURE)
 
 const prisma = require('../config/prisma');
+const { Prisma } = require('@prisma/client');
 
-// --- 1. Public Function ---
+// === FIX 1: THE SANITIZER FUNCTION (XSS Prevention) ===
+// यह फंक्शन किसी भी स्ट्रिंग से सभी HTML टैग्स को हटा देगा।
+function removeHtmlTags(str) {
+  if (!str || typeof str !== 'string') {
+    return str;
+  }
+  return str.replace(/<[^>]*>/g, '').trim(); 
+}
+// === END FIX 1 ===
 
-/**
- * @desc    Public ke liye sirf active plans fetch karna
- * @route   GET /api/plans
- */
+
+// --- 1. Public Function (No Change) ---
 exports.getPublicPlans = async (req, res) => {
   try {
     const plans = await prisma.plan.findMany({
@@ -28,10 +35,6 @@ exports.getPublicPlans = async (req, res) => {
 
 // --- 2. SuperAdmin Functions ---
 
-/**
- * @desc    SuperAdmin ke liye saare plans fetch karna (active aur inactive)
- * @route   GET /api/plans/admin-all
- */
 exports.getAllPlansAdmin = async (req, res) => {
   try {
     const plans = await prisma.plan.findMany({
@@ -47,11 +50,17 @@ exports.getAllPlansAdmin = async (req, res) => {
 };
 
 /**
- * @desc    Naya plan banana
+ * @desc    Naya plan banana (Sanitized)
  * @route   POST /api/plans/admin
  */
 exports.createPlanAdmin = async (req, res) => {
   const { id, name, price, description, features, isActive } = req.body;
+
+  // === FIX 2: Sanitization ===
+  const sanitizedName = removeHtmlTags(name);
+  const sanitizedDescription = removeHtmlTags(description);
+  // features (JSON) ko sanitize karna Frontend ka kaam hai, hum sirf basic strings ko dekhenge.
+  // ==========================
 
   try {
     // Check karein ki Plan ID unique hai (jaise "STARTER", "PRO")
@@ -66,12 +75,11 @@ exports.createPlanAdmin = async (req, res) => {
     const newPlan = await prisma.plan.create({
       data: {
         id: id.toUpperCase(),
-        name,
+        name: sanitizedName,
         price: Number(price),
-        description,
+        description: sanitizedDescription,
         features: features || [], // Frontend se array aana chahiye
         isActive: isActive || false,
-        // originalPrice, etc. bhi yahaan add kar sakte hain
       },
     });
 
@@ -83,12 +91,18 @@ exports.createPlanAdmin = async (req, res) => {
 };
 
 /**
- * @desc    Ek plan ko update karna
+ * @desc    Ek plan ko update karna (Sanitized)
  * @route   PUT /api/plans/admin/:id
  */
 exports.updatePlanAdmin = async (req, res) => {
   const { id } = req.params; // Yeh Plan ID hai (jaise "STARTER")
   const { name, price, description, features, isActive } = req.body;
+
+  // === FIX 3: Sanitization ===
+  const sanitizedName = removeHtmlTags(name);
+  const sanitizedDescription = removeHtmlTags(description);
+  // ==========================
+
 
   try {
     const updatedPlan = await prisma.plan.update({
@@ -96,11 +110,11 @@ exports.updatePlanAdmin = async (req, res) => {
         id: id.toUpperCase(),
       },
       data: {
-        name,
+        name: sanitizedName,
         price: Number(price),
-        description,
-        features, // Frontend se poora array bhejein
-        isActive,
+        description: sanitizedDescription,
+        features: features, // Frontend se poora array bhejein
+        isActive: isActive,
       },
     });
 
@@ -116,7 +130,7 @@ exports.updatePlanAdmin = async (req, res) => {
 };
 
 /**
- * @desc    Ek plan ko delete karna
+ * @desc    Ek plan ko delete karna (No Change)
  * @route   DELETE /api/plans/admin/:id
  */
 exports.deletePlanAdmin = async (req, res) => {

@@ -1,19 +1,34 @@
-// File: backend/controllers/couponController.js (Poora updated code)
+// File: backend/controllers/couponController.js (SUPREME SECURE)
 
 const prisma = require('../config/prisma');
+const { Prisma } = require('@prisma/client');
 
-// === 1. Naya Coupon Banane ka Function (Thoda update kiya) ===
+// === FIX 1: THE SANITIZER FUNCTION (XSS Prevention) ===
+// यह फंक्शन किसी भी स्ट्रिंग से सभी HTML टैग्स को हटा देगा।
+function removeHtmlTags(str) {
+  if (!str || typeof str !== 'string') {
+    return str;
+  }
+  return str.replace(/<[^>]*>/g, '').trim(); 
+}
+// === END FIX 1 ===
+
+
+// === 1. Naya Coupon Banane ka Function (Sanitized) ===
 exports.createCoupon = async (req, res) => {
   try {
-    const { code, discountType, discountValue, expiryDate, maxUses, isActive } = req.body; // isActive add kiya
+    const { code, discountType, discountValue, expiryDate, maxUses, isActive } = req.body; 
+    
+    // === FIX 2: Code को Sanitize करें ===
+    const sanitizedCode = removeHtmlTags(code);
 
     // Basic Validation
-    if (!code || !discountType || !discountValue) {
+    if (!sanitizedCode || !discountType || !discountValue) {
       return res.status(400).json({ message: 'Code, Discount Type, and Value are required.' });
     }
 
     const existingCoupon = await prisma.coupon.findUnique({
-      where: { code: code.toUpperCase() }
+      where: { code: sanitizedCode.toUpperCase() }
     });
 
     if (existingCoupon) {
@@ -22,10 +37,10 @@ exports.createCoupon = async (req, res) => {
 
     const newCoupon = await prisma.coupon.create({
       data: {
-        code: code.toUpperCase(),
+        code: sanitizedCode.toUpperCase(),
         discountType: discountType,
         discountValue: parseFloat(discountValue),
-        isActive: isActive || false, // Form se value lein
+        isActive: isActive || false,
         timesUsed: 0,
         expiryDate: expiryDate ? new Date(expiryDate) : null,
         maxUses: maxUses ? parseInt(maxUses) : null,
@@ -40,12 +55,12 @@ exports.createCoupon = async (req, res) => {
   }
 };
 
-// === 2. Saare Coupons Dekhne ka Function (Ab 'createdAt' ke saath sort karega) ===
+// === 2. Saare Coupons Dekhne ka Function (No Change) ===
 exports.getAllCoupons = async (req, res) => {
   try {
     const coupons = await prisma.coupon.findMany({
       orderBy: {
-        createdAt: 'desc' // Sabse naya coupon upar
+        createdAt: 'desc' 
       }
     });
     res.status(200).json(coupons);
@@ -55,16 +70,19 @@ exports.getAllCoupons = async (req, res) => {
   }
 };
 
-// === 3. NAYA: Coupon Update Function ===
+// === 3. NAYA: Coupon Update Function (Sanitized) ===
 exports.updateCoupon = async (req, res) => {
   const { id } = req.params;
   const { code, discountType, discountValue, expiryDate, maxUses, isActive } = req.body;
 
+  // === FIX 3: Code को Sanitize करें ===
+  const sanitizedCode = removeHtmlTags(code);
+  
   try {
     const updatedCoupon = await prisma.coupon.update({
       where: { id: Number(id) },
       data: {
-        code: code.toUpperCase(),
+        code: sanitizedCode.toUpperCase(),
         discountType: discountType,
         discountValue: parseFloat(discountValue),
         isActive: isActive,
@@ -75,14 +93,14 @@ exports.updateCoupon = async (req, res) => {
     res.status(200).json(updatedCoupon);
   } catch (error) {
     console.error(`Error updating coupon ${id}:`, error);
-    if (error.code === 'P2002') { // Unique constraint failed (code already exists)
+    if (error.code === 'P2002') { 
       return res.status(400).json({ message: 'This coupon code already exists.' });
     }
     res.status(500).json({ message: "Server error while updating coupon." });
   }
 };
 
-// === 4. NAYA: Coupon Delete Function ===
+// === 4. NAYA: Coupon Delete Function (No Change in Logic) ===
 exports.deleteCoupon = async (req, res) => {
   const { id } = req.params;
 
@@ -96,7 +114,6 @@ exports.deleteCoupon = async (req, res) => {
      if (error.code === 'P2025') {
       return res.status(404).json({ message: 'Coupon not found.' });
     }
-    // Check agar coupon pehle se use ho chuka hai
     if (error.code === 'P2003') { 
         return res.status(400).json({ message: 'Cannot delete coupon. It is already used in subscriptions.' });
     }

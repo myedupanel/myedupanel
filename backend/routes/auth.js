@@ -1,4 +1,4 @@
-// File: backend/routes/auth.js
+// File: backend/routes/auth.js (FINAL SECURE CODE with Rate Limiting)
 
 const express = require('express');
 const router = express.Router();
@@ -9,9 +9,13 @@ const prisma = require('../config/prisma'); // Prisma client
 const sendEmail = require('../utils/sendEmail');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { Prisma } = require('@prisma/client'); // Prisma errors ke liye
+// === NAYA IMPORT (Rate Limiter) ===
+const { authLimiter } = require('../middleware/rateLimiter');
+// ===================================
 
-// ===== SIGNUP ROUTE (UPDATED with Trial Logic) =====
-router.post('/signup', async (req, res) => {
+// ===== SIGNUP ROUTE (Rate Limiting लागू किया) =====
+// [authLimiter] middleware ko signup se pehle add kiya
+router.post('/signup', authLimiter, async (req, res) => {
   const { schoolName, adminName, email, password } = req.body;
   const lowerCaseEmail = email.toLowerCase(); // Consistent casing
 
@@ -187,7 +191,7 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// ===== VERIFY OTP ROUTE =====
+// ===== VERIFY OTP ROUTE (Bina Rate Limiting) =====
 router.post('/verify-otp', async (req, res) => {
   const { email, otp } = req.body;
   const lowerCaseEmail = email.toLowerCase();
@@ -238,8 +242,9 @@ router.post('/verify-otp', async (req, res) => {
   }
 });
 
-// ===== LOGIN ROUTE =====
-router.post('/login', async (req, res) => {
+// ===== LOGIN ROUTE (Rate Limiting लागू किया) =====
+// [authLimiter] middleware ko login se pehle add kiya
+router.post('/login', authLimiter, async (req, res) => {
   const { email, password } = req.body;
   const lowerCaseEmail = email.toLowerCase();
   try {
@@ -281,7 +286,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// ===== ME ROUTE (UPDATED with Plan Status) =====
+// ===== ME ROUTE (Bina Rate Limiting) =====
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     if (!req.user) {
@@ -321,7 +326,7 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
-// ===== FORGOT PASSWORD ROUTE =====
+// ===== FORGOT PASSWORD ROUTE (Bina Rate Limiting) =====
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
@@ -376,7 +381,7 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
-// ===== RESET PASSWORD ROUTE =====
+// ===== RESET PASSWORD ROUTE (Bina Rate Limiting) =====
 router.put('/reset-password/:token', async (req, res) => {
   try {
     const hashedToken = crypto
@@ -416,7 +421,7 @@ router.put('/reset-password/:token', async (req, res) => {
   }
 });
 
-// ===== RESEND OTP ROUTE =====
+// ===== RESEND OTP ROUTE (Bina Rate Limiting) =====
 router.post('/resend-otp', async (req, res) => {
   const { email } = req.body;
   const lowerCaseEmail = email.toLowerCase();

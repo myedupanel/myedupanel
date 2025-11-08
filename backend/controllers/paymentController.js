@@ -1,9 +1,10 @@
-// File: backend/controllers/paymentController.js (FINAL "Super Intelligent" UPDATE)
+// File: backend/controllers/paymentController.js (FINAL SECURE CODE)
 
 const prisma = require('../config/prisma');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
+const { Prisma } = require('@prisma/client'); // Prisma errors ke liye
 
 // Razorpay instance (Bina Badlaav)
 let razorpay;
@@ -16,9 +17,20 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
   console.warn("WARNING: Razorpay keys are not set. Payment API will not work.");
 }
 
+// === FIX 1: THE SANITIZER FUNCTION (XSS Prevention) ===
+// यह फंक्शन किसी भी स्ट्रिंग से सभी HTML टैग्स को हटा देगा।
+function removeHtmlTags(str) {
+  if (!str || typeof str !== 'string') {
+    return str;
+  }
+  return str.replace(/<[^>]*>/g, '').trim(); 
+}
+// === END FIX 1 ===
+
+
 // createReceiptHtml function (Bina Badlaav)
 const createReceiptHtml = (userName, planName, amount, orderId, paymentId, expiryDate) => {
-  // ... (Poora HTML code jaisa tha waisa hi) ...
+  // ... (HTML code jaisa tha waisa hi) ...
   return `
   <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
     <div style="background-color: #007bff; color: white; padding: 20px;">
@@ -66,16 +78,20 @@ const createReceiptHtml = (userName, planName, amount, orderId, paymentId, expir
   `;
 };
 
-// === FUNCTION 1: createSubscriptionOrder (Bina Badlaav) ===
+// === FUNCTION 1: createSubscriptionOrder (UPDATED) ===
 exports.createSubscriptionOrder = async (req, res) => {
-  // ... (Poora code jaisa pichli baar tha, waisa hi rahega) ...
   if (!razorpay) {
     return res.status(500).json({ message: "Payment gateway is not configured." });
   }
   try {
-    const { planName, couponCode } = req.body;
+    const { planName, couponCode: rawCouponCode } = req.body;
     const schoolId = req.user.schoolId;
     const userId = req.user.id; 
+    
+    // === FIX 2: COUPON CODE KO SANITIZE KAREIN ===
+    const couponCode = removeHtmlTags(rawCouponCode);
+    // === END FIX 2 ===
+
     const planFromDb = await prisma.plan.findUnique({
       where: { id: planName.toUpperCase() }
     });
@@ -143,11 +159,15 @@ exports.createSubscriptionOrder = async (req, res) => {
   }
 };
 
-// === FUNCTION 2: validateCoupon (Bina Badlaav) ===
+// === FUNCTION 2: validateCoupon (UPDATED) ===
 exports.validateCoupon = async (req, res) => {
-  // ... (Poora code jaisa pichli baar tha, waisa hi rahega) ...
   try {
-    const { couponCode } = req.body;
+    const { couponCode: rawCouponCode } = req.body;
+    
+    // === FIX 3: COUPON CODE KO SANITIZE KAREIN ===
+    const couponCode = removeHtmlTags(rawCouponCode);
+    // === END FIX 3 ===
+    
     const planFromDb = await prisma.plan.findUnique({ where: { id: 'STARTER' } });
     if (!planFromDb || !planFromDb.isActive) {
         return res.status(404).json({ message: "Starter plan details not found." });
@@ -212,13 +232,13 @@ exports.verifySubscriptionWebhook = async (req, res) => {
   const event = req.body.event;
   const payment = req.body.payload?.payment?.entity;
   if (event === 'payment.captured' && payment && payment.status === 'captured') {
-    const { schoolId, userId, planName, type, originalAmount, couponId } = payment.notes;
-    if (type !== 'APP_SUBSCRIPTION') {
+    const { schoolId, userId, planName, originalAmount, couponId } = payment.notes;
+    if (payment.notes.type !== 'APP_SUBSCRIPTION') {
       return res.status(200).json({ message: 'Ignored: Not an app subscription.' });
     }
     const amountPaid = Number(payment.amount) / 100;
     const planStartDate = new Date(payment.created_at * 1000); 
-    const planEndDate = new Date(planStartDate); // Start date se copy karein
+    const planEndDate = new Date(planStartDate); 
     planEndDate.setFullYear(planEndDate.getFullYear() + 1);
     const durationDays = 365;
     try {
@@ -242,7 +262,7 @@ exports.verifySubscriptionWebhook = async (req, res) => {
             paymentId: payment.id,
             orderId: payment.order_id,
             createdAt: planStartDate,
-            endDate: planEndDate, // <-- Yeh field add kiya tha
+            endDate: planEndDate, 
             schoolId: schoolId,
             userId: Number(userId),
             couponId: couponId ? Number(couponId) : null
@@ -333,8 +353,6 @@ exports.syncRazorpayPayments = async (req, res) => {
       const planEndDate = new Date(planStartDate); // Start date se copy karein
       planEndDate.setFullYear(planEndDate.getFullYear() + 1); // 1 saal add karein
 
-      // --- YAHI HAI NAYA "SUPER-SUPER INTELLIGENT" LOGIC ---
-      
       // 1. Check karein ki payment record hamare DB mein hai ya nahi
       const existingSubscription = await prisma.appSubscription.findUnique({
         where: { paymentId: paymentId }
@@ -344,7 +362,6 @@ exports.syncRazorpayPayments = async (req, res) => {
       const school = await prisma.school.findUnique({ where: { id: schoolId } });
 
       // 3. AGAR PAYMENT HAI, LEKIN SCHOOL 'TRIAL' PAR HAI (MISMATCH!)
-      //    (Ya plan name match nahi karta, ya expiry date match nahi karti)
       if (existingSubscription && school && 
           (school.plan !== planName.toUpperCase() || 
            school.planExpiryDate.getTime() !== planEndDate.getTime())

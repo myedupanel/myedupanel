@@ -10,24 +10,12 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require("socket.io");
 const prisma = require('./config/prisma');
+
+// --- Imports ---
 const paymentRoutes = require('./routes/payment'); 
 const couponRoutes = require('./routes/couponRoutes');
+const planRoutes = require('./routes/planRoutes'); 
 
-// === FIX: Sirf sahi waali 'planRoutes.js' file ko import karein ===
-const planRoutes = require('./routes/planRoutes'); // ./routes/planRoutes.js ko import karega
-// const planSingularRoutes = require('./routes/plan');  // <-- YEH ERROR WAALI LINE HATA DI GAYI HAI
-// === END FIX ===
-
-// --- Allowed URLs ki list (No Change) ---
-const allowedOrigins = [
-  process.env.FRONTEND_URL || "http://localhost:3000", 
-  "http://localhost:3000",
-  "https://myedupanel.vercel.app" 
-];
-// --- END ---
-
-
-// --- Route Imports (No Change) ---
 const academicRoutes = require('./routes/academics');
 const eventRoutes = require('./routes/events');
 const settingRoutes = require('./routes/settings');
@@ -47,13 +35,22 @@ const classRoutes = require('./routes/classes');
 const attendanceRoutes = require('./routes/attendance'); 
 const timetableRoutes = require('./routes/timetable');
 
-// const dashboardRoutes = require('./routes/dashboard'); 
+const { apiLimiter } = require('./middleware/rateLimiter'); // Global Limiter Import
+
+// --- Allowed URLs ki list (No Change) ---
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:3000", 
+  "http://localhost:3000",
+  "https://myedupanel.vercel.app" 
+];
+// --- END ---
+
 
 // --- Express App Setup (No Change) ---
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- Standard Middlewares (No Change) ---
+// --- Standard Middlewares (Order: CORS, JSON) ---
 app.use(cors({
   origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE"]
@@ -83,14 +80,21 @@ app.use((req, res, next) => {
     next();
 });
 
-// --- Register API Routes (FIXED) ---
+// --- Register API Routes (CORRECT ORDER) ---
+
 app.get('/', (req, res) => {
   res.send('SchoolPro Backend is running (Prisma Version)!'); 
 });
 
-// Ab sabhi routes body parsers ke baad register honge
-app.use('/api/school', schoolRoutes); 
+// 1. AUTH ROUTES (Yeh apne custom 'authLimiter' ka upyog karte hain)
 app.use('/api/auth', authRoutes);
+
+// 2. GLOBAL API LIMITER (Ab iske neeche ke sabhi routes par apiLimiter lag jayega)
+// [Threat D solved for feature routes]
+app.use('/api', apiLimiter);
+
+// 3. FEATURE ROUTES (Ab ye sabhi rate limited hain)
+app.use('/api/school', schoolRoutes); 
 app.use('/api/admin', adminRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
@@ -109,19 +113,26 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/coupons', couponRoutes);
-
-// === FIX: Sirf sahi route ko register karein ===
-app.use('/api/plans', planRoutes); // Ab /api/plans/admin-all isse match karega
-// app.use('/api/plan', planSingularRoutes); // <-- YEH ERROR WAALI LINE HATA DI GAYI HAI
-// === END FIX ===
-
-// app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/plans', planRoutes);
 
 // --- Socket.IO Connection Handler (No Change) ---
 io.on('connection', (socket) => {
   console.log('A user connected via Socket.IO:', socket.id);
   socket.on('disconnect', () => {
     console.log('User disconnected via Socket.IO:', socket.id);
+  });
+});
+
+// --- 4. GLOBAL ERROR HANDLER (CRASH PREVENTION) ---
+app.use((err, req, res, next) => {
+  console.error('SERVER CRASH DETECTED:', err.stack);
+
+  // Default status code 500 (Internal Server Error)
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode).json({
+    message: err.message || 'An unexpected server error occurred.',
+    // Production mein stack trace na bhejein
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
   });
 });
 

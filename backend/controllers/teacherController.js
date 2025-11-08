@@ -1,11 +1,21 @@
-// File: backend/controllers/teacherController.js
+// File: backend/controllers/teacherController.js (SUPREME SECURE)
 
 // --- 1. Imports ---
-// Puraane models (Teacher, User) ko hatayein
-const prisma = require('../config/prisma'); // Naya Prisma client import karein
+const prisma = require('../config/prisma'); 
+// हमें user token से School ID चाहिए, इसलिए bcrypt, crypto, sendEmail की यहाँ ज़रूरत नहीं है
+
+// === FIX 1: THE SANITIZER FUNCTION (XSS Prevention) ===
+// यह फंक्शन किसी भी स्ट्रिंग से सभी HTML टैग्स को हटा देगा।
+function removeHtmlTags(str) {
+  if (!str || typeof str !== 'string') {
+    return str;
+  }
+  // रेगुलर एक्सप्रेशन का उपयोग करके HTML टैग्स को हटाएँ
+  return str.replace(/<[^>]*>/g, '').trim(); 
+}
+// === END FIX 1 ===
 
 // --- 2. Header Mappings ---
-// Isme koi badlaav nahi, yeh bilkul sahi hai
 const headerMappings = {
   teacherId: ['teacherid', 'id', 'employee id', 'employeeid'],
   name: ['name', 'teacher name', 'teachername', 'full name'],
@@ -15,7 +25,6 @@ const headerMappings = {
 };
 
 // --- 3. Helper Function ---
-// Isme bhi koi badlaav nahi
 function getCanonicalKey(header) {
   if (!header) return null;
   const normalizedHeader = header.toLowerCase().replace(/[\s_-]/g, '');
@@ -30,7 +39,6 @@ function getCanonicalKey(header) {
 // --- 4. FUNCTION 1: addTeachersInBulk (Prisma Version) ---
 const addTeachersInBulk = async (req, res) => {
   try {
-    // NAYA: School ID ko req.user se lein
     const schoolId = req.user.schoolId;
     if (!schoolId) {
       return res.status(400).json({ message: 'Invalid or missing school ID.' });
@@ -41,14 +49,17 @@ const addTeachersInBulk = async (req, res) => {
       return res.status(400).json({ message: 'No data provided.' });
     }
 
-    // ProcessedTeachers (Same code)
+    // ProcessedTeachers (अब Sanitization के साथ)
     const processedTeachers = teachersData.map(row => {
       const newTeacher = {};
       for (const rawHeader in row) {
         const canonicalKey = getCanonicalKey(rawHeader);
         if (canonicalKey) {
           const value = row[rawHeader];
-          newTeacher[canonicalKey] = typeof value === 'string' ? value.trim() : value;
+          
+          // === FIX 2: VALUE KO SANITIZE KAREIN ===
+          newTeacher[canonicalKey] = removeHtmlTags(typeof value === 'string' ? value.trim() : value);
+          // === END FIX 2 ===
         }
       }
       return newTeacher;
@@ -64,23 +75,21 @@ const addTeachersInBulk = async (req, res) => {
     // NAYA: Har teacher data mein schoolId add karein
     const teachersWithSchoolId = validTeachers.map(teacher => ({
       ...teacher,
-      schoolId: schoolId 
+      schoolId: schoolId,
+      // email ko lowercase mein rakhein (best practice)
+      email: teacher.email ? teacher.email.toLowerCase() : teacher.email 
     }));
 
-    // NAYA: Puraana 'Teacher.insertMany' isse badal gaya
-    // Hum 'createMany' ka istemaal karenge, yeh bahut fast hai
+    // createMany का इस्तेमाल करें
     const result = await prisma.teachers.createMany({
       data: teachersWithSchoolId,
-      skipDuplicates: true, // Yeh 'ordered: false' jaisa hai. Duplicate (email/teacherId) ko skip kar dega.
+      skipDuplicates: true, 
     });
     
-    // 'result.count' batata hai ki kitne naye teachers *asli* mein add hue
     res.status(201).json({ message: `${result.count} teachers were added successfully!` });
 
   } catch (error) {
     console.error("Error during bulk teacher import:", error);
-    // P2002 (Unique constraint) error ab nahi aana chahiye 'skipDuplicates: true' ke kaaran
-    // Lekin agar koi aur error aata hai (jaise database connection)
     res.status(500).json({ message: 'Server error during import.' });
   }
 };
@@ -88,19 +97,17 @@ const addTeachersInBulk = async (req, res) => {
 // --- 5. FUNCTION 2: getAllTeachers (Prisma Version) ---
 const getAllTeachers = async (req, res) => {
   try {
-    // NAYA: School ID ko req.user se lein
     const schoolId = req.user.schoolId;
     if (!schoolId) {
       return res.status(400).json({ message: 'Invalid or missing school ID.' });
     }
 
-    // NAYA: Puraana 'Teacher.find()' isse badal gaya
     const teachers = await prisma.teachers.findMany({
       where: {
-        schoolId: schoolId // Sirf iss school ke teachers ko find karein
+        schoolId: schoolId 
       },
       orderBy: {
-        name: 'asc' // Teachers ko naam se (A-Z) sort karein
+        name: 'asc' 
       }
     });
     res.json(teachers);
