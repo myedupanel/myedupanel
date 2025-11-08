@@ -178,7 +178,7 @@ const PlansPage = () => {
 
             {/* === NAYA CODE: Locked "Pro" Plan === */}
             <div className={`${styles.planCard} ${styles.locked}`}>
-              <h3 className={styles.planName}>Pro Plan</h3>
+              <h3 className={styles.planName}>Plus Plan</h3>
               <p className={styles.planDescription}>For growing schools ready to scale their operations.</p>
               <div className={styles.planPrice}>
                 Undefined
@@ -213,7 +213,7 @@ const PlansPage = () => {
 
             {/* === NAYA CODE: Locked "Plus" Plan === */}
             <div className={`${styles.planCard} ${styles.locked}`}>
-              <h3 className={styles.planName}>Plus Plan</h3>
+              <h3 className={styles.planName}>Pro Plan</h3>
               <p className={styles.planDescription}>For large institutions with multi-branch needs.</p>
               <div className={styles.planPrice}>
                 Undefined

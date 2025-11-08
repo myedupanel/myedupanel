@@ -13,9 +13,9 @@ const prisma = require('./config/prisma');
 const paymentRoutes = require('./routes/payment'); 
 const couponRoutes = require('./routes/couponRoutes');
 
-// === FIX: Donon files ko alag-alag naam se import karein ===
+// === FIX: Sirf sahi waali 'planRoutes.js' file ko import karein ===
 const planRoutes = require('./routes/planRoutes'); // ./routes/planRoutes.js ko import karega
-const planSingularRoutes = require('./routes/plan');  // ./routes/plan.js ko import karega
+// const planSingularRoutes = require('./routes/plan');  // <-- YEH ERROR WAALI LINE HATA DI GAYI HAI
 // === END FIX ===
 
 // --- Allowed URLs ki list (No Change) ---
@@ -109,9 +109,9 @@ app.use('/api/timetable', timetableRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/coupons', couponRoutes);
 
-// === FIX: Donon routes ko alag-alag path par register karein ===
+// === FIX: Sirf sahi route ko register karein ===
 app.use('/api/plans', planRoutes); // Ab /api/plans/admin-all isse match karega
-app.use('/api/plan', planSingularRoutes); // Naya path /api/plan (singular)
+// app.use('/api/plan', planSingularRoutes); // <-- YEH ERROR WAALI LINE HATA DI GAYI HAI
 // === END FIX ===
 
 // app.use('/api/dashboard', dashboardRoutes);

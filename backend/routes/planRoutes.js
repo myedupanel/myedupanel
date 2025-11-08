@@ -1,14 +1,23 @@
-// File: backend/routes/planRoutes.js
-const express = require('express');
-const router = express.Router();
-const { getPublicPlans } = require('../controllers/planController');
-// const { authMiddleware, authorize } = require('../middleware/authMiddleware');
+// File: backend/routes/planRoutes.js (Nayi file)
 
-// @route   GET /api/plans
-// @desc    Sabhi public plans (prices) ko fetch karein
-// @access  Public
+const express = require('express');
+// ... (saare imports)
+const {
+  getPublicPlans,
+  getAllPlansAdmin,
+  createPlanAdmin,
+  updatePlanAdmin,
+  deletePlanAdmin
+} = require('../controllers/planController');
+
+// ... (Public route)
 router.get('/', getPublicPlans);
 
-// Yahaan hum baad mein (SuperAdmin ke liye) POST / PUT routes add karenge
+// ... (SuperAdmin routes)
+const superAdminAuth = [authMiddleware, authorize('SuperAdmin')];
+router.get('/admin-all', superAdminAuth, getAllPlansAdmin);
+router.post('/admin', superAdminAuth, createPlanAdmin);
+router.put('/admin/:id', superAdminAuth, updatePlanAdmin);
+router.delete('/admin/:id', superAdminAuth, deletePlanAdmin);
 
 module.exports = router;

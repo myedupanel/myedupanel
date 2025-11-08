@@ -247,7 +247,7 @@ export default function Home() {
               </div>
               
               {/* 2. Button text is correct */}
-              <Link href="/plans" className="cta-button">Grab Now Deal</Link>
+              <Link href="/plans" className="cta-button">Get Started</Link>
               
               {/* 3. Trial info line is gone */}
             </div>
