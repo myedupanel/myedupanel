@@ -1,13 +1,13 @@
-/* File: src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss */
+/* File: src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss (FINAL OFFICIAL A4 GRID) */
 
 /* --- Base Styles --- */
 .certificatePaper {
-  /* A4 Dimensions (210mm x 297mm - Adjusted for browser rendering) */
+  /* A4 Dimensions */
   width: 210mm;
   min-height: 297mm;
   margin: 20px auto;
   font-family: 'Times New Roman', Times, serif;
-  font-size: 11pt; 
+  font-size: 10.5pt; /* Final print size ke liye optimized */
   color: #000;
   background: #fff;
   border: 1px solid #ccc;
@@ -18,12 +18,13 @@
 
 .outerBorder {
   border: 2px solid #000;
-  padding: 8mm 10mm 8mm 10mm; /* Uniform padding */
+  padding: 6mm 8mm 12mm 8mm; /* Reduced padding for more content space */
   display: flex;
   flex-direction: column;
   width: 100%;
   flex-grow: 1;
   box-sizing: border-box;
+  background-color: #fff; /* Ensure it is clean white */
 }
 
 /* Fill styles */
@@ -50,21 +51,20 @@
 /* --- End Base Styles --- */
 
 
-/* --- Header Style --- */
+/* --- Header Style (Matching SNS PUNE Template) --- */
 .certHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 15px; 
-  border-bottom: 1.5px solid #000;
+  gap: 10px; 
+  border-bottom: 1px solid #ddd; /* Header ke neeche ki line */
   padding-bottom: 5px; 
-  margin-bottom: 5px; /* Reduced gap before title row */
+  margin-bottom: 5px; 
 
   .logoContainer {
     flex-shrink: 0;
-    width: 65px;
-    height: 65px;
-    padding: 5px 0;
+    width: 70px;
+    height: 70px;
   }
   .logo { 
     width: 100%;
@@ -77,38 +77,43 @@
     text-align: center;
     line-height: 1.2;
     
-    .schoolNameMyEdu { font-size: 9pt; margin-bottom: 2px; } 
-    .schoolName1 { font-size: 16pt; font-weight: bold; margin: 0; }
-    .schoolAddressCode { font-size: 10pt; line-height: 1.4; } 
+    .schoolNameMyEdu { font-size: 8pt; margin-bottom: 2px; } /* Estd line */
+    .schoolName1 { font-size: 14pt; font-weight: bold; margin: 0; text-transform: uppercase; } /* School Name */
+    .schoolAddressCode { font-size: 9pt; line-height: 1.3; margin-top: 3px; } /* UDISE / Address */
   }
 }
 
-/* Title Row */
+/* Title Row (Merging with the Main Grid Border) */
 .titleRow {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: 2fr 1fr 2fr; /* Serial No | Title | GR No. */
   align-items: center;
   width: 100%;
-  margin-bottom: 0;
-  padding: 0 0;
+  border: 1.5px solid #000; /* Main border */
+  border-bottom: none; 
+  padding: 0;
   
   h2 { 
-    font-size: 14pt;
+    font-size: 13pt;
     font-weight: bold;
     margin: 0;
     padding: 5px 10px; 
     text-align: center;
-    border: 1.5px solid #000;
-    border-top: none;
-    border-bottom: none; 
+    border-left: 1.5px solid #000;
+    border-right: 1.5px solid #000;
   }
 
   .headerSrNo, .headerRegNo {
-    font-size: 11pt;
+    font-size: 9pt;
     font-weight: normal; 
     white-space: nowrap;
     padding: 0 10px;
-    .fill, .fillBlank { width: 100%; flex-grow: 1; }
+    
+    .fill, .fillBlank { 
+        width: 100%; 
+        flex-grow: 1; 
+        border-bottom: 1px dotted #333; /* Line dikhe */
+    }
   }
   .headerSrNo { text-align: left; }
   .headerRegNo { text-align: right; }
@@ -122,20 +127,19 @@
 .certificateGrid {
   width: 100%;
   border: 1.5px solid #000; 
-  border-top: none; /* TitleRow ke border se merge ho jayega */
   display: grid;
-  grid-template-columns: 35px 35% auto; /* 1. Num | 2. Label | 3. Value */
+  /* 1. Num (Fixed) | 2. Label (Fixed) | 3. Value (Auto-fill) */
+  grid-template-columns: 35px 35% auto; 
   flex-grow: 1; 
-  align-content: stretch; 
 }
 
 .rowNum, .rowLabel, .rowValue {
-  padding: 5px 8px; 
+  padding: 3px 8px; /* Compact padding */
   line-height: 1.4;
-  border-bottom: 1px solid #ddd; /* Lighter border for rows */
+  border-bottom: 1px solid #000; /* Darker, cleaner row border */
   display: flex;
   align-items: center; 
-  min-height: 30px; 
+  min-height: 25px; /* Compact height */
 }
 
 .rowNum {
@@ -155,16 +159,16 @@
   border-bottom: none !important;
 }
 
-/* --- STYLING FOR MULTI-FIELD ROWS --- */
+/* --- STYLING FOR MULTI-FIELD ROWS (To handle splits within Row Value) --- */
 .multiFieldRow {
   display: flex;
   align-items: baseline;
   justify-content: flex-start; 
   width: 100%;
-  gap: 5px 20px; 
+  gap: 5px 20px; /* Fields ke beech ki spacing */
   
   .subField {
-      flex-grow: 1; /* Subfields ko jagah dega */
+      flex-grow: 1; 
       display: flex;
       align-items: baseline;
   }
@@ -172,18 +176,35 @@
   .subLabel {
     flex-shrink: 0;
     margin-right: 5px; 
+    font-weight: normal;
   }
 }
+
+/* Row 5: Religion & Caste (Specific Alignment Fix) */
+.rowValue:nth-child(5) {
+    .multiFieldRow {
+        gap: 5px 10px;
+        /* Religion value field */
+        & > .fill { flex-basis: 35%; min-width: 100px; }
+        
+        /* Caste subfield */
+        .casteField {
+            flex-grow: 1; 
+            .fill, .fillBlank { width: 100%; }
+        }
+    }
+}
+
 
 /* Birth Place Sub-Grid (Row 6) */
 .subGrid { 
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2x2 grid */
-  gap: 8px 15px;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2 columns */
+  gap: 4px 8px;
   width: 100%;
   
   .subField {
-      flex-grow: 0; 
+      flex-grow: 1; 
       white-space: nowrap;
   }
 }
@@ -191,7 +212,7 @@
 
 /* --- Certification Text & Footer --- */
 .certText {
-  font-size: 11pt;
+  font-size: 10pt;
   text-align: left;
   margin-top: 10px; 
   line-height: 1.5;
@@ -200,21 +221,19 @@
 .certFooterWrapper {
   margin-top: 10px;
   padding-top: 15px; 
-  font-size: 12pt;
+  font-size: 10pt;
   font-weight: normal;
 }
 
 .datePlace {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 25px; 
+  margin-bottom: 20px; /* Reduced gap */
   
   span {
     display: flex;
     gap: 5px;
-    .fillBlank {
-      min-width: 100px;
-    }
+    .fillBlank { min-width: 100px; }
   }
 }
 
@@ -227,9 +246,9 @@
 .sigBox {
   text-align: center;
   width: 30%;
-  padding-top: 40px; 
+  padding-top: 30px; /* Reduced padding for cleaner look */
   border-top: 1px solid #000;
-  font-size: 10pt;
+  font-size: 9pt;
   font-weight: 600;
 }
 
@@ -241,47 +260,33 @@
     margin: 0;
     padding: 0;
     height: 100%;
-    font-size: 9.5pt !important; /* Final font size for density */
+    font-size: 9pt !important; /* Final font size for maximum density */
   }
   .outerBorder {
     border: 1px solid #000;
-    padding: 4mm 6mm 8mm 6mm; 
-    min-height: 0;
-    height: 100%;
-    box-sizing: border-box; 
+    padding: 3mm 5mm 6mm 5mm; 
   }
   
   /* Print के लिए row padding कम की */
   .rowNum, .rowLabel, .rowValue {
-    padding: 2px 4px !important; 
-    line-height: 1.3 !important;
-    min-height: 20px; 
-    box-sizing: border-box;
+    padding: 1px 3px !important; 
+    line-height: 1.2 !important;
+    min-height: 18px; /* Min height for print density */
   }
-  .multiFieldRow { gap: 2px 10px !important; }
+  .multiFieldRow { gap: 1px 5px !important; }
   .subGrid { gap: 1px 5px !important; }
 
   /* Title alignment fix for print */
   .titleRow { 
-    margin-top: 3px !important; 
+    margin-top: 2px !important; 
     padding: 1px 0 !important; 
-    h2 { font-size: 11pt !important; }
-    .headerSrNo, .headerRegNo { 
-        font-size: 9pt !important; 
-        .fill, .fillBlank { width: 70px !important; }
-    }
+    h2 { font-size: 10pt !important; }
+    .headerSrNo, .headerRegNo { font-size: 8pt !important; }
   }
   
   /* Footer space reduction */
-  .certText { 
-    margin-top: 3px !important; 
-    font-size: 9pt !important;
-  }
-  .certFooterWrapper { 
-    padding-top: 5px !important; 
-    margin-top: 5px !important; 
-    font-size: 10pt !important;
-  }
-  .datePlace { margin-bottom: 10px !important; }
-  .sigBox { padding-top: 15px !important; } 
+  .certText { margin-top: 3px !important; font-size: 8pt !important; }
+  .certFooterWrapper { padding-top: 3px !important; margin-top: 3px !important; font-size: 9pt !important; }
+  .datePlace { margin-bottom: 8px !important; }
+  .sigBox { padding-top: 10px !important; font-size: 8pt !important; }
 }

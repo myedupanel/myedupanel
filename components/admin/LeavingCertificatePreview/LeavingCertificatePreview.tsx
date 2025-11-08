@@ -88,6 +88,7 @@ const fill = (value: string | undefined | null, noLine = false) => {
 
 const SubField: React.FC<{ label: string, value: string | undefined | null, noLine?: boolean }> = ({ label, value, noLine = false }) => (
   <span className={styles.subField}>
+    {/* Label ko tabhi dikhayein jab woh blank na ho */}
     {label && <span className={styles.subLabel}>{label}:</span>} 
     {fill(value, noLine)}
   </span>
@@ -120,7 +121,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* Header (Updated SCSS handles alignment and sizing) */}
+        {/* Header (School Name, Logo, UDISE) */}
         <header className={styles.certHeader}>
           {schoolDetails.logoUrl && (
             <div className={styles.logoContainer}>
@@ -132,7 +133,9 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             </div>
           )}
           <div className={styles.schoolInfoBlock}>
+            {/* School Name - First Line (if needed for Trust/Est. info) */}
             <div className={styles.schoolNameMyEdu}>{schoolDetails.name || 'My EduPanel Trust'}</div> 
+            {/* School Name - Main Bold Line */}
             <div className={styles.schoolName1}>{schoolDetails.name2 || 'Prime International School'}</div>
             <div className={styles.schoolAddressCode}>
               {schoolDetails.address || 'Hinjewadi, Pune, 411057'}
@@ -142,7 +145,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           </div>
         </header>
           
-        {/* Title Row (Centering and Border Fix) */}
+        {/* Title Row (Sr. No / Title / Reg. No) */}
         <div className={styles.titleRow}>
           <div className={styles.headerSrNo}>
             Sr. No: {fill(formData.genRegNo)}
@@ -171,7 +174,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           {/* === ROW 4: Nationality & Mother Tongue === */}
           <GridRow num="4" label="Nationality">
             <div className={styles.multiFieldRow}>
-              {/* Nationality value, no line */}
+              {/* Nationality value (No label, no line needed for value) */}
               <SubField label="" value={formData.nationality || 'Indian'} noLine={true} />
               
               {/* Mother Tongue subfield */}
@@ -182,7 +185,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           {/* === ROW 5: Religion & Caste === */}
           <GridRow num="5" label="Religion"> 
             <div className={styles.multiFieldRow}>
-                {/* 1. Religion Value (fixed space) */}
+                {/* 1. Religion Value */}
                 {fill(formData.religion)}
                 
                 {/* 2. Caste Field */}
@@ -259,7 +262,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           School General Register No. {fill(formData.genRegNo)}
         </p>
 
-        {/* Footer (Spacing Adjusted via SCSS) */}
+        {/* Footer (Signatures and Place/Date) */}
         <footer className={styles.certFooterWrapper}>
           <div className={styles.datePlace}>
             <span>Date: {fill(formData.issueDate)}</span>
