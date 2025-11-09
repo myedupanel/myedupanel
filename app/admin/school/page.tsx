@@ -410,7 +410,7 @@ const DashboardControlCenter = () => {
                       <div className={styles.boxFooter}><button onClick={() => openModal('add-parent')} className={styles.addButton}><MdPersonAdd /> Add Parent</button></div>
                  </div>
 
-                 /* Staff Box */
+
                  <div className={styles.summaryBox}>
                      <div className={styles.boxHeader}><h2><MdBadge/> Staff</h2><Link href="/admin/staff" className={styles.viewAllLink}>View All</Link></div>
                       <ul className={styles.recentList}>
