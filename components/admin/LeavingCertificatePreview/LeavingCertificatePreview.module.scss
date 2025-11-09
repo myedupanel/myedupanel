@@ -33,13 +33,13 @@
 .fillBlank { border-bottom: 1px dotted #333; width: 100%; flex-grow: 1; min-height: 1.1em; }
 
 
-/* --- Header Style (CRITICAL LEFT ALIGN FIX) --- */
+/* --- Header Style (School Data Block Slightly Right) --- */
 .certHeader {
-  /* Logo Left, Block Left moved */
+  /* Logo Left, Info Right - User requested adjustment */
   display: flex;
-  justify-content: flex-start; /* Logo and block start from the left */
-  align-items: flex-start;
-  gap: 15px; /* Added gap for separation */
+  justify-content: space-between; /* Logo left, school info right */
+  align-items: flex-start; /* Align to the very top */
+  gap: 15px; /* Gap for separation if elements are close */
   
   padding-bottom: 5px; 
   text-align: center;
@@ -52,7 +52,7 @@
   .schoolInfoBlock {
     line-height: 1.1;
     text-align: center; /* Internal center align maintained */
-    max-width: 70%; /* Allowing it to take up less space */
+    max-width: 80%; /* Allowing it to take up more space towards right-center */
     
     .trustName { font-size: 8pt; margin: 0 0 2px 0; } 
     .schoolName1 { font-size: 13pt; font-weight: bold; margin: 0; text-transform: uppercase; } 
@@ -93,7 +93,7 @@
 
 /*
   ======================================================================
-  === MAIN TABULAR GRID (Height HALVED) ===
+  === MAIN TABULAR GRID (Space Further Minimized) ===
   ======================================================================
 */
 .certificateGrid {
@@ -107,11 +107,11 @@
   font-size: 9.5pt; 
 }
 
-/* LABEL CELL (Vertical Space Further Reduced) */
+/* LABEL CELL (Vertical Space Minimized) */
 .labelCell {
-    /* Spacing further reduced for height half */
-    padding: 0px 8px; /* Reduced vertical padding */
-    min-height: 12px; /* Reduced min-height */
+    /* Spacing further minimized */
+    padding: 0px 5px; /* Vertical padding 0, Horizontal reduced */
+    min-height: 11px; /* Minimum height for grid row */
     
     line-height: 1.3;
     border-right: 1px solid #000; 
@@ -122,11 +122,11 @@
     background-color: #ffffff;
 }
 
-/* VALUE CELL (Vertical Space Further Reduced) */
+/* VALUE CELL (Vertical Space Minimized) */
 .valueCell {
-    /* Spacing further reduced for height half */
-    padding: 0px 8px; /* Reduced vertical padding */
-    min-height: 12px; /* Reduced min-height */
+    /* Spacing further minimized */
+    padding: 0px 5px; /* Vertical padding 0, Horizontal reduced */
+    min-height: 11px; /* Minimum height for grid row */
     
     line-height: 1.3;
     border-right: none; 
@@ -164,19 +164,16 @@
 }
 
 
-/* --- Certification Text & Footer (Space Tightened for Lift) --- */
+/* --- Certification Text & Footer (Optimized for Lift and Signature Space) --- */
 .certText { 
     font-size: 8pt; text-align: left; 
-    /* Reduced top margin for lift */
-    margin-top: 1px; 
-    
+    margin-top: 0px; /* Reduced to pull up content */
     line-height: 1.3; 
 } 
 
 .certFooterWrapper {
   margin-top: auto;
-  /* Further reduced padding to lift the content */
-  padding-top: 1px; 
+  padding-top: 0px; /* Further reduced to pull up content */
   
   font-size: 9pt;
   font-weight: normal;
@@ -186,7 +183,7 @@
 
 .datePlace {
   display: grid; grid-template-columns: 1fr 1fr; 
-  margin-bottom: 15px; /* Gap between date/place and signatures maintained */
+  margin-bottom: 20px; /* Increased gap for clear separation from signatures */
   gap: 15px;
   
   span {
@@ -200,8 +197,8 @@
 .sigBox {
   text-align: center;
   width: 30%;
-  /* Signature space और बढ़ाया */
-  padding-top: 30px; 
+  /* Increased padding for ample signature space above the line */
+  padding-top: 35px; 
   
   border-top: 1px solid #000;
   font-size: 7pt;
