@@ -7,7 +7,7 @@
   min-height: 297mm;
   margin: 0 auto;
   font-family: 'Times New Roman', Times, serif;
-  font-size: 10pt; /* Final print size के लिए optimized */
+  font-size: 10pt;
   color: #000;
   background: #fff;
   border: 1px solid #ccc;
@@ -18,7 +18,7 @@
 
 .outerBorder {
   border: 2px solid #000;
-  padding: 0 7mm 3mm 7mm; /* CRITICAL FIX: Top Padding हटाकर 0 कर दिया, Bottom Padding कम किया */
+  padding: 0 7mm 3mm 7mm;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -33,27 +33,24 @@
 .fillBlank { border-bottom: 1px dotted #333; width: 100%; flex-grow: 1; min-height: 1.1em; }
 
 
-/* --- Header Style (CRITICAL ZERO MARGIN FIX) --- */
+/* --- Header Style (No change here from last update) --- */
 .certHeader {
-  /* <<< YAHAN BADLAAV KIYA >>> */
   display: flex;
-  justify-content: space-between; /* Logo Left, Info Right */
-  align-items: flex-start; /* CRITICAL: Align to the very top */
-  /* <<< BADLAAV SAMAPT >>> */
-  
+  justify-content: space-between; 
+  align-items: flex-start;
   gap: 1px; 
   padding-bottom: 5px; 
-  text-align: center; /* Kept for title block if any */
+  text-align: center;
   border-bottom: 1px solid #000;
   margin-bottom: 5px; 
 
-  .logoContainer { flex-shrink: 0; width: 60px; height: 60px; margin-top: 5px; } /* Small top margin for logo if needed, or remove */
+  .logoContainer { flex-shrink: 0; width: 60px; height: 60px; margin-top: 5px; }
   .logo { width: 100%; height: 100%; object-fit: contain; }
   
   .schoolInfoBlock {
     line-height: 1.1;
-    text-align: center; /* User-requested: keep text centered within this block */
-    max-width: 80%; /* To prevent stretching */
+    text-align: center; 
+    max-width: 80%;
     
     .trustName { font-size: 8pt; margin: 0 0 2px 0; } 
     .schoolName1 { font-size: 13pt; font-weight: bold; margin: 0; text-transform: uppercase; } 
@@ -94,13 +91,13 @@
 
 /*
   ======================================================================
-  === MAIN TABULAR GRID (No composes error) ===
+  === MAIN TABULAR GRID (Height Reduced) ===
   ======================================================================
 */
 .certificateGrid {
   width: 100%;
   border: 1.5px solid #000; 
-  border-top: none; /* Merge with Title block */
+  border-top: none; 
   display: grid;
   grid-template-columns: 38% auto; 
   flex-grow: 1;
@@ -108,11 +105,11 @@
   font-size: 9.5pt; 
 }
 
-/* LABEL CELL (Vertical Space Reduced) */
+/* LABEL CELL (Vertical Space Further Reduced) */
 .labelCell {
-    /* <<< YAHAN BADLAAV KIYA: Padding/Min-Height कम किया >>> */
-    padding: 1.5px 8px; 
-    min-height: 16px; 
+    /* <<< BADLAAV >>> */
+    padding: 1px 8px; /* Reduced */
+    min-height: 14px; /* Reduced */
     /* <<< BADLAAV SAMAPT >>> */
     line-height: 1.3;
     border-right: 1px solid #000; 
@@ -123,11 +120,11 @@
     background-color: #ffffff;
 }
 
-/* VALUE CELL (Vertical Space Reduced) */
+/* VALUE CELL (Vertical Space Further Reduced) */
 .valueCell {
-    /* <<< YAHAN BADLAAV KIYA: Padding/Min-Height कम किया >>> */
-    padding: 1.5px 8px; 
-    min-height: 16px; 
+    /* <<< BADLAAV >>> */
+    padding: 1px 8px; /* Reduced */
+    min-height: 14px; /* Reduced */
     /* <<< BADLAAV SAMAPT >>> */
     line-height: 1.3;
     border-right: none; 
@@ -165,25 +162,29 @@
 }
 
 
-/* --- Certification Text & Footer (CRITICAL A4 SPACE FIX) --- */
-.certText { font-size: 8pt; text-align: left; margin-top: 3px; line-height: 1.3; } /* Reduced size and margin */
+/* --- Certification Text & Footer (Space Tightened) --- */
+.certText { 
+    font-size: 8pt; text-align: left; 
+    /* <<< BADLAAV >>> */
+    margin-top: 2px; /* Reduced */
+    /* <<< BADLAAV SAMAPT >>> */
+    line-height: 1.3; 
+} 
 
 .certFooterWrapper {
   margin-top: auto;
-  /* <<< YAHAN BADLAAV KIYA: Padding कम किया >>> */
-  padding-top: 4px; /* Reduced padding to lift the content */
+  /* <<< BADLAAV >>> */
+  padding-top: 2px; /* Further reduced padding to lift the content */
   /* <<< BADLAAV SAMAPT >>> */
   font-size: 9pt;
   font-weight: normal;
   background-color: transparent; 
-  color: #000; /* Ensure dark text */
+  color: #000;
 }
 
 .datePlace {
   display: grid; grid-template-columns: 1fr 1fr; 
-  /* <<< YAHAN BADLAAV KIYA: Margin-bottom बढ़ाया >>> */
-  margin-bottom: 15px; /* Increased gap below date/place and above signatures */
-  /* <<< BADLAAV SAMAPT >>> */
+  margin-bottom: 15px; /* Gap between date/place and signatures maintained */
   gap: 15px;
   
   span {
@@ -197,9 +198,7 @@
 .sigBox {
   text-align: center;
   width: 30%;
-  /* <<< YAHAN BADLAAV KIYA: Signature space बढ़ाया >>> */
-  padding-top: 25px; /* Increased padding for signature space above the line */
-  /* <<< BADLAAV SAMAPT >>> */
+  padding-top: 25px; /* Ample padding for signature space above the line maintained */
   border-top: 1px solid #000;
   font-size: 7pt;
   font-weight: 600;
@@ -214,8 +213,8 @@
   .certHeader { padding-bottom: 1px; }
   .titleBlock h2 { font-size: 9pt; }
   .preHeaderRow { margin-bottom: 1px; }
-  .certText { margin-top: 2px !important; }
-  .certFooterWrapper { padding-top: 3px; }
+  .certText { margin-top: 1px !important; }
+  .certFooterWrapper { padding-top: 1px; }
   .sigBox { padding-top: 15px; font-size: 6pt; }
   .datePlace { margin-bottom: 5px; }
 }
