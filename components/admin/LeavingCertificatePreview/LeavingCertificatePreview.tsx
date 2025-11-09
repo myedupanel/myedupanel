@@ -132,7 +132,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           )}
           <div className={styles.schoolInfoBlock}>
             {/* 1. School Name (Largest/Bold - SWAPPED) */}
-            <div className={styles.trustName}>{schoolDetails.name || 'KHANESPAR ENGLISH MEDIUM SCHOOL PARANDA'}</div> 
+            <div className={styles.trustName}>{schoolDetails.name || 'MYEDUPANEL ENGLISH MEDIUM SCHOOL PUNE'}</div> 
             
             {/* 2. Trust/Society Name (SWAPPED) */}
             <div className={styles.schoolName1}>{schoolDetails.name2 || 'AFFILIATED/DBT BOARD...'}</div>
