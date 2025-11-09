@@ -167,11 +167,11 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {fill(student?.name)}
           </RenderRow>
           
-          {/* === FIX 1: UID/AADHAR CARD ROW === */}
+          {/* === UID/AADHAR CARD ROW === */}
           <RenderRow label="UID Adhar Card No.:">
             {fill(student?.aadhaarNo)}
           </RenderRow>
-          {/* === END FIX 1 === */}
+          {/* === END UID/AADHAR CARD ROW === */}
           
           <RenderRow label="Mother's Name:">
             {fill(formData.motherName)}

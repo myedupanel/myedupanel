@@ -1,9 +1,10 @@
-/* File: src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss (FINAL A4 OPTIMIZED) */
+/* File: src/components/admin/LeavingCertificatePreview/LeavingCertificatePreview.module.scss (FINAL OFFICIAL A4 GRID - CSS FIX) */
 
 /* --- Base Styles --- */
 .certificatePaper {
+  /* A4 Dimensions */
   width: 210mm;
-  /* Min-height हटा दिया ताकि A4 पर फिट हो */
+  min-height: 297mm;
   margin: 10px auto;
   font-family: 'Times New Roman', Times, serif;
   font-size: 10.5pt; 
@@ -23,7 +24,7 @@
   width: 100%;
   flex-grow: 1;
   box-sizing: border-box;
-  background-color: #fff;
+  background-color: #fff; /* White Background */
 }
 
 /* Fill styles */
@@ -32,7 +33,7 @@
 .fillBlank { border-bottom: 1px dotted #333; width: 100%; flex-grow: 1; min-height: 1.1em; }
 
 
-/* --- Header Style --- */
+/* --- Header Style (Matching SNS PUNE Template) --- */
 .certHeader {
   display: flex;
   justify-content: center; 
@@ -55,7 +56,7 @@
   }
 }
 
-/* --- Serial/GR No. & Title Row (Merged) --- */
+/* --- Serial/GR No. & Title Row (Pre-Header) --- */
 .preHeaderRow {
     display: flex;
     justify-content: space-between;
@@ -66,7 +67,13 @@
     .serialBox, .grBox {
         display: flex;
         align-items: baseline;
-        .fillBlank, .fill { border-bottom: 1px solid #000; min-width: 70px; margin-left: 5px; font-weight: normal; }
+        
+        .fillBlank, .fill { 
+            border-bottom: 1px solid #000; 
+            min-width: 70px;
+            margin-left: 5px;
+            font-weight: normal;
+        }
     }
 }
 
@@ -76,12 +83,12 @@
     padding-bottom: 5px;
     margin-bottom: 0;
     
-    h2 { font-size: 13pt; font-weight: bold; margin: 0; }
+    h2 { font-size: 12pt; font-weight: bold; margin: 0; }
 }
 
 /*
   ======================================================================
-  === MAIN TABULAR GRID (100% SNS MATCH - No composes error) ===
+  === MAIN TABULAR GRID (CSS FIX: composes हटा दिया गया) ===
   ======================================================================
 */
 .certificateGrid {
@@ -102,11 +109,12 @@
     display: flex;
     align-items: center; 
     font-weight: normal;
-    min-height: 20px; /* Reduced min-height */
+    min-height: 20px; 
 }
 
-/* LABEL CELL (White Background - Replicating Table Look) */
+/* LABEL CELL (Manual duplication) */
 .labelCell {
+    /* composes: tableCell की जगह properties */
     padding: 3px 8px; 
     line-height: 1.3;
     border-right: 1px solid #000; 
@@ -119,7 +127,7 @@
     background-color: #ffffff; /* White background */
 }
 
-/* VALUE CELL (White Background, Bold Value) */
+/* VALUE CELL (Manual duplication) */
 .valueCell {
     padding: 3px 8px; 
     line-height: 1.3;
@@ -127,7 +135,7 @@
     border-bottom: 1px solid #000; 
     display: flex;
     align-items: center; 
-    font-weight: bold; 
+    font-weight: bold; /* Value field bold */
     min-height: 20px; 
     
     flex-wrap: wrap; 
@@ -143,7 +151,7 @@
     border-bottom: none !important;
 }
 
-/* --- Multi-Field Formatting --- */
+/* === Multi-Field Formatting (No Change) === */
 .multiFieldRow {
   display: flex;
   align-items: baseline;
@@ -156,16 +164,9 @@
 }
 
 
-/* --- Certification Text & Footer --- */
+/* --- Certification Text & Footer (No Change) --- */
 .certText { font-size: 9pt; text-align: left; margin-top: 5px; line-height: 1.5; }
-
-.certFooterWrapper {
-  margin-top: auto;
-  padding-top: 15px; 
-  font-size: 10pt;
-  font-weight: normal;
-}
-
+.certFooterWrapper { margin-top: 10px; padding-top: 15px; font-size: 10pt; font-weight: normal; }
 .datePlace {
   display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 20px; 
   gap: 15px;
@@ -192,7 +193,7 @@
   .certificatePaper { font-size: 8.5pt !important; }
   .outerBorder { padding: 2mm 4mm 4mm 4mm; } 
   .tableCell { padding: 1px 3px !important; min-height: 15px; }
-  .certHeader { padding-bottom: 2px; }
+  .certHeader { padding-bottom: 2px; border-bottom: 1px solid #000; }
   .titleBlock h2 { font-size: 10pt; }
   .preHeaderRow { margin-bottom: 2px; }
   .certFooterWrapper { padding-top: 3px; }
