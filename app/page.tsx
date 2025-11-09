@@ -163,7 +163,7 @@ export default function Home() {
           </div>
           <div className="impact-cards">
             <div className="impact-card"><div className="card-icon-background"><i className="bi bi-building"></i></div><div className="card-number">9+</div><div className="card-title">Schools</div><p className="card-description">Institutions using our platform</p></div>
-            <div className="impact-card"><div className="card-icon-background"><i className="bi bi-people"></i></div><div className="card-number">90000+</div><div className="card-title">Students</div><p className="card-description">Learning through our system</p></div>
+            <div className="impact-card"><div className="card-icon-background"><i className="bi bi-people"></i></div><div className="card-number">2548+</div><div className="card-title">Students</div><p className="card-description">Learning through our system</p></div>
             <div className="impact-card"><div className="card-icon-background"><i className="bi bi-person"></i></div><div className="card-number">499+</div><div className="card-title">Parents</div><p className="card-description">Engaged with their children's education</p></div>
           </div>
         </div>
