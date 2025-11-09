@@ -33,13 +33,13 @@
 .fillBlank { border-bottom: 1px dotted #333; width: 100%; flex-grow: 1; min-height: 1.1em; }
 
 
-/* --- Header Style (School Data Block Slightly Right) --- */
+/* --- Header Style (School Info Block Adjusted Slightly Right) --- */
 .certHeader {
-  /* Logo Left, Info Right - User requested adjustment */
   display: flex;
-  justify-content: space-between; /* Logo left, school info right */
-  align-items: flex-start; /* Align to the very top */
-  gap: 15px; /* Gap for separation if elements are close */
+  justify-content: flex-start; 
+  align-items: flex-start;
+  /* Gap increased slightly to push school info block a bit right */
+  gap: 20px; 
   
   padding-bottom: 5px; 
   text-align: center;
@@ -52,7 +52,11 @@
   .schoolInfoBlock {
     line-height: 1.1;
     text-align: center; /* Internal center align maintained */
-    max-width: 80%; /* Allowing it to take up more space towards right-center */
+    /* Max-width increased slightly to give it more presence */
+    max-width: 75%; 
+    
+    /* Added left margin to subtly move the block more to the right */
+    margin-left: 5px; 
     
     .trustName { font-size: 8pt; margin: 0 0 2px 0; } 
     .schoolName1 { font-size: 13pt; font-weight: bold; margin: 0; text-transform: uppercase; } 
@@ -93,7 +97,7 @@
 
 /*
   ======================================================================
-  === MAIN TABULAR GRID (Space Further Minimized) ===
+  === MAIN TABULAR GRID (Height Further Reduced) ===
   ======================================================================
 */
 .certificateGrid {
@@ -109,9 +113,9 @@
 
 /* LABEL CELL (Vertical Space Minimized) */
 .labelCell {
-    /* Spacing further minimized */
-    padding: 0px 5px; /* Vertical padding 0, Horizontal reduced */
-    min-height: 11px; /* Minimum height for grid row */
+    /* Padding and min-height further reduced for maximum compaction */
+    padding: 0px 8px; /* Minimal vertical padding */
+    min-height: 11px; /* Minimal height for content */
     
     line-height: 1.3;
     border-right: 1px solid #000; 
@@ -124,9 +128,9 @@
 
 /* VALUE CELL (Vertical Space Minimized) */
 .valueCell {
-    /* Spacing further minimized */
-    padding: 0px 5px; /* Vertical padding 0, Horizontal reduced */
-    min-height: 11px; /* Minimum height for grid row */
+    /* Padding and min-height further reduced for maximum compaction */
+    padding: 0px 8px; /* Minimal vertical padding */
+    min-height: 11px; /* Minimal height for content */
     
     line-height: 1.3;
     border-right: none; 
@@ -164,16 +168,19 @@
 }
 
 
-/* --- Certification Text & Footer (Optimized for Lift and Signature Space) --- */
+/* --- Certification Text & Footer (Space Optimized for Signatures) --- */
 .certText { 
     font-size: 8pt; text-align: left; 
-    margin-top: 0px; /* Reduced to pull up content */
+    /* Minimized top margin for lift */
+    margin-top: 0px; 
+    
     line-height: 1.3; 
 } 
 
 .certFooterWrapper {
   margin-top: auto;
-  padding-top: 0px; /* Further reduced to pull up content */
+  /* Minimized padding for lift */
+  padding-top: 0px; 
   
   font-size: 9pt;
   font-weight: normal;
@@ -183,7 +190,8 @@
 
 .datePlace {
   display: grid; grid-template-columns: 1fr 1fr; 
-  margin-bottom: 20px; /* Increased gap for clear separation from signatures */
+  /* Maintained good gap below date/place and above signatures */
+  margin-bottom: 18px; 
   gap: 15px;
   
   span {
@@ -210,12 +218,12 @@
 @media print {
   .certificatePaper { font-size: 7.5pt !important; }
   .outerBorder { padding: 1mm 3mm 3mm 3mm; border: 1px solid #000; } 
-  .labelCell, .valueCell { padding: 1px 3px !important; min-height: 14px; }
+  .labelCell, .valueCell { padding: 0.5px 3px !important; min-height: 11px; }
   .certHeader { padding-bottom: 1px; }
   .titleBlock h2 { font-size: 9pt; }
   .preHeaderRow { margin-bottom: 1px; }
-  .certText { margin-top: 1px !important; }
-  .certFooterWrapper { padding-top: 1px; }
-  .sigBox { padding-top: 15px; font-size: 6pt; }
+  .certText { margin-top: 0px !important; }
+  .certFooterWrapper { padding-top: 0px; }
+  .sigBox { padding-top: 20px; font-size: 6pt; }
   .datePlace { margin-bottom: 5px; }
 }
