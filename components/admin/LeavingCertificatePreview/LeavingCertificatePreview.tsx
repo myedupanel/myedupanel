@@ -141,7 +141,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             <div className={styles.schoolAddressCode}>
               {schoolDetails.address || 'FULL SCHOOL ADDRESS'}
               <br/>
-              Affiliation No.: {fill('1130572', true)} | U-DISE Code No.: {schoolDetails.udiseNo || '27251014726'}
+              Affiliation No.: {fill('', true)} | U-DISE Code No.: {schoolDetails.udiseNo || '27251014726'}
             </div>
             
             {/* 4. Contact Line */}
