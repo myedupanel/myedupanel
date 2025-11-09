@@ -33,12 +33,14 @@
 .fillBlank { border-bottom: 1px dotted #333; width: 100%; flex-grow: 1; min-height: 1.1em; }
 
 
-/* --- Header Style (No change here from last update) --- */
+/* --- Header Style (CRITICAL LEFT ALIGN FIX) --- */
 .certHeader {
+  /* Logo Left, Block Left moved */
   display: flex;
-  justify-content: space-between; 
+  justify-content: flex-start; /* Logo and block start from the left */
   align-items: flex-start;
-  gap: 1px; 
+  gap: 15px; /* Added gap for separation */
+  
   padding-bottom: 5px; 
   text-align: center;
   border-bottom: 1px solid #000;
@@ -49,8 +51,8 @@
   
   .schoolInfoBlock {
     line-height: 1.1;
-    text-align: center; 
-    max-width: 80%;
+    text-align: center; /* Internal center align maintained */
+    max-width: 70%; /* Allowing it to take up less space */
     
     .trustName { font-size: 8pt; margin: 0 0 2px 0; } 
     .schoolName1 { font-size: 13pt; font-weight: bold; margin: 0; text-transform: uppercase; } 
@@ -91,7 +93,7 @@
 
 /*
   ======================================================================
-  === MAIN TABULAR GRID (Height Reduced) ===
+  === MAIN TABULAR GRID (Height HALVED) ===
   ======================================================================
 */
 .certificateGrid {
@@ -107,10 +109,10 @@
 
 /* LABEL CELL (Vertical Space Further Reduced) */
 .labelCell {
-    /* <<< BADLAAV >>> */
-    padding: 1px 8px; /* Reduced */
-    min-height: 14px; /* Reduced */
-    /* <<< BADLAAV SAMAPT >>> */
+    /* Spacing further reduced for height half */
+    padding: 0px 8px; /* Reduced vertical padding */
+    min-height: 12px; /* Reduced min-height */
+    
     line-height: 1.3;
     border-right: 1px solid #000; 
     border-bottom: 1px solid #000; 
@@ -122,10 +124,10 @@
 
 /* VALUE CELL (Vertical Space Further Reduced) */
 .valueCell {
-    /* <<< BADLAAV >>> */
-    padding: 1px 8px; /* Reduced */
-    min-height: 14px; /* Reduced */
-    /* <<< BADLAAV SAMAPT >>> */
+    /* Spacing further reduced for height half */
+    padding: 0px 8px; /* Reduced vertical padding */
+    min-height: 12px; /* Reduced min-height */
+    
     line-height: 1.3;
     border-right: none; 
     border-bottom: 1px solid #000; 
@@ -162,20 +164,20 @@
 }
 
 
-/* --- Certification Text & Footer (Space Tightened) --- */
+/* --- Certification Text & Footer (Space Tightened for Lift) --- */
 .certText { 
     font-size: 8pt; text-align: left; 
-    /* <<< BADLAAV >>> */
-    margin-top: 2px; /* Reduced */
-    /* <<< BADLAAV SAMAPT >>> */
+    /* Reduced top margin for lift */
+    margin-top: 1px; 
+    
     line-height: 1.3; 
 } 
 
 .certFooterWrapper {
   margin-top: auto;
-  /* <<< BADLAAV >>> */
-  padding-top: 2px; /* Further reduced padding to lift the content */
-  /* <<< BADLAAV SAMAPT >>> */
+  /* Further reduced padding to lift the content */
+  padding-top: 1px; 
+  
   font-size: 9pt;
   font-weight: normal;
   background-color: transparent; 
@@ -198,7 +200,9 @@
 .sigBox {
   text-align: center;
   width: 30%;
-  padding-top: 25px; /* Ample padding for signature space above the line maintained */
+  /* Signature space और बढ़ाया */
+  padding-top: 30px; 
+  
   border-top: 1px solid #000;
   font-size: 7pt;
   font-weight: 600;
