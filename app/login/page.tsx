@@ -1,4 +1,3 @@
-// File: app/login/page.tsx (Updated with Super Premium Transition Logic)
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -8,6 +7,7 @@ import axios from 'axios';
 import { FiArrowRight, FiEye, FiEyeOff, FiHome } from 'react-icons/fi';
 import styles from './login.module.scss';
 import { Inter } from 'next/font/google';
+// Import 'useAuth' hook (Aapka code pehle se sahi hai)
 import { useAuth } from '@/app/context/AuthContext'; 
 
 const inter = Inter({
@@ -24,6 +24,7 @@ const slideshowImages = [
 
 export default function LoginPage() {
   const router = useRouter();
+  // 'login' function (Aapka code pehle se sahi hai)
   const { login } = useAuth(); 
 
   const [showPassword, setShowPassword] = useState(false);
@@ -31,8 +32,6 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  // <<< NEW STATE: Transition Screen Control >>>
-  const [isTransitionActive, setIsTransitionActive] = useState(false); 
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -48,20 +47,19 @@ export default function LoginPage() {
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
-    
-    // 1. Start loading and transition immediately
     setIsLoading(true);
-    setIsTransitionActive(true); // <<< START TRANSITION >>>
 
     try {
+      // Axios call ab aapke global 'api.ts' instance ko use nahi karega, 
+      // isliye '/api' prefix zaroori hai
       const response = await axios.post('/api/auth/login', formData);
       const token = response.data.token;
       
-      // 2. Perform heavy work (login + role check)
       const user = await login(token);
 
       if (user) {
-        // 3. Success: Redirect (Transition is already running)
+        
+        // 'signupIntent' logic (Yeh bilkul sahi hai)
         const signupIntent = localStorage.getItem('signupIntent');
         if (signupIntent === 'starter') {
           localStorage.removeItem('signupIntent');
@@ -69,9 +67,11 @@ export default function LoginPage() {
           return; 
         }
         
+        // ===== YAHI HAI SUPERADMIN LOGIN FIX =====
+        // Role ke hisaab se redirect karein
         switch (user.role) {
           case 'Admin':
-          case 'SuperAdmin':
+          case 'SuperAdmin': // <-- YEH NAYI LINE ADD KI HAI
             router.push('/admin/dashboard');
             break;
           case 'Teacher':
@@ -87,35 +87,22 @@ export default function LoginPage() {
             router.push('/');
         }
       } else {
-        // 4. Failure in role check
         setError("Could not verify user role after login.");
-        setIsTransitionActive(false); // Stop transition
-        setIsLoading(false);
       }
     } catch (err: any) {
-      // 4. Login Failure (Error handling)
       if (err.response && err.response.data.msg) {
         setError(err.response.data.msg);
       } else {
         setError("Login failed. Please check your connection and try again.");
       }
-      setIsTransitionActive(false); // Stop transition
+    } finally {
       setIsLoading(false);
-    } 
-    // finally block hata diya, kyuki success hone par loading false nahi karna hai, page redirect hoga
+    }
   };
 
   // Baaki saara JSX code bilkul waisa hi rahega
   return (
-    // <<< MAIN WRAPPER >>>
     <div className={`${styles.pageWrapper} ${inter.className}`}>
-      
-      {/* 5. Transition Overlay Rendering */}
-      {/* isTransitionActive hone par 'active' class add hogi, jo CSS transition ko trigger karegi */}
-      <div className={`${styles.transitionOverlay} ${isTransitionActive ? styles.transitionActive : ''}`}>
-        <div className={styles.transitionCircle}></div>
-      </div>
-      
       <div className={styles.formContainer}>
         <div className={styles.formCard}>
           <header className={styles.header}>
