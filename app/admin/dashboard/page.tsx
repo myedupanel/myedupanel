@@ -332,4 +332,4 @@ interface AdminProfile {
   email: string;
   profileImageUrl: string;
   schoolName: string;
-}
+} 
