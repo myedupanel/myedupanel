@@ -94,7 +94,7 @@
 
 /*
   ======================================================================
-  === MAIN TABULAR GRID (Height INCREASED to 80%) ===
+  === MAIN TABULAR GRID (Height INCREASED to 83%) ===
   ======================================================================
 */
 .certificateGrid {
@@ -107,11 +107,11 @@
   font-size: 9.5pt; 
 }
 
-/* LABEL CELL (Vertical Space Maximized for 80% fill) */
+/* LABEL CELL (Vertical Space Maximized for 83% fill) */
 .labelCell {
-    /* <<< CRITICAL BADLAAV: Padding/Min-height increased for 80% >>> */
-    padding: 12px 8px; /* Increased vertical padding */
-    min-height: 28px; /* Increased min-height */
+    /* <<< CRITICAL BADLAAV: Padding/Min-height increased for 83% >>> */
+    padding: 13px 8px; /* Increased vertical padding */
+    min-height: 30px; /* Increased min-height */
     
     line-height: 1.3;
     border-right: 1px solid #000; 
@@ -122,11 +122,11 @@
     background-color: #ffffff;
 }
 
-/* VALUE CELL (Vertical Space Maximized for 80% fill) */
+/* VALUE CELL (Vertical Space Maximized for 83% fill) */
 .valueCell {
-    /* <<< CRITICAL BADLAAV: Padding/Min-height increased for 80% >>> */
-    padding: 12px 8px; /* Increased vertical padding */
-    min-height: 28px; /* Increased min-height */
+    /* <<< CRITICAL BADLAAV: Padding/Min-height increased for 83% >>> */
+    padding: 13px 8px; /* Increased vertical padding */
+    min-height: 30px; /* Increased min-height */
     
     line-height: 1.3;
     border-right: none; 
@@ -167,31 +167,35 @@
 /* --- Certification Text & Footer (Space ADJUSTED) --- */
 .certText { 
     font-size: 8pt; text-align: left; 
-    /* Margin kept minimal as grid is now very tall */
     margin-top: 5px; 
-    
     line-height: 1.3; 
 } 
 
+/* Date/Place block now positioned right after certText */
+.datePlace {
+    /* <<< CRITICAL BADLAAV: Date/Place styling moved out of certFooterWrapper and adjusted >>> */
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    margin-top: 5px; /* Added gap below cert text */
+    margin-bottom: 25px; /* Gap below date/place and above signatures increased */
+    gap: 15px;
+    
+    span {
+      display: flex; gap: 5px; font-weight: bold; 
+      .fill, .fillBlank { min-width: 80px; border-bottom: 1px solid #000; font-weight: normal; }
+    }
+}
+/* End of Date/Place block changes */
+
+
 .certFooterWrapper {
-  margin-top: auto; 
+  margin-top: auto; /* Pushes signatures to the very bottom */
   padding-top: 0px; 
   
   font-size: 9pt;
   font-weight: normal;
   background-color: transparent; 
   color: #000;
-}
-
-.datePlace {
-  display: grid; grid-template-columns: 1fr 1fr; 
-  margin-bottom: 18px; 
-  gap: 15px;
-  
-  span {
-    display: flex; gap: 5px; font-weight: bold; 
-    .fill, .fillBlank { min-width: 80px; border-bottom: 1px solid #000; font-weight: normal; }
-  }
 }
 
 .signatures { display: flex; justify-content: space-between; align-items: flex-end; }
@@ -211,8 +215,8 @@
 @media print {
   .certificatePaper { font-size: 7.5pt !important; }
   .outerBorder { padding: 1mm 3mm 3mm 3mm; border: 1px solid #000; } 
-  /* Print height adjusted for 80% fill */
-  .labelCell, .valueCell { padding: 4px 3px !important; min-height: 20px; } 
+  /* Print height adjusted for 83% fill */
+  .labelCell, .valueCell { padding: 5px 3px !important; min-height: 22px; } 
   .certHeader { padding-bottom: 1px; }
   .titleBlock h2 { font-size: 9pt; }
   .preHeaderRow { margin-bottom: 1px; }

@@ -266,13 +266,16 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
         <p className={styles.certText}>
           Certified that the above information is in accordance with school register.
         </p>
+        
+        {/* <<< CRITICAL BADLAAV: Date/Place moved here, outside the footer tag >>> */}
+        <div className={styles.datePlace}>
+          <span>Date: {fill(formData.issueDate)}</span>
+          <span>Place: {fill(schoolDetails.place)}</span>
+        </div>
+        {/* <<< BADLAAV SAMAPT >>> */}
 
-        {/* Footer (Signatures and Place/Date) */}
+        {/* Footer (Signatures) */}
         <footer className={styles.certFooterWrapper}>
-          <div className={styles.datePlace}>
-            <span>Date: {fill(formData.issueDate)}</span>
-            <span>Place: {fill(schoolDetails.place)}</span>
-          </div>
           <div className={styles.signatures}>
             <div className={styles.sigBox}>
               <span>Class Teacher</span>
