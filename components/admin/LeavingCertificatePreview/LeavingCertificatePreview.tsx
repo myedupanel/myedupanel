@@ -131,11 +131,11 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             </div>
           )}
           <div className={styles.schoolInfoBlock}>
-            {/* 1. Trust/Society Name */}
-            <div className={styles.trustName}>{schoolDetails.name2 || 'AFFILIATED/DBT BOARD...'}</div> 
+            {/* 1. School Name (Largest/Bold - SWAPPED) */}
+            <div className={styles.trustName}>{schoolDetails.name || 'KHANESPAR ENGLISH MEDIUM SCHOOL PARANDA'}</div> 
             
-            {/* 2. School Name (Largest/Bold) */}
-            <div className={styles.schoolName1}>{schoolDetails.name || 'KHANESPAR ENGLISH MEDIUM SCHOOL PARANDA'}</div>
+            {/* 2. Trust/Society Name (SWAPPED) */}
+            <div className={styles.schoolName1}>{schoolDetails.name2 || 'AFFILIATED/DBT BOARD...'}</div>
             
             {/* 3. Address & Affiliation */}
             <div className={styles.schoolAddressCode}>
