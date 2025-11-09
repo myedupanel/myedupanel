@@ -4,55 +4,142 @@
   color: #d1d5db; // Light text color
   width: 260px; 
   height: 100vh;
-  position: fixed; 
+  position: fixed; // <--- FIX: Sidebar ko lock karega
   top: 0;
   left: 0;
   display: flex;
   flex-direction: column;
   z-index: 1000; 
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease-in-out; /* CRITICAL: Animation add kiya */
 }
 
-/* Mobile State: Sidebar ko left se bahar dhakelta hai */
-.sidebarContainer.hiddenOnMobile {
-    transform: translateX(-100%);
+.logoSection {
+  padding: 1.5rem;
+  border-bottom: 1px solid #374151;
+  h2 {
+    color: #ffffff;
+    font-size: 1.8rem;
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+  }
+  a {
+    text-decoration: none;
+  }
 }
 
-/* --- LOGO, MENU, FOOTER (NO CHANGE) --- */
-/* ... (Aapka poora logoSection, menuSection, footerButton code waisa hi rakhein) ... */
+.menuSection {
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem 0;
+}
 
-// --- New Hamburger Toggle Button Styling (Header mein use hoga) ---
-.menuToggleBtn {
-    display: none; /* Default mein chupa rahega */
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 1001; /* Sidebar se upar rahega */
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 10px;
-    border-radius: 4px;
+.menuList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menuItem {
+  margin: 0.25rem 0.75rem;
+  border-radius: 8px;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    color: #d1d5db;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+
+  .icon {
     font-size: 1.5rem;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    a {
+      background-color: #374151;
+      color: #ffffff;
+    }
+  }
+
+  &.active {
+    background-color: #3b82f6; 
+    a {
+      color: #ffffff;
+    }
+  }
 }
 
-/* --- MEDIA QUERY for Mobile --- */
-@media (max-width: 1024px) {
-  .menuToggleBtn {
-    display: block; /* Mobile par dikhega */
+/* --- TAGS STYLES --- */
+.proTag {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background-color: #ffc107; 
+  color: #333;
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+.upcomingTag {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background-color: #17a2b8;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+.upcoming {
+  a {
+    color: #6b7280; 
+    cursor: not-allowed;
   }
-
-  .sidebarContainer {
-    /* Mobile par default chupa hua */
-    transform: translateX(-100%);
-    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5); /* Deep shadow */
+}
+.superAdminLink {
+  a {
+    color: #60a5fa; 
   }
+}
 
-  /* Sidebar active hone par screen par aayega */
-  .sidebarContainer.activeOnMobile {
-    transform: translateX(0%);
+/* --- FOOTER STYLES --- */
+.sidebarFooter {
+  padding: 1rem;
+  margin-top: auto; 
+  border-top: 1px solid #374151;
+}
+.footerButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  background-color: #374151;
+  color: #e5e7eb;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #4b5563;
+    color: #ffffff;
+  }
+  
+  &.logoutButton {
+    background-color: #ef4444; 
+    color: #ffffff;
+
+    &:hover {
+      background-color: #dc2626; 
+    }
   }
 }
