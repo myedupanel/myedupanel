@@ -89,7 +89,7 @@
 
 /*
   ======================================================================
-  === MAIN TABULAR GRID (100% SNS MATCH - Final Structure) ===
+  === MAIN TABULAR GRID (CSS FIX: composes हटा दिया गया) ===
   ======================================================================
 */
 .certificateGrid {
@@ -125,7 +125,7 @@
     align-items: center; 
     font-weight: 600; /* Labels ko bold rakhein */
     min-height: 18px; 
-    background-color: #ffffff;
+    background-color: #ffffff; /* White background */
 }
 
 /* VALUE CELL (Manual duplication) */
@@ -136,8 +136,9 @@
     border-bottom: 1px solid #000; 
     display: flex;
     align-items: center; 
-    font-weight: bold; 
+    font-weight: bold; /* Value field bold */
     min-height: 18px; 
+    
     flex-wrap: wrap; 
     
     .fill, .fillBlank, .fillNoLine {
@@ -168,7 +169,7 @@
 }
 
 
-/* --- Certification Text & Footer --- */
+/* --- Certification Text & Footer (No Change) --- */
 .certText { font-size: 8pt; text-align: left; margin-top: 5px; line-height: 1.5; }
 
 .certFooterWrapper {
@@ -207,7 +208,7 @@
   .certificatePaper { font-size: 7.5pt !important; }
   .outerBorder { padding: 1mm 3mm 3mm 3mm; } 
   .labelCell, .valueCell { padding: 1px 3px !important; min-height: 14px; }
-  .certHeader { padding-bottom: 1px; }
+  .certHeader { padding-bottom: 1px; border-bottom: 1px solid #000; }
   .titleBlock h2 { font-size: 9pt; }
   .preHeaderRow { margin-bottom: 1px; }
   .certFooterWrapper { padding-top: 3px; }
