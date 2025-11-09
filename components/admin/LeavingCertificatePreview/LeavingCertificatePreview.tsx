@@ -119,7 +119,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* === HEADER BLOCK REFACTOR (Zero-Margin Hierarchy) === */}
+        {/* === HEADER BLOCK (ZERO MARGIN FIX) === */}
         <header className={styles.certHeader}>
           {schoolDetails.logoUrl && (
             <div className={styles.logoContainer}>
@@ -131,17 +131,17 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             </div>
           )}
           <div className={styles.schoolInfoBlock}>
-            {/* 1. Trust/Society Name (Smallest) */}
-            <div className={styles.trustName}>{schoolDetails.name2 || 'TRUST / SOCIETY NAME'}</div> 
+            {/* 1. Trust/Society Name */}
+            <div className={styles.trustName}>{schoolDetails.name2 || 'AFFILIATED/DBT BOARD...'}</div> 
             
             {/* 2. School Name (Largest/Bold) */}
-            <div className={styles.schoolName1}>{schoolDetails.name || 'SCHOOL NAME FROM PROFILE'}</div>
+            <div className={styles.schoolName1}>{schoolDetails.name || 'KHANESPAR ENGLISH MEDIUM SCHOOL PARANDA'}</div>
             
             {/* 3. Address & Affiliation */}
             <div className={styles.schoolAddressCode}>
               {schoolDetails.address || 'FULL SCHOOL ADDRESS'}
               <br/>
-              Affiliation No.: {fill(schoolDetails.govtReg || '1130572', true)} | U-DISE Code No.: {schoolDetails.udiseNo || '27251014726'}
+              Affiliation No.: {fill('1130572', true)} | U-DISE Code No.: {schoolDetails.udiseNo || '27251014726'}
             </div>
             
             {/* 4. Contact Line */}
@@ -149,7 +149,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           </div>
         </header>
           
-        {/* === METADATA SERIAL & GR NO. ROW FIX === */}
+        {/* === METADATA (SERIAL & GR NO.) === */}
         <div className={styles.preHeaderRow}>
             <div className={styles.serialBox}>
                 Serial No: {fill(formData.genRegNo || student?.studentId, true)}
@@ -158,7 +158,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                 G. R. No: {fill(formData.regNo || schoolDetails.genRegNo, true)}
             </div>
         </div>
-        {/* === END METADATA FIX === */}
+        {/* === END PRE-HEADER === */}
         
         {/* Title Block */}
         <div className={styles.titleBlock}>
@@ -172,7 +172,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {fill(student?.name)}
           </RenderRow>
           
-          {/* === UID/AADHAR CARD ROW (Moved below Full Name) === */}
+          {/* === UID/AADHAR CARD ROW === */}
           <RenderRow label="UID Adhar Card No.:">
             {fill(student?.aadhaarNo)}
           </RenderRow>
@@ -185,13 +185,13 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           {/* === ROW: Religion, Caste & Sub-Caste (3-Column Fix) === */}
           <RenderRow label="Religion and Caste with sub caste:">
             <div className={styles.multiFieldRowCaste}> 
-                {/* 1. Religion Value */}
+                {/* Religion */}
                 <SubField label="Religion" value={formData.religion} />
                 
-                {/* 2. Caste Value */}
+                {/* Caste */}
                 <SubField label="Caste" value={formData.caste} />
                 
-                {/* 3. Sub Caste Value */}
+                {/* Sub Caste */}
                 <SubField label="Sub Caste" value={formData.subCaste} />
             </div>
           </RenderRow>
@@ -201,7 +201,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           </RenderRow>
           
           <RenderRow label="Place of Birth:">
-            {/* 4 Sub-Fields on one line */}
+            {/* Birth Place fields into one line */}
             <div className={styles.multiFieldRowCaste}> 
                 <SubField label="Place" value={formData.birthPlace} />
                 <SubField label="Taluka" value={formData.birthTaluka} />
