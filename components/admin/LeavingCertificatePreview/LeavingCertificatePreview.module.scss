@@ -151,7 +151,7 @@
     border-bottom: none !important;
 }
 
-/* === Multi-Field Formatting (No Change) === */
+/* === Multi-Field Formatting === */
 .multiFieldRow {
   display: flex;
   align-items: baseline;
@@ -166,7 +166,13 @@
 
 /* --- Certification Text & Footer (No Change) --- */
 .certText { font-size: 9pt; text-align: left; margin-top: 5px; line-height: 1.5; }
-.certFooterWrapper { margin-top: 10px; padding-top: 15px; font-size: 10pt; font-weight: normal; }
+.certFooterWrapper {
+  margin-top: 10px;
+  padding-top: 15px; 
+  font-size: 10pt;
+  font-weight: normal;
+}
+
 .datePlace {
   display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 20px; 
   gap: 15px;
