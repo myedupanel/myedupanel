@@ -99,7 +99,7 @@ const AddStaffForm = ({ onClose, onSave }: AddStaffFormProps) => {
         {/* Email Address */}
         <div className={styles.formGroup}>
           <label htmlFor="email">Email Address</label>
-          <input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} required placeholder="staff@example.com" disabled={true}/>
+          <input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} required placeholder="staff@example.com" disabled={isLoading}/>
           <small>Login details will be sent here.</small>
         </div>
         {/* Joining Date */}

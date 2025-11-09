@@ -140,7 +140,7 @@ const AddParentForm: React.FC<AddParentFormProps> = ({ onClose, onSubmit, existi
       </div>
       <div className={styles.formGroup}>
         <label htmlFor="email">Email</label>
-        <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required disabled={true} />
+        <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required disabled={isLoading} />
       </div>
       <div className={styles.formGroup}>
         <label htmlFor="occupation">Occupation</label>
