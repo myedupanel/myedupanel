@@ -1,3 +1,4 @@
+/* File: app/admin/layout.module.scss */
 .container {
   display: flex;
   height: 100vh;
@@ -11,7 +12,6 @@
   height: 100vh; /* Content area bhi poori height lega */
   background-color: #f4f7fa;
   /* Sidebar 'position: fixed' है, इसलिए content को 260px left margin चाहिए */
-  /* FIX: !important जोड़ा गया ताकि कोई override न हो */
   margin-left: 260px !important; 
 }
 .loadingState {
@@ -23,8 +23,7 @@
   font-weight: 500;
 }
 
-/* === YEH NAYE MODAL STYLES HAIN (YAHIN ADD KIYE HAIN) === */
-
+/* === YEH NAYE MODAL STYLES HAIN (Bina Badlaav) === */
 .upcomingModalOverlay {
   position: fixed;
   top: 0;
@@ -86,4 +85,12 @@
   color: #555;
   font-size: 1rem;
   line-height: 1.5;
+} 
+
+/* === MOBILE/TABLET CONTENT FIXES === */
+@media (max-width: 1024px) {
+  .content {
+    /* Mobile par sidebar chhipa hoga, isliye margin hata denge */
+    margin-left: 0 !important; 
+  }
 }

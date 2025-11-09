@@ -4,7 +4,7 @@
   color: #d1d5db; // Light text color
   width: 260px; 
   height: 100vh;
-  position: fixed; // <--- FIX: Sidebar ko lock karega
+  position: fixed; // Sidebar ko lock karega
   top: 0;
   left: 0;
   display: flex;
@@ -141,5 +141,28 @@
     &:hover {
       background-color: #dc2626; 
     }
+  }
+}
+
+/* === MOBILE/TABLET RESPONSIVENESS (Sidebar Off-Canvas) === */
+@media (max-width: 1024px) {
+  .sidebarContainer {
+    width: 280px; /* Slightly wider on mobile for better touch target */
+    transform: translateX(-100%); /* CRITICAL: Hide it off-screen by default */
+    transition: transform 0.3s ease-out;
+    box-shadow: none;
+  }
+
+  /*
+    NOTE: When the user implements a mobile toggle button (usually in a Header
+    component), they will need to add a class like 'mobileOpen' to this container.
+  */
+  &.mobileOpen {
+    transform: translateX(0); /* Slide it into view */
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  .logoSection {
+    border-bottom: none; /* Mobile par border hata diya */
   }
 }
