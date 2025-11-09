@@ -1,63 +1,41 @@
+/* File: AdminDashboard.module.scss (FINAL RESPONSIVE FIX) */
+
 .dashboardContainer {
-  padding: 2rem; /* Thoda gap add karega, jisse Header neeche aa jaayega */
+  padding: 2rem; 
+}
+
+/* --- Stats Grid (For Dashboard Overview Cards) --- */
+.statsGrid {
+  /* Default: 3 columns for large screens */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 1.5rem;
+  margin-bottom: 2rem; 
 }
 
 /* --- Styles for the row containing the charts --- */
 .chartsRow {
-  display: grid; // Use grid for easy layout
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); // Responsive columns
-  gap: 1.5rem; // Space between charts
-  margin-bottom: 1.5rem; // Space below the charts row
+  /* Default: Responsive columns with min width 300px */
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+  gap: 1.5rem; 
+  margin-bottom: 1.5rem; 
 }
 
-/* --- UPDATED: Styles for individual chart containers --- */
+/* --- Styles for individual chart containers --- */
 .chartContainer {
-  background-color: #fff; // Simplified from #ffffff
+  background-color: #fff;
   padding: 1.5rem;
-  border-radius: 8px; // Changed from 12px
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); // Changed shadow
-  /* margin-bottom from the first block is removed as .chartsRow handles spacing below */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* --- Stats Grid (Now 3 columns) --- */
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 columns */
-  gap: 1.5rem;
-  margin-bottom: 2rem; // Keep margin below stats grid
-}
-
-/* --- Recent Payments Container --- */
+/* --- Recent Payments Container (This will stack below the charts) --- */
 .paymentsContainer {
   background-color: #ffffff;
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  // Add margin-top if needed to separate from chartsRow
-  // margin-top: 1.5rem;
-}
-
-/* --- Responsive styles for smaller screens --- */
-@media (max-width: 1024px) {
-  .statsGrid {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
-  }
-  // Optional: Make charts stack earlier if needed
-  // .chartsRow {
-  //   grid-template-columns: 1fr;
-  // }
-}
-
-@media (max-width: 640px) {
-  .dashboardContainer {
-    padding: 1rem;
-  }
-  .statsGrid {
-    grid-template-columns: 1fr; /* 1 column on small screens */
-  }
-  .chartsRow {
-    grid-template-columns: 1fr; /* Ensure charts stack on small screens */
-  }
 }
 
 /* Add styles for .loading if you have one */
@@ -68,18 +46,65 @@
   color: #555;
 }
 .statLink {
-  text-decoration: none; /* Link ka underline hatata hai */
-  color: inherit;       /* Text color normal rakhta hai */
-  display: block;       /* Poori grid cell ko cover karta hai */
+  text-decoration: none; 
+  color: inherit;       
+  display: block;       
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 
   &:hover {
-    transform: translateY(-5px); /* Hover par card ko thoda upar uthata hai */
-    /* Thoda shadow add karta hai, professional look ke liye */
+    transform: translateY(-5px); 
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
   }
 
   &:active {
-    transform: translateY(-2px); /* Click karne par thoda neeche dabta hai */
+    transform: translateY(-2px);
+  }
+}
+
+/* ===================================================
+   RESPONSIVE MEDIA QUERIES
+   =================================================== */
+
+/* Tablet & Medium Screens (Max-width: 1024px) */
+@media (max-width: 1024px) {
+  .dashboardContainer {
+    padding: 1.5rem;
+  }
+  
+  /* Stats Grid: 3 columns se 2 columns par switch karein */
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 1rem;
+  }
+  
+  /* Charts Row: Thoda tight ho jaaye, ya chart aur payments stack ho jaaye */
+  .chartsRow {
+      // By default, ye minmax(300px, 1fr) se handle hoga.
+      // Agar charts chote ho rahe hain, to unhe 1fr dein.
+      grid-template-columns: 1fr; 
+  }
+}
+
+/* Mobile Screens (Max-width: 640px) */
+@media (max-width: 640px) {
+  .dashboardContainer {
+    padding: 1rem;
+  }
+  
+  /* Stats Grid: 2 columns se 1 column par switch karein */
+  .statsGrid {
+    grid-template-columns: 1fr; 
+    gap: 1rem;
+  }
+  
+  /* Header Area Fix (Admin header ka title font size kam karein) */
+  .dashboardContainer h1.pageTitle { 
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+  }
+
+  /* Charts Row: Single column for charts/payments */
+  .chartsRow {
+    grid-template-columns: 1fr; 
   }
 }
