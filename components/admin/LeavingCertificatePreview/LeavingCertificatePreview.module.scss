@@ -33,7 +33,7 @@
 .fillBlank { border-bottom: 1px dotted #333; width: 100%; flex-grow: 1; min-height: 1.1em; }
 
 
-/* --- Header Style (School Info Block Adjusted Slightly Right) --- */
+/* --- Header Style --- */
 .certHeader {
   display: flex;
   justify-content: flex-start; 
@@ -94,7 +94,7 @@
 
 /*
   ======================================================================
-  === MAIN TABULAR GRID (Height MINIMIZED) ===
+  === MAIN TABULAR GRID (Height INCREASED for Half Page Fill) ===
   ======================================================================
 */
 .certificateGrid {
@@ -103,15 +103,16 @@
   border-top: none; 
   display: grid;
   grid-template-columns: 38% auto; 
-  /* flex-grow: 1; <-- REMOVED */ 
+  /* flex-grow removed, rows will determine height */
   margin-top: 0; 
   font-size: 9.5pt; 
 }
 
-/* LABEL CELL (Vertical Space Minimized) */
+/* LABEL CELL (Vertical Space INCREASED) */
 .labelCell {
-    padding: 0px 5px; 
-    min-height: 10px; 
+    /* <<< CRITICAL BADLAAV: Padding/Min-height increased >>> */
+    padding: 5px 8px; /* Increased vertical padding */
+    min-height: 18px; /* Increased min-height */
     
     line-height: 1.3;
     border-right: 1px solid #000; 
@@ -122,10 +123,11 @@
     background-color: #ffffff;
 }
 
-/* VALUE CELL (Vertical Space Minimized) */
+/* VALUE CELL (Vertical Space INCREASED) */
 .valueCell {
-    padding: 0px 5px; 
-    min-height: 10px; 
+    /* <<< CRITICAL BADLAAV: Padding/Min-height increased >>> */
+    padding: 5px 8px; /* Increased vertical padding */
+    min-height: 18px; /* Increased min-height */
     
     line-height: 1.3;
     border-right: none; 
@@ -163,17 +165,17 @@
 }
 
 
-/* --- Certification Text & Footer (Space INCREASED between Grid and Footer) --- */
+/* --- Certification Text & Footer (Space ADJUSTED) --- */
 .certText { 
     font-size: 8pt; text-align: left; 
-    /* <<< CRITICAL BADLAAV: Margin increased to create the large empty space >>> */
-    margin-top: 40px; 
+    /* <<< CRITICAL BADLAAV: Margin reduced as grid is taller now >>> */
+    margin-top: 5px; 
     
     line-height: 1.3; 
 } 
 
 .certFooterWrapper {
-  margin-top: auto; 
+  margin-top: auto; /* Pushes the footer block to the bottom of the remaining space */
   padding-top: 0px; 
   
   font-size: 9pt;
@@ -210,11 +212,11 @@
 @media print {
   .certificatePaper { font-size: 7.5pt !important; }
   .outerBorder { padding: 1mm 3mm 3mm 3mm; border: 1px solid #000; } 
-  .labelCell, .valueCell { padding: 0.5px 3px !important; min-height: 10px; } 
+  .labelCell, .valueCell { padding: 2px 3px !important; min-height: 15px; } /* Print height adjusted */
   .certHeader { padding-bottom: 1px; }
   .titleBlock h2 { font-size: 9pt; }
   .preHeaderRow { margin-bottom: 1px; }
-  .certText { margin-top: 25px !important; } /* Print margin for space */
+  .certText { margin-top: 3px !important; } 
   .certFooterWrapper { padding-top: 0px; }
   .sigBox { padding-top: 25px; font-size: 6pt; } 
   .datePlace { margin-bottom: 5px; }
