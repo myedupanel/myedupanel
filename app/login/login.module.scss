@@ -283,3 +283,39 @@
   color: #721c24;
   border: 1px solid #f5c6cb;
 }
+.transitionOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999; /* Sabse upar */
+  pointer-events: none; /* User interaction allowed underneath until active */
+}
+
+.transitionCircle {
+  background-color: var(--primary-blue); /* Sky Blue */
+  border-radius: 50%;
+  
+  /* Start State: Chhota aur centered */
+  transform: scale(0);
+  width: 100px; /* Small base size */
+  height: 100px;
+  
+  /* CRITICAL: Super Professional Transition */
+  /* Bounce/Snap effect ke liye Cubic Bezier */
+  transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+}
+
+.transitionActive {
+  pointer-events: all; /* Jab active ho, toh clicks roko */
+  
+  /* Target State: Full Screen Cover */
+  .transitionCircle {
+    /* Scale(30) ensures it covers even the largest 4K screen diagonals */
+    transform: scale(30); 
+  }
+}
