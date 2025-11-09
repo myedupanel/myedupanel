@@ -38,7 +38,6 @@
   display: flex;
   justify-content: flex-start; 
   align-items: flex-start;
-  /* Gap increased slightly to push school info block a bit right */
   gap: 20px; 
   
   padding-bottom: 5px; 
@@ -51,12 +50,10 @@
   
   .schoolInfoBlock {
     line-height: 1.1;
-    text-align: center; /* Internal center align maintained */
-    /* Max-width increased slightly to give it more presence */
+    text-align: center; 
     max-width: 75%; 
     
-    /* Added left margin to subtly move the block more to the right */
-    margin-left: 5px; 
+    margin-left: 5px; /* Subtle right shift maintained */
     
     .trustName { font-size: 8pt; margin: 0 0 2px 0; } 
     .schoolName1 { font-size: 13pt; font-weight: bold; margin: 0; text-transform: uppercase; } 
@@ -97,7 +94,7 @@
 
 /*
   ======================================================================
-  === MAIN TABULAR GRID (Height Further Reduced) ===
+  === MAIN TABULAR GRID (Height MINIMIZED) ===
   ======================================================================
 */
 .certificateGrid {
@@ -106,7 +103,8 @@
   border-top: none; 
   display: grid;
   grid-template-columns: 38% auto; 
-  flex-grow: 1;
+  /* <<< CRITICAL BADLAAV: Removed flex-grow to make space below >>> */
+  /* flex-grow: 1; <-- REMOVED */ 
   margin-top: 0; 
   font-size: 9.5pt; 
 }
@@ -114,8 +112,8 @@
 /* LABEL CELL (Vertical Space Minimized) */
 .labelCell {
     /* Padding and min-height further reduced for maximum compaction */
-    padding: 0px 8px; /* Minimal vertical padding */
-    min-height: 11px; /* Minimal height for content */
+    padding: 0px 5px; 
+    min-height: 10px; 
     
     line-height: 1.3;
     border-right: 1px solid #000; 
@@ -129,8 +127,8 @@
 /* VALUE CELL (Vertical Space Minimized) */
 .valueCell {
     /* Padding and min-height further reduced for maximum compaction */
-    padding: 0px 8px; /* Minimal vertical padding */
-    min-height: 11px; /* Minimal height for content */
+    padding: 0px 5px; 
+    min-height: 10px; 
     
     line-height: 1.3;
     border-right: none; 
@@ -168,18 +166,18 @@
 }
 
 
-/* --- Certification Text & Footer (Space Optimized for Signatures) --- */
+/* --- Certification Text & Footer (Space INCREASED between Grid and Footer) --- */
 .certText { 
     font-size: 8pt; text-align: left; 
-    /* Minimized top margin for lift */
-    margin-top: 0px; 
+    /* <<< CRITICAL BADLAAV: Space increased after grid >>> */
+    margin-top: 15px; /* Increased margin to create space after the shrunken grid */
     
     line-height: 1.3; 
 } 
 
 .certFooterWrapper {
-  margin-top: auto;
-  /* Minimized padding for lift */
+  margin-top: auto; /* Pushes the footer block to the bottom of the container */
+  /* Padding-top maintained low */
   padding-top: 0px; 
   
   font-size: 9pt;
@@ -190,7 +188,6 @@
 
 .datePlace {
   display: grid; grid-template-columns: 1fr 1fr; 
-  /* Maintained good gap below date/place and above signatures */
   margin-bottom: 18px; 
   gap: 15px;
   
@@ -205,8 +202,8 @@
 .sigBox {
   text-align: center;
   width: 30%;
-  /* Increased padding for ample signature space above the line */
-  padding-top: 35px; 
+  /* <<< BADLAAV: Signature space further increased >>> */
+  padding-top: 40px; 
   
   border-top: 1px solid #000;
   font-size: 7pt;
@@ -218,12 +215,12 @@
 @media print {
   .certificatePaper { font-size: 7.5pt !important; }
   .outerBorder { padding: 1mm 3mm 3mm 3mm; border: 1px solid #000; } 
-  .labelCell, .valueCell { padding: 0.5px 3px !important; min-height: 11px; }
+  .labelCell, .valueCell { padding: 0.5px 3px !important; min-height: 10px; } /* Print height reduced */
   .certHeader { padding-bottom: 1px; }
   .titleBlock h2 { font-size: 9pt; }
   .preHeaderRow { margin-bottom: 1px; }
-  .certText { margin-top: 0px !important; }
+  .certText { margin-top: 10px !important; } /* Increased print margin for space */
   .certFooterWrapper { padding-top: 0px; }
-  .sigBox { padding-top: 20px; font-size: 6pt; }
+  .sigBox { padding-top: 25px; font-size: 6pt; } /* Print signature space increased */
   .datePlace { margin-bottom: 5px; }
 }
