@@ -112,7 +112,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
   const studentDobFormatted = formatDate(student?.dob);
   
   // Header Contact Line
-  const contactLine = `${schoolDetails.email || 'EMAIL NOT FOUND'} | ${schoolDetails.contactNumber || 'CONTACT NO. NOT FOUND'}`;
+  const contactLine = `${schoolDetails.email || 'EMAIL NOT FOUND'} | ${schoolDetails.contactNumber || 'Contact NO.'}`;
 
 
   return (
@@ -141,7 +141,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             <div className={styles.schoolAddressCode}>
               {schoolDetails.address || 'FULL SCHOOL ADDRESS'}
               <br/>
-              Affiliation No.: {fill('', true)} | U-DISE Code No.: {schoolDetails.udiseNo || '27251014726'}
+              Affiliation No.: {fill('             ', true)} | U-DISE Code No.: {schoolDetails.udiseNo || '27251014726'}
             </div>
             
             {/* 4. Contact Line */}
