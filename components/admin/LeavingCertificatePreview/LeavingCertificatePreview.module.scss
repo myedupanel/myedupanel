@@ -5,9 +5,9 @@
   /* A4 Dimensions */
   width: 210mm;
   min-height: 297mm;
-  margin: 0 auto; /* Margin top/bottom हटा दिया */
+  margin: 0 auto; 
   font-family: 'Times New Roman', Times, serif;
-  font-size: 10pt; /* Final print size के लिए optimized */
+  font-size: 10pt; 
   color: #000;
   background: #fff;
   border: 1px solid #ccc;
@@ -18,7 +18,7 @@
 
 .outerBorder {
   border: 2px solid #000;
-  padding: 0 7mm 3mm 7mm; /* CRITICAL FIX: Top Padding हटाकर 0 कर दिया, Bottom Padding कम किया */
+  padding: 0 7mm 3mm 7mm; /* TOP padding is 0 */
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -33,31 +33,29 @@
 .fillBlank { border-bottom: 1px dotted #333; width: 100%; flex-grow: 1; min-height: 1.1em; }
 
 
-/* --- Header Style (CRITICAL ZERO MARGIN FIX & ALIGNMENT) --- */
+/* --- Header Style (CRITICAL ZERO MARGIN & ALIGNMENT FIX) --- */
 .certHeader {
   display: flex;
-  justify-content: space-between; /* Logo left, Info Block right */
-  align-items: flex-start; /* Move contents to the very top */
+  justify-content: space-between; /* Logo Left, Info Right */
+  align-items: flex-start; /* Align to the very top */
   flex-direction: row; 
-  gap: 5px; 
-  padding-bottom: 5px; 
-  text-align: left;
+  gap: 1px; 
+  padding: 0 0 2px 0; /* Top padding 0, small bottom padding */
+  text-align: left; /* General container alignment */
   border-bottom: 1px solid #000;
-  margin-bottom: 5px; /* Keep a small gap before metadata */
-  padding-top: 0; /* Ensure no top padding */
+  margin-bottom: 2px; /* Reduced margin */
 
   .logoContainer { 
     flex-shrink: 0; 
     width: 60px; 
     height: 60px; 
-    align-self: flex-start; /* Ensure logo is at the top left */
   }
   .logo { width: 100%; height: 100%; object-fit: contain; }
   
   .schoolInfoBlock {
     line-height: 1.1;
-    text-align: right; /* Align block content to the right */
-    
+    text-align: center; /* **INTERNAL TEXT CENTER ALIGNED AS REQUESTED** */
+    max-width: 70%; /* Prevents overlap with logo */
     .trustName { font-size: 8pt; margin: 0 0 2px 0; } 
     .schoolName1 { font-size: 13pt; font-weight: bold; margin: 0; text-transform: uppercase; } 
     .schoolAddressCode { font-size: 9pt; margin-top: 2px; line-height: 1.3; } 
@@ -70,7 +68,7 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
-    margin-bottom: 3px; /* Reduced margin from 6px to lift up */
+    margin-bottom: 4px; /* Reduced from 6px */
     font-size: 9pt;
     
     .serialBox, .grBox {
@@ -90,50 +88,50 @@
     text-align: center;
     border-bottom: 1.5px solid #000;
     padding-bottom: 3px;
-    margin-bottom: 0; /* Already 0, good for lifting main grid */
+    margin-bottom: 0;
     
     h2 { font-size: 11pt; font-weight: bold; margin: 0; } 
 }
 
 /*
   ======================================================================
-  === MAIN TABULAR GRID (No composes error) ===
+  === MAIN TABULAR GRID (SPACING REDUCTION FIX) ===
   ======================================================================
 */
 .certificateGrid {
   width: 100%;
   border: 1.5px solid #000; 
-  border-top: none; /* Merge with Title block */
+  border-top: none; 
   display: grid;
   grid-template-columns: 38% auto; 
   flex-grow: 1;
-  margin-top: 0; /* Already 0, good for lifting */
+  margin-top: 0; 
   font-size: 9.5pt; 
 }
 
-/* LABEL CELL (White Background - Replicating Table Look) */
+/* LABEL CELL (Vertical Spacing Reduced) */
 .labelCell {
-    padding: 2px 8px; 
-    line-height: 1.3;
+    padding: 1px 8px; /* Reduced from 2px */
+    line-height: 1.2; /* Tighter line-height */
     border-right: 1px solid #000; 
     border-bottom: 1px solid #000; 
     display: flex;
     align-items: center; 
     font-weight: 600; 
-    min-height: 18px; 
+    min-height: 16px; /* Reduced from 18px */
     background-color: #ffffff;
 }
 
-/* VALUE CELL (White Background, Bold Value) */
+/* VALUE CELL (Vertical Spacing Reduced) */
 .valueCell {
-    padding: 2px 8px; 
-    line-height: 1.3;
+    padding: 1px 8px; /* Reduced from 2px */
+    line-height: 1.2; /* Tighter line-height */
     border-right: none; 
     border-bottom: 1px solid #000; 
     display: flex;
     align-items: center; 
     font-weight: bold; 
-    min-height: 18px; 
+    min-height: 16px; /* Reduced from 18px */
     flex-wrap: wrap; 
     
     .fill, .fillBlank, .fillNoLine {
@@ -164,20 +162,21 @@
 }
 
 
-/* --- Certification Text & Footer (CRITICAL A4 SPACE FIX) --- */
-.certText { font-size: 8pt; text-align: left; margin-top: 3px; line-height: 1.3; } /* Reduced size and margin */
+/* --- Certification Text & Footer (LIFT & SIGNATURE SPACE FIX) --- */
+.certText { font-size: 8pt; text-align: left; margin-top: 2px; line-height: 1.3; } /* Margin reduced */
 
 .certFooterWrapper {
   margin-top: auto;
-  padding-top: 5px; /* Reduced padding from 8px to lift date/place closer */
+  padding-top: 4px; /* **REDUCED to LIFT Date/Place UP** */
   font-size: 9pt;
   font-weight: normal;
   background-color: transparent; 
-  color: #000; /* Ensure dark text */
+  color: #000; 
+  /* NO BORDER HERE - ALREADY MET */
 }
 
 .datePlace {
-  display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 8px; 
+  display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 4px; /* Reduced margin */
   gap: 15px;
   
   span {
@@ -191,8 +190,8 @@
 .sigBox {
   text-align: center;
   width: 30%;
-  padding-top: 15px; /* Space above text for signature line */
-  border-top: 1px solid #000;
+  padding-top: 25px; /* **INCREASED for SIGNATURE SPACE** */
+  border-top: 1px solid #000; /* Signature line */
   font-size: 7pt;
   font-weight: 600;
   background-color: transparent;
@@ -202,12 +201,12 @@
 @media print {
   .certificatePaper { font-size: 7.5pt !important; }
   .outerBorder { padding: 1mm 3mm 3mm 3mm; border: 1px solid #000; } 
-  .labelCell, .valueCell { padding: 1px 3px !important; min-height: 14px; }
+  .labelCell, .valueCell { padding: 0 3px !important; min-height: 12px; } /* Further reduced for print */
   .certHeader { padding-bottom: 1px; }
   .titleBlock h2 { font-size: 9pt; }
   .preHeaderRow { margin-bottom: 1px; }
   .certText { margin-top: 2px !important; }
-  .certFooterWrapper { padding-top: 3px; }
-  .sigBox { padding-top: 8px; font-size: 6pt; }
-  .datePlace { margin-bottom: 5px; }
+  .certFooterWrapper { padding-top: 1px; }
+  .sigBox { padding-top: 15px; font-size: 6pt; }
+  .datePlace { margin-bottom: 3px; }
 }
