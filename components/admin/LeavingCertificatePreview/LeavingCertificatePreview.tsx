@@ -111,7 +111,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
   const dateOfLeaving = formatDate(formData.dateOfLeaving);
   const studentDobFormatted = formatDate(student?.dob);
   
-  // Header Contact Line (Goal 1: Ensure contactNumber is fetched)
+  // Header Contact Line - UPDATED: Ensure contact number is used if available.
   const contactLine = `${schoolDetails.email || 'EMAIL NOT FOUND'} | ${schoolDetails.contactNumber || 'Contact NO.'}`;
 
 
@@ -119,9 +119,8 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* === HEADER BLOCK (LOGO LEFT - TEXT RIGHT) === */}
+        {/* === HEADER BLOCK (LAYOUT ADJUSTMENT) === */}
         <header className={styles.certHeader}>
-          {/* Logo on the Left (Goal 3) */}
           {schoolDetails.logoUrl && (
             <div className={styles.logoContainer}>
               <img 
@@ -131,22 +130,21 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
               />
             </div>
           )}
-          {/* School Info on the Right (Goal 3) */}
           <div className={styles.schoolInfoBlock}>
-            {/* 1. School Name (Largest/Bold - SWAPPED) */}
+            {/* 1. School Name (Largest/Bold) */}
             <div className={styles.trustName}>{schoolDetails.name || 'MYEDUPANEL ENGLISH MEDIUM SCHOOL PUNE'}</div> 
             
-            {/* 2. Trust/Society Name (SWAPPED) */}
+            {/* 2. Trust/Society Name */}
             <div className={styles.schoolName1}>{schoolDetails.name2 || 'AFFILIATED/DBT BOARD...'}</div>
             
-            {/* 3. Address & U-DISE (Goal 2: Affiliation No. removed) */}
+            {/* 3. Address & Affiliation - UPDATED: Removed 'Affiliation No.: |' */}
             <div className={styles.schoolAddressCode}>
               {schoolDetails.address || 'FULL SCHOOL ADDRESS'}
               <br/>
               U-DISE Code No.: {schoolDetails.udiseNo || '27251014726'}
             </div>
             
-            {/* 4. Contact Line (Goal 1: Uses schoolDetails.contactNumber) */}
+            {/* 4. Contact Line */}
             <div className={styles.schoolContact}>{contactLine}</div>
           </div>
         </header>
