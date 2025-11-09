@@ -2,7 +2,7 @@
 
 /* --- Base Styles --- */
 .certificatePaper {
-  /* A4 Dimensions */
+  /* A4 Dimensions - Tighter */
   width: 210mm;
   min-height: 297mm;
   margin: 10px auto;
@@ -18,7 +18,7 @@
 
 .outerBorder {
   border: 2px solid #000;
-  padding: 5mm 7mm 7mm 7mm; /* Tighter padding for A4 fit */
+  padding: 3mm 5mm 5mm 5mm; /* CRITICAL: Tighter padding for A4 fit */
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -40,29 +40,29 @@
   align-items: center;
   flex-direction: column;
   gap: 1px; /* Tighter gap */
-  padding-bottom: 5px; 
+  padding-bottom: 3px; /* Tighter padding */
   text-align: center;
-  border-bottom: 1px solid #000; /* Dark border */
-  margin-bottom: 5px; 
+  border-bottom: 1px solid #000; 
+  margin-bottom: 3px; /* Tighter margin */
 
   .logoContainer { flex-shrink: 0; width: 60px; height: 60px; }
   .logo { width: 100%; height: 100%; object-fit: contain; }
   
   .schoolInfoBlock {
     line-height: 1.1;
-    .trustName { font-size: 8pt; margin: 0 0 2px 0; } /* 1. Trust Name (Smallest) */
-    .schoolName1 { font-size: 13pt; font-weight: bold; margin: 0; text-transform: uppercase; } /* 2. School Name (Largest/Bold) */
-    .schoolAddressCode { font-size: 9pt; margin-top: 2px; line-height: 1.3; } /* 3. Address & UDISE */
-    .schoolContact { font-size: 8pt; margin-top: 1px; } /* 4. Contact Line */
+    .trustName { font-size: 8pt; margin: 0 0 1px 0; } 
+    .schoolName1 { font-size: 13pt; font-weight: bold; margin: 0; text-transform: uppercase; } 
+    .schoolAddressCode { font-size: 8pt; margin-top: 1px; line-height: 1.2; } 
+    .schoolContact { font-size: 7.5pt; margin-top: 1px; } 
   }
 }
 
-/* --- Serial/GR No. & Title Row (Pre-Header) --- */
+/* --- Serial/GR No. & Title Row (Metadata Fix) --- */
 .preHeaderRow {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    margin-bottom: 6px; 
+    margin-bottom: 1px; /* Tighter margin */
     font-size: 9pt;
     
     .serialBox, .grBox {
@@ -71,7 +71,7 @@
         
         .fillBlank, .fill { 
             border-bottom: 1px solid #000; 
-            min-width: 80px; /* Increased space for Reg No. value */
+            min-width: 80px; 
             margin-left: 5px;
             font-weight: normal;
         }
@@ -81,7 +81,7 @@
 .titleBlock {
     text-align: center;
     border-bottom: 1.5px solid #000;
-    padding-bottom: 3px;
+    padding-bottom: 2px; /* Tighter padding */
     margin-bottom: 0;
     
     h2 { font-size: 11pt; font-weight: bold; margin: 0; } 
@@ -89,56 +89,42 @@
 
 /*
   ======================================================================
-  === MAIN TABULAR GRID (CSS FIX: composes हटा दिया गया) ===
+  === MAIN TABULAR GRID (CRITICAL ALIGNMENT) ===
   ======================================================================
 */
 .certificateGrid {
   width: 100%;
   border: 1.5px solid #000; 
-  border-top: none; /* Title block ke border se merge */
+  border-top: none; /* Merge with title block border */
   display: grid;
-  grid-template-columns: 38% auto; /* 1. Label | 2. Value */
+  grid-template-columns: 38% auto; 
   flex-grow: 1;
   margin-top: 0; 
   font-size: 9.5pt; 
 }
 
-/* COMMON CELL STYLE (Base) */
-.tableCell {
-    padding: 2px 8px; /* Tighter padding */
-    line-height: 1.3;
-    border-right: 1px solid #000; 
-    border-bottom: 1px solid #000; 
-    display: flex;
-    align-items: center; 
-    font-weight: normal;
-    min-height: 18px; 
-}
-
-/* LABEL CELL (Manual duplication) */
+/* LABEL & VALUE CELL STYLES */
 .labelCell {
-    padding: 2px 8px; 
+    padding: 1px 6px; /* Tighter padding */
     line-height: 1.3;
     border-right: 1px solid #000; 
     border-bottom: 1px solid #000; 
     display: flex;
     align-items: center; 
-    font-weight: 600; /* Labels ko bold rakhein */
+    font-weight: 600;
     min-height: 18px; 
-    background-color: #ffffff; /* White background */
+    background-color: #ffffff;
 }
 
-/* VALUE CELL (Manual duplication) */
 .valueCell {
-    padding: 2px 8px; 
+    padding: 1px 6px; /* Tighter padding */
     line-height: 1.3;
     border-right: none; 
     border-bottom: 1px solid #000; 
     display: flex;
     align-items: center; 
-    font-weight: bold; /* Value field bold */
+    font-weight: bold; 
     min-height: 18px; 
-    
     flex-wrap: wrap; 
     
     .fill, .fillBlank, .fillNoLine {
@@ -152,10 +138,22 @@
     border-bottom: none !important;
 }
 
-/* --- Multi-Field Formatting (Critical Fix for Caste/Sub-Caste) --- */
+/* === Multi-Field Formatting (Critical Fix for Caste/Sub-Caste) === */
+.multiFieldRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start; /* Space out the subfields */
+  width: 100%;
+  gap: 5px 10px; /* Tighter gap */
+  
+  .subField { flex-grow: 1; display: flex; align-items: baseline; }
+  .subLabel { flex-shrink: 0; margin-right: 3px; font-weight: normal; }
+}
+
+/* Custom class for Caste/Sub-Caste/Birth Place to ensure clean grid */
 .multiFieldRowCaste {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Religion, Caste, Sub-Caste */
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 equal columns for Religion, Caste, Sub-Caste */
   align-items: baseline;
   width: 100%;
   gap: 5px; 
@@ -167,22 +165,35 @@
     .fill, .fillBlank { border-bottom: 1px dotted #333; }
   }
 }
+/* Birth Place Fix - 4 fields (2x2) */
+.subGrid4 { 
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr; /* 4 fields in one row, no wrap */
+  width: 100%;
+  gap: 5px;
+  
+  .subField { 
+      flex-grow: 1; 
+      white-space: nowrap; 
+      font-weight: normal; 
+  }
+}
 
 
-/* --- Certification Text & Footer (No Change) --- */
-.certText { font-size: 8pt; text-align: left; margin-top: 5px; line-height: 1.5; }
+/* --- Certification Text & Footer (Visibility Fix) --- */
+.certText { font-size: 8pt; text-align: left; margin-top: 5px; line-height: 1.5; color: #000; }
 
 .certFooterWrapper {
   margin-top: auto;
-  padding-top: 10px; 
+  padding-top: 5px; /* CRITICAL: Reduced padding for vertical space */
   font-size: 9pt;
   font-weight: normal;
   background-color: transparent; 
-  color: #000; /* Ensure text is visible */
+  color: #000; /* CRITICAL FIX: Ensure all footer text is black */
 }
 
 .datePlace {
-  display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 10px; 
+  display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 8px; /* Tighter margin */
   gap: 15px;
   
   span {
@@ -196,7 +207,7 @@
 .sigBox {
   text-align: center;
   width: 30%;
-  padding-top: 20px; /* Reduced padding for fit */
+  padding-top: 15px; /* Tighter padding for signatures */
   border-top: 1px solid #000;
   font-size: 7pt;
   font-weight: 600;
@@ -205,13 +216,13 @@
 
 /* --- Print Fix (A4 Density) --- */
 @media print {
-  .certificatePaper { font-size: 7.5pt !important; }
-  .outerBorder { padding: 1mm 3mm 3mm 3mm; } 
-  .labelCell, .valueCell { padding: 1px 3px !important; min-height: 14px; }
-  .certHeader { padding-bottom: 1px; border-bottom: 1px solid #000; }
+  .certificatePaper { font-size: 7pt !important; } /* Smallest possible font size for A4 fit */
+  .outerBorder { padding: 1mm 2mm 2mm 2mm; border: 1px solid #000; } /* Minimal padding and border for print */ 
+  .labelCell, .valueCell { padding: 1px 3px !important; min-height: 12px; }
+  .certHeader { padding-bottom: 1px; }
   .titleBlock h2 { font-size: 9pt; }
   .preHeaderRow { margin-bottom: 1px; }
-  .certFooterWrapper { padding-top: 3px; }
-  .sigBox { padding-top: 8px; font-size: 6pt; }
+  .certFooterWrapper { padding-top: 2px; margin-bottom: 3px; font-size: 7pt; }
+  .sigBox { padding-top: 5px; font-size: 6pt; }
   .datePlace { margin-bottom: 5px; }
 }

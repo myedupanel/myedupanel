@@ -3,7 +3,7 @@
 import React from 'react';
 import styles from './LeavingCertificatePreview.module.scss'; 
 
-// --- Interfaces (UPDATED for Real Data & Contact) ---
+// --- Interfaces (No Change) ---
 interface Student {
   id: string; 
   name: string; 
@@ -119,7 +119,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
     <div className={styles.certificatePaper}>
       <div className={styles.outerBorder}>
         
-        {/* Header (School Name, Logo, UDISE) */}
+        {/* === HEADER BLOCK REFACTOR (Zero-Margin Hierarchy) === */}
         <header className={styles.certHeader}>
           {schoolDetails.logoUrl && (
             <div className={styles.logoContainer}>
@@ -141,7 +141,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             <div className={styles.schoolAddressCode}>
               {schoolDetails.address || 'FULL SCHOOL ADDRESS'}
               <br/>
-              Affiliation No.: {fill('1130572', true)} | U-DISE Code No.: {schoolDetails.udiseNo || '27251014726'}
+              Affiliation No.: {fill(schoolDetails.govtReg || '1130572', true)} | U-DISE Code No.: {schoolDetails.udiseNo || '27251014726'}
             </div>
             
             {/* 4. Contact Line */}
@@ -149,7 +149,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           </div>
         </header>
           
-        {/* === PRE-HEADER SERIAL & GR NO. ROW (SNS Layout) === */}
+        {/* === METADATA SERIAL & GR NO. ROW FIX === */}
         <div className={styles.preHeaderRow}>
             <div className={styles.serialBox}>
                 Serial No: {fill(formData.genRegNo || student?.studentId, true)}
@@ -158,7 +158,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
                 G. R. No: {fill(formData.regNo || schoolDetails.genRegNo, true)}
             </div>
         </div>
-        {/* === END PRE-HEADER === */}
+        {/* === END METADATA FIX === */}
         
         {/* Title Block */}
         <div className={styles.titleBlock}>
@@ -185,9 +185,13 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
           {/* === ROW: Religion, Caste & Sub-Caste (3-Column Fix) === */}
           <RenderRow label="Religion and Caste with sub caste:">
             <div className={styles.multiFieldRowCaste}> 
-                {/* Note: Labels inside SubField are now removed to avoid duplication, using only value */}
+                {/* 1. Religion Value */}
                 <SubField label="Religion" value={formData.religion} />
+                
+                {/* 2. Caste Value */}
                 <SubField label="Caste" value={formData.caste} />
+                
+                {/* 3. Sub Caste Value */}
                 <SubField label="Sub Caste" value={formData.subCaste} />
             </div>
           </RenderRow>
