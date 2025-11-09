@@ -1,3 +1,5 @@
+/* File: app/admin/dashboard/layout.module.scss */
+
 .container {
   display: flex;
   height: 100vh;
@@ -7,13 +9,15 @@
 
 .content {
   flex-grow: 1;
-  overflow-y: auto; /* Agar content lamba ho toh woh scroll ho paayega */
-  height: 100vh; /* Content area bhi poori height lega */
+  overflow-y: auto; 
+  height: 100vh; 
   background-color: #f4f7fa;
-  /* Sidebar 'position: fixed' है, इसलिए content को 260px left margin चाहिए */
-  /* FIX: !important जोड़ा गया ताकि कोई override न हो */
-  margin-left: 260px !important; 
+  /* Desktop Fix: Sidebar fixed है, इसलिए content को margin चाहिए */
+  margin-left: 260px; 
+  transition: margin-left 0.3s ease-in-out; /* Smooth transition */
+  padding: 0; /* Outer padding ko zero rakhte hain */
 }
+
 .loadingState {
   display: flex;
   justify-content: center;
@@ -23,9 +27,18 @@
   font-weight: 500;
 }
 
-/* === YEH NAYE MODAL STYLES HAIN (YAHIN ADD KIYE HAIN) === */
+/* === RESPONSIVE MEDIA QUERIES === */
+/* Tablet & Mobile (जब sidebar छिपना शुरू होगा) */
+@media (max-width: 1024px) {
+  .content {
+    /* CRITICAL FIX 1: Mobile par margin-left hata dein */
+    margin-left: 0; 
+  }
+}
 
+/* --- Modal Styles (No Change in Logic) --- */
 .upcomingModalOverlay {
+  /* ... (Modal styles) ... */
   position: fixed;
   top: 0;
   left: 0;
@@ -35,7 +48,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000; /* Sidebar se bhi upar */
+  z-index: 2000; 
   backdrop-filter: blur(5px);
 }
 
@@ -47,17 +60,12 @@
   max-width: 400px;
   width: 90%;
   position: relative;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
   transform: scale(0.9);
   animation: popIn 0.3s forwards ease-out;
 }
 
-@keyframes popIn {
-  to {
-    transform: scale(1);
-  }
-}
-
+/* ... (Remaining modal styles) ... */
 .closeButton {
   position: absolute;
   top: 10px;
