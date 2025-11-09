@@ -110,7 +110,7 @@ const AddTeacherForm: React.FC<AddTeacherFormProps> = ({ onClose, onSubmit, exis
       </div>
       <div className={styles.formGroup}>
         <label htmlFor="email">Email Address</label>
-        <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required disabled={isLoading} />
+        <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required disabled={true} />
       </div>
 
       {error && <p className={styles.error}>{error}</p>}
