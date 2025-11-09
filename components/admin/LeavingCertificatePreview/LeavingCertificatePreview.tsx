@@ -1,9 +1,9 @@
-// File: LeavingCertificatePreview.tsx (FINAL PREMIUM STRUCTURE - SNS Template Match)
+// File: LeavingCertificatePreview.tsx (FINAL PREMIUM STRUCTURE - 100% MATCH)
 
 import React from 'react';
 import styles from './LeavingCertificatePreview.module.scss'; 
 
-// --- Interfaces (UPDATED: Added subCaste) ---
+// --- Interfaces (UPDATED for Real Data & Contact) ---
 interface Student {
   id: string; 
   name: string; 
@@ -14,10 +14,10 @@ interface Student {
 }
 interface SchoolDetails {
   name: string; 
-  name2?: string; 
+  name2?: string; // Trust Name
   address: string; 
-  email?: string; 
-  contactNo?: string; 
+  email?: string; // Contact Email
+  contactNumber?: string; // Contact Number
   govtReg?: string; 
   logoUrl?: string; 
   place?: string; 
@@ -31,7 +31,7 @@ export interface LeavingFormData {
   motherTongue?: string;
   religion?: string; 
   caste?: string;
-  subCaste?: string; // ADDED: Explicit field for Sub Caste
+  subCaste?: string; // ADDED: Sub Caste
   birthPlace?: string;
   birthTaluka?: string;
   birthDistrict?: string;
@@ -87,7 +87,7 @@ const fill = (value: string | undefined | null, noLine = false) => {
 
 const SubField: React.FC<{ label: string, value: string | undefined | null, noLine?: boolean }> = ({ label, value, noLine = false }) => (
   <span className={styles.subField}>
-    {label && <span className={styles.subLabel}>{label}:</span>} 
+    {label && <span className={styles.subLabel}>{label}</span>} 
     {fill(value, noLine)}
   </span>
 );
@@ -111,8 +111,8 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
   const dateOfLeaving = formatDate(formData.dateOfLeaving);
   const studentDobFormatted = formatDate(student?.dob);
   
-  // Dynamic Contact Line
-  const contactLine = `${schoolDetails.email || 'EMAIL NOT FOUND'} | ${schoolDetails.contactNo || 'CONTACT NO. NOT FOUND'}`;
+  // Header Contact Line
+  const contactLine = `${schoolDetails.email || 'EMAIL NOT FOUND'} | ${schoolDetails.contactNumber || 'CONTACT NO. NOT FOUND'}`;
 
 
   return (
@@ -131,24 +131,20 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             </div>
           )}
           <div className={styles.schoolInfoBlock}>
-            {/* Template Top Info */}
-            <div className={styles.schoolNameMyEdu}>Estd. {fill('1999', true)} | {schoolDetails.name2 || 'My EduPanel Education Foundation\'s'}</div> 
+            {/* 1. Trust/Society Name (Smallest) */}
+            <div className={styles.trustName}>{schoolDetails.name2 || 'TRUST / SOCIETY NAME'}</div> 
             
-            {/* Main Name */}
+            {/* 2. School Name (Largest/Bold) */}
             <div className={styles.schoolName1}>{schoolDetails.name || 'SCHOOL NAME FROM PROFILE'}</div>
             
-            {/* Affiliated / UDISE / Address */}
+            {/* 3. Address & Affiliation */}
             <div className={styles.schoolAddressCode}>
-              Affiliated to CBSE Board (Affiliation No.: {fill('1130572', true)})
+              {schoolDetails.address || 'FULL SCHOOL ADDRESS'}
               <br/>
-              (SURYA KIDS - PRE PRIMARY SECTION)
-              <br/>
-              (U-DISE Code No. {schoolDetails.udiseNo || '27251014726'})
-              <br/>
-              Suryabhavan, Wing - A, S. No. 342, Bavdhan, Pune - 411021
+              Affiliation No.: {fill('1130572', true)} | U-DISE Code No.: {schoolDetails.udiseNo || '27251014726'}
             </div>
             
-            {/* Contact Line */}
+            {/* 4. Contact Line */}
             <div className={styles.schoolContact}>{contactLine}</div>
           </div>
         </header>
@@ -156,11 +152,10 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
         {/* === PRE-HEADER SERIAL & GR NO. ROW (SNS Layout) === */}
         <div className={styles.preHeaderRow}>
             <div className={styles.serialBox}>
-                Serial No: {fill(formData.genRegNo, true)}
+                Serial No: {fill(formData.genRegNo || student?.studentId, true)}
             </div>
-            {/* UID Adhar Card No. ko table ke andar move kiya gaya hai */}
             <div className={styles.grBox}>
-                G. R. No: {fill(formData.regNo, true)}
+                G. R. No: {fill(formData.regNo || schoolDetails.genRegNo, true)}
             </div>
         </div>
         {/* === END PRE-HEADER === */}
@@ -177,7 +172,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {fill(student?.name)}
           </RenderRow>
           
-          {/* === UID/AADHAR CARD ROW === */}
+          {/* === UID/AADHAR CARD ROW (Moved below Full Name) === */}
           <RenderRow label="UID Adhar Card No.:">
             {fill(student?.aadhaarNo)}
           </RenderRow>
@@ -187,10 +182,10 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {fill(formData.motherName)}
           </RenderRow>
 
-          {/* === ROW 4: Religion, Caste & Sub-Caste (3-COLUMN FIX) === */}
+          {/* === ROW: Religion, Caste & Sub-Caste (3-Column Fix) === */}
           <RenderRow label="Religion and Caste with sub caste:">
-            {/* Use dedicated 3-column grid class */}
             <div className={styles.multiFieldRowCaste}> 
+                {/* Note: Labels inside SubField are now removed to avoid duplication, using only value */}
                 <SubField label="Religion" value={formData.religion} />
                 <SubField label="Caste" value={formData.caste} />
                 <SubField label="Sub Caste" value={formData.subCaste} />
@@ -201,10 +196,9 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {fill(formData.nationality || 'Indian')}
           </RenderRow>
           
-          {/* === ROW 6: Place of Birth SubGrid === */}
           <RenderRow label="Place of Birth:">
-            {/* Combine Birth Place fields into one line */}
-            <div className={styles.multiFieldRow}>
+            {/* 4 Sub-Fields on one line */}
+            <div className={styles.multiFieldRowCaste}> 
                 <SubField label="Place" value={formData.birthPlace} />
                 <SubField label="Taluka" value={formData.birthTaluka} />
                 <SubField label="Dist" value={formData.birthDistrict} />
@@ -224,7 +218,7 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {fill(formData.previousSchool)}
           </RenderRow>
 
-          {/* === ROW 10: Date of Admission & Class === */}
+          {/* === ROW: Date of Admission & Class === */}
           <RenderRow label="Date of Admission & Class:">
              <div className={styles.multiFieldRow}>
                 <SubField label="Date" value={dateOfAdmission} />
