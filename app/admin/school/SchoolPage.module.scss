@@ -263,7 +263,102 @@
         background-color: #dc2626;
     }
 }
+.warningModal {
+    /* Main Modal Container ki Styling (Is class ko Modal component use karta hai) */
+    max-width: 500px;
+    
+    /* Strong Gold/Blue Shadow for Premium Urgency */
+    box-shadow: 0 0 40px rgba(212, 175, 55, 0.4), 0 0 20px rgba(15, 46, 94, 0.6);
+    
+    /* Header/Title ko highlight karna */
+    h2 { 
+        color: #ef4444; /* Bright Red for Trial Ending */
+        border-bottom: 2px solid #fde047; /* Yellow Line */
+        padding-bottom: 1rem;
+    }
+}
 
+.modalContent {
+    /* Main text content area */
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem; 
+    padding-top: 0.5rem;
+
+    p {
+        font-size: 1rem;
+        color: #333;
+        line-height: 1.6;
+        
+        strong {
+            font-weight: 700;
+            color: #ef4444; /* Days Left ko Red highlight karna */
+        }
+    }
+}
+
+.warningMessage {
+    /* Critical Warning Line: Access will be restricted */
+    display: flex;
+    align-items: center;
+    background-color: #fef2f2; /* Very light red background */
+    border-left: 5px solid #ef4444; /* Red stripe */
+    padding: 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #b91c1c; /* Darker red text */
+    
+    svg {
+        color: #ef4444; 
+    }
+}
+
+.modalActions {
+    /* Button container */
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.upgradeLinkButton, .dismissButton {
+    /* Base Button Styles */
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    text-align: center;
+    text-decoration: none;
+    flex-grow: 1; 
+}
+
+.upgradeLinkButton {
+    /* Primary CTA: Premium Gold Button */
+    background-color: #D4AF37; /* Luminous Gold */
+    color: #111;
+    border: none;
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.4);
+    
+    &:hover {
+        background-color: #c09f30;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(212, 175, 55, 0.6);
+    }
+}
+
+.dismissButton {
+    /* Secondary CTA: Clean/Subtle Dark Blue */
+    background-color: #4F46E5; /* Indigo */
+    color: #fff;
+    border: 1px solid #4F46E5;
+    
+    &:hover {
+        background-color: #4338CA;
+        transform: translateY(-2px);
+    }
+}
 /* === MOBILE RESPONSIVENESS (FINAL ALIGNMENT FIX) === */
 @media (max-width: 1024px) {
     .mainContent {

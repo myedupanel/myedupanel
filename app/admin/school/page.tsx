@@ -68,38 +68,80 @@ interface DashboardData {
 
 // --- NEW COMPONENT: TrialWarningModal (Same) ---
 interface TrialWarningModalProps {
+
     isOpen: boolean;
+
     onClose: () => void;
+
     daysLeft: number;
+
 }
+
 const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, daysLeft }) => {
+
     return (
+
         <Modal 
+
             isOpen={isOpen} 
+
             onClose={onClose} 
-            title="Trial Period Ending Soon! ⏳"
+
+            // Title ko sirf icon ke saath rakha, styling CSS mein
+
+            title="Trial Period Ending Soon!" 
+
             modalClassName={styles.warningModal}
+
         >
+
             <div className={styles.modalContent}>
-                <p>Your **{daysLeft} day** free trial will expire soon.</p>
+
+                {/* Days left ko strong tag mein wrap kiya for Red Highlight */}
+
+                <p>Your **<strong>{daysLeft} day</strong>** free trial will expire soon.</p> 
+
+                
+
                 <p>To avoid any disruption to your school's operations, please consider **upgrading** to a paid plan today.</p>
+
+                
+
+                {/* Warning Message Styling (Uses .warningMessage class) */}
+
                 <p className={styles.warningMessage}>
+
                     <MdFlashOn size={20} style={{ marginRight: '8px' }}/> 
+
                     Once your trial ends, access to some features will be restricted.
+
                 </p>
+
+                
+
                 <div className={styles.modalActions}>
+
                     <Link href="/upgrade" className={styles.upgradeLinkButton}>
+
                         Upgrade Now
+
                     </Link>
+
                     <button onClick={onClose} className={styles.dismissButton}>
+
                         Continue Using Trial
+
                     </button>
+
                 </div>
+
             </div>
+
         </Modal>
+
     );
+
 };
-// ----------------------------------------
 
 
 // --- UPDATED COMPONENT: SubscriptionBanner ---
