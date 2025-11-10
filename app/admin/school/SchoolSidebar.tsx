@@ -2,7 +2,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useSchoolLayout } from '@/app/admin/school/layout'; 
+// CRITICAL FIX: Hook को लेआउट से हटाकर context फ़ाइल से import करें
+import { useSchoolLayout } from '@/app/context/SchoolLayoutContext'; 
 import styles from '@/components/layout/Sidebar/Sidebar.module.scss'; 
 import { useAuth } from '@/app/context/AuthContext';
 import { useUpcomingFeature } from '@/app/context/UpcomingFeatureContext';
@@ -20,7 +21,7 @@ export interface NavItem {
   type: 'free' | 'starter' | 'locked'; 
 }
 
-// --- RESTORED: Professional Premium Color Palette ---
+// --- RESTORED: Professional Premium Color Palette (Same) ---
 const Colors = {
     ControlCenter: '#6366F1', 
     Students: '#0EA5E9',     
@@ -59,11 +60,11 @@ const schoolMenuItems: NavItem[] = [
 // ---
 
 const SchoolSidebar = () => {
-    // ... (Rest of the component logic remains unchanged) ...
     const pathname = usePathname();
     const { user } = useAuth();
     const { triggerModal } = useUpcomingFeature();
-    const { isSidebarOpen, toggleSidebar } = useSchoolLayout();
+    // Hook call is now safe because the correct file is imported
+    const { isSidebarOpen, toggleSidebar } = useSchoolLayout(); 
 
     const isSuperAdmin = user?.role === 'SuperAdmin';
     const showUpcomingFeatureAlert = (e: React.MouseEvent) => {
@@ -117,7 +118,7 @@ const SchoolSidebar = () => {
 
             <nav className={styles.menuSection}>
                 <ul className={styles.menuList}>
-                    {schoolMenuItems.map((item) => { // FIX 2 is resolved here!
+                    {schoolMenuItems.map((item) => { 
                         const isActive = item.path === '/admin/school' 
                             ? pathname === item.path 
                             : pathname.startsWith(item.path); 

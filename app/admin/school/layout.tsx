@@ -1,34 +1,18 @@
 "use client"; 
-import React, { useState, createContext, useContext, ReactNode } from 'react'; // Context-related imports kept
+import React, { ReactNode } from 'react'; 
 import styles from './SchoolPage.module.scss';
 import SchoolSidebar from '@/app/admin/school/SchoolSidebar';
-// मान रहे हैं कि ये दोनों context files मौजूद हैं, इसलिए उन्हें import किया गया है
+import Modal from '@/components/common/Modal/Modal';
+import { MdFlashOn } from 'react-icons/md';
+
+// CRITICAL FIX: Importing Provider and Hook from the new external context file
+import { SchoolLayoutProvider, useSchoolLayout } from '@/app/context/SchoolLayoutContext'; 
 import { UpcomingFeatureProvider, useUpcomingFeature } from '@/app/context/UpcomingFeatureContext'; 
 
-// === 🛑 IMPORTANT: Context Definitions are MOVED or ASSUMED EXTERNAL 🛑 ===
-// (Aapko yeh definitions ab yahan se hataakar 'app/context/SchoolLayoutContext.tsx' mein daalni hongi)
 
-// CRITICAL FIX: To fix the build error, we define the minimal provider/hook structure here.
-// Ideal way is to put this in 'app/context/SchoolLayoutContext.tsx'
-interface SchoolLayoutContextType { isSidebarOpen: boolean; toggleSidebar: () => void; }
-const SchoolLayoutContext = createContext<SchoolLayoutContextType | undefined>(undefined);
-const SchoolLayoutProvider = ({ children }: { children: ReactNode }) => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
-    
-    return (
-        <SchoolLayoutContext.Provider value={{ isSidebarOpen, toggleSidebar }}>
-            {children}
-        </SchoolLayoutContext.Provider>
-    );
-};
-export const useSchoolLayout = () => useContext(SchoolLayoutContext)!; // Hook for internal use.
-// =======================================================================
-
-
-// === UPCOMING FEATURE MODAL DEFINITION (Same) ===
+// === UPCOMING FEATURE MODAL DEFINITION ===
 const UpcomingFeatureModal = () => {
-    // CRITICAL FIX: useUpcomingFeature hook call MUST be inside a component 
+    // Hook call is safe here (inside a component, and Provider is used in export default)
     const { showModal, setShowModal } = useUpcomingFeature();
 
     return (
@@ -52,9 +36,9 @@ const UpcomingFeatureModal = () => {
 };
 // =================================================================
 
-// === SchoolLayoutContent (Hook calls aur children ko render karne ke liye) ===
+// === SchoolLayoutContent (The Visual Shell Component) ===
 const SchoolLayoutContent = ({ children }: { children: React.ReactNode }) => {
-    // FIX: Hook call inside the component wrapped by the provider
+    // Hook call is safe here, consuming the context provided in the final export
     const { isSidebarOpen, toggleSidebar } = useSchoolLayout(); 
     
     return (
@@ -62,7 +46,7 @@ const SchoolLayoutContent = ({ children }: { children: React.ReactNode }) => {
             
             <SchoolSidebar /> 
             
-            {/* FIX: Conditional rendering of overlay */}
+            {/* Mobile Overlay is conditional based on context */}
             {isSidebarOpen && <div className={styles.sidebarOverlay} onClick={toggleSidebar} />}
 
             <main className={styles.content}>
@@ -75,27 +59,21 @@ const SchoolLayoutContent = ({ children }: { children: React.ReactNode }) => {
 // =======================================================================
 
 
-import Modal from '@/components/common/Modal/Modal';
-import { MdFlashOn } from 'react-icons/md';
-
-
-// === 🏆 FINAL EXPORT: Only the Provider Wrapper ===
+// === 🏆 FINAL EXPORT: The only part Next.js recognizes ===
 export default function SchoolLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
-    // Yahan sirf Providers render honge.
+    // This is the only place we use the Provider components to wrap the content
     return (
         <UpcomingFeatureProvider>
-            <SchoolLayoutProvider> {/* School Layout Provider */}
+            <SchoolLayoutProvider> {/* Imported from the new context file */}
                 
-                {/* SchoolLayoutContent is now the visual shell */}
                 <SchoolLayoutContent>
                     {children}
                 </SchoolLayoutContent>
                 
-                {/* Modal Rendering */}
                 <UpcomingFeatureModal /> 
 
             </SchoolLayoutProvider>

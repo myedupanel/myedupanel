@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styles from './SchoolPage.module.scss';
 import Link from 'next/link';
-// Hamburger logic ke liye zaroori imports
-import { useSchoolLayout } from './layout';
+// CRITICAL FIX: Hook को सीधे Context फ़ाइल से import करें (लेआउट से नहीं)
+import { useSchoolLayout } from '@/app/context/SchoolLayoutContext'; 
 import { MdMenu } from 'react-icons/md';
 // ---
 import { useRouter } from 'next/navigation';
