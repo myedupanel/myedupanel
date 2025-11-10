@@ -2,10 +2,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styles from './SchoolPage.module.scss';
 import Link from 'next/link';
-// CRITICAL FIX: Hook को सीधे Context फ़ाइल से import करें (लेआउट से नहीं)
 import { useSchoolLayout } from '@/app/context/SchoolLayoutContext'; 
 import { MdMenu } from 'react-icons/md';
-// ---
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useAuth, User } from '@/app/context/AuthContext';
@@ -142,7 +140,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
             case 'TRIAL':
                 return {
                     icon: MdFlashOn,
-                    text: 'Trial Mode Active',
+                    text: 'Your 14-day trial has begun!', // Full text for desktop
                     link: '/upgrade', 
                     buttonText: 'Upgrade Now',
                     className: styles.trialBanner,
@@ -185,10 +183,13 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
             
             return (
                 <div className={styles.trialContent}>
-                    <div className={styles.trialSlogan}>Your 14-day trial has begun!</div>
+                    {/* Desktop Trial View */}
+                    <div className={styles.trialSlogan}>
+                         {text}
+                         {/* Desktop days left */}
+                         <span style={{ fontWeight: 900, color: '#ef4444', marginLeft: '10px' }}>{daysLeft} DAYS LEFT</span>
+                    </div>
                     <div className={styles.trialCountdown}>
-                        <div className={styles.countdownValue}>{daysLeft}</div>
-                        <div className={styles.countdownLabel}>DAYS LEFT</div>
                         <div className={styles.progressBar}>
                             <div 
                                 className={styles.progressFill} 
@@ -204,16 +205,13 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
             <div className={styles.planContent}>
                 <PlanIcon size={20} />
                 
-                {/* NAYA CODE START: Abbreviated and Full Text */}
-                {/* Abbreviated text (visible only on mobile via SCSS) */}
+                {/* Mobile Text (Hidden on desktop by SCSS) */}
                 <span className={styles.bannerAbbreviation}>
-                    {/* CRITICAL FIX: Mobile par sirf short name dikhega */}
-                    {plan === 'STARTER' ? 'Starter Plan' : (plan === 'PRO' ? 'Pro Plan' : (plan === 'TRIAL' ? 'Trial Mode' : 'No Plan'))}
+                    {plan === 'STARTER' ? 'Starter' : (plan === 'PRO' ? 'Pro' : (plan === 'TRIAL' ? 'Trial' : 'No Plan'))}
                 </span>
                 
-                {/* Full text (visible only on desktop via SCSS) */}
+                {/* Full text (Visible on desktop) */}
                 <span>{text}</span> 
-                {/* NAYA CODE END */}
 
                 {/* 1 Year Remaining Alert for Paid Users (Same) */}
                 {isPaid && daysLeft !== null && daysLeft <= 30 && daysLeft > 0 && (
@@ -229,7 +227,16 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
 
     return (
         <div className={`${styles.subscriptionBanner} ${className}`}>
-            {renderContent()}
+             {/* CRITICAL FIX 1: Render Trial Icon on mobile, full content on desktop */}
+            {isTrial && daysLeft !== null && window.innerWidth <= 1024 ? (
+                 <div className={styles.planContent}>
+                    <MdFlashOn size={24} style={{ color: '#f59e0b' }}/>
+                 </div>
+            ) : (
+                renderContent()
+            )}
+            
+            {/* CRITICAL FIX 2: Upgrade Button is ALWAYS rendered next to the banner content/icon */}
             {buttonText && (
                 <Link href={link} className={styles.upgradeButton}>
                     {buttonText}

@@ -13,7 +13,7 @@
     padding: 1.5rem 2rem;
     overflow-y: auto;
     margin-left: 260px; /* Desktop Margin */
-    transition: margin-left 0.3s ease; /* Smooth transition for margin */
+    transition: margin-left 0.3s ease; 
 }
 
 .overviewContainer {
@@ -55,7 +55,6 @@
     flex-direction: column;
     transition: all 0.2s ease;
     
-    // Add a slight hover effect
     &:hover {
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         transform: translateY(-2px);
@@ -66,7 +65,7 @@
     grid-column: span 3;
     height: 380px;
     padding: 1.5rem; 
-    &:hover { transform: none; box-shadow: none; } /* Remove hover effect on chart */
+    &:hover { transform: none; box-shadow: none; } 
 }
 
 /* --- Box Header Styles (Same) --- */
@@ -173,6 +172,57 @@
     animation: border-glow-paid 6s infinite alternate ease-in-out;
 }
 
+.trialBanner {
+    background-color: #fffbeb; /* Light yellow background */
+    color: #92400e; /* Dark brown/orange text */
+    border: 1px solid #fcd34d; /* Yellow border */
+    padding: 0.75rem 1rem; /* More padding to highlight trial */
+    min-width: 320px;
+    
+    // Desktop Trial Content Layout
+    .trialContent {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        
+        .trialSlogan {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .trialCountdown {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            
+            .countdownValue {
+                font-size: 1.5rem;
+                font-weight: 900;
+                color: #ef4444; /* Highlight days left in red */
+            }
+            .countdownLabel {
+                font-weight: 500;
+                color: #4b5563;
+                text-transform: uppercase;
+            }
+            
+            .progressBar {
+                flex-grow: 1;
+                height: 8px;
+                background-color: #fde68a;
+                border-radius: 4px;
+                overflow: hidden;
+                .progressFill {
+                    height: 100%;
+                    background-color: #f59e0b;
+                    transition: width 0.5s ease;
+                }
+            }
+        }
+    }
+}
+
 .planContent {
     display: flex;
     align-items: center;
@@ -180,12 +230,10 @@
     font-size: 1rem;
     flex-grow: 1;
     
-    // Default: Full text dikhega
     .bannerAbbreviation {
         display: none; 
     }
     
-    // Default: Full text dikhega
     span:not(.bannerAbbreviation) {
         display: block; 
     }
@@ -202,15 +250,27 @@
     padding: 0;
 }
 
+.upgradeButton {
+    padding: 0.4rem 0.8rem;
+    background-color: #ef4444; /* Red button for urgency */
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: background-color 0.2s ease;
+    &:hover {
+        background-color: #dc2626;
+    }
+}
+
 /* === MOBILE RESPONSIVENESS (FINAL ALIGNMENT FIX) === */
 @media (max-width: 1024px) {
-    /* Main Content: Sidebar chhipa hoga, isliye margin hata denge */
     .mainContent {
         margin-left: 0 !important; 
         padding: 1rem; 
     }
     
-    /* Grid Collapse: Saare boxes ko 1 column par stack karein */
     .mainGrid {
         grid-template-columns: 1fr; 
     }
@@ -223,13 +283,12 @@
     /* --- Mobile Header and Banner Alignment FIX --- */
     .headerRow {
         flex-direction: row; 
-        /* CRITICAL FIX 1: Vertical centering on the line */
         align-items: center; 
         justify-content: space-between; 
         flex-wrap: nowrap; 
         gap: 0.5rem; 
-        margin-bottom: 1.5rem; 
-        padding-top: 0; /* Extra safety */
+        margin-bottom: 1rem; /* Reduced margin */
+        padding-top: 0; 
     }
     
     /* Hamburger Button (Left) */
@@ -237,44 +296,54 @@
         display: block; 
         order: 1; 
         flex-shrink: 0;
-        margin: 0; /* Remove any default vertical margins */
+        margin: 0; 
     }
     
     .mainTitle {
-        font-size: 1.25rem; /* CRITICAL FIX 2: Font size ko chhota kiya */
-        line-height: 1.2; /* CRITICAL FIX 3: Line height fix */
+        font-size: 1.25rem; 
+        line-height: 1.2; 
         order: 2; 
-        flex-grow: 1; /* Title takes remaining space */
+        flex-grow: 1; 
         padding-right: 0.25rem; 
         white-space: nowrap; 
         overflow: hidden;
         text-overflow: ellipsis;
-        margin: 0; /* CRITICAL FIX 4: Margin zero kiya */
+        margin: 0; 
         padding-left: 0.5rem;
     }
 
+    /* --- CRITICAL MOBILE BANNER FIX --- */
     .subscriptionBanner {
         order: 3; 
         flex-shrink: 0; 
         min-width: unset;
-        padding: 0.4rem 0.6rem; /* CRITICAL FIX 5: Banner padding kam kiya */
+        padding: 0; /* Remove padding from outer banner container */
+        background-color: transparent !important; /* Remove background */
+        border: none !important; /* Remove border */
+        box-shadow: none !important;
         
-        /* Mobile Abbreviation Logic */
         .planContent {
-            gap: 0.25rem;
-            // Full text ko chhipao
-            span:not(.bannerAbbreviation) {
-                display: none;
-            }
-            // Abbreviated text dikhao
-            .bannerAbbreviation {
-                display: block; 
-                font-size: 0.8rem; /* CRITICAL FIX 6: Font size aur chhota kiya */
-                font-weight: 700;
-            }
+            // Mobile: Only show the trial icon
+            span { display: none !important; }
             svg {
-                font-size: 1rem; /* Icon size bhi kam kiya */
+                display: block !important;
+                font-size: 1.5rem !important; /* Make icon visible and slightly larger */
+                color: #f59e0b !important; /* Orange/Warning color */
             }
+        }
+        
+        /* Align upgrade button next to the icon */
+        .upgradeButton {
+            padding: 0.4rem 0.6rem; 
+            font-size: 0.75rem; /* Very small button text */
+            margin-left: 0.5rem;
+            background-color: #4F46E5; /* Use primary blue for clean look */
+            &:hover { background-color: #4338CA; }
+        }
+        
+        /* Hide the large trial content blocks */
+        .trialBanner .trialContent {
+            display: none;
         }
     }
 }
