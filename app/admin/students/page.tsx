@@ -1,7 +1,12 @@
+// app/admin/students/page.tsx
 "use client";
-import React, { useState, useEffect, useMemo, useCallback, createContext, useContext, ReactNode } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './StudentsPage.module.scss';
+
+// NAYA: Context और Provider को यहाँ से Import किया गया
+import { useStudentLayout, StudentLayoutProvider } from '@/app/context/StudentLayoutContext'; 
+
 import StudentSidebar from './components/StudentSidebar';
 import StudentsTable from '@/components/admin/StudentsTable/StudentsTable';
 import Modal from '@/components/common/Modal/Modal';
@@ -14,32 +19,6 @@ import ImportStudentsForm from '@/components/admin/ImportStudentsForm/ImportStud
 import StudentFilters from '@/components/admin/StudentFilters/StudentFilters'; 
 import { io } from "socket.io-client";
 import { useAuth } from '@/app/context/AuthContext';
-
-
-// === Student Layout Context (Same) ===
-interface StudentLayoutContextType {
-    isSidebarOpen: boolean;
-    toggleSidebar: () => void;
-}
-const StudentLayoutContext = createContext<StudentLayoutContextType | undefined>(undefined);
-export const useStudentLayout = () => {
-    const context = useContext(StudentLayoutContext);
-    if (!context) {
-        throw new Error('useStudentLayout must be used within a StudentLayoutProvider');
-    }
-    return context;
-};
-const StudentLayoutProvider = ({ children }: { children: ReactNode }) => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
-    
-    return (
-        <StudentLayoutContext.Provider value={{ isSidebarOpen, toggleSidebar }}>
-            {children}
-        </StudentLayoutContext.Provider>
-    );
-};
-// === END Student Layout Context ===
 
 
 // --- DATA INTERFACES (Same) ---
@@ -147,15 +126,14 @@ const StudentsPageContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user } = useAuth(); 
-    // NAYA: Context use kiya
+    
+    // Context hook is now imported and used
     const { isSidebarOpen, toggleSidebar } = useStudentLayout(); 
-    // NAYA: Search toggle state
+    
     const [isFiltersVisible, setIsFiltersVisible] = useState(false);
-
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-    // ... (baki states remain same) ...
     const [students, setStudents] = useState<StudentData[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [editingStudent, setEditingStudent] = useState<StudentData | null>(null);
@@ -163,7 +141,7 @@ const StudentsPageContent = () => {
     const [selectedClass, setSelectedClass] = useState<string>('all');
     const [isActionsOpen, setIsActionsOpen] = useState(false);
 
-    // ... (All useEffects and handlers remain same) ...
+    
     useEffect(() => {
         const modalParam = searchParams.get('modal');
         if (modalParam === 'add') {
@@ -353,7 +331,7 @@ const StudentsPageContent = () => {
         <>
             <div className={`${styles.studentPageLayout}`}>
                 
-                {/* 1. Sidebar - CRITICAL FIX: Prop pass kiya */}
+                {/* 1. Sidebar */}
                 <StudentSidebar isMobileOpen={isSidebarOpen} />
                 
                 {/* 2. Mobile Overlay */}
@@ -505,6 +483,7 @@ const StudentsPageContent = () => {
     );
 };
 
+// Next.js Page Component (Wrapper)
 const StudentsPage = () => (
     <StudentLayoutProvider>
         <StudentsPageContent />

@@ -4,7 +4,9 @@ import { useRouter } from 'next/navigation';
 import styles from './StudentSidebar.module.scss';
 import { FiFileText, FiDownload, FiUpload, FiPlus } from 'react-icons/fi';
 import { MdArrowBack, MdPictureAsPdf } from 'react-icons/md';
-import { useStudentLayout } from '../page';
+
+// FIX: useStudentLayout को नई, सही फ़ाइल से import करें
+import { useStudentLayout } from '@/app/context/StudentLayoutContext'; 
 
 // NAYA: Props interface
 interface StudentSidebarProps {
@@ -13,7 +15,8 @@ interface StudentSidebarProps {
 
 const StudentSidebar = ({ isMobileOpen }: StudentSidebarProps) => { 
   const router = useRouter();
-  const { toggleSidebar } = useStudentLayout();
+  // useStudentLayout अब ठीक से काम करेगा
+  const { toggleSidebar } = useStudentLayout(); 
 
   const openModal = (modalName: string) => {
     // Mobile par click hone par sidebar close karein
