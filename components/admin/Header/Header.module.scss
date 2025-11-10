@@ -1,108 +1,5 @@
-.headerWrapper {
-  // Yeh Title aur Subtitle dono bars ka container hai
-  margin-bottom: 1.5rem;
-}
+/* File: components/admin/Header/Header.module.scss */
 
-// --- Part 1: Title Bar ---
-.titleBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 1rem;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-}
-
-.pageTitle {
-  margin: 0;
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: #1a202c;
-}
-
-.profileSection {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.profileImage {
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.profileInfo {
-  display: flex;
-  flex-direction: column;
-  text-align: right;
-}
-
-.profileName {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #2d3748;
-}
-
-.profileEmail {
-  font-size: 0.75rem;
-  color: #718096;
-}
-
-.editButton {
-  background: #f1f2f6;
-  border: none;
-  cursor: pointer;
-  color: #718096;
-  padding: 0.5rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: #e2e8f0;
-  }
-}
-
-
-// --- Part 2: Subtitle Bar ---
-.subtitleBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f7fafc;
-  border: 1px solid #e2e8f0;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.subtitle {
-  font-size: 0.9rem;
-  color: #718096;
-  margin: 0;
-}
-
-.timeSection {
-  display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-}
-
-.date {
-  font-size: 0.85rem;
-  color: #718096;
-  font-weight: 500;
-}
-
-.time {
-  font-size: 1rem;
-  color: #2d3748;
-  font-weight: 600;
-  font-family: 'monospace', sans-serif; // Digital clock jaisa look
-}
 .headerWrapper {
   background-color: #ffffff;
   padding: 1.5rem;
@@ -111,32 +8,53 @@
   margin-bottom: 2rem;
 }
 
-.titleBar, .subtitleBar {
+/* --- Part 1: Title Bar --- */
+.titleBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.subtitleBar {
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid #f3f4f6;
+  padding-bottom: 0.75rem; /* Thoda kam padding kiya */
+  flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
 .pageTitle {
+  margin: 0;
   font-size: 2rem;
   font-weight: 700;
   color: #1e293b;
-}
-
-.subtitle {
-  color: #64748b;
 }
 
 .profileSection {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.avatarContainer {
+  margin-right: 0.5rem; 
+}
+
+.defaultAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600; 
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.premiumIcon {
+  background: linear-gradient(135deg, #6a11cb, #2575fc); 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .profileImage {
@@ -153,11 +71,6 @@
 .profileName {
   font-weight: 600;
   color: #334155;
-}
-
-.profileEmail {
-  font-size: 0.8rem;
-  color: #94a3b8;
 }
 
 .editButton {
@@ -178,6 +91,22 @@
   }
 }
 
+/* --- Part 2: Subtitle Bar --- */
+.subtitleBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+  padding-bottom: 0; /* No extra padding below */
+}
+
+.subtitle {
+  color: #64748b;
+  margin: 0;
+}
+
 .timeSection {
   display: flex;
   align-items: center;
@@ -189,89 +118,63 @@
 .time {
   font-weight: 600;
 }
-// Yeh code copy karke Header.module.scss mein sabse neeche add karein
 
-// Yeh container profile photo aur default avatar, dono ko hold karega
-.avatarContainer {
-  margin-right: 12px; // Naam aur avatar ke beech thodi jagah
+/* --- Menu Button (Hamburger) --- */
+.menuButton {
+  display: none; 
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #3b82f6; 
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+
+  @media (max-width: 1024px) {
+    display: block; 
+    margin-right: 0.5rem;
+  }
 }
 
-// Yeh hai aapka naya default "Initials" avatar
-.defaultAvatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%; // Isse circle banega
-  background-color: #7c3aed; // Ek accha purple color
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600; // Bold text
-  font-size: 0.9rem; // Initials ka size
-  line-height: 1;
-}
+/* --- Animation Styles --- */
+.titleFadeIn { animation: fadeIn 0.5s ease-out forwards; }
+.titleFadeOut { animation: fadeOut 0.5s ease-in forwards; opacity: 1; }
 
-// Yeh puraani profileImage class ko bhi round kar dega
-.profileImage {
-  border-radius: 50%; // Asli photo ko bhi circle mein dikhayega
-}
-/* === YEH NAYA CODE ADD KAREIN === */
-/* Styles for the title animation */
-.titleFadeIn {
-  animation: fadeIn 0.5s ease-out forwards;
-}
-
-.titleFadeOut {
-  animation: fadeOut 0.5s ease-in forwards;
-  opacity: 1; /* Fade out hone se pehle 1 se shuru karein */
-}
-
-/* Keyframes for the animation */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-}
-.defaultAvatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: var(--primary-color); /* Ya koi premium color */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #fff;
-  flex-shrink: 0; // Taaki shrink na ho
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
 }
 
-.premiumIcon {
-  /* === YAHAN FIX KIYA GAYA HAI ===
-    Pehle wale gradient variables (var(...)) kaam nahi kar rahe the.
-    Ab hum ek solid, premium-looking gradient seedha add kar rahe hain.
-  */
-  background: linear-gradient(135deg, #6a11cb, #2575fc); 
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  
-  /* Yeh properties icon ko center mein rakhti hain (defaultAvatar se) */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* === MOBILE RESPONSIVENESS (FINAL FIX) === */
+@media (max-width: 1024px) {
+    .pageTitle {
+        font-size: 1.5rem;
+        flex-grow: 1; 
+        // Hamburger button ke saath wrap hone se rokenge
+        white-space: nowrap; 
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .titleBar {
+        // Mobile par Title aur Profile ko align karne ke liye
+        align-items: center; /* Center alignment kiya */
+        flex-wrap: nowrap;
+    }
+
+    .profileSection {
+        /* CRITICAL FIX: Hide School Profile section on mobile */
+        display: none !important; 
+    }
+
+    .subtitleBar {
+        // Subtitle bar mein items ko stack karein
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.5rem 0; /* Padding adjust kiya */
+    }
 }

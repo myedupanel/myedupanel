@@ -1,4 +1,5 @@
 /* File: components/layout/Sidebar/Sidebar.module.scss */
+
 .sidebarContainer {
   background-color: #1f2937; // Dark background
   color: #d1d5db; // Light text color
@@ -12,21 +13,28 @@
   z-index: 1000; 
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   
-  /* === MOBILE/TABLET RESPONSIVENESS (Sidebar Off-Canvas) === */
-  /* <<< FIX: Media query is now nested inside the parent selector >>> */
+  /* --- MOBILE/TABLET RESPONSIVENESS (Sidebar Off-Canvas) --- */
+  
+  // 1. Mobile par chhipane ke styles (Default view)
   @media (max-width: 1024px) {
-    width: 280px; /* Slightly wider on mobile for better touch target */
-    transform: translateX(-100%); /* CRITICAL: Hide it off-screen by default */
+    width: 280px; 
+    transform: translateX(-100%); /* Default: Hide it off-screen */
     transition: transform 0.3s ease-out;
     box-shadow: none;
-
-    &.mobileOpen { /* '&' is now valid as it's nested */
-      transform: translateX(0); /* Slide it into view */
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
-    }
+    z-index: 1050; // Overlay se upar
     
+    // Logo section mein mobile par border ki zaroorat nahi hai
     .logoSection {
       border-bottom: none; 
+    }
+  }
+
+  // 2. Mobile par khulne ke styles (Open state)
+  // &.mobileOpen ko top level par rakha, media query ko andar daala (Compiler Fix)
+  &.mobileOpen { 
+    @media (max-width: 1024px) {
+      transform: translateX(0); /* Slide it into view */
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
     }
   }
 }
@@ -95,7 +103,13 @@
     }
   }
 }
-
+.mobileOnlyLink {
+    display: none; /* Default: Desktop par chhipa rahega */
+    
+    @media (max-width: 1024px) {
+        display: block; /* Mobile/Tablet par dikhega */
+    }
+}
 /* --- TAGS STYLES --- */
 .proTag {
   margin-left: auto;
@@ -126,6 +140,10 @@
     color: #60a5fa; 
   }
 }
+.editProfileLink {
+  color: #ffc107 !important; 
+}
+
 
 /* --- FOOTER STYLES --- */
 .sidebarFooter {
@@ -159,5 +177,25 @@
     &:hover {
       background-color: #dc2626; 
     }
+  }
+}
+
+/* --- Mobile Overlay Style --- */
+.sidebarOverlay {
+  display: none; // Default hidden on desktop
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); // Semi-transparent black
+  z-index: 1040; // Sidebar (1050) se neeche, content (0) se upar
+  transition: opacity 0.3s ease-in-out;
+  
+  @media (max-width: 1024px) {
+    display: block; // Mobile par dikhega jab isSidebarOpen = true
+  }
+  @media (min-width: 1025px) {
+    display: none !important; // Desktop par hamesha hidden
   }
 }

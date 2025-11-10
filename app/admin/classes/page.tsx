@@ -4,9 +4,9 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import api from '@/backend/utils/api'; 
 import styles from './ClassesPage.module.scss';
-import Link from 'next/link'; // <-- 1. YEH ADD KIYA
+import Link from 'next/link'; 
 import { FiEdit, FiTrash2 } from 'react-icons/fi'; 
-import { MdGridView } from 'react-icons/md'; // <-- 2. YEH ADD KIYA
+import { MdGridView } from 'react-icons/md'; 
 import Modal from '@/components/common/Modal/Modal'; 
 
 interface SchoolClass {
@@ -180,7 +180,7 @@ const ClassesPage = () => {
                     )}
                 </section>
 
-                {/* --- 3. FIX: Wrapper div add kiya --- */}
+                {/* --- Sidebar Column (Add Class and Dashboard Link) --- */}
                 <div className={styles.sidebarColumn}>
                     {/* Section to Add a New Class (No Change) */}
                     <section className={styles.addClassSection}>
@@ -210,13 +210,12 @@ const ClassesPage = () => {
                         </form>
                     </section>
 
-                    {/* --- 3. YEH NAYA LINK ADD KIYA HAI --- */}
+                    {/* --- Dashboard Link --- */}
                     <Link href="/admin/school" className={styles.dashboardLinkButton}>
                         <MdGridView /> Go to Dashboard
                     </Link>
-                    {/* --- END NAYA LINK --- */}
                 </div>
-                {/* --- END FIX --- */}
+                {/* --- END Sidebar Column --- */}
             </div>
 
             {/* Edit Modal (No Change) */}

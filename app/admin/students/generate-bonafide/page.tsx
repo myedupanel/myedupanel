@@ -1,9 +1,8 @@
-// app/admin/students/generate-bonafide/page.tsx
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
-import styles from './BonafideBuilder.module.scss'; // Ensure this points to your FINAL V8 SCSS
+import styles from './BonafideBuilder.module.scss'; 
 import StudentSearch from '@/components/admin/StudentSearch/StudentSearch';
-import { FiDownload, FiPrinter } from 'react-icons/fi';
+import { FiDownload, FiPrinter, FiSearch } from 'react-icons/fi';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import api from '@/backend/utils/api';
@@ -11,7 +10,7 @@ import Link from 'next/link';
 import { MdGridView } from 'react-icons/md';
 import { useAuth } from '@/app/context/AuthContext';
 
-// --- Student Interface ---
+// --- Student Interface (Same) ---
 interface Student {
   id: string;
   name: string;
@@ -20,7 +19,7 @@ interface Student {
   address?: string;
 }
 
-// --- School Details Interface ---
+// --- School Details Interface (Same) ---
 interface SchoolDetails {
   name: string;
   name2?: string;
@@ -33,7 +32,7 @@ interface SchoolDetails {
   place?: string;
 }
 
-// --- Form Data State ---
+// --- Form Data State (Same) ---
 interface BonafideFormData {
   certificateNo: string;
   academicYear: string;
@@ -43,17 +42,16 @@ interface BonafideFormData {
   issueDate: string;
 }
 
-// --- Helper Functions ---
+// --- Helper Functions (Same) ---
 const formatDate = (dateString: string | undefined): string => {
-  if (!dateString) return ''; // Return empty string for placeholder logic below
+  if (!dateString) return '';
   try {
     const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
     return new Date(dateString).toLocaleDateString('en-GB', options);
   } catch (e) { return 'Invalid Date'; }
 };
 
-// --- ✅ FINAL V8: BonafidePDFPreview Component ---
-// No JSX changes needed, CSS handles the alignment
+// --- BonafidePDFPreview Component (Same) ---
 const BonafidePDFPreview = ({
   student,
   formData,
@@ -63,7 +61,7 @@ const BonafidePDFPreview = ({
   formData: BonafideFormData;
   schoolDetails: SchoolDetails;
 }) => {
-  // Use conditional rendering for placeholders/blanks
+  // ... (JSX and logic remains the same) ...
   const studentNameNode = student?.name ? <span className={styles.fillIn}>{student.name}</span> : <span className={styles.fillInBlank}>&nbsp;</span>;
   const studentClassNode = student?.class ? <span className={styles.fillIn}>{student.class}</span> : <span className={styles.fillInBlank}>&nbsp;</span>;
   const studentDobNode = student?.dob ? <span className={styles.fillIn}>{formatDate(student.dob)}</span> : <span className={styles.fillInBlank}>&nbsp;</span>;
@@ -175,7 +173,7 @@ const BonafidePDFPreview = ({
 };
 
 
-// --- BonafidePDFForm Component (No change needed) ---
+// --- BonafidePDFForm Component (Same) ---
 const BonafidePDFForm = ({
   formData,
   setFormData
@@ -239,7 +237,9 @@ const BonafidePDFForm = ({
 const BonafideBuilderPage = () => {
   const { user } = useAuth();
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const certificateRef = useRef<HTMLDivElement | null>(null); // Ref for the certificatePaper div
+  const certificateRef = useRef<HTMLDivElement | null>(null); 
+  // NAYA: Controls visibility state
+  const [isControlsVisible, setIsControlsVisible] = useState(false);
 
   const [formData, setFormData] = useState<BonafideFormData>({
     certificateNo: '',
@@ -300,7 +300,7 @@ const BonafideBuilderPage = () => {
     fetchSchoolProfile();
   }, [user]);
 
-  // --- Print/Download functions ---
+  // --- Print/Download functions (Same) ---
   const handlePrint = () => {
     const input = certificateRef.current;
     if (!input || !selectedStudent) {
@@ -335,6 +335,9 @@ const BonafideBuilderPage = () => {
   const handleDownloadPDF = () => {
     const input = certificateRef.current;
     if (!selectedStudent) { alert("Please select a student first."); return; }
+    // NAYA FIX: Mobile par controls automatically band honge jab PDF download ho
+    if (window.innerWidth <= 1024) setIsControlsVisible(false);
+
     if (!input) { alert("Preview element not found."); return; }
     html2canvas(input, {
         scale: 3,
@@ -375,16 +378,38 @@ const BonafideBuilderPage = () => {
   return (
     <div className={styles.pageContainer}>
       <header className={styles.header}>
-        <h1>Bonafide & Character Certificate Builder</h1>
-        <p>Search student, fill details, and preview the certificate based on the required format.</p>
+        {/* CRITICAL FIX: Header structure ko flex row mein banaya */}
+        <div className={styles.headerTitleBar}>
+            {/* NAYA: Mobile Controls Toggle Button */}
+            <button className={styles.controlsToggleButton} onClick={() => setIsControlsVisible(prev => !prev)}>
+                <FiSearch />
+            </button>
+            
+            <h1 className={styles.title}>Bonafide & Character Certificate Builder</h1>
+        </div>
+        
+        {/* NAYA: Subtitle (Desktop/Mobile Toggle) */}
+        <p className={styles.subtitle}>
+            <span className={styles.desktopSubtitle}>Search student, fill details, and preview the certificate based on the required format.</span>
+            <span className={styles.mobileSubtitle}>Search student, fill details, and Download certificate based on the required format.</span>
+        </p>
+        
+        {/* NAYA: Mobile Close Button (Controls visible hone par dikhega) */}
+        {isControlsVisible && (
+            <button className={styles.controlsCloseButton} onClick={() => setIsControlsVisible(false)}>
+                &times;
+            </button>
+        )}
+
       </header>
 
-      <div className={styles.builderLayout}>
+      {/* NAYA: Conditional class added for mobile controls */}
+      <div className={`${styles.builderLayout} ${isControlsVisible ? styles.controlsVisible : ''}`}> 
+        
         {/* Controls Column */}
         <div className={styles.controlsColumn}>
           <div className={styles.controlSection}>
             <h2>1. Select Student</h2>
-            {/* Make sure StudentSearch returns StudentFullProfile */}
             <StudentSearch onStudentSelect={(student) => setSelectedStudent(student as Student)} />
              <p className={styles.note}>
               Student Search needs to provide: Name, Class, Date of Birth, and Address.
@@ -400,10 +425,12 @@ const BonafideBuilderPage = () => {
                 />
               </div>
               <div className={styles.actionsWrapper}>
-                  <button onClick={handleDownloadPDF} type="button" className={`${styles.actionButton} ${styles.download}`}>
+                  {/* CRITICAL FIX 1: Download button ko full width diya */}
+                  <button onClick={handleDownloadPDF} type="button" className={`${styles.actionButton} ${styles.download} ${styles.downloadMobileFullWidth}`}>
                       <FiDownload /> Download PDF
                   </button>
-                  <button onClick={handlePrint} type="button" className={`${styles.actionButton} ${styles.print}`}>
+                  {/* CRITICAL FIX 2: Print button ko desktop only rakha */}
+                  <button onClick={handlePrint} type="button" className={`${styles.actionButton} ${styles.print} ${styles.printButtonDesktopOnly}`}>
                       <FiPrinter /> Print
                   </button>
               </div>
@@ -415,7 +442,6 @@ const BonafideBuilderPage = () => {
         <div className={styles.previewColumn}>
           <h2>Live Preview</h2>
           <div className={styles.previewWrapper}>
-             {/* The ref MUST be on the div containing BonafidePDFPreview */}
             <div ref={certificateRef}>
               <BonafidePDFPreview
                 student={selectedStudent}
@@ -427,7 +453,7 @@ const BonafideBuilderPage = () => {
         </div>
       </div>
 
-       {/* Link to Dashboard */}
+       {/* Link to Students Dashboard */}
        <Link href="/admin/students" className={styles.dashboardLinkButton}>
           <MdGridView />
           Go to Students Dashboard

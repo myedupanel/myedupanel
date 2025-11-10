@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'; 
 import styles from './TeachersPage.module.scss';
 import { useAuth } from '@/app/context/AuthContext';
-// FIX: Session Context (Teachers Global हैं, इसलिए इसे हटा दिया गया है)
 import TeachersTable from '@/components/admin/TeachersTable/TeachersTable';
 import Modal from '@/components/common/Modal/Modal';
 import AddTeacherForm from '@/components/admin/AddTeacherForm/AddTeacherForm';
-import { FiPlus, FiUpload, FiDownload } from 'react-icons/fi';
+// FiMenu और FiSearch को import किया
+import { FiPlus, FiUpload, FiDownload, FiMenu, FiSearch } from 'react-icons/fi'; 
 import api from '@/backend/utils/api'; 
 import { CSVLink } from 'react-csv';
 import * as XLSX from 'xlsx';
@@ -56,14 +56,16 @@ const TeachersPage = () => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   
+  // NAYA: Actions/Menu Modal state
+  const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
+  // NAYA: Search Modal state
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
   const [teachers, setTeachers] = useState<TeacherData[]>([]);
   const [editingTeacher, setEditingTeacher] = useState<TeacherData | null>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
   
-  // FIX 1: sortOrder state को हटा दिया गया
-  // const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-
   const fetchTeachers = useCallback(async () => {
     if (!user?.schoolId) return;
     try {
@@ -152,7 +154,6 @@ const TeachersPage = () => {
     }
   };
 
-  // FIX 2: Sorting logic और sortOrder dependency हटा दी गई
   const filteredAndSortedTeachers = useMemo(() => {
     if (!teachers) return [];
     return teachers
@@ -160,7 +161,6 @@ const TeachersPage = () => {
         t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
         (t.teacherId && t.teacherId.toLowerCase().includes(searchQuery.toLowerCase()))
       )
-      // Sorting logic हटा दिया गया
   }, [teachers, searchQuery]); 
 
   // --- Import / Export Logic ---
@@ -200,8 +200,22 @@ const TeachersPage = () => {
 
   return (
     <div className={styles.pageContainer}>
+      
+      {/* --- NEW Mobile Header --- */}
       <header className={styles.header}>
+        {/* Hamburger Icon */}
+        <button className={styles.menuButton} onClick={() => setIsActionsModalOpen(true)}>
+            <FiMenu />
+        </button>
+        
         <h1 className={styles.title}>Teacher Management</h1>
+        
+        {/* Search Icon */}
+        <button className={styles.searchToggleButton} onClick={() => setIsSearchModalOpen(true)}>
+            <FiSearch />
+        </button>
+
+        {/* Desktop Actions (Mobile pe hide ho jayega) */}
         <div className={styles.headerActions}>
           <button onClick={() => setIsExportModalOpen(true)} className={`${styles.actionButton} ${styles.exportButton}`}>
             <FiDownload /> Export
@@ -215,13 +229,18 @@ const TeachersPage = () => {
         </div>
       </header>
       
-      {/* FIX 3: onSort prop हटा दिया गया */}
-      <StudentFilters onSearch={setSearchQuery} />
+      {/* Desktop Search Filter (Mobile pe hide ho jayega) */}
+      <div className={styles.desktopSearchFilter}>
+        <StudentFilters onSearch={setSearchQuery} />
+      </div>
 
       <main>
         <TeachersTable teachers={filteredAndSortedTeachers} onEdit={handleEdit} onDelete={handleDelete} />
       </main>
 
+      {/* --- MODALS --- */}
+      
+      {/* 1. Add Teacher Modal (No Change) */}
       <Modal isOpen={isAddModalOpen} onClose={closeModal} title={editingTeacher ? "Edit Teacher" : "Add a New Teacher"}>
         <AddTeacherForm 
           onClose={closeModal} 
@@ -230,10 +249,12 @@ const TeachersPage = () => {
         />
       </Modal>
 
+      {/* 2. Import Modal (No Change) */}
       <Modal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} title="Import Teachers from File">
         <ImportTeachersForm onClose={() => setIsImportModalOpen(false)} onImport={handleDataImport} />
       </Modal>
-
+      
+      {/* 3. Export Modal (No Change) */}
       <Modal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} title="Choose Export Format">
         <div className={styles.exportOptionsContainer}>
           <CSVLink 
@@ -250,6 +271,38 @@ const TeachersPage = () => {
           </button>
         </div>
       </Modal>
+
+      {/* 4. NAYA: Actions Modal (Hamburger Menu Content) */}
+      <Modal isOpen={isActionsModalOpen} onClose={() => setIsActionsModalOpen(false)} title="Quick Actions">
+        <div className={styles.actionsModalContent}>
+            <button 
+                onClick={() => { setIsExportModalOpen(true); setIsActionsModalOpen(false); }} 
+                className={`${styles.actionButton} ${styles.exportButton} ${styles.modalAction}`}
+            >
+                <FiDownload /> Export
+            </button>
+            <button 
+                onClick={() => { setIsImportModalOpen(true); setIsActionsModalOpen(false); }} 
+                className={`${styles.actionButton} ${styles.importButton} ${styles.modalAction}`}
+            >
+                <FiUpload /> Import Teachers
+            </button>
+            <button 
+                onClick={() => { setEditingTeacher(null); setIsAddModalOpen(true); setIsActionsModalOpen(false); }} 
+                className={`${styles.actionButton} ${styles.addButton} ${styles.modalAction}`}
+            >
+                <FiPlus /> Add New Teacher
+            </button>
+        </div>
+      </Modal>
+
+      {/* 5. NAYA: Search Modal */}
+      <Modal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} title="Search Teachers">
+        <div className={styles.searchModalContent}>
+          <StudentFilters onSearch={setSearchQuery} />
+        </div>
+      </Modal>
+
 
       <Link href="/admin/school" className={styles.dashboardLinkButton}>
         <MdGridView />

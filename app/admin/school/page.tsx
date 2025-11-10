@@ -1,8 +1,11 @@
-// File: app/admin/school/page.tsx (FINAL CLEANED CODE - Provider Removed)
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styles from './SchoolPage.module.scss';
 import Link from 'next/link';
+// Hamburger logic ke liye zaroori imports
+import { useSchoolLayout } from './layout';
+import { MdMenu } from 'react-icons/md';
+// ---
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useAuth, User } from '@/app/context/AuthContext';
@@ -11,7 +14,7 @@ import {
     MdPeople, MdSchool, MdFamilyRestroom, MdBadge,
     MdEventAvailable, MdAttachMoney, MdSchedule,
     MdAssessment, MdSettings, MdPersonAdd,
-    MdClass, MdFlashOn, MdStar // Added icons for the banner
+    MdClass, MdFlashOn, MdStar 
 } from 'react-icons/md';
 import Modal from '@/components/common/Modal/Modal';
 import AddStudentForm from '@/components/admin/AddStudentForm/AddStudentForm';
@@ -19,10 +22,9 @@ import AddTeacherForm from '@/components/admin/AddTeacherForm/AddTeacherForm';
 import AddParentForm from '@/components/admin/AddParentForm/AddParentForm';
 import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
 import api from '@/backend/utils/api';
-// === Context Imports Removed: अब ये layout.tsx में रहेंगे ===
 
 
-// === 1. TypeScript Interfaces (Unchanged) ===
+// === 1. TypeScript Interfaces (Same) ===
 interface RecentStudent {
     id: string; name: string; class?: string; details?: { class?: string };
 }
@@ -43,13 +45,12 @@ interface AdmissionDataPoint {
 }
 
 
-// === Subscription Interface (Unchanged) ===
+// === Subscription Interface (Same) ===
 type PlanType = 'NONE' | 'TRIAL' | 'STARTER' | 'PRO'; 
 interface SubscriptionData {
     plan: PlanType;
     planExpiryDate: string | null; 
 }
-// =========================================================
 
 interface DashboardData {
     admissionsData: AdmissionDataPoint[];
@@ -67,7 +68,7 @@ interface DashboardData {
 }
 // ===========================================
 
-// --- NEW COMPONENT: TrialWarningModal (Unchanged) ---
+// --- NEW COMPONENT: TrialWarningModal (Same) ---
 interface TrialWarningModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -103,17 +104,15 @@ const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, 
 // ----------------------------------------
 
 
-// --- UPDATED COMPONENT: SubscriptionBanner (Unchanged) ---
+// --- UPDATED COMPONENT: SubscriptionBanner ---
 interface SubscriptionBannerProps {
     plan: PlanType;
     planExpiryDate: string | null;
 }
 
 const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpiryDate }) => {
-    // ... (Subscription Banner logic remains unchanged) ...
     const [daysLeft, setDaysLeft] = useState<number | null>(null);
 
-    // Calculate days left and update every minute
     useEffect(() => {
         if (plan === 'TRIAL' || plan === 'STARTER' || plan === 'PRO') {
             if (!planExpiryDate) {
@@ -204,8 +203,19 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
         return (
             <div className={styles.planContent}>
                 <PlanIcon size={20} />
-                <span>{text}</span>
-                {/* 1 Year Remaining Alert for Paid Users */}
+                
+                {/* NAYA CODE START: Abbreviated and Full Text */}
+                {/* Abbreviated text (visible only on mobile via SCSS) */}
+                <span className={styles.bannerAbbreviation}>
+                    {/* CRITICAL FIX: Mobile par sirf short name dikhega */}
+                    {plan === 'STARTER' ? 'Starter Plan' : (plan === 'PRO' ? 'Pro Plan' : (plan === 'TRIAL' ? 'Trial Mode' : 'No Plan'))}
+                </span>
+                
+                {/* Full text (visible only on desktop via SCSS) */}
+                <span>{text}</span> 
+                {/* NAYA CODE END */}
+
+                {/* 1 Year Remaining Alert for Paid Users (Same) */}
                 {isPaid && daysLeft !== null && daysLeft <= 30 && daysLeft > 0 && (
                      <span className={styles.paidExpiryWarning}>
                         (Expires in {daysLeft} Days)
@@ -231,17 +241,17 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
 // -------------------------------------------
 
 
-// === UpcomingFeatureModal REMOVED FROM HERE, it goes to layout.tsx ===
-
 // --- DashboardControlCenter Component (Main) ---
 const DashboardControlCenter = () => {
+    // ... (All logic remains the same) ...
     const { token, user } = useAuth(); 
     const router = useRouter();
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeModal, setActiveModal] = useState<string | null>(null);
-
+    const { toggleSidebar } = useSchoolLayout(); 
+    
     // REAL-TIME SUBSCRIPTION DATA from useAuth().user (Unchanged)
     const subscriptionData: SubscriptionData = useMemo(() => {
         if (user && user.role === 'SuperAdmin') {
@@ -260,13 +270,11 @@ const DashboardControlCenter = () => {
     const openModal = (modalName: string) => setActiveModal(modalName);
     const closeModal = () => setActiveModal(null);
     
-    // FIX: closeWarningModal handler definition
     const closeWarningModal = () => {
         setShowWarningModal(false);
         localStorage.setItem('trialWarningDismissed', 'true');
         setWarningDismissed(true);
     };
-    // ... (rest of the handlers remain unchanged) ...
 
     const handleFormSubmit = async () => {
         return new Promise<void>((resolve) => {
@@ -291,7 +299,6 @@ const DashboardControlCenter = () => {
         }
     };
 
-    // Main Data Fetch (Dashboard Data) - Unchanged
     useEffect(() => {
         const fetchData = async () => {
             if (!token) {
@@ -315,7 +322,6 @@ const DashboardControlCenter = () => {
         setWarningDismissed(localStorage.getItem('trialWarningDismissed') === 'true');
     }, [token]);
 
-    // POP-UP LOGIC: Show warning if trial and <= 14 days left and not dismissed - Unchanged
     useEffect(() => {
         if (subscriptionData.plan === 'TRIAL' && subscriptionData.planExpiryDate && !warningDismissed) {
             const end = new Date(subscriptionData.planExpiryDate).getTime();
@@ -343,6 +349,11 @@ const DashboardControlCenter = () => {
         <div className={styles.overviewContainer}>
             
             <div className={styles.headerRow}>
+                {/* NAYA: Hamburger Button (Mobile Only) */}
+                <button className={styles.menuButton} onClick={toggleSidebar}>
+                    <MdMenu />
+                </button>
+                
                 <h1 className={styles.mainTitle}>School Control Center</h1>
                 {user && (
                     <SubscriptionBanner 
@@ -353,7 +364,6 @@ const DashboardControlCenter = () => {
             </div>
 
             <div className={styles.mainGrid}>
-                {/* ... (Chart Box and all other Boxes remain unchanged) ... */}
                  {/* Chart Box */}
                 <div className={`${styles.summaryBox} ${styles.chartBox}`}>
                      <div className={styles.boxHeader}><h2><MdAssessment/> Student Admissions</h2></div>
@@ -421,7 +431,7 @@ const DashboardControlCenter = () => {
                  </div>
             </div>
             
-            {/* General Modals */}
+            {/* General Modals (Same) */}
             <Modal isOpen={!!activeModal} onClose={closeModal} title={getModalTitle()}>
                 <>
                     {activeModal === 'add-student' && <AddStudentForm onClose={closeModal} onSuccess={handleStudentSuccess} />}

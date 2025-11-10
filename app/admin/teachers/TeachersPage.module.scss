@@ -5,10 +5,10 @@
   min-height: 100vh;
 }
 
-/* Page header section */
+/* Page header section - Desktop */
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start; /* Icons ko sides pe push karega */
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
@@ -19,14 +19,35 @@
   font-size: 2.25rem;
   font-weight: 700;
   color: #1e293b;
+  flex-grow: 1; /* Title ko space lene dega */
 }
 
-/* === UPDATED BUTTON STYLES START HERE === */
+/* NAYA: Mobile Icon Styling - Desktop pe hidden */
+.menuButton, .searchToggleButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 28px;
+    padding: 8px;
+    color: #1e293b;
+    display: none; /* Default: hidden on desktop */
+    flex-shrink: 0;
+}
+
+/* NAYA: Desktop Search Filter (Hiding on mobile) */
+.desktopSearchFilter {
+    margin-bottom: 2rem;
+    display: block;
+}
+
+
+/* === BUTTONS & ACTIONS (Desktop) === */
 
 /* Container for the buttons on the right */
 .headerActions {
-  display: flex;
-  gap: 0.75rem; /* Slightly less gap */
+  display: flex; /* Desktop pe dikhega */
+  gap: 0.75rem; 
+  flex-shrink: 0;
 }
 
 /* Base style for all action buttons */
@@ -34,10 +55,10 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.65rem 1.2rem; /* Adjusted padding */
+  padding: 0.65rem 1.2rem; 
   font-size: 0.9rem;
   font-weight: 600;
-  border: 2px solid transparent; // Border for all buttons for consistent size
+  border: 2px solid transparent; 
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
@@ -50,6 +71,12 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
+}
+
+/* Modal specific action button styling */
+.actionButton.modalAction {
+    margin-bottom: 0.5rem;
+    justify-content: flex-start;
 }
 
 /* Tertiary Action: Export Button (Outline Style) */
@@ -87,9 +114,6 @@
   }
 }
 
-/* === END OF UPDATED BUTTON STYLES === */
-
-
 /* Styles for the buttons inside the Export modal */
 .exportOptionsContainer {
   display: flex;
@@ -121,15 +145,16 @@
     background-color: #f8fafc;
   }
 }
-/* Yeh code TeachersPage.module.scss ke aakhir mein add karein */
+
+/* Dashboard Link Button */
 .dashboardLinkButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  margin: 2rem auto 1rem auto; /* Page ke end mein center karega */
-  background-color: #374151; // Dark color
+  margin: 2rem auto 1rem auto; 
+  background-color: #374151; 
   color: #ffffff;
   font-weight: 500;
   text-decoration: none;
@@ -143,6 +168,70 @@
   }
 
   &:hover {
-    background-color: #4b5563; // Thoda light hover
+    background-color: #4b5563; 
   }
+}
+
+
+/* --- Mobile Responsive Styles (Max 768px) --- */
+@media (max-width: 768px) {
+    .pageContainer {
+        padding: 1rem; 
+    }
+
+    /* Header: Aligns icons and title in one row */
+    .header {
+        flex-direction: row; 
+        justify-content: space-between; 
+        align-items: center;
+        padding-bottom: 0.5rem; /* Reduced padding */
+        margin-bottom: 0.5rem; /* Reduced margin */
+    }
+
+    .title {
+        font-size: 1.5rem; /* Smaller title */
+        margin: 0 0.5rem; /* Space between title and icons */
+        text-align: center; 
+        flex-grow: 1;
+    }
+    
+    /* Show icons on mobile */
+    .menuButton, .searchToggleButton {
+        display: block; 
+    }
+    
+    /* Hide desktop elements */
+    .headerActions, .desktopSearchFilter {
+        display: none; 
+    }
+    
+    /* Mobile Actions Modal Content */
+    .actionsModalContent {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        
+        .actionButton.modalAction {
+            width: 100%; 
+            justify-content: flex-start; /* Align text left */
+            padding: 1rem;
+            font-size: 1rem;
+            transform: none;
+            box-shadow: none;
+        }
+    }
+
+    /* Search Modal Content (just for styling StudentFilters) */
+    .searchModalContent {
+       padding: 1rem;
+    }
+
+    /* Dashboard link button adjustments */
+    .dashboardLinkButton {
+        display: flex;  
+        width: 100%;
+        max-width: 300px; 
+        margin: 1rem auto;
+        padding: 1rem;
+    }
 }

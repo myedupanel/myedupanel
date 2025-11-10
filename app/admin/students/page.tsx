@@ -1,13 +1,12 @@
-// app/admin/students/page.tsx
 "use client";
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, createContext, useContext, ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './StudentsPage.module.scss';
 import StudentSidebar from './components/StudentSidebar';
 import StudentsTable from '@/components/admin/StudentsTable/StudentsTable';
 import Modal from '@/components/common/Modal/Modal';
 import AddStudentForm from '@/components/admin/AddStudentForm/AddStudentForm';
-import { FiDownload, FiPrinter, FiChevronDown } from 'react-icons/fi';
+import { FiDownload, FiPrinter, FiChevronDown, FiMenu, FiSearch } from 'react-icons/fi';
 import api from '@/backend/utils/api';
 import { CSVLink } from 'react-csv';
 import * as XLSX from 'xlsx';
@@ -16,7 +15,34 @@ import StudentFilters from '@/components/admin/StudentFilters/StudentFilters';
 import { io } from "socket.io-client";
 import { useAuth } from '@/app/context/AuthContext';
 
-// --- DATA INTERFACES (KOI BADLAAV NAHI) ---
+
+// === Student Layout Context (Same) ===
+interface StudentLayoutContextType {
+    isSidebarOpen: boolean;
+    toggleSidebar: () => void;
+}
+const StudentLayoutContext = createContext<StudentLayoutContextType | undefined>(undefined);
+export const useStudentLayout = () => {
+    const context = useContext(StudentLayoutContext);
+    if (!context) {
+        throw new Error('useStudentLayout must be used within a StudentLayoutProvider');
+    }
+    return context;
+};
+const StudentLayoutProvider = ({ children }: { children: ReactNode }) => {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
+    
+    return (
+        <StudentLayoutContext.Provider value={{ isSidebarOpen, toggleSidebar }}>
+            {children}
+        </StudentLayoutContext.Provider>
+    );
+};
+// === END Student Layout Context ===
+
+
+// --- DATA INTERFACES (Same) ---
 interface ApiStudent {
     studentid: number;
     first_name: string;
@@ -83,7 +109,7 @@ interface ClassData {
 }
 
 
-// --- HELPER FUNCTIONS (KOI BADLAAV NAHI) ---
+// --- HELPER FUNCTIONS (Same) ---
 const transformApiData = (apiStudent: ApiStudent): StudentData => {
     const formatDate = (dateStr?: Date | string) => {
         if (!dateStr) return '';
@@ -117,25 +143,27 @@ const getFullName = (s: { first_name?: string, last_name?: string }) => [s.first
 
 
 // --- 3. MAIN COMPONENT ---
-const StudentsPage = () => {
+const StudentsPageContent = () => { 
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user } = useAuth(); 
+    // NAYA: Context use kiya
+    const { isSidebarOpen, toggleSidebar } = useStudentLayout(); 
+    // NAYA: Search toggle state
+    const [isFiltersVisible, setIsFiltersVisible] = useState(false);
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-
+    // ... (baki states remain same) ...
     const [students, setStudents] = useState<StudentData[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
-    
     const [editingStudent, setEditingStudent] = useState<StudentData | null>(null);
-    
     const [classes, setClasses] = useState<ClassData[]>([]);
     const [selectedClass, setSelectedClass] = useState<string>('all');
     const [isActionsOpen, setIsActionsOpen] = useState(false);
 
-    
+    // ... (All useEffects and handlers remain same) ...
     useEffect(() => {
         const modalParam = searchParams.get('modal');
         if (modalParam === 'add') {
@@ -172,7 +200,6 @@ const StudentsPage = () => {
         fetchClasses(); 
     }, [fetchStudents, fetchClasses]); 
 
-    // --- Socket useEffect (KOI BADLAAV NAHI) ---
     useEffect(() => {
         const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "https://myedupanel.onrender.com");
         socket.on('student_added', (newApiStudent: ApiStudent) => {
@@ -269,8 +296,8 @@ const StudentsPage = () => {
         { label: "First Name", key: "first_name" },
         { label: "Last Name", key: "last_name" },
         { label: "Class", key: "class_name" },
-        { label: "Parent Name", key: "father_name" },
-        { label: "Parent Contact", key: "guardian_contact" },
+        { label: "Parent Name", "key": "father_name" },
+        { label: "Parent Contact", "key": "guardian_contact" },
         { label: "Email", key: "email" },
         { label: "DOB", key: "dob" },
     ];
@@ -324,17 +351,34 @@ const StudentsPage = () => {
 
     return (
         <>
-            <div className={styles.studentPageLayout}>
-                <StudentSidebar />
+            <div className={`${styles.studentPageLayout}`}>
+                
+                {/* 1. Sidebar - CRITICAL FIX: Prop pass kiya */}
+                <StudentSidebar isMobileOpen={isSidebarOpen} />
+                
+                {/* 2. Mobile Overlay */}
+                {isSidebarOpen && <div className={styles.sidebarOverlay} onClick={toggleSidebar} />}
+
                 <div className={styles.mainContent}>
                     <header className={styles.header}>
+                        {/* NAYA: Hamburger Button */}
+                        <button className={styles.menuButton} onClick={toggleSidebar}>
+                            <FiMenu />
+                        </button>
+
                         <h1 className={styles.title}>Student Management</h1>
+                        
+                        {/* NAYA: Search Toggle Button (Mobile Only) */}
+                        <button className={styles.searchToggleButton} onClick={() => setIsFiltersVisible(prev => !prev)}>
+                            <FiSearch />
+                        </button>
+
                     </header>
                     
-                    {/* --- YAHAN BADLAAV KIYA GAYA (Re-ordered) --- */}
-                    <div className={styles.filtersContainer}>
+                    {/* --- Filters Container (Visibility class add ki) --- */}
+                    <div className={`${styles.filtersContainer} ${isFiltersVisible ? styles.filtersVisible : ''}`}>
                         
-                        {/* 1. Search Bar (Note: Sort UI abhi bhi iske andar hai) */}
+                        {/* 1. Search Bar */}
                         <div className={styles.searchFilter}>
                             <StudentFilters 
                                 onSearch={setSearchQuery} 
@@ -359,7 +403,7 @@ const StudentsPage = () => {
                             </select>
                         </div>
 
-                        {/* 3. Actions Button (yeh right mein align ho jayega) */}
+                        {/* 3. Actions Button */}
                         <div className={styles.actionsDropdownContainer}>
                             <button 
                                 onClick={() => setIsActionsOpen(!isActionsOpen)} 
@@ -389,7 +433,7 @@ const StudentsPage = () => {
                             )}
                         </div>
                     </div>
-                    {/* --- BADLAAV KHATM --- */}
+                    {/* --- Filters Container End --- */}
 
 
                     <main>
@@ -403,7 +447,7 @@ const StudentsPage = () => {
                 </div>
             </div>
 
-            {/* --- Modals (Koi Badlaav Nahi) --- */}
+            {/* --- Modals (Same) --- */}
             <Modal
                 isOpen={isAddModalOpen}
                 onClose={closeAddModalAndReset}
@@ -461,4 +505,9 @@ const StudentsPage = () => {
     );
 };
 
+const StudentsPage = () => (
+    <StudentLayoutProvider>
+        <StudentsPageContent />
+    </StudentLayoutProvider>
+);
 export default StudentsPage;

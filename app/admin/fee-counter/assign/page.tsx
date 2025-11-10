@@ -1,3 +1,4 @@
+// file: app/admin/fee-counter/assign/page.tsx
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '@/backend/utils/api';
@@ -5,7 +6,7 @@ import styles from './AssignFee.module.scss';
 import { FiSave, FiDollarSign, FiCreditCard, FiSmartphone, FiHome, FiEdit } from 'react-icons/fi';
 import { FaRupeeSign, FaUniversity, FaWallet } from 'react-icons/fa'; 
 import StudentSearch from '@/components/admin/StudentSearch/StudentSearch';
-import Link from 'next/link'; // --- FIX: 'Link' component import करें (Onboarding message के लिए)
+import Link from 'next/link'; 
 
 // Helper function (if not globally available)
 const formatCurrency = (amount: number) => {
@@ -210,7 +211,7 @@ const AssignFeePage = () => {
                     <p>Before you can assign fees, you need to add at least one class to your school.</p>
                     {/* Yeh link aapke "Add Class" page par jaana chahiye */}
                     {/* NOTE: Link ko update karein agar aapka path alag hai */}
-                    <Link href="/admin/fee-counter/classes">
+                    <Link href="/admin/classes">
                         <button className={styles.assignButton}>+ Add Classes Now</button>
                     </Link>
                 </div>

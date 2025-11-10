@@ -1,16 +1,14 @@
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './FeeRecordsPage.module.scss';
-import { FiSearch, FiPrinter, FiDownload, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+// FiMenu, FiSearch, FiPrinter, FiDownload icons add kiye
+import { FiSearch, FiPrinter, FiDownload, FiChevronLeft, FiChevronRight, FiMenu } from 'react-icons/fi';
 import Link from 'next/link';
-// --- API Import ---
 import api from '@/backend/utils/api'; 
-// --- Modal and Receipt Component Imports ---
 import Modal from '@/components/common/Modal/Modal'; 
 import FeeReceipt from '@/components/admin/fees/FeeReceipt'; 
 
 // --- Interface Definitions (Assuming centralized types are fixed and imported) ---
-// Note: These interfaces are kept local for clarity, but should ideally be imported.
 interface Transaction {
   id: number;
   receiptId: string;
@@ -34,7 +32,7 @@ interface ClassOption {
     name: string;
 }
 
-// --- Helper Hook: Debounce ---
+// --- Helper Hook: Debounce (No Change) ---
 const useDebounce = (value: string, delay: number) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
     useEffect(() => {
@@ -68,14 +66,16 @@ const FeeRecordsPage: React.FC = () => {
   const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null);
   const [detailedReceiptData, setDetailedReceiptData] = useState<DetailedTransaction | null>(null);
   const [isReceiptLoading, setIsReceiptLoading] = useState(false);
+  
+  // NAYE MODAL STATES
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false); 
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false); 
   // --- End Modal States ---
   
-  // NEW: Fetch Classes from /api/classes
+  // NEW: Fetch Classes from /api/classes (No Change)
   const fetchClasses = useCallback(async () => {
       try {
-          // Assuming API returns an array like [{ classid: 1, class_name: '7th' }, ...]
           const res = await api.get('/api/classes');
-          // FIX: Class ID को string से number में parse किया जा रहा है
           const options = res.data.map((c: any) => ({ id: c.classid, name: c.class_name }));
           setClassOptions(options);
       } catch (err) {
@@ -92,18 +92,15 @@ const FeeRecordsPage: React.FC = () => {
     params.append('page', currentPage.toString());
     params.append('limit', '15'); 
     
-    // Student Name/Receipt ID Search (Uses Debounced query)
     if (debouncedSearchQuery) params.append('search', debouncedSearchQuery);
     if (filterMode !== 'All') params.append('paymentMode', filterMode);
     if (filterStatus !== 'All') params.append('status', filterStatus); 
     
-    // ADD CLASS FILTER: FilterClassId number/string में जाता है (backend इसे handle करता है)
     if (filterClassId !== 'All') params.append('classId', filterClassId.toString());
 
     try {
       const res = await api.get(`/fees/transactions?${params.toString()}`);
       
-      // NOTE: Backend feeController.js में, getTransactions अब ClassId से सही filter करेगा
       setTransactions(res.data.data); 
       setTotalPages(res.data.totalPages);
       
@@ -118,7 +115,7 @@ const FeeRecordsPage: React.FC = () => {
   
   // --- Run Initial Fetch Effect ---
   useEffect(() => {
-    fetchClasses(); // Fetch classes on initial load
+    fetchClasses(); 
   }, [fetchClasses]);
   
   // --- Run Transaction Fetch Effect ---
@@ -155,6 +152,14 @@ const FeeRecordsPage: React.FC = () => {
       setSelectedTransactionId(null);
       setDetailedReceiptData(null);
   }
+  
+  // --- Mobile Filter Handlers ---
+  const handleApplyFilters = (newQuery: string) => {
+    // Only search query is applied from the modal
+    setSearchQuery(newQuery);
+    setCurrentPage(1);
+    setIsSearchModalOpen(false);
+  }
 
   // --- Helpers and Pagination (No change) ---
   const displayedTransactions = useMemo(() => transactions, [transactions]);
@@ -179,6 +184,66 @@ const FeeRecordsPage: React.FC = () => {
 
   return (
     <div className={styles.pageContainer}>
+      
+      {/* --- NAYA: Mobile Header Bar --- */}
+      <header className={styles.mobileHeaderBar}>
+          <button 
+              className={styles.menuButton} 
+              onClick={() => setIsMenuModalOpen(true)}
+              aria-label="Open Fees Menu"
+          >
+              <FiMenu />
+          </button>
+          <h1 className={styles.title}>Fee Records</h1>
+          
+          {/* CRITICAL FIX: Functional Filters in Header */}
+          <div className={styles.headerFilters}>
+              {/* Class Filter */}
+              <select 
+                className={styles.headerFilterDropdown}
+                value={filterClassId} 
+                onChange={(e) => {setFilterClassId(Number(e.target.value) || 'All'); setCurrentPage(1);}}
+              >
+                <option value="All">Class</option>
+                {classOptions.map(cls => (
+                    <option key={cls.id} value={cls.id}>{cls.name}</option>
+                ))}
+              </select>
+
+              {/* Mode Filter */}
+              <select 
+                className={styles.headerFilterDropdown}
+                value={filterMode} 
+                onChange={(e) => {setFilterMode(e.target.value); setCurrentPage(1);}}
+              >
+                <option value="All">Mode</option>
+                <option value="Cash">Cash</option>
+                <option value="UPI">UPI</option>
+              </select>
+              
+              {/* Status Filter */}
+              <select 
+                className={styles.headerFilterDropdown}
+                value={filterStatus} 
+                onChange={(e) => {setFilterStatus(e.target.value as 'All' | Transaction['status']); setCurrentPage(1);}}
+              >
+                <option value="All">Status</option>
+                <option value="Success">Paid</option>
+                <option value="Pending">Partial</option>
+              </select>
+          </div>
+          {/* END CRITICAL FIX */}
+
+          <button 
+              className={styles.searchToggleButton} 
+              onClick={() => setIsSearchModalOpen(true)}
+              aria-label="Open Filters and Search"
+          >
+              <FiSearch />
+          </button>
+      </header>
+
+      {/* --- Desktop Header (Hides on Mobile) --- */}
       <header className={styles.header}>
         <h1 className={styles.title}>Fee Records & Transaction History 💰</h1>
         <div className={styles.actions}>
@@ -188,6 +253,7 @@ const FeeRecordsPage: React.FC = () => {
         </div>
       </header>
 
+      {/* --- Desktop Controls (Hides on Mobile) --- */}
       <div className={styles.controls}>
         {/* Search Bar */}
         <div className={styles.searchBar}>
@@ -238,7 +304,7 @@ const FeeRecordsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* --- Transaction Table (Perfectly Fitted) --- */}
+      {/* --- Transaction Table (Scroll Fix Applied in SCSS) --- */}
       <div className={styles.tableContainer}>
         <table className={styles.transactionsTable}>
           <thead>
@@ -262,7 +328,6 @@ const FeeRecordsPage: React.FC = () => {
                 return (
                   <tr key={t.id} className={styles.transactionRow}>
                     <td className={styles.receiptIdCol}>
-                      {/* View Receipt Trigger */}
                       <a href="#" onClick={(e) => {e.preventDefault(); handleViewReceipt(t.id); }}>
                           {t.receiptId}
                       </a>
@@ -298,7 +363,7 @@ const FeeRecordsPage: React.FC = () => {
         </table>
       </div>
       
-      {/* --- Pagination Controls --- */}
+      {/* --- Pagination Controls (No Change) --- */}
       {!isLoading && totalPages > 1 && (
         <div className={styles.paginationControls}>
           <button 
@@ -321,7 +386,7 @@ const FeeRecordsPage: React.FC = () => {
         </div>
       )}
       
-      {/* --- MODAL FOR RECEIPT (View Receipt opens this) --- */}
+      {/* --- MODAL 1: RECEIPT (No Change) --- */}
       <Modal 
         isOpen={isReceiptModalOpen} 
         onClose={handleCloseReceiptModal} 
@@ -334,6 +399,48 @@ const FeeRecordsPage: React.FC = () => {
         ) : (
              <div style={{ padding: '2rem', textAlign: 'center' }}>Receipt data could not be loaded.</div>
         )}
+      </Modal>
+      
+      {/* --- MODAL 2: MOBILE MENU (Export Data) --- */}
+      <Modal isOpen={isMenuModalOpen} onClose={() => setIsMenuModalOpen(false)} title="Quick Actions">
+          <button 
+            className={styles.modalActionLink} 
+            onClick={() => { alert('Exporting data via backend API route 16...'); setIsMenuModalOpen(false); }}
+          >
+            <FiDownload /> Export Data
+          </button>
+      </Modal>
+
+      {/* --- MODAL 3: MOBILE SEARCH ONLY --- */}
+      <Modal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} title="Filters & Search">
+        <div className={styles.modalFiltersContainer}>
+          {/* Search Input */}
+          <div className={styles.modalSearchControls}>
+              <div className={styles.searchBar}>
+                  <FiSearch className={styles.searchIcon} />
+                  <input 
+                      type="text"
+                      placeholder="Student Name or Receipt ID"
+                      // Use a ref or simple query on apply button to get current value for complex modal inputs
+                      defaultValue={searchQuery}
+                      id="modalSearchInput"
+                  />
+              </div>
+          </div>
+            
+          {/* Apply Button */}
+          <button 
+              className={styles.modalActionLink}
+              onClick={() => {
+                  const input = document.getElementById('modalSearchInput') as HTMLInputElement;
+                  // Only pass the search query
+                  handleApplyFilters(input.value);
+              }}
+          >
+              <FiSearch /> Apply Search
+          </button>
+
+        </div>
       </Modal>
 
     </div>

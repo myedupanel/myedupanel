@@ -9,7 +9,8 @@ import { FiTag } from 'react-icons/fi';
 import { 
   MdLogout, MdPeople, MdSchool, MdFamilyRestroom, MdBadge, MdClass, 
   MdEventAvailable, MdSchedule, MdSettings, MdAssessment, MdGridView, 
-  MdPublic, MdAttachMoney, MdLayers // <-- 1. NAYA ICON IMPORT KIYA
+  MdPublic, MdAttachMoney, MdLayers, 
+  MdEdit 
 } from 'react-icons/md'; 
 import { FaLandmark } from 'react-icons/fa';
 import { GiReceiveMoney } from 'react-icons/gi';
@@ -22,7 +23,7 @@ export interface NavItem {
   type: 'free' | 'premium' | 'upcoming';
 }
 
-// === MENU 1: DASHBOARD MAIN MENU (Bina Badlaav) ===
+// === MENU 1: DASHBOARD MAIN MENU ===
 const mainMenuItems: NavItem[] = [
   { name: 'Main Dashboard', path: '/admin/dashboard', icon: <MdGridView style={{ color: '#3b82f6' }} />, type: 'free' },
   { name: 'School', path: '/admin/school', icon: <MdSchool style={{ color: '#8b5cf6' }} />, type: 'free' },
@@ -30,7 +31,7 @@ const mainMenuItems: NavItem[] = [
   { name: 'Expense', path: '/admin/expense', icon: <GiReceiveMoney style={{ color: '#f97316' }} />, type: 'upcoming' },
 ];
 
-// === MENU 2: SCHOOL CONTROL CENTER MENU (Bina Badlaav) ===
+// === MENU 2: SCHOOL CONTROL CENTER MENU ===
 const schoolMenuItems: NavItem[] = [
     { name: 'Students', path: '/admin/students', icon: <MdPeople />, type: 'free' },
     { name: 'Teachers', path: '/admin/teachers', icon: <MdSchool />, type: 'free' },
@@ -47,11 +48,11 @@ const schoolMenuItems: NavItem[] = [
 const Sidebar = () => { 
   const pathname = usePathname();
   const { user, logout } = useAuth(); 
-  const { showUpcomingFeatureModal } = useAdminLayout(); 
+  const { showUpcomingFeatureModal, isSidebarOpen, toggleSidebar } = useAdminLayout(); 
 
   const isSuperAdmin = user?.role === 'SuperAdmin';
   
-  // DYNAMIC MENU SELECTION LOGIC (Bina Badlaav)
+  // DYNAMIC MENU SELECTION LOGIC (Same)
   const isSchoolFeatureRoute = pathname.startsWith('/admin/school') || 
                                pathname.startsWith('/admin/students') || 
                                pathname.startsWith('/admin/teachers') || 
@@ -61,32 +62,33 @@ const Sidebar = () => {
                                
   const currentMenuItems = isSchoolFeatureRoute ? schoolMenuItems : mainMenuItems;
 
-  // getLinkProps (Bina Badlaav)
+  // getLinkProps (Updated for mobile toggle)
   const getLinkProps = (item: NavItem) => {
-    // Locking Logic (Same as before)
-    if (isSuperAdmin || item.type === 'free') {
-      return { href: item.path, onClick: undefined, className: '' };
-    }
-    if (item.type === 'premium') {
-      return { href: item.path, onClick: undefined, className: styles.premium };
-    }
-    if (item.type === 'upcoming') {
-      return {
-        href: '#',
+    const commonProps = { 
         onClick: (e: React.MouseEvent) => {
-          e.preventDefault();
-          showUpcomingFeatureModal();
+            // Mobile par hi toggle karein (1024px)
+            if (window.innerWidth <= 1024) toggleSidebar(); 
+            if (item.type === 'upcoming') showUpcomingFeatureModal();
         },
-        className: styles.upcoming
-      };
+        className: ''
+    };
+    
+    if (isSuperAdmin || item.type === 'free' || item.type === 'premium') {
+      return { href: item.path, ...commonProps, className: item.type === 'premium' ? styles.premium : '' };
     }
-    return { href: item.path, onClick: undefined, className: '' };
+    
+    if (item.type === 'upcoming') {
+        // Upcoming feature ke liye href="#" use karein
+      return { href: '#', ...commonProps, className: styles.upcoming };
+    }
+    
+    return { href: item.path, ...commonProps };
   };
 
   return (
-    <aside className={styles.sidebarContainer}>
+    <aside className={`${styles.sidebarContainer} ${isSidebarOpen ? styles.mobileOpen : ''}`}>
       <div className={styles.logoSection}>
-        <Link href="/admin/dashboard">
+        <Link href="/admin/dashboard" onClick={e => { if (window.innerWidth <= 1024) toggleSidebar(); }}>
           <h2>My EduPanel</h2>
         </Link>
       </div>
@@ -107,7 +109,7 @@ const Sidebar = () => {
                 >
                   <span className={styles.icon}>{item.icon}</span>
                   <span>{item.name}</span>
-                  {/* === TAGS (Bina Badlaav) === */}
+                  {/* TAGS (Same) */}
                   {(item.type === 'premium' && !isSuperAdmin) && (
                     <span className={styles.proTag}>PRO</span>
                   )}
@@ -119,31 +121,41 @@ const Sidebar = () => {
             );
           })}
           
-          {/* === COUPON BUTTON (Bina Badlaav) === */}
+          {/* SUPER ADMIN LINKS (Same) */}
           {isSuperAdmin && (
-            <li className={`${styles.menuItem} ${styles.superAdminLink} ${
-                pathname === '/superadmin/coupons' ? styles.active : ''
-              }`}
-            >
-              <Link href="/superadmin/coupons">
-                <span className={styles.icon}><FiTag /></span>
-                <span>Manage Coupons</span>
-              </Link>
-            </li>
+            <>
+              {/* COUPON BUTTON (Same) */}
+              <li className={`${styles.menuItem} ${styles.superAdminLink} ${
+                  pathname === '/superadmin/coupons' ? styles.active : ''
+                }`}
+              >
+                <Link href="/superadmin/coupons" onClick={e => { if (window.innerWidth <= 1024) toggleSidebar(); }}>
+                  <span className={styles.icon}><FiTag /></span>
+                  <span>Manage Coupons</span>
+                </Link>
+              </li>
+              {/* MANAGE PLANS LINK (Same) */}
+              <li className={`${styles.menuItem} ${styles.superAdminLink} ${
+                  pathname === '/superadmin/plans' ? styles.active : ''
+                }`}
+              >
+                <Link href="/superadmin/plans" onClick={e => { if (window.innerWidth <= 1024) toggleSidebar(); }}>
+                  <span className={styles.icon}><MdLayers /></span>
+                  <span>Manage Plans</span>
+                </Link>
+              </li>
+            </>
           )}
-
-          {/* === 2. NAYA MANAGE PLANS LINK === */}
-          {isSuperAdmin && (
-            <li className={`${styles.menuItem} ${styles.superAdminLink} ${
-                pathname === '/superadmin/plans' ? styles.active : ''
-              }`}
-            >
-              <Link href="/superadmin/plans">
-                <span className={styles.icon}><MdLayers /></span>
-                <span>Manage Plans</span>
-              </Link>
-            </li>
-          )}
+          {/* NAYA: Edit Profile Link for all users (Admin/SuperAdmin) */}
+          <li className={`${styles.menuItem} ${styles.mobileOnlyLink} ${
+              pathname === '/admin/profile' ? styles.active : ''
+            }`}
+          >
+            <Link href="/admin/profile" onClick={e => { if (window.innerWidth <= 1024) toggleSidebar(); }} className={styles.editProfileLink}>
+              <span className={styles.icon}><MdEdit /></span>
+              <span>Edit Profile</span>
+            </Link>
+          </li>
           {/* ============================== */}
 
         </ul>

@@ -1,12 +1,17 @@
+/* app/admin/staff/StaffPage.module.scss */
+
 .staffContainer {
   padding: 1.5rem;
 }
 
+/* --- Header & Title (Desktop Layout) --- */
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start; /* Icons ko sides pe push karega */
   align-items: center;
   margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .title {
@@ -14,8 +19,22 @@
   font-weight: 700;
   color: #2d3748;
   margin: 0;
+  flex-grow: 1; 
 }
 
+/* NAYA: Mobile Icon Styling - Desktop pe hidden */
+.menuButton, .searchToggleButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 28px;
+    padding: 8px;
+    color: #2d3748;
+    display: none; /* Default: hidden on desktop */
+    flex-shrink: 0;
+}
+
+/* --- Desktop Add Button --- */
 .addButton {
   display: flex;
   align-items: center;
@@ -29,8 +48,11 @@
   font-size: 1rem;
   cursor: pointer;
 }
+.desktopAddButton {
+    flex-shrink: 0;
+}
 
-/* NAYE STYLES */
+/* --- Desktop Controls (Search and Filter) --- */
 .controls {
   display: flex;
   justify-content: space-between;
@@ -49,6 +71,7 @@
   border-radius: 6px;
   padding: 0 0.75rem;
   color: #718096;
+  flex-grow: 1; /* Desktop pe zyada space lega */
 
   input {
     border: none;
@@ -66,16 +89,65 @@
   border-radius: 6px;
   background-color: #ffffff;
   font-size: 1rem;
+  flex-shrink: 0;
 }
-/* Yeh code StaffPage.module.scss ke aakhir mein add karein */
+
+/* --- Modal Content Styles --- */
+.actionsModalContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 1rem;
+
+    .modalAddButton {
+        width: 100%;
+        justify-content: flex-start; 
+        padding: 1rem;
+    }
+}
+
+/* --- NAYA: Mobile Search Modal Content --- */
+.searchModalContent {
+    padding: 1rem 0; 
+
+    .mobileSearchFilter {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .searchBox {
+            width: 100%;
+            margin: 0;
+        }
+
+        .filterDropdown {
+            width: 100%;
+        }
+    }
+}
+
+.modalSearchApplyButton {
+    padding: 12px 20px;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    &:hover { background-color: #4338ca; }
+}
+
+
+/* Dashboard Link */
 .dashboardLinkButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  margin: 2rem auto 1rem auto; /* Page ke end mein center karega */
-  background-color: #374151; // Dark color
+  margin: 2rem auto 1rem auto; 
+  background-color: #374151; 
   color: #ffffff;
   font-weight: 500;
   text-decoration: none;
@@ -83,12 +155,65 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
+  
+  display: block; 
+  text-align: center;
+  width: fit-content;
 
   svg {
     font-size: 1.25rem;
   }
 
   &:hover {
-    background-color: #4b5563; // Thoda light hover
+    background-color: #4b5563; 
   }
+}
+
+
+/* --- Mobile Responsive Styles (Max 768px) --- */
+@media (max-width: 768px) {
+    .staffContainer {
+        padding: 1rem; 
+    }
+
+    /* Header: Aligns icons and title in one row */
+    .header {
+        flex-direction: row; 
+        justify-content: space-between; 
+        align-items: center;
+        padding-bottom: 0.5rem; 
+        margin-bottom: 0.5rem; 
+    }
+
+    .title {
+        font-size: 1.5rem; 
+        margin: 0 0.5rem; 
+        flex-grow: 1;
+        text-align: center;
+    }
+    
+    /* Show mobile icons */
+    .menuButton, .searchToggleButton {
+        display: block; 
+    }
+    
+    /* Hide desktop elements */
+    .desktopAddButton, .controls {
+        display: none !important; 
+    }
+    
+    /* Table: Ensures table is scrollable on small screens */
+    /* Staff table itself will need overflow-x: auto in its own wrapper */
+    .tableWrapper {
+        overflow-x: auto;
+    }
+    
+    /* Dashboard link button adjustments */
+    .dashboardLinkButton {
+        display: flex; 
+        width: 100%;
+        max-width: 300px; 
+        margin: 1rem auto;
+        padding: 1rem;
+    }
 }

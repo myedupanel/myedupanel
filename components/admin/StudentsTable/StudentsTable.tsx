@@ -42,7 +42,7 @@ const StudentsTable = ({ students, onDelete, onEdit, onGenerateBonafide }: Stude
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>Student ID / Roll No.</th> {/* FIX: Header badla */}
+            <th>Student ID / Roll No.</th>
             <th>Student Name</th>
             <th>Class</th>
             <th>Parent's Name</th>

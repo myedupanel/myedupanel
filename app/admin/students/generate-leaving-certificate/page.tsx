@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './LeavingCertificate.module.scss';
 import StudentSearch from '@/components/admin/StudentSearch/StudentSearch';
-import { FiDownload, FiPrinter } from 'react-icons/fi';
+import { FiDownload, FiPrinter, FiSearch } from 'react-icons/fi'; // FiSearch added
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import api from '@/backend/utils/api';
@@ -86,7 +86,7 @@ export interface LeavingFormData {
 }
 // --- END ---
 
-// --- Helper function (No Change - Yeh perfect tha) ---
+// --- Helper function (No Change) ---
 const standardMap: { [key: string]: string } = {
   '1': 'First',
   '2': 'Second',
@@ -121,11 +121,14 @@ const LeavingCertificateBuilderPage = () => {
   const { user } = useAuth();
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const certificateRef = useRef<HTMLDivElement | null>(null);
+  // --- NEW STATE FOR MOBILE SEARCH MODAL ---
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  // --- END NEW STATE ---
 
   // --- formData state (No Change) ---
   const [formData, setFormData] = useState<LeavingFormData>({
-    genRegNo: '', // Yeh auto-fill hoga
-    regNo: '', // Yeh auto-fill hoga
+    genRegNo: '', 
+    regNo: '', 
     studentAadharNo: '',
     nationality: 'Indian', 
     motherTongue: '',
@@ -149,7 +152,7 @@ const LeavingCertificateBuilderPage = () => {
     remarks: '',
     issueDate: new Date().toISOString().split('T')[0],
     signatoryRole: 'Head Master',
-    motherName: '', // Yeh auto-fill hoga
+    motherName: '', 
   });
   // --- END ---
 
@@ -159,13 +162,13 @@ const LeavingCertificateBuilderPage = () => {
     mobNo: "Loading...", email: "Loading...", govtReg: "Loading...",
     udiseNo: "Loading...", place: "Loading...", logoUrl: undefined,
     affiliationIndex: "Loading...", affiliationDetails: "Loading...",
-    genRegNo: "Loading..." // Initial state add kiya
+    genRegNo: "Loading..."
   });
   // --- END ---
 
 
-   // --- Student data se form pre-fill karna (No Change) ---
-   useEffect(() => {
+  // --- Student data se form pre-fill karna (No Change) ---
+  useEffect(() => {
     
     const formatDate = (dateStr?: string) => {
         if (!dateStr) return '';
@@ -301,76 +304,125 @@ const LeavingCertificateBuilderPage = () => {
         pdf.save(`Leaving_Certificate_${selectedStudent.name.replace(/ /g, '_')}.pdf`);
       }).catch(err => { console.error("PDF LC Error:", err); alert("Error generating PDF."); });
   };
+  
+  // --- Student selection handler for modal ---
+  const handleStudentSelect = (student: Student | null) => {
+    setSelectedStudent(student);
+    setIsSearchModalOpen(false); // Close modal after selection
+  };
   // --- END ---
+
 
   // --- JSX Return (UPDATED) ---
   return (
-    <div className={styles.pageContainer}>
-      <header className={styles.header}>
-        <h1>Leaving Certificate Builder</h1>
-        <p>Search student, fill details, and preview the certificate.</p>
-      </header>
-
-      <div className={styles.builderLayout}>
-        {/* Controls Column */}
-        <div className={styles.controlsColumn}>
-          <div className={styles.controlSection}>
-            <h2>1. Select Student</h2>
-            <StudentSearch onStudentSelect={(student) => setSelectedStudent(student as Student)} />
-             <p className={styles.note}>
-              Ensure Student Search provides all details listed in the certificate table (Aadhaar, Mother's Name etc.).
-            </p>
-          </div>
-          {selectedStudent && (
-            <>
-              <div className={styles.controlSection}>
-                <h2>2. Fill Leaving Details</h2>
-                {/* Form ab updated state use karega */}
-                <LeavingCertificateForm
-                  formData={formData}
-                  setFormData={setFormData}
-                />
-              </div>
-              
-              {/* --- YAHAN SE BUTTONS HATA DIYE GAYE --- */}
-
-            </>
-          )}
-        </div>
-
-        {/* Preview Column */}
-        <div className={styles.previewColumn}>
-          <h2>Live Preview</h2>
-          
-          {/* --- YAHAN BUTTONS ADD KIYE GAYE --- */}
-          {selectedStudent && (
-            <div className={styles.actionsWrapper}>
-                <button onClick={handleDownloadPDF} type="button" className={`${styles.actionButton} ${styles.download}`}>
-                    <FiDownload /> Download PDF
-                </button>
-                <button onClick={handlePrint} type="button" className={`${styles.actionButton} ${styles.print}`}>
-                    <FiPrinter /> Print
-                </button>
-            </div>
-          )}
-          {/* --- FIX ENDS HERE --- */}
-
-          <div className={styles.previewWrapper}>
-             <div ref={certificateRef}>
-               <LeavingCertificatePreview
-                 student={selectedStudent}
-                 formData={formData}
-                 schoolDetails={schoolDetails}
-               />
-             </div>
-          </div>
+    <>
+      {/* 1. Mobile Search Modal Overlay */}
+      <div className={`${styles.searchModalOverlay} ${isSearchModalOpen ? styles.open : ''}`}>
+        <div className={styles.searchModalContent}>
+            <button 
+                className={styles.modalCloseButton} 
+                onClick={() => setIsSearchModalOpen(false)}
+                aria-label="Close Search"
+            >
+                &times;
+            </button>
+            <h2 style={{ marginBottom: '1rem' }}>Search Student</h2>
+            <StudentSearch onStudentSelect={handleStudentSelect} />
         </div>
       </div>
+      
+      <div className={styles.pageContainer}>
+        {/* Updated Header Structure */}
+        <div className={styles.headerWrapper}>
+            <header className={styles.header}>
+                <div className={styles.headerTitleBar}>
+                    <h1>Leaving Certificate Builder</h1>
+                    {/* Mobile Search Toggle Button */}
+                    <button 
+                        className={styles.searchToggleButton}
+                        onClick={() => setIsSearchModalOpen(true)}
+                        aria-label="Search Student"
+                    >
+                        <FiSearch /> 
+                    </button>
+                </div>
+                <p>Search student, fill details, and preview the certificate.</p>
+            </header>
+        </div>
 
-       <Link href="/admin/students" className={styles.dashboardLinkButton}>
-          <MdGridView /> Go to Students Dashboard
-       </Link>
-    </div>
+        <div className={styles.builderLayout}>
+          {/* Controls Column */}
+          <div className={styles.controlsColumn}>
+            <div className={styles.controlSection}>
+              <h2>1. Select Student</h2>
+              {/* Desktop/Tablet Student Search (Mobile pe CSS se hide hoga) */}
+              <div className={styles.desktopSearchBox}>
+                 <StudentSearch onStudentSelect={setSelectedStudent} />
+              </div>
+
+              {/* Note (Mobile pe CSS se hide hoga) */}
+              <p className={styles.note}>
+                Ensure Student Search provides all details listed in the certificate table (Aadhaar, Mother's Name etc.).
+              </p>
+            </div>
+            {selectedStudent && (
+              <>
+                <div className={styles.controlSection}>
+                  <h2>2. Fill Leaving Details</h2>
+                  <LeavingCertificateForm
+                    formData={formData}
+                    setFormData={setFormData}
+                  />
+                </div>
+              </>
+            )}
+            
+            {/* Mobile pe dikhane ke liye buttons (optional) */}
+            {selectedStudent && (
+                 <div className={`${styles.actionsWrapper} ${styles.mobileActions}`}>
+                    <button onClick={handleDownloadPDF} type="button" className={`${styles.actionButton} ${styles.download}`}>
+                        <FiDownload /> Download PDF
+                    </button>
+                    {/* Print button ko mobile par hide kar sakte hain ya sirf download rakh sakte hain. Filhaal dono rakhte hain. */}
+                    <button onClick={handlePrint} type="button" className={`${styles.actionButton} ${styles.print} ${styles.mobilePrintHidden}`}>
+                        <FiPrinter /> Print
+                    </button>
+                </div>
+            )}
+          </div>
+
+          {/* Preview Column (Mobile pe CSS se hide hoga) */}
+          <div className={styles.previewColumn}>
+            <h2>Live Preview</h2>
+            
+            {selectedStudent && (
+              <div className={styles.actionsWrapper}>
+                  <button onClick={handleDownloadPDF} type="button" className={`${styles.actionButton} ${styles.download}`}>
+                      <FiDownload /> Download PDF
+                  </button>
+                  <button onClick={handlePrint} type="button" className={`${styles.actionButton} ${styles.print}`}>
+                      <FiPrinter /> Print
+                  </button>
+              </div>
+            )}
+            
+            <div className={styles.previewWrapper}>
+               <div ref={certificateRef}>
+                 <LeavingCertificatePreview
+                   student={selectedStudent}
+                   formData={formData}
+                   schoolDetails={schoolDetails}
+                 />
+               </div>
+            </div>
+          </div>
+        </div>
+
+        <Link href="/admin/students" className={styles.dashboardLinkButton}>
+            <MdGridView /> Go to Students Dashboard
+        </Link>
+      </div>
+    </>
   );
 };
 

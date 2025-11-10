@@ -22,7 +22,19 @@
   color: #333;
 }
 
-/* No styles are needed for .header-plan-status or .header-user-menu
-  because the 'justify-content: space-between' in the parent
-  (.header-container) is already handling their alignment.
-*/
+@media (max-width: 1024px) {
+    // Mobile par Title ko chhota karein aur left-align rakhein (Old code)
+    .pageTitle {
+        font-size: 1.5rem;
+        flex-grow: 1; 
+    }
+    .titleBar {
+        align-items: flex-start;
+        flex-wrap: nowrap;
+    }
+    
+    // === NAYA CODE START: School Profile Section ko hide karein ===
+    .profileSection {
+        display: none !important; 
+    }
+      }

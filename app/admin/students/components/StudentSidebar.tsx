@@ -3,30 +3,49 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './StudentSidebar.module.scss';
 import { FiFileText, FiDownload, FiUpload, FiPlus } from 'react-icons/fi';
-import { MdArrowBack, MdPictureAsPdf } from 'react-icons/md'; // Naya icon
+import { MdArrowBack, MdPictureAsPdf } from 'react-icons/md';
+import { useStudentLayout } from '../page';
 
-const StudentSidebar = () => {
+// NAYA: Props interface
+interface StudentSidebarProps {
+    isMobileOpen: boolean;
+}
+
+const StudentSidebar = ({ isMobileOpen }: StudentSidebarProps) => { 
   const router = useRouter();
+  const { toggleSidebar } = useStudentLayout();
 
   const openModal = (modalName: string) => {
+    // Mobile par click hone par sidebar close karein
+    if (window.innerWidth <= 1024) toggleSidebar(); 
     router.push(`/admin/students?modal=${modalName}`);
+  };
+  
+  const handleLinkClick = (path: string) => {
+    // Mobile par click hone par sidebar close karein
+    if (window.innerWidth <= 1024) toggleSidebar(); 
+    router.push(path);
   };
 
   return (
-    <aside className={styles.sidebarContainer}>
+    // NAYA: isMobileOpen prop se class apply ki
+    <aside className={`${styles.sidebarContainer} ${isMobileOpen ? styles.mobileOpen : ''}`}>
       <div className={styles.titleSection}>
+        {/* NAYA: Mobile par close button (Sirf mobile par dikhega) */}
+        <button className={styles.closeSidebarButton} onClick={toggleSidebar}>
+            &times;
+        </button>
         <h3>Student Actions</h3>
       </div>
       
       <nav className={styles.menuSection}>
         <ul>
-          {/* Naya Button Yahan Add Hua Hai */}
-          <li className={styles.menuItem} onClick={() => router.push('/admin/students/generate-leaving-certificate')}>
+          <li className={styles.menuItem} onClick={() => handleLinkClick('/admin/students/generate-leaving-certificate')}>
             <MdPictureAsPdf /> <span>Generate LC</span>
           </li>
-          <li className={styles.menuItem} onClick={() => router.push('/admin/students/generate-bonafide')}>
+          <li className={styles.menuItem} onClick={() => handleLinkClick('/admin/students/generate-bonafide')}>
             <FiFileText /> <span>Generate Bonafide</span>
-          </li>
+          </li >
           <li className={styles.menuItem} onClick={() => openModal('export')}>
             <FiDownload /> <span>Export / Print</span>
           </li>
@@ -40,10 +59,8 @@ const StudentSidebar = () => {
       </nav>
 
       <div className={styles.footerSection}>
-        {/* --- YAHAN BADLAAV KIYA GAYA HAI --- */}
-        <button className={styles.dashboardButton} onClick={() => router.push('/admin/school')}>
+        <button className={styles.dashboardButton} onClick={() => handleLinkClick('/admin/school')}>
           <MdArrowBack />
-          {/* Aap text bhi badal sakte hain agar chahein */}
           <span>Go to Dashboard</span>
         </button>
       </div>

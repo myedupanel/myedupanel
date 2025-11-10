@@ -6,14 +6,12 @@ import ParentsTable from '@/components/admin/ParentsTable/ParentsTable';
 import Modal from '@/components/common/Modal/Modal';
 import AddParentForm from '@/components/admin/AddParentForm/AddParentForm';
 import StudentFilters from '@/components/admin/StudentFilters/StudentFilters';
-import { FiPlus } from 'react-icons/fi';
+// FiMenu और FiSearch को import किया
+import { FiPlus, FiMenu, FiSearch } from 'react-icons/fi'; 
 import api from '@/backend/utils/api'; 
 import Link from 'next/link';
 import { MdGridView } from 'react-icons/md';
 import { useAuth } from '@/app/context/AuthContext'; 
-// --- NAYE IMPORTS ---
-// FIX 1: useSession Import हटा दिया गया
-// import { useSession } from '@/app/context/SessionContext';
 
 // --- 1. INTERFACES (PRISMA-AWARE) ---
 
@@ -75,23 +73,19 @@ const transformApiData = (parent: ApiParent): ParentData => ({
 // --- 3. MAIN COMPONENT ---
 const ParentsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // NAYA: Actions/Menu Modal state
+  const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
+  // NAYA: Search Modal state
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  
   const [parents, setParents] = useState<ParentData[]>([]);
   const [editingParent, setEditingParent] = useState<ParentData | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Sorting state हटा दिया गया
-  
   const { user } = useAuth();
-  // FIX 2: useSession hook कॉल हटा दिया गया
-  // const { viewingSession } = useSession();
 
-  // FIX 3: fetchParents को Non-Session Aware बनाया गया
   const fetchParents = useCallback(async () => {
-    // FIX: Session-Aware Check हटा दिया गया
-    // if (!viewingSession) { console.log("ParentsPage: Session load nahi hua, fetch skip kar rahe hain."); return; }
-    
     try {
-      // API call से sessionId param हटा दिया गया
       const res = await api.get('/parents');
       const formattedData = res.data.map(transformApiData);
       setParents(formattedData);
@@ -99,7 +93,7 @@ const ParentsPage = () => {
     } catch (error) {
       console.error("Failed to fetch parents", error);
     }
-  }, []); // viewingSession dependency हटा दी गई
+  }, []);
 
   useEffect(() => {
     fetchParents();
@@ -162,22 +156,43 @@ const ParentsPage = () => {
           studentName.includes(lowercasedQuery)
         );
       })
-      // Sorting logic हटा दिया गया
   }, [parents, searchQuery]);
+  
+  // NAYA: Search query handler for modal
+  const handleSearchAndCloseModal = (query: string) => {
+    setSearchQuery(query);
+    setIsSearchModalOpen(false);
+  };
 
 
   return (
     <div className={styles.pageContainer}>
+      
+      {/* --- UPDATED HEADER FOR MOBILE/DESKTOP --- */}
       <header className={styles.header}>
+        {/* Hamburger Icon (Mobile Only) */}
+        <button className={styles.menuButton} onClick={() => setIsActionsModalOpen(true)}>
+            <FiMenu />
+        </button>
+        
         <h1 className={styles.title}>Parent Management</h1>
-        <button onClick={() => setIsModalOpen(true)} className={styles.addButton}>
+        
+        {/* Search Icon (Mobile Only) */}
+        <button className={styles.searchToggleButton} onClick={() => setIsSearchModalOpen(true)}>
+            <FiSearch />
+        </button>
+        
+        {/* Desktop Add Button (Mobile pe hide) */}
+        <button onClick={() => setIsModalOpen(true)} className={`${styles.addButton} ${styles.desktopAddButton}`}>
           <FiPlus />
           Add New Parent
         </button>
       </header>
       
-      {/* FIX 4: onSort prop हटा दिया गया */}
-      <StudentFilters onSearch={setSearchQuery} />
+      {/* Desktop Search Filter (Mobile pe hide) */}
+      <div className={styles.desktopSearchFilter}>
+        <StudentFilters onSearch={setSearchQuery} />
+      </div>
 
       <main>
         <ParentsTable parents={filteredAndSortedParents} onEdit={handleEdit} onDelete={handleDelete} />
@@ -200,6 +215,26 @@ const ParentsPage = () => {
             occupation: editingParent.occupation
           } : null}
         />
+      </Modal>
+
+      {/* --- NAYA: Actions Modal (Hamburger Menu Content) --- */}
+      <Modal isOpen={isActionsModalOpen} onClose={() => setIsActionsModalOpen(false)} title="Quick Actions">
+        <div className={styles.actionsModalContent}>
+            <button 
+                onClick={() => { setIsModalOpen(true); setIsActionsModalOpen(false); }} 
+                className={`${styles.addButton} ${styles.modalAddButton}`}
+            >
+                <FiPlus /> Add New Parent
+            </button>
+        </div>
+      </Modal>
+
+      {/* --- NAYA: Search Modal --- */}
+      <Modal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} title="Search Parents">
+        <div className={styles.searchModalContent}>
+          {/* onSearch ko update kiya taki modal close ho sake */}
+          <StudentFilters onSearch={handleSearchAndCloseModal} />
+        </div>
       </Modal>
 
       <Link href="/admin/school" className={styles.dashboardLinkButton}>

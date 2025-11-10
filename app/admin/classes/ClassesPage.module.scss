@@ -2,8 +2,8 @@
 
 .pageContainer {
   padding: 1.5rem 2rem;
-  background-color: #f8f9fa; /* Light background */
-  min-height: calc(100vh - 60px); // Adjust based on your header height
+  background-color: #f8f9fa; 
+  min-height: calc(100vh - 60px); 
 }
 
 .header {
@@ -20,7 +20,7 @@
 
 .contentArea {
   display: grid;
-  grid-template-columns: 1fr; // Default to single column
+  grid-template-columns: 1fr; // Mobile: Default to single column
   gap: 2rem;
 
   @media (min-width: 768px) { // On medium screens and up, use two columns
@@ -55,7 +55,7 @@
 }
 
 .errorMessage {
-  color: #dc3545; /* Red for errors */
+  color: #dc3545; 
   font-weight: 500;
   background-color: #f8d7da;
   border: 1px solid #f5c2c7;
@@ -73,38 +73,33 @@
     font-size: 1rem;
     color: #495057;
     
-    // --- FIX: ADDED FLEXBOX STYLES ---
     display: flex;
-    justify-content: space-between; // Naam ko left, buttons ko right rakhega
-    align-items: center; // Vertically center karega
-    gap: 1rem; // Naam aur buttons ke beech thoda gap
-    // --- END FIX ---
+    justify-content: space-between; 
+    align-items: center; 
+    gap: 1rem; 
 
     &:last-child {
       border-bottom: none;
     }
 
-    // Naam ke liye (taaki woh shrink na ho)
     span {
-      flex-grow: 1; // Naam ko available space dega
+      flex-grow: 1; 
     }
   }
 }
-
-// --- FIX: ADDED NEW STYLES FOR BUTTONS AND MODAL ---
 
 // Container for Edit/Delete buttons
 .classActions {
   display: flex;
   gap: 0.5rem;
-  flex-shrink: 0; // Buttons ko shrink hone se rokega
+  flex-shrink: 0; 
 }
 
 // Style for individual icon buttons (Edit/Delete)
 .actionButton {
   background-color: transparent;
   border: none;
-  color: #6c757d; // Neutral icon color
+  color: #6c757d; 
   cursor: pointer;
   padding: 0.25rem;
   display: flex;
@@ -129,7 +124,6 @@
     background-color: transparent;
   }
 
-  // Specific color for delete button on hover
   &.deleteButton:hover {
     background-color: #f8d7da;
     color: #dc3545;
@@ -138,13 +132,13 @@
 
 // Edit Modal Form
 .editForm {
-  padding-top: 1rem; // Modal header se thoda gap
+  padding-top: 1rem; 
 }
 
 // Container for modal buttons (Cancel, Save)
 .modalActions {
   display: flex;
-  justify-content: flex-end; // Buttons ko right align karega
+  justify-content: flex-end; 
   gap: 1rem;
   margin-top: 1.5rem;
   padding-top: 1rem;
@@ -169,7 +163,7 @@
 
 // Cancel button style (uses modalButton base)
 .cancelButton {
-  @extend .modalButton; // Base style apply karega
+  @extend .modalButton; 
   background-color: #f8f9fa;
   color: #495057;
   border: 1px solid #ced4da;
@@ -181,20 +175,19 @@
 
 // Re-using add button style for Save/Submit
 .addButton {
-  @extend .modalButton; // Base style apply karega
+  @extend .modalButton; 
   color: #ffffff;
-  background-color: #198754; // Green for adding/saving
+  background-color: #198754; 
 
   &:hover:not(:disabled) {
     background-color: #157347;
   }
   
   &:disabled {
-    background-color: #6c757d; // Keep disabled style
+    background-color: #6c757d; 
   }
 }
 
-// --- END ADDED STYLES ---
 
 .formGroup {
   margin-bottom: 1rem;
@@ -214,7 +207,7 @@
   border: 1px solid #ced4da;
   border-radius: 4px;
   font-size: 1rem;
-  box-sizing: border-box; // Ensures padding doesn't add to width
+  box-sizing: border-box; 
   transition: border-color 0.2s, box-shadow 0.2s;
 
   &:focus {
@@ -224,40 +217,11 @@
   }
 }
 
-// --- FIX: Updated .addButton to NOT be full width by default ---
-.addButton {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #ffffff;
-  background-color: #198754; // Green for adding
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  // width: 100%; // <-- Yeh line hata di taaki modal mein bhi use ho sake
-  
-  &:hover {
-    background-color: #157347;
-  }
-  
-  &:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-  }
-
-  // Agar 'Add New Class' form mein button ko full width chahiye, toh form ko style karein
-  // Example (In .addClassSection > form):
-  // form { display: flex; flex-direction: column; }
-  // form .addButton { width: 100%; } 
-  // (Yeh aapke existing JSX ke hisaab se pehle se hi kaam karna chahiye)
-}
-/* ... existing styles ... */
-
+// --- FIX: Dashboard link alignment ---
 .sidebarColumn {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; // Add/Edit section aur link ke beech gap
+  gap: 1.5rem; 
 }
 
 .dashboardLinkButton {
@@ -274,9 +238,42 @@
   border-radius: 4px;
   text-decoration: none;
   transition: background-color 0.2s, color 0.2s;
+  
+  /* Mobile: full width, Desktop: fit-content */
+  width: 100%;
 
   &:hover {
     background-color: #e9ecef;
     color: #000;
   }
+}
+
+
+/* --- Mobile Responsive Styles (Max 768px) --- */
+@media (max-width: 767px) {
+    .pageContainer {
+        padding: 1rem; /* Mobile padding kam kiya */
+    }
+
+    .header {
+        margin-bottom: 1rem;
+        
+        h1 {
+            font-size: 1.5rem; /* Title size kam kiya */
+        }
+    }
+    
+    .contentArea {
+        /* Default single column layout hi rahega */
+        gap: 1.5rem;
+    }
+    
+    .classListSection, .addClassSection {
+        padding: 1rem; /* Section padding kam kiya */
+    }
+    
+    .dashboardLinkButton {
+        width: 100%; /* Mobile pe full width link */
+        margin-top: 0.5rem;
+    }
 }

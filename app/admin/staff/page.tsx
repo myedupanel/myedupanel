@@ -1,8 +1,10 @@
-// backend/routes/classes.js (app/admin/staff/page.tsx)
+// app/admin/staff/page.tsx
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './StaffPage.module.scss';
 import { MdAdd, MdSearch, MdGridView } from 'react-icons/md';
+// NAYE IMPORTS
+import { FiMenu, FiSearch } from 'react-icons/fi'; 
 import StaffTable from '@/components/admin/StaffTable/StaffTable';
 import Modal from '@/components/common/Modal/Modal';
 import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
@@ -81,9 +83,7 @@ const transformApiData = (apiStaff: ApiStaffMember): InternalStaffMember => {
 
     return {
         id: apiStaff.id, // FIX: Used apiStaff.id (number)
-        // --- FIX: Ensure staffId always has a value and convert id to string ---
         staffId: details.staffId || String(apiStaff.id) || 'N/A', 
-        // --- END FIX ---
         name: apiStaff.name || 'N/A',
         role: apiStaff.role || 'N/A',
         contact: details.contactNumber || 'N/A',
@@ -109,9 +109,14 @@ const StaffPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // NAYE STATES FOR MOBILE
+  const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+
   // fetchStaff (Fixed parameter and user ID usage)
   const fetchStaff = useCallback(async () => {
-        if (!user?.schoolId) { // FIX: Filter by user.schoolId (string), not user.id (number)
+        if (!user?.schoolId) { 
           setIsLoading(false);
           return;
       }
@@ -119,9 +124,6 @@ const StaffPage = () => {
       setError(null);
       try {
           const response = await api.get<{ data: ApiStaffMember[] }>('/staff'); 
-          // Backend filtering is implicit or done by middleware if no params. We assume backend filters by user.schoolId.
-          
-          // Data ko transform karte samay Number se string convert karna (agar zaroori ho toh)
           const transformedData = (response.data?.data || []).map(transformApiData);
           setStaffList(transformedData);
       } catch (err: any) {
@@ -131,7 +133,7 @@ const StaffPage = () => {
       } finally {
           setIsLoading(false);
       }
-  }, [user?.schoolId]); // Dependency user.schoolId
+  }, [user?.schoolId]); 
 
   useEffect(() => {
     fetchStaff();
@@ -144,9 +146,9 @@ const StaffPage = () => {
 
       socket.on('staff_added', (rawNewStaff: ApiStaffMember) => {
           const newStaff = transformApiData(rawNewStaff);
-          if(newStaff.schoolId === user?.schoolId) { // FIX: Compare schoolId (string)
+          if(newStaff.schoolId === user?.schoolId) { 
              setStaffList((prevList) => {
-                 if (prevList.some(s => s.id === newStaff.id)) return prevList; // FIX: Compare using id (number)
+                 if (prevList.some(s => s.id === newStaff.id)) return prevList; 
                  return [newStaff, ...prevList].sort((a,b) => a.name.localeCompare(b.name));
              });
           }
@@ -154,19 +156,19 @@ const StaffPage = () => {
 
       socket.on('staff_updated', (rawUpdatedStaff: ApiStaffMember) => {
           const updatedStaff = transformApiData(rawUpdatedStaff);
-           if(updatedStaff.schoolId === user?.schoolId) { // FIX: Compare schoolId (string)
+           if(updatedStaff.schoolId === user?.schoolId) { 
                 setStaffList((prevList) =>
                     prevList.map((staff) =>
-                    staff.id === updatedStaff.id ? updatedStaff : staff // FIX: Compare using id (number)
+                    staff.id === updatedStaff.id ? updatedStaff : staff 
                     )
                 );
            }
       });
 
-      socket.on('staff_deleted', (deletedStaffInfo: { id: number, schoolId: string }) => { // FIX: id is number
-          if (deletedStaffInfo.schoolId === user?.schoolId) { // FIX: Compare schoolId (string)
+      socket.on('staff_deleted', (deletedStaffInfo: { id: number, schoolId: string }) => { 
+          if (deletedStaffInfo.schoolId === user?.schoolId) { 
               setStaffList((prevList) =>
-                prevList.filter((staff) => staff.id !== deletedStaffInfo.id) // FIX: Compare using id (number)
+                prevList.filter((staff) => staff.id !== deletedStaffInfo.id) 
               );
           }
       });
@@ -174,7 +176,7 @@ const StaffPage = () => {
       socket.on('disconnect', () => console.log('StaffPage Socket Disconnected'));
       socket.on('connect_error', (err) => console.error('StaffPage Socket Connection Error:', err));
       return () => { socket.disconnect(); };
-  }, [user?.schoolId]); // FIX: Added user?.schoolId to dependency array
+  }, [user?.schoolId]); 
 
   // handleSaveStaff (No change)
   const handleSaveStaff = async (staffFormData: StaffFormData) => {
@@ -193,10 +195,10 @@ const StaffPage = () => {
   };
 
   // handleDeleteStaff (Fixed staffId type to number)
-  const handleDeleteStaff = async (staffId: number) => { // FIX: Receives number now
+  const handleDeleteStaff = async (staffId: number) => { 
      if (window.confirm("Delete staff member?")) {
       try {
-        await api.delete(`/staff/${staffId}`); // API call uses number ID
+        await api.delete(`/staff/${staffId}`); 
       } catch (err: any) {
         console.error('Failed to delete staff:', err);
         alert(`Error deleting staff: ${err.response?.data?.msg || err.message}`);
@@ -207,7 +209,7 @@ const StaffPage = () => {
   // handleEditClick (Fixed received type)
   const handleEditClick = (staffTableMember: StaffTableMemberType) => { 
     console.log("Edit clicked for (from table):", staffTableMember);
-    const staffToEdit = staffList.find(s => s.id === staffTableMember.id); // Find using id (number)
+    const staffToEdit = staffList.find(s => s.id === staffTableMember.id); 
     if (staffToEdit) {
         console.log("Found internal staff object to edit:", staffToEdit);
         setCurrentStaff(staffToEdit);
@@ -220,10 +222,10 @@ const StaffPage = () => {
 
   // handleUpdateStaff (Fixed user ID usage)
   const handleUpdateStaff = async (staffFormData: StaffFormData) => {
-        if (!currentStaff?.id) return; // Use number ID
+        if (!currentStaff?.id) return; 
       const dataToSend = { ...staffFormData };
       try {
-          await api.put(`/staff/${currentStaff.id}`, dataToSend); // API call uses number ID
+          await api.put(`/staff/${currentStaff.id}`, dataToSend); 
           setIsEditModalOpen(false);
           setCurrentStaff(null);
       } catch (err: any) {
@@ -238,17 +240,38 @@ const StaffPage = () => {
             .filter(member => (filterRole === 'All' ? true : member.role === filterRole))
             .filter(member => member.name.toLowerCase().includes(searchTerm.toLowerCase()));
    }, [staffList, filterRole, searchTerm]);
+   
+   // NAYA: Search query handler for modal
+  const handleSearchAndCloseModal = (query: string, role: string) => {
+    setSearchTerm(query);
+    setFilterRole(role);
+    setIsSearchModalOpen(false);
+  };
 
 
   return (
     <div className={styles.staffContainer}>
-      {/* Header and Controls (No change) */}
-      <div className={styles.header}>
-         <h1 className={styles.title}>Staff Management</h1>
-        <button className={styles.addButton} onClick={() => { setCurrentStaff(null); setIsAddModalOpen(true); }}>
+      {/* --- UPDATED HEADER FOR MOBILE/DESKTOP --- */}
+      <header className={styles.header}>
+        {/* Hamburger Icon (Mobile Only) */}
+        <button className={styles.menuButton} onClick={() => setIsActionsModalOpen(true)}>
+            <FiMenu />
+        </button>
+        
+        <h1 className={styles.title}>Staff Management</h1>
+        
+        {/* Search Icon (Mobile Only) */}
+        <button className={styles.searchToggleButton} onClick={() => setIsSearchModalOpen(true)}>
+            <FiSearch />
+        </button>
+
+        {/* Desktop Add Button (Mobile pe hide) */}
+        <button className={`${styles.addButton} ${styles.desktopAddButton}`} onClick={() => { setCurrentStaff(null); setIsAddModalOpen(true); }}>
           <MdAdd /> Add New Staff
         </button>
-      </div>
+      </header>
+      
+      {/* Desktop Controls (Search and Filter) - Mobile pe hide */}
       <div className={styles.controls}>
          <div className={styles.searchBox}>
           <MdSearch />
@@ -267,10 +290,9 @@ const StaffPage = () => {
       ) : staffList.length === 0 ? (
           <div className={styles.emptyState}>No staff members found. Add one to get started!</div>
       ) : (
-          // === PASS CORRECT MAPPED DATA TO StaffTable ===
           <StaffTable
               staff={filteredStaff.map(s => ({
-                  id: s.id, // Pass number ID
+                  id: s.id, 
                   staffId: s.staffId, 
                   name: s.name,
                   role: s.role,
@@ -279,10 +301,9 @@ const StaffPage = () => {
                   leavingDate: s.leavingDate, 
               }))}
               
-              onDelete={handleDeleteStaff} // Function now expects number ID
-              onEdit={handleEditClick} // Function expects StaffTableMemberType (number ID)
+              onDelete={handleDeleteStaff} 
+              onEdit={handleEditClick} 
           />
-          // === END ===
       )}
 
       {/* Modals */}
@@ -291,13 +312,63 @@ const StaffPage = () => {
       </Modal>
       <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Staff Member">
         {currentStaff && (
-          // EditStaffForm uses InternalStaffMember
           <EditStaffForm
             onClose={() => { setIsEditModalOpen(false); setCurrentStaff(null); }}
             onSave={handleUpdateStaff}
-            staffData={currentStaff} // Pass InternalStaffMember
+            staffData={currentStaff} 
           />
         )}
+      </Modal>
+
+      {/* 4. NAYA: Actions Modal (Hamburger Menu Content) */}
+      <Modal isOpen={isActionsModalOpen} onClose={() => setIsActionsModalOpen(false)} title="Quick Actions">
+        <div className={styles.actionsModalContent}>
+            <button 
+                onClick={() => { setCurrentStaff(null); setIsAddModalOpen(true); setIsActionsModalOpen(false); }} 
+                className={`${styles.addButton} ${styles.modalAddButton}`}
+            >
+                <MdAdd /> Add New Staff
+            </button>
+        </div>
+      </Modal>
+
+      {/* 5. NAYA: Search Modal */}
+      <Modal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} title="Search Staff">
+        <div className={styles.searchModalContent}>
+          {/* Mobile search: Passes the current searchTerm and filterRole to the StudentFilters component,
+             which we'll use for both search text and the role dropdown in the modal.
+             We need to adjust the StudentFilters to handle both text and a dropdown if it's reused here. 
+             For now, we'll keep the search text filter and rely on the filterRole dropdown being outside the modal logic in the main component.
+          */}
+          <div className={styles.mobileSearchFilter}>
+            {/* Using a simple input for search inside modal for simplicity, since StudentFilters expects a single onSearch handler */}
+             <div className={styles.searchBox}>
+                <MdSearch />
+                <input 
+                    type="text" 
+                    placeholder="Search by name..." 
+                    defaultValue={searchTerm} 
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            handleSearchAndCloseModal(e.currentTarget.value, filterRole);
+                        }
+                    }}
+                />
+            </div>
+            <select className={styles.filterDropdown} value={filterRole} onChange={(e) => setFilterRole(e.target.value)}>
+              {allRoles.map(role => <option key={role} value={role}>{role}</option>)}
+            </select>
+             <button 
+                 className={styles.modalSearchApplyButton} 
+                 onClick={() => {
+                     const input = document.querySelector(`.${styles.mobileSearchFilter} input`) as HTMLInputElement;
+                     handleSearchAndCloseModal(input.value, filterRole);
+                 }}
+             >
+                 Apply Filters
+             </button>
+          </div>
+        </div>
       </Modal>
 
       {/* Dashboard Link */}

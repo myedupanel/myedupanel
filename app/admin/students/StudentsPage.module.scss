@@ -1,24 +1,28 @@
+/* File: app/admin/students/StudentsPage.module.scss */
+
 /* Page ka main layout */
 .studentPageLayout {
   display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background-color: #f4f7fa; /* Light background for the whole page */
+  background-color: #f4f7fa; 
 }
 
 /* Sidebar ke alawa baaki ka content area */
 .mainContent {
   flex-grow: 1;
   padding: 2rem;
-  overflow-y: auto; /* Content lamba hone par scrollable banayein */
+  overflow-y: auto; 
+  margin-left: 250px; /* Desktop margin */
+  transition: margin-left 0.3s ease;
 }
 
 /* Page ka header "Student Management" */
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: center; 
   margin-bottom: 2rem;
 }
 
@@ -26,88 +30,46 @@
   font-size: 32px;
   font-weight: 700;
   color: #1a2a44;
+  margin: 0; 
 }
 
-/* Export/Print modal ke andar ke buttons */
-.exportOptionsContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 0.5rem;
-}
-
-.exportOptionButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.85rem 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-decoration: none; /* For CSVLink */
-
-  &.csv {
-    background-color: #f0fdf4;
-    color: #166534;
-    &:hover {
-      background-color: #dcfce7;
-      border-color: #86efac;
+/* Hamburger Button */
+.menuButton {
+    display: none; 
+    font-size: 28px;
+    color: #1a2a44; 
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    
+    @media (max-width: 1024px) {
+        display: block; 
+        margin-right: 0.5rem; 
     }
-  }
-  
-  &.xlsx {
-    background-color: #f1f5f9;
-    color: #334155;
-    &:hover {
-      background-color: #e2e8f0;
-      border-color: #cbd5e1;
-    }
-  }
-
-  &.print {
-    background-color: #eff6ff;
-    color: #1e40af;
-    &:hover {
-      background-color: #dbeafe;
-      border-color: #93c5fd;
-    }
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  }
 }
-/* Yeh code StudentsPage.module.scss ke aakhir mein add karein */
-.dashboardLinkButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  margin: 2rem auto 1rem auto; /* Page ke end mein center karega */
-  background-color: #374151; // Dark color
-  color: #ffffff;
-  font-weight: 500;
-  text-decoration: none;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s;
 
-  svg {
-    font-size: 1.25rem;
-  }
-
-  &:hover {
-    background-color: #4b5563; // Thoda light hover
-  }
+/* NAYA: Search Toggle Button */
+.searchToggleButton {
+    display: none;
+    font-size: 22px;
+    color: #4a90e2; 
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    
+    @media (max-width: 1024px) {
+        display: block; 
+        margin-left: auto; /* Title ko left, Button ko right push karega */
+        flex-shrink: 0;
+    }
 }
+
+
+/* Filters Container */
 .filtersContainer {
   display: flex;
   align-items: center;
@@ -145,17 +107,14 @@
   }
 }
 
-/* Search bar ko failane ke liye */
 .searchFilter {
   flex-grow: 1; 
-  // Isse search bar bachi hui jagah le lega
-  // Yahaan aapko StudentFilters component ke andar ke input ko
-  // width: 100% dena pad sakta hai.
 }
 
-/* Naya Actions Dropdown */
+/* Naya Actions Dropdown (Same) */
 .actionsDropdownContainer {
   position: relative;
+  flex-shrink: 0; 
 }
 
 .actionsButton {
@@ -163,7 +122,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background-color: #4a90e2; // Primary button color
+  background-color: #4a90e2; 
   color: white;
   border: none;
   border-radius: 6px;
@@ -171,46 +130,128 @@
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
+  flex-shrink: 0; 
 
   &:hover {
     background-color: #357abd;
   }
 }
+/* ... Baki filters, action menu styles (Same) ... */
 
-.actionsMenu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 8px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 10;
-  width: 200px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+/* --- Modals and other helper styles (Same) --- */
+
+/* --- MOBILE RESPONSIVENESS FIXES --- */
+.sidebarOverlay {
+    display: none; 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 999; 
+    
+    @media (max-width: 1024px) {
+      display: block; 
+    }
+}
+@media (max-width: 1024px) {
+  .mainContent {
+    margin-left: 0; /* Sidebar margin remove kiya */
+    padding: 1rem;
+  }
+  
+  .title {
+    font-size: 20px; 
+    margin: 0;
+    flex-grow: 1; 
+    text-align: left;
+  }
+  
+  .header {
+    /* CRITICAL FIX: Alignment */
+    align-items: center; 
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+  }
+  
+  /* Filters ko stack karein */
+  .filtersContainer {
+    display: none; /* Default hidden on mobile */
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 1rem;
+  }
+  
+  .filtersContainer.filtersVisible {
+    display: flex; /* Click hone par dikhega */
+  }
+
+  .searchFilter {
+    order: 1; 
+    width: 100%; 
+  }
+  
+  .classFilter {
+    order: 2; 
+    justify-content: space-between;
+  }
+  
+  .actionsDropdownContainer {
+    order: 3; 
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .actionsButton {
+      width: 100%;
+  }
+}
+.exportOptionsContainer {
+    /* Buttons ko vertically stack aur spacing dega */
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Buttons ke beech ka space */
+    padding: 20px 0 0 0; /* Modal content padding ke neeche start hoga */
 }
 
-.actionItem {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  background: none;
-  border: none;
-  text-align: left;
-  font-size: 0.9rem;
-  color: #2d3748;
-  cursor: pointer;
-  text-decoration: none; // CSVLink ke liye
-
-  &:hover {
-    background-color: #f7fafc;
-  }
-
-  svg {
+.exportOptionButton {
+    /* Common button styling */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Text aur icon ko left align karega */
+    width: 100%; /* Full width button */
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 6px;
     font-size: 1rem;
-    color: #718096;
-  }
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none; /* CSVLink ke liye */
+    border: none;
+    
+    svg {
+        font-size: 1.1rem;
+    }
+
+    /* Specific colors for visual distinction */
+    &.csv {
+        background-color: #2ecc71; /* Emerald Green */
+        color: white;
+        &:hover { background-color: #27ae60; }
+    }
+    &.xlsx {
+        background-color: #2980b9; /* Bright Blue */
+        color: white;
+        &:hover { background-color: #2471a3; }
+    }
+    &.print {
+        background-color: #6c757d; /* Grey/Dark for Print */
+        color: white;
+        &:hover { background-color: #5a6268; }
+    }
 }

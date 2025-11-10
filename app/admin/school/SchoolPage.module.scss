@@ -1,33 +1,35 @@
+/* File: app/admin/school/SchoolPage.module.scss (Final Code) */
+
 /* Main container for the whole page */
 .schoolPageContainer {
     display: flex;
-    background-color: #f8f9fa; // Lighter background color
+    background-color: #f8f9fa; 
     min-height: 100vh;
 }
 
-/* === FIX for Sidebar Overlap === */
+/* FIX for Sidebar Overlap (main content area) */
 .mainContent {
     flex-grow: 1;
     padding: 1.5rem 2rem;
     overflow-y: auto;
-    margin-left: 260px; 
+    margin-left: 260px; /* Desktop Margin */
+    transition: margin-left 0.3s ease; /* Smooth transition for margin */
 }
 
-/* Rest of the styles */
 .overviewContainer {
     max-width: 1600px;
     margin: 0 auto;
 }
 
-// === NEW: Header Row for Title and Banner ===
+// === Header Row for Title, Hamburger, and Banner ===
 .headerRow {
     display: flex;
     justify-content: space-between; 
     align-items: center;
     margin-bottom: 2rem;
     gap: 1.5rem; 
+    flex-wrap: wrap; 
 }
-// ===========================================
 
 .mainTitle {
     font-size: 2.25rem;
@@ -37,80 +39,47 @@
     flex-shrink: 0; 
 }
 
-/* Premium Stat Cards (RESTORED - FULL CODE ADDED) */
-.statsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-}
-
-.statCard {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    border: 1px solid #e9ecef;
-    border-top: 4px solid; 
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    &:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.07);
-    }
-}
-.iconWrapper {
-    padding: 1rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    svg { font-size: 1.75rem; }
-}
-.statInfo {
-    .statTitle { font-size: 0.9rem; color: #6c757d; margin: 0 0 0.25rem 0; font-weight: 500; }
-    .statValue { font-size: 1.75rem; font-weight: 700; color: #212529; margin: 0; }
-}
-
-
-/* Premium Main Grid (RESTORED - FULL CODE ADDED) */
+/* --- Base Grid Styles (Same) --- */
 .mainGrid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); // 3-column layout
+    grid-template-columns: repeat(3, 1fr); 
     gap: 1.5rem;
 }
 
+/* --- Summary Box Styling (PROFESSIONAL UPDATE) --- */
 .summaryBox {
-    background-color: #fff;
+    background-color: #ffffff;
     border-radius: 12px;
-    border: 1px solid #e9ecef;
+    border: 1px solid #e2e8f0; 
     display: flex;
     flex-direction: column;
-    grid-column: span 1; // Default to 1 column wide
+    transition: all 0.2s ease;
+    
+    // Add a slight hover effect
+    &:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
 }
 
 .chartBox {
-    grid-column: span 3; // Chart takes full width
+    grid-column: span 3;
     height: 380px;
-    padding: 1rem;
-}
-.chartContainer {
-    width: 100%;
-    height: 100%;
+    padding: 1.5rem; 
+    &:hover { transform: none; box-shadow: none; } /* Remove hover effect on chart */
 }
 
-/* Box Header Styles (RESTORED - FULL CODE ADDED) */
+/* --- Box Header Styles (Same) --- */
 .boxHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid #f1f5f9; 
     h2 {
         font-size: 1.1rem;
         font-weight: 600;
-        color: #343a40;
+        color: #4F46E5; /* Primary color for title (Indigo) */
         margin: 0;
         display: flex;
         align-items: center;
@@ -118,19 +87,14 @@
     }
 }
 .viewAllLink {
-    font-size: 0.8rem;
-    color: #495057;
+    font-size: 0.85rem;
+    color: #4F46E5; 
     text-decoration: none;
     font-weight: 500;
-    &:hover { color: #007bff; }
+    &:hover { text-decoration: underline; }
 }
 
-.boxContent {
-    padding: 1.25rem;
-    flex-grow: 1;
-    p { margin: 0.25rem 0; }
-}
-
+/* --- Recent List Styles (Same) --- */
 .recentList {
     list-style: none;
     padding: 0;
@@ -141,238 +105,196 @@
         justify-content: space-between;
         align-items: center;
         padding: 0.85rem 1.25rem;
-        font-size: 0.9rem;
-        border-bottom: 1px solid #f1f3f5;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #f8f9fa; 
         &:last-child { border-bottom: none; }
     }
 }
 .subject {
-    color: #6c757d;
-    font-size: 0.85rem;
+    color: #64748b;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+.noRecent {
+    padding: 1rem 1.25rem;
+    color: #94a3b8;
+    font-style: italic;
+    text-align: center;
 }
 
+/* --- Box Footer/Button Styles (Same) --- */
 .boxFooter {
     padding: 0.75rem 1.25rem;
     background-color: #f8f9fa;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid #e2e8f0;
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
 }
-
-/* Base Add Button (RESTORED - FULL CODE ADDED) */
 .addButton {
     width: 100%;
-    padding: 0.6rem;
-    background-color: #f8f9fa;
-    color: #495057;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    font-weight: 500;
+    padding: 0.65rem;
+    background-color: #4F46E5; /* Indigo button */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    &:hover { background-color: #007bff; color: #fff; border-color: #007bff; }
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    &:hover { background-color: #4338CA; }
 }
 
-.smallText { 
-    font-size: 0.9rem; 
-    color: #6c757d; 
-    text-align: center;
-    strong { color: #212529; }
-}
-.schoolLayoutWrapper {
-    display: flex;
-    flex-grow: 1; 
-    position: relative; 
+/* === SUBSCRIPTION BANNER STYLES (PREMIUM UPDATE) === */
+
+@keyframes border-glow-paid {
+    0%   { border-color: #4F46E5; box-shadow: 0 0 10px rgba(79, 70, 229, 0.5); } 
+    50%  { border-color: #10B981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.7); }
+    100% { border-color: #4F46E5; box-shadow: 0 0 10px rgba(79, 70, 229, 0.5); }
 }
 
-.schoolContent {
-    flex-grow: 1; 
-    overflow-y: auto;
-    min-height: 100vh;
-    margin-left: 260px; 
-    padding: 1.5rem 2rem;
-    background-color: #f4f7fa; 
-}
-
-
-// === PREMIUM GLOW ANIMATION KEYFRAMES (NEW) ===
-@keyframes border-glow-subtle {
-    0%   { border-color: #fcd34d; box-shadow: 0 0 10px rgba(252, 211, 77, 0.4); } 
-    25%  { border-color: #6ee7b7; box-shadow: 0 0 10px rgba(110, 231, 183, 0.4); } // Greenish
-    50%  { border-color: #fca5a5; box-shadow: 0 0 10px rgba(252, 165, 165, 0.4); } // Reddish
-    75%  { border-color: #93c5fd; box-shadow: 0 0 10px rgba(147, 197, 253, 0.4); } // Sky Blue
-    100% { border-color: #fcd34d; box-shadow: 0 0 10px rgba(252, 211, 77, 0.4); } // Yellowish
-}
-
-// === SUBSCRIPTION BANNER BASE ===
 .subscriptionBanner {
     display: flex;
     align-items: center;
     padding: 0.5rem 1rem;
     border-radius: 8px;
     font-weight: 600;
-    flex-shrink: 1;
-    min-width: 250px; 
+    flex-shrink: 0; 
+    min-width: 280px; 
     transition: all 0.5s ease;
 }
 
-// --- TRIAL BANNER (Light Yellow, New Slogan Structure) ---
-.trialBanner {
-    background-color: #fffbeb; // Light yellow background
-    border: 2px solid #fcd34d; // Premium Border
-    color: #92400e;
-}
-
-// --- PAID PLAN BANNER (Subtle Multi-Color Glow) ---
 .paidPlanBanner {
-    background-color: #f0fdfa; // Very light greenish background
+    background-color: #f0fdfa;
     color: #065f46;
     border: 2px solid; 
-    animation: border-glow-subtle 8s infinite alternate ease-in-out; // Slow glow transition
+    animation: border-glow-paid 6s infinite alternate ease-in-out;
 }
 
-// --- UPGRADE BUTTON (Sky Blue Normal Glowing) ---
-.upgradeButton {
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: 600;
-    text-decoration: none;
-    margin-left: 1rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    flex-shrink: 0;
-    
-    .trialBanner & {
-        background-color: #3b82f6; // Sky Blue
-        color: #fff;
-        border: 1px solid #3b82f6;
-        box-shadow: 0 0 8px rgba(59, 130, 246, 0.6); // Normal glowing
-        &:hover { 
-            background-color: #2563eb; 
-            box-shadow: 0 0 12px rgba(59, 130, 246, 0.8);
-            transform: translateY(-1px);
-        }
-    }
-}
-
-// --- TRIAL SPECIFIC CONTENT (Slogan + Countdown) ---
-.trialContent {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    gap: 0.25rem; // Reduced gap for tighter look
-    padding: 0.3rem 0;
-}
-.trialSlogan {
-    font-size: 1rem; // Slightly larger slogan
-    font-weight: 700;
-    color: #92400e; // Dark yellow text
-}
-.trialCountdown {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-}
-.countdownValue {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: #ef4444; 
-    line-height: 1;
-}
-.countdownLabel {
-    font-size: 0.7rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    color: #92400e;
-    line-height: 1;
-}
-
-.progressBar {
-    flex-grow: 1;
-    height: 8px;
-    background-color: #fde68a; 
-    border-radius: 4px;
-    overflow: hidden;
-    margin-left: 1rem;
-}
-
-.progressFill {
-    height: 100%;
-    background-color: #ef4444; 
-    border-radius: 4px;
-    transition: width 0.5s ease-out; 
-}
-// --- PAID PLAN CONTENT ---
 .planContent {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     font-size: 1rem;
     flex-grow: 1;
-}
-.paidExpiryWarning {
-    color: #ef4444;
-    font-weight: 700;
-    font-size: 0.85rem;
-    margin-left: 1rem;
-    padding: 2px 6px;
-    background-color: rgba(239, 68, 68, 0.1);
-    border-radius: 4px;
-    // Animation/Glow for the warning text itself
-    box-shadow: 0 0 5px rgba(239, 68, 68, 0.4);
-}
-
-
-// === WARNING MODAL STYLES (Unchanged) ===
-.warningModal {
-    max-width: 550px !important; 
-}
-
-.modalContent {
-    padding: 1rem 0;
-    p {
-        margin: 0 0 0.8rem 0;
-        font-size: 1rem;
-        color: #495057;
-        font-weight: 500;
+    
+    // Default: Full text dikhega
+    .bannerAbbreviation {
+        display: none; 
+    }
+    
+    // Default: Full text dikhega
+    span:not(.bannerAbbreviation) {
+        display: block; 
     }
 }
 
-.warningMessage {
-    display: flex;
-    align-items: center;
-    background-color: #fef3c7;
-    border-left: 4px solid #f59e0b;
-    padding: 0.8rem;
-    border-radius: 4px;
-    color: #92400e !important;
-    font-weight: 600 !important;
-}
-
-.modalActions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 1.5rem;
-}
-
-.upgradeLinkButton {
-    @extend .addButton !optional; 
-    background-color: #10b981;
-    color: #fff;
+/* --- Hamburger Button Style --- */
+.menuButton {
+    display: none; 
+    font-size: 2rem;
+    color: #3b82f6;
+    background: none;
     border: none;
-    &:hover { background-color: #059669; color: #fff; }
+    cursor: pointer;
+    padding: 0;
 }
 
-.dismissButton {
-    @extend .addButton !optional; 
-    background-color: #f8f9fa;
-    color: #495057;
-    border-color: #dee2e6;
-    &:hover { background-color: #e9ecef; }
+/* === MOBILE RESPONSIVENESS (FINAL ALIGNMENT FIX) === */
+@media (max-width: 1024px) {
+    /* Main Content: Sidebar chhipa hoga, isliye margin hata denge */
+    .mainContent {
+        margin-left: 0 !important; 
+        padding: 1rem; 
+    }
+    
+    /* Grid Collapse: Saare boxes ko 1 column par stack karein */
+    .mainGrid {
+        grid-template-columns: 1fr; 
+    }
+    
+    .chartBox {
+        grid-column: span 1; 
+        height: 300px; 
+    }
+
+    /* --- Mobile Header and Banner Alignment FIX --- */
+    .headerRow {
+        flex-direction: row; 
+        /* CRITICAL FIX 1: Vertical centering on the line */
+        align-items: center; 
+        justify-content: space-between; 
+        flex-wrap: nowrap; 
+        gap: 0.5rem; 
+        margin-bottom: 1.5rem; 
+        padding-top: 0; /* Extra safety */
+    }
+    
+    /* Hamburger Button (Left) */
+    .menuButton {
+        display: block; 
+        order: 1; 
+        flex-shrink: 0;
+        margin: 0; /* Remove any default vertical margins */
+    }
+    
+    .mainTitle {
+        font-size: 1.25rem; /* CRITICAL FIX 2: Font size ko chhota kiya */
+        line-height: 1.2; /* CRITICAL FIX 3: Line height fix */
+        order: 2; 
+        flex-grow: 1; /* Title takes remaining space */
+        padding-right: 0.25rem; 
+        white-space: nowrap; 
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: 0; /* CRITICAL FIX 4: Margin zero kiya */
+        padding-left: 0.5rem;
+    }
+
+    .subscriptionBanner {
+        order: 3; 
+        flex-shrink: 0; 
+        min-width: unset;
+        padding: 0.4rem 0.6rem; /* CRITICAL FIX 5: Banner padding kam kiya */
+        
+        /* Mobile Abbreviation Logic */
+        .planContent {
+            gap: 0.25rem;
+            // Full text ko chhipao
+            span:not(.bannerAbbreviation) {
+                display: none;
+            }
+            // Abbreviated text dikhao
+            .bannerAbbreviation {
+                display: block; 
+                font-size: 0.8rem; /* CRITICAL FIX 6: Font size aur chhota kiya */
+                font-weight: 700;
+            }
+            svg {
+                font-size: 1rem; /* Icon size bhi kam kiya */
+            }
+        }
+    }
 }
-// =================================
+
+/* --- Sidebar Overlay (Same) --- */
+.sidebarOverlay {
+    display: none; 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 1040; 
+    transition: opacity 0.3s ease-in-out;
+    
+    @media (max-width: 1024px) {
+      display: block; 
+    }
+    @media (min-width: 1025px) {
+      display: none !important; 
+    }
+}

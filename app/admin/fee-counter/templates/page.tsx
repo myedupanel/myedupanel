@@ -1,9 +1,10 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import styles from './FeeTemplates.module.scss';
-import { FiPlus, FiEdit, FiTrash } from 'react-icons/fi'; // <-- NEW ICONS
+// FiMenu और FiSearch को जोड़ा
+import { FiPlus, FiEdit, FiTrash, FiMenu, FiSearch } from 'react-icons/fi'; 
 import Modal from '@/components/common/Modal/Modal';
-import AddFeeTemplateForm from '@/components/admin/AddFeeTemplateForm/AddFeeTemplateForm'; // We'll reuse this for editing
+import AddFeeTemplateForm from '@/components/admin/AddFeeTemplateForm/AddFeeTemplateForm'; 
 import api from '@/backend/utils/api';
 
 // --- NEW: Currency Formatter Helper ---
@@ -20,22 +21,26 @@ const formatCurrency = (amount: number) => {
 const FeeTemplatesPage = () => {
   // --- UPDATED STATES ---
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalToOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
   const [deletingTemplateId, setDeletingTemplateId] = useState<string | null>(null);
-  // ---
-  
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
+  
+  // NAYE STATES FOR MOBILE
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false); 
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(''); // NEW SEARCH STATE
+  
+  
   const fetchTemplates = async () => {
     try {
       setLoading(true);
       const res = await api.get('/fees/templates');
-      setTemplates(res.data || []); // Default to empty array
+      setTemplates(res.data || []); 
     } catch (error) {
       console.error("Failed to fetch templates", error);
-      setTemplates([]); // Set to empty on error
+      setTemplates([]); 
     } finally {
       setLoading(false);
     }
@@ -45,39 +50,55 @@ const FeeTemplatesPage = () => {
     fetchTemplates();
   }, []);
 
+  // --- NAYA: Filter Logic ---
+  const filteredTemplates = useMemo(() => {
+    if (!searchTerm) return templates;
+    const lowercasedQuery = searchTerm.toLowerCase();
+    return templates.filter(template => 
+      template.name.toLowerCase().includes(lowercasedQuery) || 
+      template.description?.toLowerCase().includes(lowercasedQuery)
+    );
+  }, [templates, searchTerm]);
+  // --- END Filter Logic ---
+
   // --- NEW HANDLERS for Add, Edit, Delete ---
   const handleAddSuccess = () => {
-    fetchTemplates(); // Refresh list
-    setIsAddModalOpen(false); // Close modal
+    fetchTemplates(); 
+    setIsAddModalOpen(false); 
   };
 
   const handleEditSuccess = () => {
-    fetchTemplates(); // Refresh list
-    setIsEditModalOpen(false); // Close modal
-    setEditingTemplate(null); // Clear editing state
+    fetchTemplates(); 
+    setIsEditModalToOpen(false); 
+    setEditingTemplate(null); 
   };
 
   const handleEditClick = (template: any) => {
-    setEditingTemplate(template); // Set which template to edit
-    setIsEditModalOpen(true); // Open edit modal
+    setEditingTemplate(template); 
+    setIsEditModalToOpen(true); 
   };
 
   const handleDeleteClick = (id: string) => {
-    setDeletingTemplateId(id); // Set which template to delete (opens confirm modal)
+    setDeletingTemplateId(id); 
   };
 
   const confirmDelete = async () => {
     if (!deletingTemplateId) return;
     try {
-      // Assumes backend route DELETE /api/fees/templates/:id
       await api.delete(`/fees/templates/${deletingTemplateId}`);
       alert('Template deleted successfully!');
-      fetchTemplates(); // Refresh list
-      setDeletingTemplateId(null); // Close confirm modal
+      fetchTemplates(); 
+      setDeletingTemplateId(null); 
     } catch (error) {
       console.error("Failed to delete template", error);
       alert('Failed to delete template. It might be in use.');
     }
+  };
+  
+  // NAYA: Search Handler for Modal
+  const handleModalSearch = (query: string) => {
+    setSearchTerm(query);
+    setIsSearchModalOpen(false);
   };
   // ---
 
@@ -85,8 +106,24 @@ const FeeTemplatesPage = () => {
     <>
       <div className={styles.pageContainer}>
         <header className={styles.header}>
-          <h1 className={styles.title}>Manage Fee Templates</h1>
-          <button className={styles.addButton} onClick={() => setIsAddModalOpen(true)}>
+          
+          {/* NAYA: Mobile Header Bar */}
+          <div className={styles.mobileHeaderBar}>
+              {/* Hamburger Menu Icon (Mobile Only) */}
+              <button className={styles.menuButton} onClick={() => setIsMenuModalOpen(true)}>
+                  <FiMenu />
+              </button>
+              
+              <h1 className={styles.title}>Manage Fee Templates</h1>
+              
+              {/* Search Icon (Mobile Only) */}
+              <button className={styles.searchToggleButton} onClick={() => setIsSearchModalOpen(true)}>
+                  <FiSearch />
+              </button>
+          </div>
+
+          {/* Desktop Add Button (Mobile pe hide) */}
+          <button className={`${styles.addButton} ${styles.desktopAddButton}`} onClick={() => setIsAddModalOpen(true)}>
             <FiPlus /> Add New Template
           </button>
         </header>
@@ -98,16 +135,16 @@ const FeeTemplatesPage = () => {
           ) : (
             <div className={styles.templateGrid}>
               
-              {/* Grid Header */}
+              {/* Grid Header (Desktop/Tablet) */}
               <div className={`${styles.templateItem} ${styles.gridHeader}`}>
                 <span>Template Name</span>
-                <span>Description</span>
-                <span>Total Amount</span>
-                <span>Actions</span>
+                <span className={styles.templateDescription}>Description</span> {/* Description hidden on mobile */}
+                <span className={styles.templateAmount}>Total Amount</span>
+                <span className={styles.templateActions}>Actions</span>
               </div>
               
-              {/* Grid Body: Map templates */}
-              {templates.length > 0 ? templates.map(template => (
+              {/* Grid Body: Map filtered templates */}
+              {filteredTemplates.length > 0 ? filteredTemplates.map(template => (
                 <div key={template.id} className={styles.templateItem}>
                   <span className={styles.templateName}>{template.name}</span>
                   <span className={styles.templateDescription}>{template.description || 'N/A'}</span>
@@ -132,7 +169,7 @@ const FeeTemplatesPage = () => {
                   </div>
                 </div>
               )) : (
-                !loading && <p className={styles.noTemplates}>No templates created yet. Click "Add New Template" to start.</p>
+                !loading && <p className={styles.noTemplates}>No templates match your search criteria.</p>
               )}
             </div>
           )}
@@ -157,18 +194,18 @@ const FeeTemplatesPage = () => {
       {editingTemplate && (
         <Modal 
           isOpen={isEditModalOpen} 
-          onClose={() => { setIsEditModalOpen(false); setEditingTemplate(null); }}
+          onClose={() => { setIsEditModalToOpen(false); setEditingTemplate(null); }}
           title="Edit Fee Template"
         >
           <AddFeeTemplateForm 
-            onClose={() => { setIsEditModalOpen(false); setEditingTemplate(null); }} 
+            onClose={() => { setIsEditModalToOpen(false); setEditingTemplate(null); }} 
             onSuccess={handleEditSuccess}
-            templateData={editingTemplate} // <-- IMPORTANT: Pass existing data to the form
+            templateData={editingTemplate} 
           />
         </Modal>
       )}
 
-      {/* 3. Delete Confirmation Modal */}
+      {/* 3. Delete Confirmation Modal (No Change) */}
       {deletingTemplateId && (
         <Modal
           isOpen={!!deletingTemplateId}
@@ -188,6 +225,51 @@ const FeeTemplatesPage = () => {
           </div>
         </Modal>
       )}
+      
+      {/* 4. NAYA: Menu Modal (Hamburger Content) */}
+      <Modal 
+          isOpen={isMenuModalOpen} 
+          onClose={() => setIsMenuModalOpen(false)}
+          title="Fees Templates Menu"
+      >
+          <nav className={styles.mobileMenuNav}>
+              <button 
+                  onClick={() => { setIsAddModalOpen(true); setIsMenuModalOpen(false); }} 
+                  className={styles.modalActionLink}
+              >
+                  <FiPlus /> Add New Template
+              </button>
+          </nav>
+      </Modal>
+
+      {/* 5. NAYA: Search Modal */}
+      <Modal 
+          isOpen={isSearchModalOpen} 
+          onClose={() => setIsSearchModalOpen(false)}
+          title="Search Templates"
+      >
+          <div className={styles.searchModalContent}>
+              <div className={styles.searchBox}>
+                  <FiSearch />
+                  <input 
+                      type="text" 
+                      placeholder="Search by name or description..." 
+                      defaultValue={searchTerm}
+                      onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                              handleModalSearch(e.currentTarget.value);
+                          }
+                      }}
+                  />
+                  <button 
+                     onClick={() => handleModalSearch( (document.querySelector(`.${styles.searchModalContent} input`) as HTMLInputElement).value)} 
+                     className={styles.searchButton}
+                  >
+                      Search
+                  </button>
+              </div>
+          </div>
+      </Modal>
     </>
   );
 };

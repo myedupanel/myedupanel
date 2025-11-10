@@ -1,24 +1,18 @@
 "use client";
 import React, { useEffect } from 'react';
-// FIX: usePathname को import करें
 import { useRouter, usePathname } from 'next/navigation'; 
 import Sidebar from '@/components/layout/Sidebar/Sidebar'; 
 import styles from './layout.module.scss';
+import sidebarStyles from '@/components/layout/Sidebar/Sidebar.module.scss'; 
 import { useAuth } from '@/app/context/AuthContext';
-import { AdminLayoutProvider } from '@/app/context/AdminLayoutContext'; 
+import { AdminLayoutProvider, useAdminLayout } from '@/app/context/AdminLayoutContext';
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const { isAuthenticated, isLoading, user } = useAuth();
-  const router = useRouter();
-  
-  // FIX: usePathname hook का उपयोग करें
+// --- AdminContent Component ---
+const AdminContent = ({ children }: { children: React.ReactNode }) => {
+  const { isSidebarOpen, toggleSidebar } = useAdminLayout();
   const pathname = usePathname(); 
   
-  // FIX: School और Fee routes के लिए Main Sidebar hide करें
+  // FIX: Conditional Rendering
   const isSchoolOrFeeRoute = 
         pathname.startsWith('/admin/school') ||
         pathname.startsWith('/admin/students') || 
@@ -33,9 +27,34 @@ export default function AdminLayout({
                         
   const shouldRenderMainSidebar = !isSchoolOrFeeRoute;
 
+  return (
+    <div className={styles.container}>
+      {/* 1. Sidebar */}
+      {shouldRenderMainSidebar && <Sidebar />} 
+      
+      {/* 2. Mobile Overlay */}
+      {isSidebarOpen && <div className={sidebarStyles.sidebarOverlay} onClick={toggleSidebar} />}
+      
+      {/* 3. Content Area */}
+      <main className={styles.content}>
+        {children}
+      </main>
+    </div>
+  );
+};
+// --- END AdminContent Component ---
 
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const router = useRouter();
+  
   useEffect(() => {
-    // Auth Logic (Remains the same)
+    // Auth Logic (Same)
     if (!isLoading) {
       const isAdminOrSuperAdmin = user?.role === 'Admin' || user?.role === 'SuperAdmin';
       if (!isAuthenticated) { router.push('/login'); } 
@@ -54,15 +73,7 @@ export default function AdminLayout({
   
   return (
     <AdminLayoutProvider>
-      <div className={styles.container}>
-        {/* FIX: Conditional Rendering */}
-        {shouldRenderMainSidebar && <Sidebar />} 
-        
-        {/* Content Area */}
-        <main className={styles.content}>
-          {children}
-        </main>
-      </div>
+      <AdminContent>{children}</AdminContent>
     </AdminLayoutProvider>
   );
 }
