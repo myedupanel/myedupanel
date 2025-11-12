@@ -186,7 +186,7 @@ margin-bottom: 1rem;
   /* Yeh <div ref={certificateRef}> ko target karta hai */
   & > div {
     transform-origin: top center;
-    transform: scale(0.85); /* Preview scale */
+    transform: scale(0.95); /* Preview scale - increased from 0.85 to 0.95 for better visibility */
     
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     border: 1px solid #ccc;
@@ -364,7 +364,7 @@ margin-bottom: 1rem;
     }
     
     .previewWrapper > div {
-        transform: scale(1); /* Full scale par print karein */
+        transform: scale(1) !important; /* Full scale par print karein */
         box-shadow: none;
         border: none;
         padding: 0;
