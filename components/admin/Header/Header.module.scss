@@ -34,8 +34,8 @@
   justify-content: space-between;
   align-items: center;
   padding-bottom: 1rem;
-  flex-wrap: wrap;
-  gap: 1.5rem;
+  flex-wrap: nowrap; /* Prevent wrapping */
+  gap: 1rem;
 }
 
 .pageTitle {
@@ -48,6 +48,11 @@
   background-clip: text;
   letter-spacing: -0.02em;
   position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1; /* Allow shrinking when needed */
+  min-width: 0; /* Allow text truncation */
   
   &::after {
     content: '';
@@ -61,10 +66,24 @@
   }
 }
 
+/* Dynamic font size classes */
+.smallTitle {
+  font-size: 1.8rem;
+}
+
+.mediumTitle {
+  font-size: 2rem;
+}
+
+.extraSmallTitle {
+  font-size: 1.5rem;
+}
+
 .profileSection {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .avatarContainer {
@@ -212,5 +231,12 @@
         flex-direction: column;
         align-items: flex-start;
         padding: 0.5rem 0; /* Padding adjust kiya */
+    }
+    
+    /* Mobile font sizes */
+    .smallTitle,
+    .mediumTitle,
+    .extraSmallTitle {
+      font-size: 1.5rem;
     }
 }

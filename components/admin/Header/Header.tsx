@@ -28,8 +28,23 @@ const Header = ({ admin }: HeaderProps) => {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [headerTitle, setHeaderTitle] = useState(`Welcome to ${admin.schoolName}`);
   const [titleAnimationClass, setTitleAnimationClass] = useState(styles.titleFadeIn);
+  const [fontSizeClass, setFontSizeClass] = useState('');
   
   const { toggleSidebar } = useAdminLayout(); // Context Hook Use Kiya
+
+  // Calculate font size class based on school name length
+  useEffect(() => {
+    const schoolNameLength = admin.schoolName.length;
+    if (schoolNameLength > 30) {
+      setFontSizeClass(styles.extraSmallTitle);
+    } else if (schoolNameLength > 25) {
+      setFontSizeClass(styles.smallTitle);
+    } else if (schoolNameLength > 20) {
+      setFontSizeClass(styles.mediumTitle);
+    } else {
+      setFontSizeClass('');
+    }
+  }, [admin.schoolName]);
 
   // Animation and Time logic (Same)
   useEffect(() => {
@@ -65,8 +80,8 @@ const Header = ({ admin }: HeaderProps) => {
           <MdMenu />
         </button>
         
-        {/* Title (Same) */}
-        <h1 className={`${styles.pageTitle} ${titleAnimationClass}`}>
+        {/* Title with dynamic font sizing */}
+        <h1 className={`${styles.pageTitle} ${titleAnimationClass} ${fontSizeClass}`}>
           {headerTitle}
         </h1>
         

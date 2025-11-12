@@ -10,11 +10,13 @@
     position: relative;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     flex-shrink: 0;
+    max-width: 200px; /* Limit width to prevent overflow */
 }
 
 .icon {
     color: #0F2E5E; /* Deep Sapphire Blue */
     margin-right: 0.5rem;
+    flex-shrink: 0;
 }
 
 .yearSelect {
@@ -34,6 +36,12 @@
     background-position: right 0.75rem center;
     background-size: 12px;
     padding-right: 2rem; /* Arrow ke liye space */
+    
+    /* Truncate long text */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px; /* Limit select width */
     
     &:focus {
         box-shadow: 0 0 0 2px rgba(15, 46, 94, 0.2);
@@ -55,6 +63,7 @@
     margin-left: 0.75rem;
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.1s ease;
+    flex-shrink: 0;
     
     &:hover {
         background-color: #c09f30;
@@ -66,6 +75,9 @@
     color: #6b7280;
     font-size: 0.9rem;
     padding: 0.4rem 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* --- Spinner Animation (Optional, for visual feedback) --- */
@@ -89,7 +101,23 @@
 
 @media (max-width: 768px) {
     .switcherContainer {
-        min-width: 150px;
-        .settingsButton { display: none; } /* Mobile par settings button hide kar dete hain */
+        min-width: 120px;
+        max-width: 150px;
+        padding: 0.2rem 0.4rem;
+        .settingsButton { 
+            display: none; 
+        } /* Mobile par settings button hide kar dete hain */
+    }
+    
+    .yearSelect {
+        font-size: 0.9rem;
+        padding: 0.3rem 0.1rem;
+        max-width: 90px;
+    }
+    
+    .icon {
+        margin-right: 0.3rem;
+        width: 16px;
+        height: 16px;
     }
 }
