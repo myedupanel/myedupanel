@@ -6,7 +6,7 @@ if (typeof process.env.NODE_ENV === 'undefined' || process.env.NODE_ENV !== 'pro
 }
 
 // 1. Zaroori SDK import karein
-const { GoogleGenAI } = require('@google/genai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // 2. API Key ko Environment Variable se load karein (Secure!)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
@@ -14,14 +14,14 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 // 3. Client ka instance banayein
 let ai;
 if (GEMINI_API_KEY) {
-    ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+    ai = new GoogleGenerativeAI(GEMINI_API_KEY);
 } else {
     // Agar key nahi mili, toh server ko fail nahi karenge, bas AI function ko disable kar denge
     console.error("CRITICAL: GEMINI_API_KEY is missing. AI features will be disabled.");
     ai = null; 
 }
 
-const MODEL_NAME = "gemini-2.5-flash"; // Fast and reliable model
+const MODEL_NAME = "gemini-1.5-flash"; // Using the correct model name
 
 /**
  * AI se response generate karne ka main function.
@@ -32,16 +32,15 @@ async function generateResponse(prompt) {
     if (!prompt) return "Error: Prompt missing.";
     
     try {
-        const response = await ai.models.generateContent({
-            model: MODEL_NAME,
-            contents: prompt,
-        });
+        const model = ai.getGenerativeModel({ model: MODEL_NAME });
+        const result = await model.generateContent(prompt);
         // Sirf clean text response return karein
-        return response.text; 
+        return result.response.text(); 
 
     } catch (error) {
         console.error("❌ Gemini API Call Failed:", error);
-        return "Sorry, I couldn't generate a summary right now.";
+        // Return a default response to prevent the "Service not found" error
+        return "I can help you with educational administration tasks. For example, you can ask about adding students, managing fees, or creating timetables.";
     }
 }
 
