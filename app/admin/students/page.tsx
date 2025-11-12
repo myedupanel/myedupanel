@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './StudentsPage.module.scss';
 
 // NAYA: Context और Provider को यहाँ से Import किया गया
-import { useStudentLayout } from '@/app/context/StudentLayoutContext';
+import { useStudentLayout, StudentLayoutProvider } from '@/app/context/StudentLayoutContext';
 import { useAcademicYear } from '@/app/context/AcademicYearContext'; // Add this import
 
 import StudentSidebar from './components/StudentSidebar';
