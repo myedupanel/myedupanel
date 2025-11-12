@@ -9,6 +9,8 @@ const { authMiddleware, authorize } = require('../middleware/authMiddleware');
 
 // === YAHAN FIX KIYA (1/2): Naya "Lock" middleware import karein ===
 const checkSubscription = require('../middleware/checkSubscription');
+// Academic year middleware import
+const { validateAcademicYear } = require('../middleware/academicYearMiddleware');
 // === FIX ENDS HERE ===
 
 // Helper: Get Full Name
@@ -27,13 +29,13 @@ const {
 // === YAHAN FIX KIYA (2/2): 'checkSubscription' ko routes mein add kiya ===
 
 // Naya student add karna (Locked)
-router.post('/', [authMiddleware, checkSubscription, authorize('Admin')], addSingleStudent);
+router.post('/', [authMiddleware, checkSubscription, authorize('Admin'), validateAcademicYear], addSingleStudent);
 
 // Bulk mein students add karna (Locked)
-router.post('/bulk', [authMiddleware, checkSubscription, authorize('Admin')], addStudentsInBulk);
+router.post('/bulk', [authMiddleware, checkSubscription, authorize('Admin'), validateAcademicYear], addStudentsInBulk);
 
 // Saare students dekhna (Locked)
-router.get('/', [authMiddleware, checkSubscription, authorize('Admin', 'Teacher')], getAllStudents);
+router.get('/', [authMiddleware, checkSubscription, authorize('Admin', 'Teacher'), validateAcademicYear], getAllStudents);
 
 // === FIX ENDS HERE ===
 

@@ -61,6 +61,10 @@ export const AcademicYearProvider: React.FC<{ children: ReactNode }> = ({ childr
             if (activeYear) {
                 setCurrentYearId(activeYear.id);
                 setCurrentYearName(activeYear.yearName);
+            } else {
+                // If no years exist, set to null
+                setCurrentYearId(null);
+                setCurrentYearName(null);
             }
 
         } catch (err: any) {

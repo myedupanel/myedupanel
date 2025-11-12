@@ -33,7 +33,7 @@ async function createAcademicYear({ yearName, startDate, endDate, schoolId, isCu
  * Get all academic years for a school
  */
 async function getAllAcademicYears(schoolId) {
-  return prisma.academicYear.findMany({
+  const years = await prisma.academicYear.findMany({
     where: { schoolId },
     orderBy: { startDate: 'desc' },
     include: {
@@ -48,6 +48,27 @@ async function getAllAcademicYears(schoolId) {
       }
     }
   });
+  
+  // If no years exist, create a default one
+  if (years.length === 0) {
+    const currentYear = new Date().getFullYear();
+    const nextYear = currentYear + 1;
+    const defaultYearName = `${currentYear}-${nextYear}`;
+    const startDate = new Date(currentYear, 5, 1); // June 1st
+    const endDate = new Date(nextYear, 4, 31); // May 31st next year
+    
+    const defaultYear = await createAcademicYear({
+      yearName: defaultYearName,
+      startDate: startDate,
+      endDate: endDate,
+      schoolId: schoolId,
+      isCurrent: true
+    });
+    
+    return [defaultYear];
+  }
+  
+  return years;
 }
 
 /**
@@ -73,9 +94,17 @@ async function getAcademicYearById(yearId, schoolId) {
  * Get the current active year for a school
  */
 async function getCurrentAcademicYear(schoolId) {
-  return prisma.academicYear.findFirst({
+  let currentYear = await prisma.academicYear.findFirst({
     where: { schoolId, isCurrent: true },
   });
+  
+  // If no current year exists, get all years (which will create a default one if needed)
+  if (!currentYear) {
+    const years = await getAllAcademicYears(schoolId);
+    currentYear = years.find(y => y.isCurrent) || years[0];
+  }
+  
+  return currentYear;
 }
 
 /**

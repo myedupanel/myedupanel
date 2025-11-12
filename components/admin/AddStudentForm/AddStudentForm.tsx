@@ -120,13 +120,17 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
     const loadClasses = async () => {
         setIsClassLoading(true);
         try {
-            const res = await api.get('/api/classes'); // Backend se classes fetch karein
-            const classesData: SchoolClass[] = res.data || [];
+            const res = await api.get('/students/classes'); // Backend se classes fetch karein
+            // The response is an array of strings, convert to SchoolClass format
+            const classesData: SchoolClass[] = res.data.map((className: string, index: number) => ({
+                classid: index + 1,
+                class_name: className
+            })) || [];
             setFetchedClasses(classesData);
             
             // Agar yeh naya student hai (existing nahi) aur class_name abhi set nahi hua hai,
             // toh list ki pehli class ko default set kar dein.
-            if (!existingStudent && classesData.length > 0) {
+            if (!existingStudent && classesData.length > 0 && !formData.class_name) {
                 setFormData(prev => ({
                     ...prev,
                     class_name: classesData[0].class_name 
@@ -163,7 +167,7 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
     (Object.keys(dataToSend) as Array<keyof FormData>).forEach(key => {
         if (key !== 'first_name' && key !== 'last_name' && key !== 'class_name' && key !== 'roll_number' && key !== 'father_name' && key !== 'guardian_contact') {
             // Agar field empty hai, toh use delete kar do taaki backend mein null jaaye
-            if (!dataToSend[key] || dataToSend[key] === '') {
+            if (!dataToSend[key] || (typeof dataToSend[key] === 'string' && dataToSend[key] === '')) {
                 delete dataToSend[key];
             }
         }
@@ -233,11 +237,14 @@ const AddStudentForm: React.FC<AddStudentFormProps> = ({ onClose, onSuccess, onU
             <option value="" disabled>No classes found. Add classes in 'Manage Classes'.</option>
           ) : (
             // Fetched classes se options banayein
-            fetchedClasses.map(cls => (
-              <option key={cls.classid} value={cls.class_name}>
-                {cls.class_name} 
-              </option>
-            ))
+            <>
+              <option value="">Select a class</option>
+              {fetchedClasses.map(cls => (
+                <option key={cls.classid} value={cls.class_name}>
+                  {cls.class_name} 
+                </option>
+              ))}
+            </>
           )}
         </select>
       </div>

@@ -10,6 +10,7 @@ const injectAcademicYear = async (req, res, next) => {
     const schoolId = req.user?.schoolId;
     
     if (!schoolId) {
+      req.academicYearId = null;
       return next(); // Skip if no school ID (public routes)
     }
 
@@ -40,6 +41,8 @@ const injectAcademicYear = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Error in academicYearMiddleware:', error);
+    // Set academicYearId to null in case of error
+    req.academicYearId = null;
     next(); // Continue even if there's an error
   }
 };
@@ -53,9 +56,19 @@ const validateAcademicYear = async (req, res, next) => {
     const schoolId = req.user?.schoolId;
 
     if (!academicYearId || !schoolId) {
-      return res.status(400).json({ 
-        error: 'No academic year selected. Please select an academic year.' 
-      });
+      // Try to get or create a default academic year
+      const academicYearService = require('../services/AcademicYearService');
+      const currentYear = await academicYearService.getCurrentAcademicYear(schoolId);
+      
+      if (currentYear) {
+        req.academicYearId = currentYear.id;
+        req.academicYear = currentYear;
+        return next();
+      } else {
+        return res.status(400).json({ 
+          error: 'No academic year selected. Please select an academic year.' 
+        });
+      }
     }
 
     // Verify the year belongs to this school

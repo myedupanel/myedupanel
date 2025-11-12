@@ -57,6 +57,12 @@ const addStudentsInBulk = async (req, res) => {
       return res.status(400).json({ message: 'Invalid or missing school ID in user token.' });
     }
 
+    // Academic Year ID check
+    const academicYearId = req.academicYearId;
+    if (!academicYearId) {
+      return res.status(400).json({ message: 'No academic year selected. Please select an academic year before adding students.' });
+    }
+
     const studentsData = req.body;
     
     if (!studentsData || !Array.isArray(studentsData)) {
@@ -108,7 +114,7 @@ const addStudentsInBulk = async (req, res) => {
         studentData.classid = classRecord.classid; 
         studentData.schoolId = schoolId; 
         // NAYA: Academic year ID ko add karein
-        studentData.academicYearId = req.academicYearId;
+        studentData.academicYearId = academicYearId;
         
         // roll_number को string में convert karein (Safety)
         studentData.roll_number = String(studentData.roll_number || '');
@@ -214,11 +220,17 @@ const getAllStudents = async (req, res) => {
     if (!schoolId) {
       return res.status(400).json({ message: 'Invalid or missing school ID in user token.' });
     }
+
+    // Academic Year ID check
+    const academicYearId = req.academicYearId;
+    if (!academicYearId) {
+      return res.status(400).json({ message: 'No academic year selected. Please select an academic year to view students.' });
+    }
     
     // NAYA: Academic year ID ke basis par filter karein
     const whereClause = {
       schoolId: schoolId,
-      academicYearId: req.academicYearId
+      academicYearId: academicYearId
     };
     
     const students = await prisma.students.findMany({
@@ -243,7 +255,13 @@ const addSingleStudent = async (req, res) => {
       return res.status(401).json({ message: 'User not authorized or missing school ID.' });
     }
 
-    // 2. Data ko req.body se lein
+    // 2. Academic Year ID check
+    const academicYearId = req.academicYearId;
+    if (!academicYearId) {
+      return res.status(400).json({ message: 'No academic year selected. Please select an academic year before adding students.' });
+    }
+
+    // 3. Data ko req.body se lein
     // === FIX 3: Data ko sanitize karein jab woh req.body se aaye ===
     const sanitizedBody = {};
     for (const key in req.body) {
@@ -261,12 +279,12 @@ const addSingleStudent = async (req, res) => {
     } = sanitizedBody;
     // === END FIX 3 ===
 
-    // 3. Zaroori fields check karein (No Change)
+    // 4. Zaroori fields check karein (No Change)
     if (!first_name || !last_name || !class_name || !roll_number || !father_name || !guardian_contact) {
       return res.status(400).json({ message: 'Missing required fields: First Name, Last Name, Class, Roll Number, Parent Name, and Parent Contact are required.' });
     }
     
-    // 4. Class ko find/create karein (No Change)
+    // 5. Class ko find/create karein (No Change)
     let classRecord = await prisma.classes.findUnique({
       where: { schoolId_class_name: { schoolId: schoolId, class_name: class_name } },
     });
@@ -276,7 +294,7 @@ const addSingleStudent = async (req, res) => {
       });
     }
 
-    // 5. Student data ko Prisma ke liye taiyaar karein (No Change)
+    // 6. Student data ko Prisma ke liye taiyaar karein (No Change)
     const studentData = {
       ...otherDetails, 
       first_name,
@@ -287,10 +305,10 @@ const addSingleStudent = async (req, res) => {
       classid: classRecord.classid,
       schoolId: schoolId,
       // NAYA: Academic year ID ko add karein
-      academicYearId: req.academicYearId,
+      academicYearId: academicYearId,
     };
 
-    // 6. Date fields ko handle karein (No Change)
+    // 7. Date fields ko handle karein (No Change)
     if (studentData.dob) {
       try {
         const parsedDate = new Date(studentData.dob);
@@ -308,7 +326,7 @@ const addSingleStudent = async (req, res) => {
        studentData.admission_date = new Date(); 
     }
 
-    // 7. Transaction (No Change)
+    // 8. Transaction (No Change)
     const tempPassword = crypto.randomBytes(8).toString('hex');
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(tempPassword, salt);
@@ -323,12 +341,12 @@ const addSingleStudent = async (req, res) => {
     const emailForUserTable = realEmail || dummyEmail;
 
     const newStudent = await prisma.$transaction(async (tx) => {
-      // 7a: Naya student create karein
+      // 8a: Naya student create karein
       const createdStudent = await tx.students.create({
         data: studentData, 
       });
 
-      // 7b: Hamesha User entry (login) create karein
+      // 8b: Hamesha User entry (login) create karein
       await tx.user.create({
         data: {
           schoolId: schoolId,
@@ -343,7 +361,7 @@ const addSingleStudent = async (req, res) => {
       return createdStudent;
     });
 
-    // 8. Welcome email (sirf REAL email par) bhejein (No Change)
+    // 9. Welcome email (sirf REAL email par) bhejein (No Change)
     if (realEmail) { 
       try {
         const schoolName = req.user.schoolName || 'MyEduPanel';
@@ -354,11 +372,11 @@ const addSingleStudent = async (req, res) => {
       }
     }
 
-    // 9. Success response (No Change)
+    // 10. Success response (No Change)
     res.status(201).json({ message: 'Student added successfully!', student: newStudent });
 
   } catch (error) {
-    // 10. Catch block (Errors ko handle karein)
+    // 11. Catch block (Errors ko handle karein)
     console.error("Error creating single student:", error);
     if (error.code === 'P2002') { 
        const target = error.meta?.target || [];
