@@ -1,10 +1,10 @@
 // backend/services/AcademicYearService.js
-import prisma from '../config/prisma.js';
+const prisma = require('../config/prisma');
 
 /**
  * Create a new Academic Year
  */
-export async function createAcademicYear({ yearName, startDate, endDate, schoolId, isCurrent = false }) {
+async function createAcademicYear({ yearName, startDate, endDate, schoolId, isCurrent = false }) {
   return prisma.$transaction(async (tx) => {
     // If this year is being set as current, deactivate all other current years
     if (isCurrent) {
@@ -32,7 +32,7 @@ export async function createAcademicYear({ yearName, startDate, endDate, schoolI
 /**
  * Get all academic years for a school
  */
-export async function getAllAcademicYears(schoolId) {
+async function getAllAcademicYears(schoolId) {
   return prisma.academicYear.findMany({
     where: { schoolId },
     orderBy: { startDate: 'desc' },
@@ -53,7 +53,7 @@ export async function getAllAcademicYears(schoolId) {
 /**
  * Get a single academic year by ID
  */
-export async function getAcademicYearById(yearId, schoolId) {
+async function getAcademicYearById(yearId, schoolId) {
   return prisma.academicYear.findFirst({
     where: { id: yearId, schoolId },
     include: {
@@ -72,7 +72,7 @@ export async function getAcademicYearById(yearId, schoolId) {
 /**
  * Get the current active year for a school
  */
-export async function getCurrentAcademicYear(schoolId) {
+async function getCurrentAcademicYear(schoolId) {
   return prisma.academicYear.findFirst({
     where: { schoolId, isCurrent: true },
   });
@@ -81,7 +81,7 @@ export async function getCurrentAcademicYear(schoolId) {
 /**
  * Set a specific year as current (active)
  */
-export async function setActiveYear(schoolId, academicYearId) {
+async function setActiveYear(schoolId, academicYearId) {
   // Verify the year belongs to the school
   const yearToActivate = await prisma.academicYear.findFirst({
     where: { schoolId, id: academicYearId },
@@ -111,7 +111,7 @@ export async function setActiveYear(schoolId, academicYearId) {
 /**
  * Update an academic year
  */
-export async function updateAcademicYear(yearId, schoolId, updateData) {
+async function updateAcademicYear(yearId, schoolId, updateData) {
   // Verify the year belongs to the school
   const existingYear = await prisma.academicYear.findFirst({
     where: { id: yearId, schoolId },
@@ -146,7 +146,7 @@ export async function updateAcademicYear(yearId, schoolId, updateData) {
 /**
  * Delete an academic year (with safety checks)
  */
-export async function deleteAcademicYear(yearId, schoolId) {
+async function deleteAcademicYear(yearId, schoolId) {
   const year = await prisma.academicYear.findFirst({
     where: { id: yearId, schoolId },
     include: {
@@ -183,7 +183,7 @@ export async function deleteAcademicYear(yearId, schoolId) {
 /**
  * Clone data from one year to another (for year rollover)
  */
-export async function cloneYearData(sourceYearId, targetYearId, schoolId, options = {}) {
+async function cloneYearData(sourceYearId, targetYearId, schoolId, options = {}) {
   const { cloneStudents = false, cloneTeachers = false, cloneFeeTemplates = false } = options;
 
   return prisma.$transaction(async (tx) => {
@@ -228,3 +228,14 @@ export async function cloneYearData(sourceYearId, targetYearId, schoolId, option
     return result;
   });
 }
+
+module.exports = {
+  createAcademicYear,
+  getAllAcademicYears,
+  getAcademicYearById,
+  getCurrentAcademicYear,
+  setActiveYear,
+  updateAcademicYear,
+  deleteAcademicYear,
+  cloneYearData,
+};
