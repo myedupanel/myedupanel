@@ -72,7 +72,7 @@ export default function Home() {
     event.preventDefault();
     const data = { success: true, role: 'admin' };
     if (data.success) {
-      if (data.role === 'admin') router.push('/admin');
+      if (data.role === 'admin') router.push('/admin/dashboard');
       else if (data.role === 'student') router.push('/student');
       else if (data.role === 'teacher') router.push('/teacher');
       else if (data.role === 'parent') router.push('/parent');
