@@ -3,8 +3,15 @@
 
 import React, { useState, useEffect } from 'react';
 import styles from './AcademicYearManager.module.scss';
-import AddAcademicYearForm from '../AddAcademicYearForm/AddAcademicYearForm';
 import Modal from '@/components/common/Modal/Modal';
+
+// Import form dynamically to avoid build issues
+import dynamic from 'next/dynamic';
+
+const AddAcademicYearForm = dynamic(
+  () => import('../AddAcademicYearForm/AddAcademicYearForm'),
+  { ssr: false }
+);
 
 interface AcademicYear {
   id: number;
@@ -216,7 +223,11 @@ const AcademicYearManager: React.FC = () => {
 
       {/* Add/Edit Form Modal */}
       {showAddForm && (
-        <Modal onClose={() => setShowAddForm(false)}>
+        <Modal 
+          isOpen={showAddForm}
+          onClose={() => setShowAddForm(false)}
+          title="Create New Academic Year"
+        >
           <AddAcademicYearForm 
             onSuccess={handleFormSuccess}
             onCancel={() => setShowAddForm(false)}
@@ -225,7 +236,11 @@ const AcademicYearManager: React.FC = () => {
       )}
 
       {editingYear && (
-        <Modal onClose={() => setEditingYear(null)}>
+        <Modal 
+          isOpen={!!editingYear}
+          onClose={() => setEditingYear(null)}
+          title="Edit Academic Year"
+        >
           <AddAcademicYearForm 
             existingYear={editingYear}
             onSuccess={handleFormSuccess}
