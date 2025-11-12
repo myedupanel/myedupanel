@@ -123,15 +123,34 @@ const ChatBot: React.FC = () => {
       
       // Speak the response
       speakText(botText);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error getting AI response:', error);
-      const errorMessage: Message = {
+      let errorMessage = "Sorry, I'm having trouble connecting to the server. Please try again.";
+      
+      // Provide more specific error messages
+      if (error.response) {
+        // Server responded with error status
+        if (error.response.status === 401) {
+          errorMessage = "Authentication required. Please log in again.";
+        } else if (error.response.status === 403) {
+          errorMessage = "Access denied. This feature is only available to admin users.";
+        } else if (error.response.status === 404) {
+          errorMessage = "Service not found. Please check if the chatbot is properly configured.";
+        } else if (error.response.status >= 500) {
+          errorMessage = "Server error. Please try again later.";
+        }
+      } else if (error.request) {
+        // Request was made but no response received
+        errorMessage = "Network error. Please check your internet connection.";
+      }
+      
+      const errorBotMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "Sorry, I'm having trouble connecting to the server. Please try again.",
+        text: errorMessage,
         sender: 'bot',
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, errorBotMessage]);
     } finally {
       setIsBotThinking(false);
     }

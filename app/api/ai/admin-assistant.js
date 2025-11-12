@@ -1,7 +1,7 @@
-// File: pages/api/ai/admin-assistant.js
+// File: app/api/ai/admin-assistant.js
 
-// Path ko sahi se adjust karein (Aapki file structure ke mutabik)
-const { generateResponse } = require('../../../../backend/helpers/geminiClient');
+// Fixed path to Gemini client after moving API route
+const { generateResponse } = require('../../../backend/helpers/geminiClient');
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
