@@ -10,7 +10,7 @@ import {
   MdLogout, MdPeople, MdSchool, MdFamilyRestroom, MdBadge, MdClass, 
   MdEventAvailable, MdSchedule, MdSettings, MdAssessment, MdGridView, 
   MdPublic, MdAttachMoney, MdLayers, 
-  MdEdit 
+  MdEdit, MdCalendarToday 
 } from 'react-icons/md'; 
 import { FaLandmark } from 'react-icons/fa';
 import { GiReceiveMoney } from 'react-icons/gi';
@@ -27,6 +27,7 @@ export interface NavItem {
 const mainMenuItems: NavItem[] = [
   { name: 'Main Dashboard', path: '/admin/dashboard', icon: <MdGridView style={{ color: '#3b82f6' }} />, type: 'free' },
   { name: 'School', path: '/admin/school', icon: <MdSchool style={{ color: '#8b5cf6' }} />, type: 'free' },
+  { name: 'Academic Years', path: '/admin/academic-years', icon: <MdCalendarToday style={{ color: '#06b6d4' }} />, type: 'free' },
   { name: 'Gov Schemes', path: '/admin/schemes', icon: <FaLandmark style={{ color: '#10b981' }} />, type: 'upcoming' },
   { name: 'Expense', path: '/admin/expense', icon: <GiReceiveMoney style={{ color: '#f97316' }} />, type: 'upcoming' },
 ];

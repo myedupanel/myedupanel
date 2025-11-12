@@ -10,7 +10,7 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 export async function GET(request) {
   try {
     // Get auth token from cookies
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
     if (!token) {
@@ -44,7 +44,7 @@ export async function GET(request) {
  */
 export async function POST(request) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
     if (!token) {
