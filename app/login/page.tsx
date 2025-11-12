@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { FiArrowRight, FiEye, FiEyeOff, FiHome } from 'react-icons/fi';
+import { FiArrowRight, FiEye, FiEyeOff, FiHome, FiLoader } from 'react-icons/fi';
 import styles from './login.module.scss';
 import { Inter } from 'next/font/google';
 // Import 'useAuth' hook (Aapka code pehle se sahi hai)
@@ -32,6 +32,7 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showRoleCheckAnimation, setShowRoleCheckAnimation] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -48,12 +49,19 @@ export default function LoginPage() {
     event.preventDefault();
     setError('');
     setIsLoading(true);
+    setShowRoleCheckAnimation(false);
 
     try {
       // Axios call ab aapke global 'api.ts' instance ko use nahi karega, 
       // isliye '/api' prefix zaroori hai
       const response = await axios.post('/api/auth/login', formData);
       const token = response.data.token;
+      
+      // Show role checking animation
+      setShowRoleCheckAnimation(true);
+      
+      // Small delay to show the animation
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       const user = await login(token);
 
@@ -90,6 +98,7 @@ export default function LoginPage() {
         setError("Could not verify user role after login.");
       }
     } catch (err: any) {
+      setShowRoleCheckAnimation(false);
       if (err.response && err.response.data.msg) {
         setError(err.response.data.msg);
       } else {
@@ -115,40 +124,49 @@ export default function LoginPage() {
 
           <main className={styles.formContent}>
             <h2>Login to your Account</h2>
-            <form onSubmit={handleLogin}>
-              <div className={styles.inputGroup}>
-                <label htmlFor="email">Email Address</label>
-                <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Ex. shauryaghadage@gmail.com" />
-              </div>
-              <div className={styles.inputGroup}>
-                <label htmlFor="password">Password</label>
-                <div className={styles.passwordWrapper}>
-                  <input 
-                    type={showPassword ? 'text' : 'password'} 
-                    id="password" 
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange} 
-                    required 
-                    placeholder="Please Enter Your Password"
-                  />
-                  <span onClick={() => setShowPassword(!showPassword)} className={styles.eyeIcon}>
-                    {showPassword ? <FiEyeOff /> : <FiEye />}
-                  </span>
-                </div>
-                <div className={styles.forgotPasswordRow}>
-                  <Link href="/forgot-password" className={styles.forgotLink}>Forgot password?</Link>
+            {showRoleCheckAnimation ? (
+              <div className={styles.roleCheckContainer}>
+                <div className={styles.roleCheckAnimation}>
+                  <FiLoader className={styles.spinner} />
+                  <p>Verifying your account...</p>
                 </div>
               </div>
-              
-              {error && <div className={styles.errorMessage}>{error}</div>}
+            ) : (
+              <form onSubmit={handleLogin}>
+                <div className={styles.inputGroup}>
+                  <label htmlFor="email">Email Address</label>
+                  <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Ex. shauryaghadage@gmail.com" />
+                </div>
+                <div className={styles.inputGroup}>
+                  <label htmlFor="password">Password</label>
+                  <div className={styles.passwordWrapper}>
+                    <input 
+                      type={showPassword ? 'text' : 'password'} 
+                      id="password" 
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange} 
+                      required 
+                      placeholder="Please Enter Your Password"
+                    />
+                    <span onClick={() => setShowPassword(!showPassword)} className={styles.eyeIcon}>
+                      {showPassword ? <FiEyeOff /> : <FiEye />}
+                    </span>
+                  </div>
+                  <div className={styles.forgotPasswordRow}>
+                    <Link href="/forgot-password" className={styles.forgotLink}>Forgot password?</Link>
+                  </div>
+                </div>
+                
+                {error && <div className={styles.errorMessage}>{error}</div>}
 
-              <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-                {isLoading ? 'Signing in...' : (
-                  <><span>Signin</span><FiArrowRight /></>
-                )}
-              </button>
-            </form>
+                <button type="submit" className={styles.submitBtn} disabled={isLoading}>
+                  {isLoading ? 'Signing in...' : (
+                    <><span>Signin</span><FiArrowRight /></>
+                  )}
+                </button>
+              </form>
+            )}
           </main>
           
           <div className={styles.actionLinkContainer}>
