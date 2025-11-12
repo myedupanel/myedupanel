@@ -104,9 +104,10 @@
         min-width: 120px;
         max-width: 150px;
         padding: 0.2rem 0.4rem;
+        /* Hide settings button on mobile */
         .settingsButton { 
             display: none; 
-        } /* Mobile par settings button hide kar dete hain */
+        }
     }
     
     .yearSelect {
@@ -119,5 +120,12 @@
         margin-right: 0.3rem;
         width: 16px;
         height: 16px;
+    }
+}
+
+/* NEW: Hide the entire switcher on mobile devices below 1024px */
+@media (max-width: 1024px) {
+    .switcherContainer {
+        display: none;
     }
 }

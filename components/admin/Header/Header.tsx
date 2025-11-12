@@ -29,8 +29,23 @@ const Header = ({ admin }: HeaderProps) => {
   const [headerTitle, setHeaderTitle] = useState(`Welcome to ${admin.schoolName}`);
   const [titleAnimationClass, setTitleAnimationClass] = useState(styles.titleFadeIn);
   const [fontSizeClass, setFontSizeClass] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
   
   const { toggleSidebar } = useAdminLayout(); // Context Hook Use Kiya
+
+  // Check if mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   // Calculate font size class based on school name length
   useEffect(() => {
@@ -71,6 +86,9 @@ const Header = ({ admin }: HeaderProps) => {
     return () => clearInterval(timer);
   }, []);
 
+  // Display only "Dashboard" on mobile
+  const displayTitle = isMobile ? "Dashboard" : headerTitle;
+
   return (
     <div className={styles.headerWrapper}>
       <div className={styles.titleBar}>
@@ -82,10 +100,10 @@ const Header = ({ admin }: HeaderProps) => {
         
         {/* Title with dynamic font sizing */}
         <h1 className={`${styles.pageTitle} ${titleAnimationClass} ${fontSizeClass}`}>
-          {headerTitle}
+          {displayTitle}
         </h1>
         
-        {/* Academic Year Switcher */}
+        {/* Academic Year Switcher - Hidden on mobile */}
         <AcademicYearSwitcher />
 
         {/* Profile Section (Desktop Only) */}
