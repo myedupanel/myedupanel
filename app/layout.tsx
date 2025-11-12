@@ -2,9 +2,10 @@
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Script from "next/script"; // Import next/script
+import Script from "next/script";
 import "./globals.scss";
 import { AuthProvider } from './context/AuthContext';
+import { AcademicYearProvider } from './context/AcademicYearContext';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,7 +34,9 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <AuthProvider>
-          {children}
+          <AcademicYearProvider>
+            {children}
+          </AcademicYearProvider>
         </AuthProvider>
       </body>
     </html>
