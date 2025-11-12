@@ -232,17 +232,36 @@ body.dark-mode {
     
     .marquee-track {
       span {
-        color: var(--color-text-heading);
-        text-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
-        font-weight: 600;
-        letter-spacing: 0.5px;
+        background: rgba(30, 41, 59, 0.7);
+        color: #f1f5f9;
+        border: 1px solid rgba(51, 65, 85, 0.5);
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
         
-        // Add professional glow effect in dark mode
+        // Enhanced glow effect in dark mode
         &::after {
-          content: '★';
-          margin-left: 10px;
           color: var(--color-accent-yellow);
           text-shadow: 0 0 10px rgba(245, 158, 11, 0.7);
+          opacity: 1;
+        }
+        
+        &:nth-child(4n+1) { 
+          box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); 
+          &:hover { box-shadow: 0 0 30px rgba(99, 102, 241, 0.7); }
+        }
+        
+        &:nth-child(4n+2) { 
+          box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); 
+          &:hover { box-shadow: 0 0 30px rgba(16, 185, 129, 0.7); }
+        }
+        
+        &:nth-child(4n+3) { 
+          box-shadow: 0 0 20px rgba(245, 158, 11, 0.5); 
+          &:hover { box-shadow: 0 0 30px rgba(245, 158, 11, 0.7); }
+        }
+        
+        &:nth-child(4n+4) { 
+          box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); 
+          &:hover { box-shadow: 0 0 30px rgba(239, 68, 68, 0.7); }
         }
       }
     }
