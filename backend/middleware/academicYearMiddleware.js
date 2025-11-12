@@ -14,7 +14,7 @@ const injectAcademicYear = async (req, res, next) => {
     }
 
     // Try to get year ID from cookie first
-    let academicYearId = req.cookies?.academicYearId;
+    let academicYearId = req.cookies?.academicYearId;     
 
     // If no cookie, fetch the current active year from database
     if (!academicYearId) {
