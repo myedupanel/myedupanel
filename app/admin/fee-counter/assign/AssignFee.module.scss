@@ -45,7 +45,8 @@
   border: 1px solid #e5e7eb;
   border-radius: 8px; 
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
-  overflow: hidden;
+  /* FIX: overflow: hidden; हटाया गया ताकि ड्रॉपडाउन बाहर आ सके */
+  position: relative; /* जोड़ा गया ताकि stacking context सही रहे */
 }
 
 .sectionHeader {
@@ -338,6 +339,7 @@
         box-shadow: none; /* Remove shadow */
         border-left: none;
         border-right: none;
+        /* NOTE: The relative position added above helps mobile search also */
     }
 
     .sectionHeader {
