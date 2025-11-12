@@ -225,31 +225,23 @@ export default function Home() {
             {/* === PRICING CARD (RIGHT SIDE) UPDATED === */}
             <div className="pricing-card">
               <h4>Include All Basic Features</h4>
-              
-              {/* 1. Price layout fixed with inline styles */}
-              <div 
-                className="price" 
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'baseline', 
-                  justifyContent: 'center', 
-                  gap: '8px', 
-                  margin: '1.5rem 0',
-                  whiteSpace: 'nowrap' /* Fix: Prevents line break */
-                }}
-              >
-                <span style={{ fontSize: '2.8rem', fontWeight: '700', color: '#111' }}>
-                  ₹4999
-                </span>
-                <span className="price-unit" style={{ fontSize: '1rem', color: '#555', fontWeight: '500' }}>
-                  /&nbsp;per&nbsp;year
-                </span>
+                            
+              {/* Professional pricing display with enhanced styling */}
+              <div className="price-container">
+                <div className="price-wrapper">
+                  <span className="currency">₹</span>
+                  <span className="amount">4999</span>
+                </div>
+                <span className="price-unit">per year</span>
               </div>
-              
-              {/* 2. Button text is correct */}
-              <Link href="/plans" className="cta-button">Get Started</Link>
-              
-              {/* 3. Trial info line is gone */}
+                            
+              {/* Enhanced Get Started button */}
+              <Link href="/plans" className="cta-button professional">Get Started</Link>
+                            
+              {/* Value proposition */}
+              <div className="value-prop">
+                <span className="highlight">Complete Solution</span> • Unlimited Users
+              </div>
             </div>
             {/* === END OF PRICING CARD UPDATES === */}
 
