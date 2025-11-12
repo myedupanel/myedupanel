@@ -2,9 +2,6 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config(); // Environment variables load karein (sirf local par)
   console.log("Running in development mode, loaded .env file.");
-} else {
-  // In production (Vercel), environment variables are set in the Vercel dashboard
-  console.log("Running in production mode, using Vercel environment variables.");
 }
 // --- END FIX ---
 
@@ -47,8 +44,7 @@ const { injectAcademicYear } = require('./middleware/academicYearMiddleware');
 const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:3000", 
   "http://localhost:3000",
-  "https://myedupanel.vercel.app",
-  "https://myedupanel-backend.vercel.app"
+  "https://myedupanel.vercel.app" 
 ];
 // --- END ---
 
