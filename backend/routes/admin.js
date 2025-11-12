@@ -6,7 +6,8 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto'); 
 const jwt = require('jsonwebtoken'); 
 const sendEmail = require('../utils/sendEmail');
-const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware'); 
+const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware');
+const { validateAcademicYear } = require('../middleware/academicYearMiddleware'); 
 const userController = require('../controllers/userController'); 
 
 // Helper: Get Full Name (Student ke liye)
@@ -26,7 +27,7 @@ router.post('/create-user', [authMiddleware, adminMiddleware], userController.cr
 
 
 // @route GET /api/admin/dashboard-data (FIXED)
-router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res) => {
+router.get('/dashboard-data', [authMiddleware, adminMiddleware, validateAcademicYear], async (req, res) => {
     console.log("[GET /dashboard-data] Request received.");
     try {
         const schoolId = req.user.schoolId; 

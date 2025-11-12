@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../config/prisma'); // Prisma client
-const { authMiddleware, authorize } = require('../middleware/authMiddleware'); // Updated middleware
+const { authMiddleware, authorize } = require('../middleware/authMiddleware');
+// Academic year middleware import
+const { validateAcademicYear } = require('../middleware/academicYearMiddleware'); // Updated middleware
 
 // Helper: Get Full Name (Student ke liye)
 const getFullName = (student) => {
@@ -14,7 +16,7 @@ const getFullName = (student) => {
  * @access  Private (Admin, Teacher)
  */
 // --- Is function mein koi change nahi, yeh perfect tha ---
-router.get('/student/:studentId', [authMiddleware, authorize('Admin', 'Teacher')], async (req, res) => { 
+router.get('/student/:studentId', [authMiddleware, authorize('Admin', 'Teacher'), validateAcademicYear], async (req, res) => { 
     const studentIdInt = parseInt(req.params.studentId);
     const schoolId = req.user.schoolId;
 
@@ -28,23 +30,23 @@ router.get('/student/:studentId', [authMiddleware, authorize('Admin', 'Teacher')
     try {
         console.log(`[Analytics] Fetching data for student: ${studentIdInt}, school: ${schoolId}`);
         const student = await prisma.students.findUnique({ 
-            where: { studentid: studentIdInt, schoolId: schoolId } 
+            where: { studentid: studentIdInt, schoolId: schoolId, academicYearId: req.academicYearId } 
         });
         if (!student) { return res.status(404).json({ msg: 'Student not found.' }); }
 
         // --- Calculate student analytics ---
         const attendanceStats = await prisma.attendance.aggregate({
-            where: { studentId: studentIdInt, schoolId: schoolId },
+            where: { studentId: studentIdInt, schoolId: schoolId, academicYearId: req.academicYearId },
             _count: { id: true }, 
         });
         const presentCount = await prisma.attendance.count({
-            where: { studentId: studentIdInt, schoolId: schoolId, status: 'Present' }
+            where: { studentId: studentIdInt, schoolId: schoolId, academicYearId: req.academicYearId, status: 'Present' }
         });
         const totalAttendanceDays = attendanceStats._count.id || 0;
         const attendancePercentage = totalAttendanceDays > 0 ? Math.round((presentCount / totalAttendanceDays) * 100) : 0;
 
         const averageScoreStats = await prisma.mark.aggregate({
-            where: { studentId: studentIdInt, schoolId: schoolId, percentage: { not: null } },
+            where: { studentId: studentIdInt, schoolId: schoolId, academicYearId: req.academicYearId, percentage: { not: null } },
             _avg: { percentage: true }
         });
         const averageScorePercentage = Math.round(averageScoreStats._avg.percentage || 0);
@@ -53,12 +55,13 @@ router.get('/student/:studentId', [authMiddleware, authorize('Admin', 'Teacher')
             where: {
                 studentId: studentIdInt, 
                 schoolId: schoolId,
+                academicYearId: req.academicYearId,
                 status: { in: ['Submitted', 'Graded'] }
             }
          });
 
         const recentMarks = await prisma.mark.findMany({ 
-            where: { studentId: studentIdInt, schoolId: schoolId, percentage: { not: null } }, 
+            where: { studentId: studentIdInt, schoolId: schoolId, academicYearId: req.academicYearId, percentage: { not: null } }, 
             orderBy: { id: 'desc' }, 
             take: 5,
             include: { assessment: { select: { name: true, date: true } } } 
@@ -70,7 +73,7 @@ router.get('/student/:studentId', [authMiddleware, authorize('Admin', 'Teacher')
 
         const subjectMasteryData = await prisma.mark.groupBy({
             by: ['subject'],
-            where: { studentId: studentIdInt, schoolId: schoolId, percentage: { not: null }, subject: { not: null } },
+            where: { studentId: studentIdInt, schoolId: schoolId, academicYearId: req.academicYearId, percentage: { not: null }, subject: { not: null } },
             _avg: { percentage: true },
         });
         const formattedSubjectMastery = subjectMasteryData.map(item => ({
@@ -101,7 +104,7 @@ router.get('/student/:studentId', [authMiddleware, authorize('Admin', 'Teacher')
  * @access  Private (Admin, Teacher)
  */
 // --- YAHAN FIX KIYA GAYA HAI ---
-router.get('/class/:className', [authMiddleware, authorize('Admin', 'Teacher')], async (req, res) => { 
+router.get('/class/:className', [authMiddleware, authorize('Admin', 'Teacher'), validateAcademicYear], async (req, res) => { 
     
     // Kadam 1: classId ke bajaye className (string) lein
     const className = decodeURIComponent(req.params.className); // e.g., "7th" ya "10th A"
@@ -138,7 +141,7 @@ router.get('/class/:className', [authMiddleware, authorize('Admin', 'Teacher')],
         // (Baaki ka poora logic waisa hi hai jaisa aapne likha tha, kyunki woh perfect tha)
         
         const studentsInClass = await prisma.students.findMany({ 
-            where: { classId: classIdInt, schoolId: schoolId },
+            where: { classId: classIdInt, schoolId: schoolId, academicYearId: req.academicYearId },
             select: { studentid: true, first_name: true, father_name: true, last_name: true } 
         });
         
@@ -150,11 +153,11 @@ router.get('/class/:className', [authMiddleware, authorize('Admin', 'Teacher')],
 
         // Calculate Class Attendance
         const classAttendanceStats = await prisma.attendance.aggregate({
-            where: { studentId: { in: studentIdsInClass }, schoolId: schoolId },
+            where: { studentId: { in: studentIdsInClass }, schoolId: schoolId, academicYearId: req.academicYearId },
             _count: { id: true }
         });
          const classPresentCount = await prisma.attendance.count({
-            where: { studentId: { in: studentIdsInClass }, schoolId: schoolId, status: 'Present' }
+            where: { studentId: { in: studentIdsInClass }, schoolId: schoolId, academicYearId: req.academicYearId, status: 'Present' }
         });
         const classTotalAttendanceRecords = classAttendanceStats._count.id || 0;
         const classAttendancePercentage = classTotalAttendanceRecords > 0 ? Math.round((classPresentCount / classTotalAttendanceRecords) * 100) : 0;
@@ -162,7 +165,7 @@ router.get('/class/:className', [authMiddleware, authorize('Admin', 'Teacher')],
         // Calculate Class Average Score & Get Top/Bottom Performers
         const studentAverageScoresData = await prisma.mark.groupBy({
             by: ['studentId'],
-            where: { studentId: { in: studentIdsInClass }, schoolId: schoolId, percentage: { not: null } },
+            where: { studentId: { in: studentIdsInClass }, schoolId: schoolId, academicYearId: req.academicYearId, percentage: { not: null } },
             _avg: { percentage: true },
         });
 
@@ -185,6 +188,7 @@ router.get('/class/:className', [authMiddleware, authorize('Admin', 'Teacher')],
         const totalAssignments = await prisma.assignment.count({
              where: {
                  schoolId: schoolId,
+                 academicYearId: req.academicYearId,
                  OR: [
                      { classId: classIdInt },
                      { studentId: { in: studentIdsInClass } } 
@@ -196,7 +200,7 @@ router.get('/class/:className', [authMiddleware, authorize('Admin', 'Teacher')],
         // Calculate Class Subject Averages
         const classSubjectAvgData = await prisma.mark.groupBy({
             by: ['subject'],
-            where: { studentId: { in: studentIdsInClass }, schoolId: schoolId, percentage: { not: null }, subject: { not: null } },
+            where: { studentId: { in: studentIdsInClass }, schoolId: schoolId, academicYearId: req.academicYearId, percentage: { not: null }, subject: { not: null } },
             _avg: { percentage: true },
         });
         const formattedSubjectAvgs = classSubjectAvgData.map(item => ({
@@ -227,7 +231,7 @@ router.get('/class/:className', [authMiddleware, authorize('Admin', 'Teacher')],
  * @access  Private (Admin)
  */
 // --- Is function mein koi change nahi, yeh perfect tha ---
-router.get('/overall', [authMiddleware, authorize('Admin')], async (req, res) => { 
+router.get('/overall', [authMiddleware, authorize('Admin'), validateAcademicYear], async (req, res) => { 
     const schoolId = req.user.schoolId;
     if (!schoolId) { return res.status(400).json({ msg: 'Invalid or missing school ID.' }); }
 
@@ -235,21 +239,21 @@ router.get('/overall', [authMiddleware, authorize('Admin')], async (req, res) =>
         console.log(`[Analytics] Fetching overall data for school: ${schoolId}`);
 
         // Get Total Students
-        const totalStudents = await prisma.students.count({ where: { schoolId: schoolId } });
+        const totalStudents = await prisma.students.count({ where: { schoolId: schoolId, academicYearId: req.academicYearId } });
 
         // Calculate Overall Attendance
         const overallAttendanceStats = await prisma.attendance.aggregate({
-            where: { schoolId: schoolId },
+            where: { schoolId: schoolId, academicYearId: req.academicYearId },
             _count: { id: true }
         });
          const totalPresent = await prisma.attendance.count({
-            where: { schoolId: schoolId, status: 'Present' }
+            where: { schoolId: schoolId, academicYearId: req.academicYearId, status: 'Present' }
         });
         const overallAttendance = (overallAttendanceStats._count.id || 0) > 0 ? Math.round((totalPresent / overallAttendanceStats._count.id) * 100) : 0;
 
         // Calculate Overall Average Score
         const overallScoreStats = await prisma.mark.aggregate({
-            where: { schoolId: schoolId, percentage: { not: null } },
+            where: { schoolId: schoolId, academicYearId: req.academicYearId, percentage: { not: null } },
             _avg: { percentage: true }
         });
         const overallAverageScore = Math.round(overallScoreStats._avg.percentage || 0);
@@ -257,12 +261,12 @@ router.get('/overall', [authMiddleware, authorize('Admin')], async (req, res) =>
         // Calculate Class Performance (Average score per class)
          const studentAvgScores = await prisma.mark.groupBy({
              by: ['studentId'],
-             where: { schoolId: schoolId, percentage: { not: null }},
+             where: { schoolId: schoolId, academicYearId: req.academicYearId, percentage: { not: null }},
              _avg: { percentage: true }
          });
 
         const studentsWithClass = await prisma.students.findMany({
-            where: { schoolId: schoolId, studentid: { in: studentAvgScores.map(s => s.studentId) } },
+            where: { schoolId: schoolId, academicYearId: req.academicYearId, studentid: { in: studentAvgScores.map(s => s.studentId) } },
             select: { studentid: true, classId: true }
         });
         
@@ -299,7 +303,7 @@ router.get('/overall', [authMiddleware, authorize('Admin')], async (req, res) =>
         // Calculate Subject Performance (Average score per subject)
         const subjectPerformanceDataRaw = await prisma.mark.groupBy({
             by: ['subject'],
-            where: { schoolId: schoolId, percentage: { not: null }, subject: { not: null } },
+            where: { schoolId: schoolId, academicYearId: req.academicYearId, percentage: { not: null }, subject: { not: null } },
             _avg: { percentage: true },
         });
          const subjectPerformanceData = subjectPerformanceDataRaw.map(item => ({

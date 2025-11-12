@@ -2,12 +2,14 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware, authorize } = require('../middleware/authMiddleware');
+// Academic year middleware import
+const { validateAcademicYear } = require('../middleware/academicYearMiddleware');
 const prisma = require('../config/prisma'); // Prisma client import karein
 
 // --- GET Routes ---
 
 // GET /api/academics/exams
-router.get('/exams', [authMiddleware], async (req, res) => {
+router.get('/exams', [authMiddleware, validateAcademicYear], async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
         if (!schoolId) {

@@ -3,11 +3,12 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/authMiddleware');
+const { validateAcademicYear } = require('../middleware/academicYearMiddleware');
 const prisma = require('../config/prisma'); // Mongoose ki jagah Prisma
 
 // @route   GET /api/dashboard/stats
 // @desc    Dashboard ke liye saare stats fetch karein (Ab Sahi Logic Ke Saath)
-router.get('/stats', authMiddleware, async (req, res) => {
+router.get('/stats', [authMiddleware, validateAcademicYear], async (req, res) => {
   try {
     // 1. SchoolId ko req.user.schoolId se lein (No Change)
     const schoolId = req.user.schoolId; 

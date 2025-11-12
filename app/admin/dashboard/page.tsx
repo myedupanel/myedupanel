@@ -10,7 +10,8 @@ import StudentClassChart from '@/components/admin/academics/StudentClassChart'; 
 import RecentPayments from '@/components/admin/RecentPayments/RecentPayments';
 import { MdPeople, MdSchool, MdAttachMoney, MdFamilyRestroom, MdBadge, MdClass } from 'react-icons/md';
 import styles from './AdminDashboard.module.scss';
-import { useAuth, User } from '../../context/AuthContext'; 
+import { useAuth, User } from '../../context/AuthContext';
+import { useAcademicYear } from '../../context/AcademicYearContext'; 
 
 // --- TYPE DEFINITIONS (No Change) ---
 interface MonthlyAdmissionData {
@@ -90,6 +91,7 @@ const getAdmissionColor = (value: number, min: number, max: number): string => {
 
 const AdminDashboardPage = () => {
   const { user, token } = useAuth() as { user: User | null; token: string | null; login: (token: string) => Promise<any> };
+  const { currentYearId } = useAcademicYear();
   const [dashboardData, setDashboardData] = useState<FormattedDashboardData | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   
@@ -247,7 +249,7 @@ const AdminDashboardPage = () => {
       socket.disconnect();
       console.log('Socket.IO: Disconnected');
     };
-  }, [fetchDashboardData, loadProfileData, token, user]); // 'user' ko dependency mein add kiya
+  }, [fetchDashboardData, loadProfileData, token, user, currentYearId]); // Add currentYearId as dependency
 
   // --- Loading state (No Change) ---
   if (!adminProfile || !dashboardData) {
@@ -258,7 +260,12 @@ const AdminDashboardPage = () => {
   if (dashboardData.stats.length === 0) {
       return (
           <div className={styles.dashboardContainer}>
-              <Header admin={adminProfile} />
+              <Header admin={{
+                adminName: adminProfile.adminName,
+                email: adminProfile.email,
+                profileImageUrl: adminProfile.profileImageUrl,
+                schoolName: adminProfile.schoolName
+              }} />
               <div className={styles.emptyState}>
                   <h2>Dashboard Data Unavailable</h2>
                   <p>Could not fetch dashboard data. Please check the backend server and try logging in again.</p>
@@ -271,7 +278,12 @@ const AdminDashboardPage = () => {
   // --- JSX (No Change) ---
   return (
     <div className={styles.dashboardContainer}>
-      <Header admin={adminProfile} />
+      <Header admin={{
+        adminName: adminProfile.adminName,
+        email: adminProfile.email,
+        profileImageUrl: adminProfile.profileImageUrl,
+        schoolName: adminProfile.schoolName
+      }} />
       
       <div className={styles.statsGrid}>
         {dashboardData.stats.map((stat) => {
@@ -328,6 +340,14 @@ export default AdminDashboardPage;
 // --- AdminProfile Interface (No Change) ---
 interface AdminProfile {
   id: number;
+  adminName: string;
+  email: string;
+  profileImageUrl: string;
+  schoolName: string;
+}
+
+// Interface for Header component
+interface HeaderAdmin {
   adminName: string;
   email: string;
   profileImageUrl: string;
