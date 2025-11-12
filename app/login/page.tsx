@@ -28,6 +28,7 @@ export default function LoginPage() {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingRole, setIsCheckingRole] = useState(false); // New state for role checking animation
 
   // Slideshow effect
   const nextSlide = () => {
@@ -69,26 +70,35 @@ export default function LoginPage() {
         // Set the token in axios default headers for future requests
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
         
+        // Show role checking animation
+        setIsCheckingRole(true);
+        setIsLoading(false); // Stop the button loading state
+        
+        // Small delay to show the animation
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
         // Fetch user data
         const userResponse = await axios.get('/api/auth/me');
         const { role } = userResponse.data;
         
         // Redirect based on user role
-        if (role === 'admin') {
+        if (role === 'admin' || role === 'Admin') {
           router.push('/admin/dashboard');
-        } else if (role === 'teacher') {
+        } else if (role === 'teacher' || role === 'Teacher') {
           router.push('/teacher');
-        } else if (role === 'student') {
+        } else if (role === 'student' || role === 'Student') {
           router.push('/student');
-        } else if (role === 'parent') {
+        } else if (role === 'parent' || role === 'Parent') {
           router.push('/parent');
         } else {
-          router.push('/admin'); // Default redirect
+          // Default to admin dashboard for any other role
+          router.push('/admin/dashboard');
         }
       } else {
         setError(response.data.message || 'Login failed');
       }
     } catch (err: any) {
+      setIsCheckingRole(false); // Hide role checking animation on error
       console.error('Login error:', err);
       if (err.response && err.response.data) {
         setError(err.response.data.message || 'Invalid email or password');
@@ -99,6 +109,44 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  // Show role checking animation when isCheckingRole is true
+  if (isCheckingRole) {
+    return (
+      <div className={`${styles.pageWrapper} ${inter.className}`}>
+        {/* --- Left Side: Role Check Animation --- */}
+        <div className={styles.formContainer}>
+          <div className={styles.formCard}>
+            <div className={styles.roleCheckContainer}>
+              <div className={styles.roleCheckAnimation}>
+                <div className={styles.spinner}></div>
+                <p>Setting up your dashboard...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* --- Right Side: Slideshow (kept for consistency) --- */}
+        <div className={`${styles.slideshowContainer} ${montserrat.className}`}>
+          <div className={styles.overlay}></div>
+          
+          {slideshowImages.map((src, index) => (
+            <div
+              key={index}
+              className={`${styles.slide} ${index === currentImageIndex ? styles.active : ''}`}
+              style={{ backgroundImage: `url(${src})` }}
+            />
+          ))}
+          
+          <div className={styles.slideshowContent}>
+            <div className={styles.tagline}>
+              Your Complete School Management System
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`${styles.pageWrapper} ${inter.className}`}>
