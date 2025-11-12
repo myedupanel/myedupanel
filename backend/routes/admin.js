@@ -44,6 +44,9 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
 
         const staffRoles = ['Accountant', 'Office Admin', 'Librarian', 'Security', 'Transport Staff', 'Other', 'Staff']; 
 
+        // NAYA: Where clause for academic year filtering
+        const academicYearWhere = { schoolId: schoolId, academicYearId: req.academicYearId };
+        
         const [
             studentCount,
             teacherCount,
@@ -58,15 +61,15 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             classCountsRaw,
             monthlyRevenueRaw 
         ] = await Promise.all([
-            // Total Counts (No Change)
-            prisma.students.count({ where: { schoolId: schoolId } }), 
-            prisma.teachers.count({ where: { schoolId: schoolId } }),
+            // Total Counts (UPDATED to filter by academic year)
+            prisma.students.count({ where: academicYearWhere }), 
+            prisma.teachers.count({ where: academicYearWhere }),
             prisma.parent.count({ where: { schoolId: schoolId } }),   
             prisma.user.count({ where: { role: { in: staffRoles }, schoolId: schoolId } }),
 
-            // --- RECENT STUDENTS (No Change) ---
+            // --- RECENT STUDENTS (UPDATED to filter by academic year) ---
             prisma.students.findMany({ 
-                where: { schoolId }, 
+                where: academicYearWhere, 
                 orderBy: { studentid: 'desc' }, 
                 take: 5, 
                 select: { 
@@ -80,7 +83,7 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             }), 
             
             prisma.teachers.findMany({ 
-                where: { schoolId }, 
+                where: academicYearWhere, 
                 orderBy: { teacher_dbid: 'desc' }, 
                 take: 5, 
                 select: { name: true, subject: true, teacher_dbid: true } 
@@ -89,9 +92,9 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             prisma.parent.findMany({ where: { schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, id: true } }), 
             prisma.user.findMany({ where: { role: { in: staffRoles }, schoolId }, orderBy: { id: 'desc' }, take: 5, select: { name: true, role: true, id: true } }), 
 
-            // --- YAHAN FIX KIYA: 'FeeRecord' ki jagah 'Transaction' se fetch kiya ---
+            // --- YAHAN FIX KIYA: 'FeeRecord' ki jagah 'Transaction' se fetch kiya (UPDATED to filter by academic year) ---
             prisma.transaction.findMany({
-                where: { schoolId: schoolId, status: 'Success' },
+                where: { ...academicYearWhere, status: 'Success' },
                 orderBy: { paymentDate: 'desc' }, // Asli date se sort kiya
                 take: 5,
                 select: { 
@@ -105,25 +108,25 @@ router.get('/dashboard-data', [authMiddleware, adminMiddleware], async (req, res
             }),
             // --- FIX ENDS ---
 
-            // Aggregations (No Change)
+            // Aggregations (UPDATED to filter by academic year)
              prisma.students.groupBy({
                  by: ['admission_date'], 
-                 where: { schoolId: schoolId, admission_date: { not: null } },
+                 where: { ...academicYearWhere, admission_date: { not: null } },
                  _count: { studentid: true }, 
                  orderBy: { admission_date: 'asc'}
              }),
              
             prisma.students.groupBy({
                 by: ['classid'],
-                where: { schoolId: schoolId },
+                where: academicYearWhere,
                 _count: { studentid: true }, 
             }),
             
-            // Monthly Revenue (No Change from last fix)
+            // Monthly Revenue (UPDATED to filter by academic year)
             prisma.transaction.aggregate({
                 _sum: { amountPaid: true }, 
                 where: {
-                    schoolId: schoolId,
+                    ...academicYearWhere,
                     status: 'Success', 
                     paymentDate: { 
                         gte: startOfMonth,

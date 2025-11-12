@@ -155,6 +155,7 @@ const StudentsPageContent = () => {
 
     const fetchStudents = useCallback(async () => {
         try {
+            // NAYA: Academic year context ko consider karein
             const res = await api.get('/students');
             const formattedData = res.data.map(transformApiData);
             setStudents(formattedData);

@@ -72,10 +72,11 @@ const addTeachersInBulk = async (req, res) => {
       return res.status(400).json({ message: 'File has no valid teacher data. Check headers for teacherId, name, and email.' });
     }
 
-    // NAYA: Har teacher data mein schoolId add karein
+    // NAYA: Har teacher data mein schoolId aur academicYearId add karein
     const teachersWithSchoolId = validTeachers.map(teacher => ({
       ...teacher,
       schoolId: schoolId,
+      academicYearId: req.academicYearId, // NAYA: Academic year ID ko add karein
       // email ko lowercase mein rakhein (best practice)
       email: teacher.email ? teacher.email.toLowerCase() : teacher.email 
     }));
@@ -102,10 +103,14 @@ const getAllTeachers = async (req, res) => {
       return res.status(400).json({ message: 'Invalid or missing school ID.' });
     }
 
+    // NAYA: Academic year ID ke basis par filter karein
+    const whereClause = {
+      schoolId: schoolId,
+      academicYearId: req.academicYearId
+    };
+
     const teachers = await prisma.teachers.findMany({
-      where: {
-        schoolId: schoolId 
-      },
+      where: whereClause,
       orderBy: {
         name: 'asc' 
       }

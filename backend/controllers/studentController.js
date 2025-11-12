@@ -107,6 +107,8 @@ const addStudentsInBulk = async (req, res) => {
         const { class_name: cn, ...studentData } = student; 
         studentData.classid = classRecord.classid; 
         studentData.schoolId = schoolId; 
+        // NAYA: Academic year ID ko add karein
+        studentData.academicYearId = req.academicYearId;
         
         // roll_number को string में convert karein (Safety)
         studentData.roll_number = String(studentData.roll_number || '');
@@ -205,15 +207,22 @@ const addStudentsInBulk = async (req, res) => {
   }
 };
 
-// 5. FUNCTION 2: getAllStudents (No Change)
+// 5. FUNCTION 2: getAllStudents (UPDATED to filter by academic year)
 const getAllStudents = async (req, res) => {
   try {
     const schoolId = req.user.schoolId;
     if (!schoolId) {
       return res.status(400).json({ message: 'Invalid or missing school ID in user token.' });
     }
+    
+    // NAYA: Academic year ID ke basis par filter karein
+    const whereClause = {
+      schoolId: schoolId,
+      academicYearId: req.academicYearId
+    };
+    
     const students = await prisma.students.findMany({
-      where: { schoolId: schoolId },
+      where: whereClause,
       include: { class: true },
       orderBy: [ { class: { class_name: 'asc' } }, { first_name: 'asc' } ],
     });
@@ -277,6 +286,8 @@ const addSingleStudent = async (req, res) => {
       guardian_contact,
       classid: classRecord.classid,
       schoolId: schoolId,
+      // NAYA: Academic year ID ko add karein
+      academicYearId: req.academicYearId,
     };
 
     // 6. Date fields ko handle karein (No Change)

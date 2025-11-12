@@ -74,7 +74,8 @@ router.post('/', [authMiddleware, authorize('Admin')], async (req, res) => { // 
             subject: subject,
             contactNumber,
             email: lowerCaseEmail,
-            schoolId: schoolId
+            schoolId: schoolId,
+            academicYearId: req.academicYearId // NAYA: Academic year ID ko add karein
           }
         });
         

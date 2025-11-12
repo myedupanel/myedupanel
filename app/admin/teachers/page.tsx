@@ -69,6 +69,7 @@ const TeachersPage = () => {
   const fetchTeachers = useCallback(async () => {
     if (!user?.schoolId) return;
     try {
+      // NAYA: Academic year context ko consider karein
       const res = await api.get('/teachers');
       const formattedData = res.data.map(transformApiData);
       setTeachers(formattedData);
