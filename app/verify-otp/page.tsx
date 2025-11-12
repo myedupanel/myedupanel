@@ -23,16 +23,6 @@ const VerifyOtpPage = () => {
   const email = searchParams.get('email');
   const { login } = useAuth();
 
-  // Remove dark mode class from body when on verify OTP page
-  useEffect(() => {
-    document.body.classList.remove('dark-mode');
-    
-    // Cleanup function to restore dark mode on unmount if needed
-    return () => {
-      // We don't restore dark mode here as we want it to be controlled by Navbar
-    };
-  }, []);
-
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (countdown > 0) {

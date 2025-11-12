@@ -36,16 +36,6 @@ export default function SignupPage() {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Remove dark mode class from body when on signup page
-  useEffect(() => {
-    document.body.classList.remove('dark-mode');
-    
-    // Cleanup function to restore dark mode on unmount if needed
-    return () => {
-      // We don't restore dark mode here as we want it to be controlled by Navbar
-    };
-  }, []);
-
   // --- BADLAAV 2.2: Yeh naya useEffect add karein ---
   // Yeh effect page load hote hi URL check karega
   useEffect(() => {

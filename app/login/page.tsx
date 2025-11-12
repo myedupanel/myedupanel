@@ -8,7 +8,7 @@ import { FiArrowRight, FiEye, FiEyeOff, FiHome } from 'react-icons/fi';
 import styles from './login.module.scss';
 import { Inter } from 'next/font/google';
 // Import 'useAuth' hook (Aapka code pehle se sahi hai)
-import { useAuth } from '@/app/context/AuthContext';
+import { useAuth } from '@/app/context/AuthContext'; 
 
 const inter = Inter({
   subsets: ['latin'],
@@ -25,23 +25,13 @@ const slideshowImages = [
 export default function LoginPage() {
   const router = useRouter();
   // 'login' function (Aapka code pehle se sahi hai)
-  const { login } = useAuth();
+  const { login } = useAuth(); 
 
   const [showPassword, setShowPassword] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  // Remove dark mode class from body when on login page
-  useEffect(() => {
-    document.body.classList.remove('dark-mode');
-    
-    // Cleanup function to restore dark mode on unmount if needed
-    return () => {
-      // We don't restore dark mode here as we want it to be controlled by Navbar
-    };
-  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -113,7 +103,6 @@ export default function LoginPage() {
   // Baaki saara JSX code bilkul waisa hi rahega
   return (
     <div className={`${styles.pageWrapper} ${inter.className}`}>
-      {/* Make the entire page wrapper scrollable */}
       <div className={styles.formContainer}>
         <div className={styles.formCard}>
           <header className={styles.header}>

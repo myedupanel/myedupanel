@@ -19,7 +19,10 @@ const {
     getProcessingPayments, // <-- YEH MISSING THA
     getEditedRecords,      // <-- YEH MISSING THA
     getPdcRecords,         // <-- YEH MISSING THA
-    getTransactionById,    // <-- YEH MISSING THA (Receipt ke liye)
+    getTransactionById,  
+    createFeeTemplate,
+    updateFeeTemplate, 
+    deleteFeeTemplate, // <-- YEH MISSING THA (Receipt ke liye)
     // (Baaki functions...)
 } = require('../controllers/feeController'); 
 
@@ -29,8 +32,10 @@ const adminAuth = [authMiddleware, authorize('Admin')];
 // --- Dashboard & Template Routes ---
 router.get('/dashboard-overview', adminAuth, getDashboardOverview);
 router.get('/templates', adminAuth, getFeeTemplates);
+router.post('/templates', adminAuth, createFeeTemplate);
 router.get('/templates/:id', adminAuth, getTemplateDetails);
-
+router.put('/templates/:id', adminAuth, updateFeeTemplate);
+router.delete('/templates/:id', adminAuth, deleteFeeTemplate);
 // --- Pichle Fixes (Correct Routes) ---
 router.post('/assign-and-collect', adminAuth, assignAndCollectFee);
 router.get('/transactions', adminAuth, getTransactions);
