@@ -13,8 +13,42 @@ type NavbarProps = {
 
 function Navbar({ showLogin, showSignup, showFeatures, activeSection }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const menuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  // Initialize theme from localStorage or system preference
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    } else if (systemPrefersDark) {
+      setTheme('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  }, []);
+
+  // Apply theme changes
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    
+    // Apply theme to body for landing page specific styles
+    if (typeof window !== 'undefined') {
+      if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -57,6 +91,14 @@ function Navbar({ showLogin, showSignup, showFeatures, activeSection }: NavbarPr
             <li><Link href="#impact-section" className={activeSection === 'impact' ? 'active-link' : ''}>Impact</Link></li>
           </ul>
           <div className="buttons">
+            {/* Theme toggle button added here */}
+            <button className="theme-toggle-btn" onClick={toggleTheme} aria-label="Toggle theme">
+              {theme === 'light' ? (
+                <i className="bi bi-moon-stars"></i>
+              ) : (
+                <i className="bi bi-sun"></i>
+              )}
+            </button>
             <Link href="/login" className="login-btn">Login</Link>
             {/* CHANGE HERE: 'Book Demo' button ab seedhe /signup page par le jayega */}
             <Link href="/signup" className="demo-btn">Book Demo</Link>
@@ -75,6 +117,10 @@ function Navbar({ showLogin, showSignup, showFeatures, activeSection }: NavbarPr
           <Link href="#pricing-section" className={activeSection === 'pricing' ? 'active-link' : ''} onClick={toggleMobileMenu}>Pricing</Link>
           <Link href="#impact-section" className={activeSection === 'impact' ? 'active-link' : ''} onClick={toggleMobileMenu}>Impact</Link>
           <hr />
+          {/* Theme toggle in mobile menu */}
+          <button className="theme-toggle-btn mobile" onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
+          </button>
           <Link href="/login" className="login-btn" onClick={toggleMobileMenu}>Login</Link>
           {/* CHANGE HERE: Mobile menu mein bhi 'Book Demo' button ab seedhe /signup page par le jayega */}
           <Link href="/signup" className="demo-btn" onClick={toggleMobileMenu}>Book Demo</Link>
