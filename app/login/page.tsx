@@ -103,6 +103,7 @@ export default function LoginPage() {
   // Baaki saara JSX code bilkul waisa hi rahega
   return (
     <div className={`${styles.pageWrapper} ${inter.className}`}>
+      {/* Make the entire page wrapper scrollable */}
       <div className={styles.formContainer}>
         <div className={styles.formCard}>
           <header className={styles.header}>
