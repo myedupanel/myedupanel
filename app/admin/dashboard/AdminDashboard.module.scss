@@ -1,5 +1,13 @@
 .dashboardContainer {
   padding: 2rem; /* Thoda gap add karega, jisse Header neeche aa jaayega */
+  
+  @media (max-width: 1024px) {
+    padding: 1.5rem;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 }
 
 /* --- Styles for the row containing the charts --- */
@@ -8,6 +16,11 @@
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); // Responsive columns
   gap: 1.5rem; // Space between charts
   margin-bottom: 1.5rem; // Space below the charts row
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }
 
 /* --- UPDATED: Styles for individual chart containers --- */
@@ -17,6 +30,10 @@
   border-radius: 8px; // Changed from 12px
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); // Changed shadow
   /* margin-bottom from the first block is removed as .chartsRow handles spacing below */
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 }
 
 /* --- Stats Grid (Now 3 columns) --- */
@@ -25,6 +42,17 @@
   grid-template-columns: repeat(3, 1fr); /* 3 columns */
   gap: 1.5rem;
   margin-bottom: 2rem; // Keep margin below stats grid
+  
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+    gap: 1.25rem;
+  }
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr; /* 1 column on small screens */
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
 }
 
 /* --- Recent Payments Container --- */
@@ -35,9 +63,14 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   // Add margin-top if needed to separate from chartsRow
   // margin-top: 1.5rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+    border-radius: 8px;
+  }
 }
 
-/* --- Responsive styles for smaller screens --- */
+/* --- Enhanced Responsive styles for smaller screens --- */
 @media (max-width: 1024px) {
   .statsGrid {
     grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
@@ -66,7 +99,13 @@
   text-align: center;
   font-size: 1.2rem;
   color: #555;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    font-size: 1.1rem;
+  }
 }
+
 .statLink {
   text-decoration: none; /* Link ka underline hatata hai */
   color: inherit;       /* Text color normal rakhta hai */
@@ -81,5 +120,11 @@
 
   &:active {
     transform: translateY(-2px); /* Click karne par thoda neeche dabta hai */
+  }
+  
+  @media (max-width: 768px) {
+    &:hover {
+      transform: translateY(-3px);
+    }
   }
 }

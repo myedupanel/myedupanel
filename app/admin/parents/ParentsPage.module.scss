@@ -5,6 +5,14 @@
   padding: 2rem 2.5rem;
   background-color: #f4f7fa;
   min-height: 100vh;
+  
+  @media (max-width: 1024px) {
+    padding: 1.5rem;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 }
 
 /* --- Header & Title (Desktop Layout) --- */
@@ -15,6 +23,16 @@
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #e0e0e0;
+  
+  @media (max-width: 1024px) {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+  }
+  
+  @media (max-width: 768px) {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+  }
 }
 
 .title {
@@ -22,6 +40,14 @@
   font-weight: 700;
   color: #1a2a44;
   flex-grow: 1; /* Desktop: Title ko space dega */
+  
+  @media (max-width: 1024px) {
+    font-size: 24px;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 20px;
+  }
 }
 
 /* --- Desktop Elements --- */
@@ -77,6 +103,16 @@
     transform: translateY(-2px); 
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); 
   }
+  
+  @media (max-width: 768px) {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    gap: 6px;
+    
+    svg {
+      font-size: 1rem;
+    }
+  }
 }
 
 /* --- Modal Content Styles --- */
@@ -131,9 +167,9 @@
 
 
 /* --- Mobile Responsive Styles (Max 768px) --- */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .pageContainer {
-        padding: 1rem; 
+        padding: 1.5rem; 
     }
 
     /* Header: Aligns icons and title in one row */
@@ -141,12 +177,12 @@
         flex-direction: row; 
         justify-content: space-between; 
         align-items: center;
-        padding-bottom: 0.5rem; 
-        margin-bottom: 0.5rem; 
+        padding-bottom: 0.75rem; 
+        margin-bottom: 1rem; 
     }
 
     .title {
-        font-size: 1.5rem; /* Smaller title */
+        font-size: 1.75rem; /* Smaller title */
         margin: 0 0.5rem; 
         flex-grow: 1;
         text-align: center;
@@ -173,5 +209,25 @@
         max-width: 300px; 
         margin: 1rem auto;
         padding: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .pageContainer {
+            padding: 1rem; 
+        }
+        
+        .header {
+            padding-bottom: 0.5rem; 
+            margin-bottom: 0.5rem; 
+        }
+        
+        .title {
+            font-size: 1.5rem;
+        }
+        
+        .dashboardLinkButton {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
     }
 }

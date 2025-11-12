@@ -7,6 +7,12 @@
   width: 100vw;
   overflow: hidden;
   background-color: #f4f7fa; 
+  
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
 }
 
 /* Sidebar ke alawa baaki ka content area */
@@ -16,6 +22,16 @@
   overflow-y: auto; 
   margin-left: 250px; /* Desktop margin */
   transition: margin-left 0.3s ease;
+  
+  @media (max-width: 1024px) {
+    margin-left: 0;
+    padding: 1rem;
+    height: auto;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.75rem;
+  }
 }
 
 /* Page ka header "Student Management" */
@@ -24,6 +40,15 @@
   justify-content: space-between;
   align-items: center; 
   margin-bottom: 2rem;
+  
+  @media (max-width: 1024px) {
+    margin-bottom: 1.5rem;
+    padding: 0.5rem 0;
+  }
+  
+  @media (max-width: 768px) {
+    margin-bottom: 1rem;
+  }
 }
 
 .title {
@@ -31,6 +56,14 @@
   font-weight: 700;
   color: #1a2a44;
   margin: 0; 
+  
+  @media (max-width: 1024px) {
+    font-size: 24px;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 20px;
+  }
 }
 
 /* Hamburger Button */
@@ -79,6 +112,18 @@
   border-radius: 8px;
   margin-bottom: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 1rem;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
 }
 
 .classFilter {
@@ -162,7 +207,7 @@
   }
   
   .title {
-    font-size: 20px; 
+    font-size: 24px; 
     margin: 0;
     flex-grow: 1; 
     text-align: left;
@@ -208,6 +253,22 @@
   
   .actionsButton {
       width: 100%;
+  }
+  
+  @media (max-width: 768px) {
+    .title {
+      font-size: 20px;
+    }
+    
+    .header {
+      margin-bottom: 0.75rem;
+      padding: 0.25rem 0;
+    }
+    
+    .filtersContainer {
+      padding: 0.75rem;
+      gap: 8px;
+    }
   }
 }
 .exportOptionsContainer {
