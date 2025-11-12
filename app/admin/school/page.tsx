@@ -100,11 +100,11 @@ const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, 
 
                 {/* Days left ko strong tag mein wrap kiya for Red Highlight */}
 
-                <p>Your **<strong>{daysLeft} day</strong>** free trial will expire soon.</p> 
+                <p>Your <strong>{daysLeft} day</strong> free trial will expire soon.</p> 
 
                 
 
-                <p>To avoid any disruption to your school's operations, please consider **upgrading** to a paid plan today.</p>
+                <p>To avoid any disruption to your school's operations, please consider upgrading to a paid plan today.</p>
 
                 
 
@@ -124,7 +124,7 @@ const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, 
 
                     <Link href="/upgrade" className={styles.upgradeLinkButton}>
 
-                        Upgrade Now
+                        Upgrade
 
                     </Link>
 
@@ -135,7 +135,6 @@ const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, 
                     </button>
 
                 </div>
-
             </div>
 
         </Modal>
@@ -183,27 +182,27 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
             case 'TRIAL':
                 return {
                     icon: MdFlashOn,
-                    text: 'Your 14-day trial has begun!', // Full text for desktop
+                    text: 'Free Trial Active', // More professional text
                     link: '/upgrade', 
-                    buttonText: 'Upgrade Now',
+                    buttonText: 'Upgrade',
                     className: styles.trialBanner,
                     isPaid: false,
                 };
             case 'STARTER':
                 return {
                     icon: MdStar,
-                    text: 'Starter Plan Active',
+                    text: 'Starter Plan',
                     link: '/admin/settings/billing', 
-                    buttonText: 'Manage Plan', 
+                    buttonText: 'Manage', 
                     className: styles.paidPlanBanner, 
                     isPaid: true,
                 };
             case 'PRO':
                 return {
                     icon: MdStar,
-                    text: 'Pro Plan Active',
+                    text: 'Pro Plan',
                     link: '/admin/settings/billing', 
-                    buttonText: 'Manage Plan', 
+                    buttonText: 'Manage', 
                     className: styles.paidPlanBanner, 
                     isPaid: true,
                 };
@@ -213,7 +212,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                     icon: MdFlashOn,
                     text: 'No Active Plan',
                     link: '/upgrade',
-                    buttonText: 'Start Trial / Upgrade',
+                    buttonText: 'Upgrade',
                     className: styles.freeBanner,
                     isPaid: false,
                 };
@@ -228,10 +227,10 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                 <div className={styles.trialContent}>
                     {/* Desktop Trial View */}
                     <div className={styles.trialSlogan}>
-                         <PlanIcon size={20} />
-                         {text}
+                         <PlanIcon size={18} />
+                         <span>{text}</span>
                          {/* Desktop days left */}
-                         <span style={{ fontWeight: 900, color: '#ef4444', marginLeft: '10px' }}>{daysLeft} DAYS LEFT</span>
+                         <span style={{ fontWeight: 700, color: '#dc2626', marginLeft: '8px', fontSize: '0.9rem' }}>{daysLeft} DAYS LEFT</span>
                     </div>
                     <div className={styles.trialCountdown}>
                         <div className={styles.progressBar}>
@@ -240,7 +239,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                                 style={{ width: `${progress > 100 ? 100 : progress}%` }} 
                             />
                         </div>
-                        <span className={styles.countdownLabel}>Trial Period</span>
+                        <span className={styles.countdownLabel}>Trial Ends</span>
                     </div>
                 </div>
             );
@@ -252,7 +251,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                 
                 {/* Mobile Text (Hidden on desktop by SCSS) */}
                 <span className={styles.bannerAbbreviation}>
-                    {plan === 'STARTER' ? 'Starter' : (plan === 'PRO' ? 'Pro' : (plan === 'TRIAL' ? 'Trial' : 'No Plan'))}
+                    {plan === 'STARTER' ? 'Starter' : (plan === 'PRO' ? 'Pro' : (plan === 'TRIAL' ? 'Trial' : 'Upgrade'))}
                 </span>
                 
                 {/* Full text (Visible on desktop) */}
@@ -275,7 +274,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
              {/* CRITICAL FIX 1: Render Trial Icon on mobile, full content on desktop */}
             {isTrial && daysLeft !== null && window.innerWidth <= 1024 ? (
                  <div className={styles.planContent}>
-                    <MdFlashOn size={24} style={{ color: '#f59e0b' }}/>
+                    <MdFlashOn size={20} style={{ color: '#f59e0b' }}/>
                  </div>
             ) : (
                 renderContent()
