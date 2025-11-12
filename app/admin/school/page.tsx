@@ -194,7 +194,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                     icon: MdStar,
                     text: 'Starter Plan Active',
                     link: '/admin/settings/billing', 
-                    buttonText: null, 
+                    buttonText: 'Manage Plan', 
                     className: styles.paidPlanBanner, 
                     isPaid: true,
                 };
@@ -203,7 +203,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                     icon: MdStar,
                     text: 'Pro Plan Active',
                     link: '/admin/settings/billing', 
-                    buttonText: null, 
+                    buttonText: 'Manage Plan', 
                     className: styles.paidPlanBanner, 
                     isPaid: true,
                 };
@@ -228,6 +228,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                 <div className={styles.trialContent}>
                     {/* Desktop Trial View */}
                     <div className={styles.trialSlogan}>
+                         <PlanIcon size={20} />
                          {text}
                          {/* Desktop days left */}
                          <span style={{ fontWeight: 900, color: '#ef4444', marginLeft: '10px' }}>{daysLeft} DAYS LEFT</span>
@@ -239,6 +240,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                                 style={{ width: `${progress > 100 ? 100 : progress}%` }} 
                             />
                         </div>
+                        <span className={styles.countdownLabel}>Trial Period</span>
                     </div>
                 </div>
             );

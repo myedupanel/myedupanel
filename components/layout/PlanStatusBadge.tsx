@@ -37,32 +37,39 @@ const PlanStatusBadge = () => {
   // Badge ka logic
   let badgeText = '';
   let badgeClass = '';
+  let icon = null;
 
   if (plan === 'TRIAL') {
     if (daysLeft !== null && daysLeft > 0) {
-      badgeText = `⏳ Trial: ${daysLeft} Days Left`;
+      badgeText = `Trial: ${daysLeft} Days Left`;
       badgeClass = styles.trial; 
+      icon = '⚡';
     } else {
       badgeText = 'Trial Ended'; 
       badgeClass = styles.expired;
+      icon = '⚠️';
     }
   } else if (plan === 'STARTER') {
     if (daysLeft !== null && daysLeft <= 14 && daysLeft >= 0) {
       // 14 days ya usse kam bache hon
-      badgeText = `⚠️ Expires in ${daysLeft} Days`; 
+      badgeText = `Expires in ${daysLeft} Days`; 
       badgeClass = styles.expiring; 
+      icon = '⚠️';
     } else if (daysLeft !== null && daysLeft < 0) {
       // Expiry date nikal chuki ho
       badgeText = 'Plan Expired';
       badgeClass = styles.expired; 
+      icon = '❌';
     } else {
-      badgeText = '✓ Starter Plan';
+      badgeText = 'Starter Plan';
       badgeClass = styles.starter; 
+      icon = '✓';
     }
   } else {
     // Other valid plans (e.g., PREMIUM)
-    badgeText = `✓ ${plan} Plan`;
+    badgeText = `${plan} Plan`;
     badgeClass = styles.starter; 
+    icon = '✓';
   }
   
   // Button kab dikhana hai
@@ -70,6 +77,9 @@ const PlanStatusBadge = () => {
     plan === 'TRIAL' || 
     plan === 'NONE' || // Agar plan set nahi hai
     (plan === 'STARTER' && daysLeft !== null && daysLeft <= 14); 
+
+  // Button text
+  const upgradeButtonText = plan === 'STARTER' ? 'Manage Plan' : 'Upgrade';
 
   // Button click par /upgrade page par bhejo
   const handleUpgradeClick = () => {
@@ -81,13 +91,14 @@ const PlanStatusBadge = () => {
     <div className={styles.badgeContainer}>
       {/* 1. Hamara Puraana Badge */}
       <div className={`${styles.planBadge} ${badgeClass}`}>
+        {icon && <span style={{ marginRight: '6px' }}>{icon}</span>}
         {badgeText}
       </div>
 
       {/* 2. Hamara Naya "Eye-Catching" Button */}
       {showUpgradeButton && (
         <button className={styles.upgradeButton} onClick={handleUpgradeClick}>
-          Upgrade
+          {upgradeButtonText}
         </button>
       )}
     </div>
