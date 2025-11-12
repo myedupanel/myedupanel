@@ -123,8 +123,8 @@
     }
 }
 
-/* NEW: Hide the entire switcher on mobile devices below 1024px */
-@media (max-width: 1024px) {
+/* NEW: Hide the entire switcher on mobile devices - only show on desktop */
+@media (max-width: 1023px) {
     .switcherContainer {
         display: none;
     }
