@@ -7,11 +7,13 @@ const bcrypt = require('bcryptjs'); // Password hashing ke liye
 const generatePassword = require('generate-password'); // Temp password ke liye
 const sendEmail = require('../utils/sendEmail');
 const { authMiddleware, authorize } = require('../middleware/authMiddleware'); // Updated middleware
+// Academic year middleware import
+const { validateAcademicYear } = require('../middleware/academicYearMiddleware');
 
 // @route   POST /api/teachers
 // @desc    Add a new teacher, create user account, send email
 // @access  Private (Admin Only)
-router.post('/', [authMiddleware, authorize('Admin')], async (req, res) => { // Role 'Admin' check
+router.post('/', [authMiddleware, authorize('Admin'), validateAcademicYear], async (req, res) => { // Role 'Admin' check
   try {
     const { teacherId, name, subject, contactNumber, email } = req.body;
     const schoolId = req.user.schoolId; // Middleware se mila
@@ -131,7 +133,7 @@ router.post('/', [authMiddleware, authorize('Admin')], async (req, res) => { // 
 // @access  Private (Admin or Teacher)
 // NOTE: Yeh function humne pehle hi controller mein update kar diya tha.
 const teacherController = require('../controllers/teacherController'); // Controller import karein
-router.get('/', [authMiddleware], teacherController.getAllTeachers); // Controller function use karein
+router.get('/', [authMiddleware, validateAcademicYear], teacherController.getAllTeachers); // Controller function use karein
 
 
 // @route   PUT /api/teachers/:id (Teacher's Prisma DB ID - teacher_dbid)

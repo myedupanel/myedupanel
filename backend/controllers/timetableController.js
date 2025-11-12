@@ -24,19 +24,20 @@ const getFullName = (student) => {
 }
 
 
-// --- 1. GET /api/timetable/settings (No Change) ---
+// --- 1. GET /api/timetable/settings (UPDATED to filter by academic year) ---
 const getSettings = async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
+        const academicYearId = req.academicYearId;
         if (!schoolId) {
             return res.status(400).json({ msg: 'Invalid or missing school ID in user token.' });
         }
         const timeSlots = await prisma.timeSlot.findMany({
-            where: { schoolId },
+            where: { schoolId, academicYearId },
             orderBy: { startTime: 'asc' }, 
         });
         const workingDays = await prisma.workingDay.findMany({
-            where: { schoolId },
+            where: { schoolId, academicYearId },
             orderBy: { dayIndex: 'asc' }, 
         });
         const classes = await prisma.classes.findMany({ 
@@ -67,13 +68,14 @@ const getSettings = async (req, res) => {
 };
 
 
-// --- 2. GET /api/timetable/assignments (No Change) ---
+// --- 2. GET /api/timetable/assignments (UPDATED to filter by academic year) ---
 const getAssignments = async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
+        const academicYearId = req.academicYearId;
         
         const rawAssignments = await prisma.timetableAssignment.findMany({
-            where: { schoolId },
+            where: { schoolId, academicYearId },
             include: {
                 class: { select: { class_name: true } },
                 teacher: { select: { name: true } },
@@ -99,10 +101,11 @@ const getAssignments = async (req, res) => {
 };
 
 
-// --- 3. POST /api/timetable/assign (UPDATED with Sanitization) ---
+// --- 3. POST /api/timetable/assign (UPDATED with Sanitization and academic year) ---
 const assignPeriod = async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
+        const academicYearId = req.academicYearId;
         
         // === FIX 2: Sabhi inputs ko Sanitize karein ===
         const { day, slotName, className, teacherName, subject } = req.body;
@@ -121,7 +124,7 @@ const assignPeriod = async (req, res) => {
         // 1. आवश्यक IDs को उनके नाम से ढूँढना
         const classData = await prisma.classes.findFirst({ where: { schoolId, class_name: sanitizedClassName } });
         const teacherData = await prisma.user.findFirst({ where: { schoolId, name: sanitizedTeacherName, role: 'Teacher' } });
-        const timeSlotData = await prisma.timeSlot.findFirst({ where: { schoolId, name: sanitizedSlotName } });
+        const timeSlotData = await prisma.timeSlot.findFirst({ where: { schoolId, name: sanitizedSlotName, academicYearId } });
 
         if (!classData || !teacherData || !timeSlotData) {
             return res.status(404).json({ message: 'Class, Teacher, या Time Slot नहीं मिला।' });
@@ -151,6 +154,7 @@ const assignPeriod = async (req, res) => {
                 day: sanitizedDay, // Sanitized day
                 subject: sanitizedSubject, // Sanitized subject
                 schoolId: schoolId,
+                academicYearId: academicYearId, // NAYA: Academic year ID
                 classId: classId,
                 teacherId: teacherId,
                 timeSlotId: timeSlotId,
@@ -171,10 +175,11 @@ const assignPeriod = async (req, res) => {
     }
 };
 
-// --- 4. Time Slot Create/Update (POST/PUT /settings/slot) (UPDATED with Sanitization) ---
+// --- 4. Time Slot Create/Update (POST/PUT /settings/slot) (UPDATED with Sanitization and academic year) ---
 const createOrUpdateSlot = async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
+        const academicYearId = req.academicYearId;
         const slotIdInt = parseInt(req.params.id); // For PUT (update)
         const { name, startTime, endTime, isBreak } = req.body;
 
@@ -191,6 +196,7 @@ const createOrUpdateSlot = async (req, res) => {
             endTime,
             isBreak: !!isBreak, 
             schoolId,
+            academicYearId, // NAYA: Academic year ID
         };
 
         let result;
@@ -198,7 +204,7 @@ const createOrUpdateSlot = async (req, res) => {
         if (slotIdInt) {
             // Update
             result = await prisma.timeSlot.update({
-                where: { id: slotIdInt, schoolId },
+                where: { id: slotIdInt, schoolId, academicYearId },
                 data: data,
             });
             res.status(200).json({ message: 'Time Slot updated successfully!', slot: result });
@@ -220,10 +226,11 @@ const createOrUpdateSlot = async (req, res) => {
 };
 
 
-// --- 5. Time Slot Delete (No Change) ---
+// --- 5. Time Slot Delete (UPDATED to filter by academic year) ---
 const deleteSlot = async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
+        const academicYearId = req.academicYearId;
         const slotIdInt = parseInt(req.params.id);
 
         if (isNaN(slotIdInt)) {
@@ -231,7 +238,7 @@ const deleteSlot = async (req, res) => {
         }
         
         await prisma.timeSlot.delete({
-            where: { id: slotIdInt, schoolId },
+            where: { id: slotIdInt, schoolId, academicYearId },
         });
 
         res.status(200).json({ message: 'Time Slot and related assignments deleted successfully.' });
@@ -247,7 +254,7 @@ const deleteSlot = async (req, res) => {
     }
 };
 
-// --- 6. Working Days Update (POST /settings/days) (UPDATED with Sanitization) ---
+// --- 6. Working Days Update (POST /settings/days) (UPDATED with Sanitization and academic year) ---
 const updateWorkingDays = async (req, res) => {
     const dayIndexMap = {
         "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, 
@@ -256,6 +263,7 @@ const updateWorkingDays = async (req, res) => {
 
     try {
         const schoolId = req.user.schoolId;
+        const academicYearId = req.academicYearId;
         const { workingDays: newDays } = req.body; 
 
         if (!Array.isArray(newDays)) {
@@ -267,9 +275,9 @@ const updateWorkingDays = async (req, res) => {
 
         // Prisma Transaction: Delete old, create new
         await prisma.$transaction([
-            // 1. Delete all existing records for the school
+            // 1. Delete all existing records for the school and academic year
             prisma.workingDay.deleteMany({
-                where: { schoolId },
+                where: { schoolId, academicYearId },
             }),
             
             // 2. Create new records for selected days
@@ -280,6 +288,7 @@ const updateWorkingDays = async (req, res) => {
                         name: dayName,
                         dayIndex: dayIndex,
                         schoolId: schoolId,
+                        academicYearId: academicYearId, // NAYA: Academic year ID
                     },
                 });
             }),

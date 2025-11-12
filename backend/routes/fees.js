@@ -4,6 +4,8 @@ const express = require('express');
 const router = express.Router();
 const { authMiddleware, authorize } = require('../middleware/authMiddleware');
 const checkPremiumAccess = require('../middleware/checkPremiumAccess');
+// Academic year middleware import
+const { validateAcademicYear } = require('../middleware/academicYearMiddleware');
 
 // === FIX 1: Saare zaroori functions import karein ===
 const { 
@@ -28,47 +30,49 @@ const {
 
 // Middleware
 const adminAuth = [authMiddleware, authorize('Admin')];
+// Academic year middleware with admin auth
+const adminAuthWithAcademicYear = [authMiddleware, authorize('Admin'), validateAcademicYear];
 
 // --- Dashboard & Template Routes ---
-router.get('/dashboard-overview', adminAuth, getDashboardOverview);
-router.get('/templates', adminAuth, getFeeTemplates);
-router.post('/templates', adminAuth, createFeeTemplate);
-router.get('/templates/:id', adminAuth, getTemplateDetails);
-router.put('/templates/:id', adminAuth, updateFeeTemplate);
-router.delete('/templates/:id', adminAuth, deleteFeeTemplate);
+router.get('/dashboard-overview', adminAuthWithAcademicYear, getDashboardOverview);
+router.get('/templates', adminAuthWithAcademicYear, getFeeTemplates);
+router.post('/templates', adminAuthWithAcademicYear, createFeeTemplate);
+router.get('/templates/:id', adminAuthWithAcademicYear, getTemplateDetails);
+router.put('/templates/:id', adminAuthWithAcademicYear, updateFeeTemplate);
+router.delete('/templates/:id', adminAuthWithAcademicYear, deleteFeeTemplate);
 // --- Pichle Fixes (Correct Routes) ---
-router.post('/assign-and-collect', adminAuth, assignAndCollectFee);
-router.get('/transactions', adminAuth, getTransactions);
-router.get('/late-payments', adminAuth, getLatePayments);
-router.post('/calculate-fine', adminAuth, calculateLateFees);
+router.post('/assign-and-collect', adminAuthWithAcademicYear, assignAndCollectFee);
+router.get('/transactions', adminAuthWithAcademicYear, getTransactions);
+router.get('/late-payments', adminAuthWithAcademicYear, getLatePayments);
+router.post('/calculate-fine', adminAuthWithAcademicYear, calculateLateFees);
 
 // === FIX 2: Naye 404 Errors ke Routes ===
 
 // @route   GET /api/fees/student-records (Fixing 404)
 // @desc    Fee Records page ke liye saare records
 // (Yeh pehle '/' par tha, ab sahi URL par hai)
-router.get('/student-records', adminAuth, getStudentFeeRecords);
+router.get('/student-records', adminAuthWithAcademicYear, getStudentFeeRecords);
 
 // @route   GET /api/fees/transaction/:id (Fixing 404)
 // @desc    Receipt details ke liye single transaction
-router.get('/transaction/:id', adminAuth, getTransactionById);
+router.get('/transaction/:id', adminAuthWithAcademicYear, getTransactionById);
 
 // @route   GET /api/fees/processing-payments (Fixing 404)
 // @desc    Dashboard tab ke liye
-router.get('/processing-payments', adminAuth, getProcessingPayments);
+router.get('/processing-payments', adminAuthWithAcademicYear, getProcessingPayments);
 
 // @route   GET /api/fees/edited-records (Fixing 404)
 // @desc    Dashboard tab ke liye
-router.get('/edited-records', adminAuth, getEditedRecords);
+router.get('/edited-records', adminAuthWithAcademicYear, getEditedRecords);
 
 // @route   GET /api/fees/pdc-records (Fixing 404)
 // @desc    Dashboard tab ke liye
-router.get('/pdc-records', adminAuth, getPdcRecords);
+router.get('/pdc-records', adminAuthWithAcademicYear, getPdcRecords);
 
 // --- END FIX ---
 
 // --- Existing Route ---
 // @route   POST /api/fees/ (Manual fee collect)
-router.post('/', adminAuth, collectManualFee);
+router.post('/', adminAuthWithAcademicYear, collectManualFee);
 
 module.exports = router;

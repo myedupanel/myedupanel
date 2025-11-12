@@ -16,6 +16,9 @@ router.get('/stats', authMiddleware, async (req, res) => {
         return res.status(400).json({ msg: 'Invalid School ID' });
     }
     
+    // NAYA: Academic year ID ke basis par filter karein
+    const academicYearWhere = { schoolId: schoolId, academicYearId: req.academicYearId };
+    
     // --- FIX: Hum Promise.all ko 'admin.js' waale sahi logic se update karenge ---
     const staffRoles = ['Accountant', 'Office Admin', 'Librarian', 'Security', 'Transport Staff', 'Other', 'Staff']; // admin.js se copy kiya
 
@@ -28,28 +31,28 @@ router.get('/stats', authMiddleware, async (req, res) => {
       admissionsDataRaw, // <-- YEH HAI ADMISSION CHART KE LIYE
       classCountsRaw     // <-- YEH HAI 'Students by Class' CHART KE LIYE
     ] = await Promise.all([
-      // Kadam 1: Saare Counters (admin.js se copy kiye)
-      prisma.students.count({ where: { schoolId: schoolId } }), // Total Students (Sahi table se)
-      prisma.user.count({ where: { role: 'Teacher', schoolId: schoolId } }), // Total Teachers
-      prisma.user.count({ where: { role: 'Parent', schoolId: schoolId } }), // Total Parents
+      // Kadam 1: Saare Counters (admin.js se copy kiye) - UPDATED to filter by academic year
+      prisma.students.count({ where: academicYearWhere }), // Total Students (Sahi table se)
+      prisma.teachers.count({ where: academicYearWhere }), // Total Teachers - UPDATED to filter by academic year
+      prisma.parent.count({ where: { schoolId: schoolId } }), // Total Parents
       prisma.user.count({ where: { role: { in: staffRoles }, schoolId: schoolId } }), // Total Staff
       prisma.classes.count({ where: { schoolId: schoolId } }), // Total Classes
 
-      // Kadam 2: Admission Chart Aggregation (admin.js se copy kiya)
+      // Kadam 2: Admission Chart Aggregation (admin.js se copy kiya) - UPDATED to filter by academic year
       prisma.students.groupBy({
           by: ['admission_date'], // 'admission_date' se group karein
           where: { 
-              schoolId: schoolId, 
+              ...academicYearWhere, 
               admission_date: { not: null } // Sirf unhein ginein jinki date null nahi hai
           }, 
           _count: { studentid: true }, 
           orderBy: { admission_date: 'asc'}
       }),
       
-      // Kadam 3: Class Counts Aggregation (admin.js se copy kiya)
+      // Kadam 3: Class Counts Aggregation (admin.js se copy kiya) - UPDATED to filter by academic year
       prisma.students.groupBy({
           by: ['classid'],
-          where: { schoolId: schoolId },
+          where: academicYearWhere,
           _count: { studentid: true }, 
       }),
     ]);
