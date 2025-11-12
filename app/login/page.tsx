@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { FiEye, FiEyeOff, FiArrowRight, FiHome } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiArrowRight, FiHome, FiCheck, FiUser, FiShield } from 'react-icons/fi';
 import styles from './login.module.scss';
 import { Inter, Montserrat } from 'next/font/google';
 
@@ -28,37 +28,41 @@ export default function LoginPage() {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isCheckingRole, setIsCheckingRole] = useState(false); // New state for role checking animation
+  const [loginStep, setLoginStep] = useState<'idle' | 'authenticating' | 'fetching' | 'redirecting'>('idle');
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Slideshow effect
-  const nextSlide = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % slideshowImages.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + slideshowImages.length) % slideshowImages.length);
-  };
-
-  // Auto slideshow
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % slideshowImages.length);
-  //   }, 5000);
-  //   return () => clearTimeout(timer);
-  // }, [currentImageIndex]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % slideshowImages.length);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    
+    // Clear error when user starts typing
+    if (error) setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Basic validation
+    if (!formData.email || !formData.password) {
+      setError('Please enter both email and password');
+      return;
+    }
+    
     setIsLoading(true);
     setError('');
-
+    setLoginStep('authenticating');
+    
     try {
       // First, login to get the token
       const response = await axios.post('/api/auth/login', formData);
@@ -70,9 +74,8 @@ export default function LoginPage() {
         // Set the token in axios default headers for future requests
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
         
-        // Show role checking animation
-        setIsCheckingRole(true);
-        setIsLoading(false); // Stop the button loading state
+        setLoginStep('fetching');
+        setSuccessMessage('Authentication successful!');
         
         // Small delay to show the animation
         await new Promise(resolve => setTimeout(resolve, 800));
@@ -80,6 +83,12 @@ export default function LoginPage() {
         // Fetch user data
         const userResponse = await axios.get('/api/auth/me');
         const { role } = userResponse.data;
+        
+        setLoginStep('redirecting');
+        setSuccessMessage('Redirecting to your dashboard...');
+        
+        // Small delay before redirect
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         // Redirect based on user role
         if (role === 'admin' || role === 'Admin') {
@@ -96,9 +105,10 @@ export default function LoginPage() {
         }
       } else {
         setError(response.data.message || 'Login failed');
+        setLoginStep('idle');
       }
     } catch (err: any) {
-      setIsCheckingRole(false); // Hide role checking animation on error
+      setLoginStep('idle');
       console.error('Login error:', err);
       if (err.response && err.response.data) {
         setError(err.response.data.message || 'Invalid email or password');
@@ -110,17 +120,30 @@ export default function LoginPage() {
     }
   };
 
-  // Show role checking animation when isCheckingRole is true
-  if (isCheckingRole) {
+  // Show login process animation
+  if (loginStep !== 'idle') {
     return (
       <div className={`${styles.pageWrapper} ${inter.className}`}>
-        {/* --- Left Side: Role Check Animation --- */}
+        {/* --- Left Side: Login Process Animation --- */}
         <div className={styles.formContainer}>
           <div className={styles.formCard}>
-            <div className={styles.roleCheckContainer}>
-              <div className={styles.roleCheckAnimation}>
-                <div className={styles.spinner}></div>
-                <p>Setting up your dashboard...</p>
+            <div className={styles.processContainer}>
+              <div className={styles.processAnimation}>
+                <div className={`${styles.processIcon} ${loginStep === 'authenticating' ? styles.active : ''}`}>
+                  <FiShield />
+                </div>
+                <div className={`${styles.processIcon} ${loginStep === 'fetching' ? styles.active : ''}`}>
+                  <FiUser />
+                </div>
+                <div className={`${styles.processIcon} ${loginStep === 'redirecting' ? styles.active : ''}`}>
+                  <FiArrowRight />
+                </div>
+                
+                <div className={styles.progressBar}>
+                  <div className={`${styles.progressFill} ${styles[loginStep]}`}></div>
+                </div>
+                
+                <p className={styles.processMessage}>{successMessage || 'Processing...'}</p>
               </div>
             </div>
           </div>
@@ -243,8 +266,8 @@ export default function LoginPage() {
           </div>
           
           <div className={styles.navArrows}>
-            <span onClick={prevSlide}>❮</span>
-            <span onClick={nextSlide}>❯</span>
+            <span onClick={() => setCurrentImageIndex((prev) => (prev - 1 + slideshowImages.length) % slideshowImages.length)}>❮</span>
+            <span onClick={() => setCurrentImageIndex((prev) => (prev + 1) % slideshowImages.length)}>❯</span>
           </div>
         </div>
       </div>
