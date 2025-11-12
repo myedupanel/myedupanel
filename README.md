@@ -14,11 +14,24 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3001](http://localhost:3001) with your browser to see the result. (Note: Port may vary if 3000/3001 is in use)
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## New Features
+
+### Admin Assistant ChatBot
+We've added a professional AI-powered chatbot to the admin dashboard with the following features:
+- Multilingual support - responds in the same language as user questions
+- Voice input - speak questions using the microphone button
+- Voice output - bot speaks responses using text-to-speech
+- Step-by-step guidance for admin tasks
+- Professional UI with animated robot interface
+- Contextual previews for complex tasks
+
+To access the chatbot, log in as an admin and navigate to the dashboard. Click the floating chat icon in the bottom-right corner.
 
 ## Learn More
 

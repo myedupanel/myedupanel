@@ -12,6 +12,7 @@ import { MdPeople, MdSchool, MdAttachMoney, MdFamilyRestroom, MdBadge, MdClass }
 import styles from './AdminDashboard.module.scss';
 import { useAuth, User } from '../../context/AuthContext';
 import { useAcademicYear } from '../../context/AcademicYearContext'; 
+import ChatBot from '@/components/admin/ChatBot/ChatBot';
 
 // --- TYPE DEFINITIONS (No Change) ---
 interface MonthlyAdmissionData {
@@ -275,7 +276,7 @@ const AdminDashboardPage = () => {
   }
 
 
-  // --- JSX (No Change) ---
+  // --- JSX (Updated to include ChatBot) ---
   return (
     <div className={styles.dashboardContainer}>
       <Header admin={{
@@ -331,6 +332,8 @@ const AdminDashboardPage = () => {
       <div className={styles.paymentsContainer}>
         <RecentPayments payments={dashboardData.recentPayments} />
       </div>
+      
+      <ChatBot />
     </div>
   );
 };
