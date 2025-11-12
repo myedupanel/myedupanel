@@ -160,25 +160,38 @@ const addStudentsInBulk = async (req, res) => {
 
         await prisma.$transaction(async (tx) => {
           // 7a: Student create karein
-          await tx.students.create({
+          const createdStudent = await tx.students.create({
             data: studentData, 
           });
 
-          // 7b: Hamesha User (login) create karein
-          const tempPassword = crypto.randomBytes(8).toString('hex');
-          const salt = await bcrypt.genSalt(10);
-          const hashedPassword = await bcrypt.hash(tempPassword, salt);
-          
-          await tx.user.create({
-            data: {
-              schoolId: schoolId,
-              name: studentFullName,
-              email: emailForUserTable,
-              password: hashedPassword,
-              role: 'student',
-              isVerified: true,
-            }
+          // 7b: Check if user with this email already exists
+          const existingUser = await tx.user.findUnique({
+            where: { email: emailForUserTable }
           });
+
+          // 7c: Only create User (login) if it doesn't already exist
+          if (!existingUser) {
+            const tempPassword = crypto.randomBytes(8).toString('hex');
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(tempPassword, salt);
+            
+            await tx.user.create({
+              data: {
+                schoolId: schoolId,
+                name: studentFullName,
+                email: emailForUserTable,
+                password: hashedPassword,
+                role: 'student',
+                isVerified: true,
+              }
+            });
+          } else {
+            // If user exists, update the student record to link to the existing user
+            await tx.students.update({
+              where: { studentid: createdStudent.studentid },
+              data: { userId: existingUser.id }
+            });
+          }
         });
         
         createdCount++;
@@ -189,7 +202,7 @@ const addStudentsInBulk = async (req, res) => {
         if (error.code === 'P2002') { 
            const target = error.meta?.target || [];
            if (target.includes('email')) {
-               errors.push(`Duplicate email for student: ${student.first_name || 'N/A'} (Email: ${student.email || 'dummy'})`);
+               errors.push(`Duplicate email for student: ${student.first_name || 'N/A'} (Email: ${student.email || 'dummy'}). User already exists, linking student to existing account.`);
            } else {
                errors.push(`Duplicate entry for student: ${student.first_name || 'N/A'} (Roll No: ${student.roll_number || 'N/A'})`);
            }
@@ -326,7 +339,7 @@ const addSingleStudent = async (req, res) => {
        studentData.admission_date = new Date(); 
     }
 
-    // 8. Transaction (No Change)
+    // 8. Transaction (Updated to check for existing user within transaction)
     const tempPassword = crypto.randomBytes(8).toString('hex');
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(tempPassword, salt);
@@ -346,23 +359,38 @@ const addSingleStudent = async (req, res) => {
         data: studentData, 
       });
 
-      // 8b: Hamesha User entry (login) create karein
-      await tx.user.create({
-        data: {
-          schoolId: schoolId,
-          name: studentFullName,
-          email: emailForUserTable,
-          password: hashedPassword,
-          role: 'student',
-          isVerified: true,
-        }
+      // 8b: Check if user with this email already exists
+      const existingUser = await tx.user.findUnique({
+        where: { email: emailForUserTable }
       });
-      
-      return createdStudent;
+
+      // 8c: Only create User entry if it doesn't already exist
+      if (!existingUser) {
+        await tx.user.create({
+          data: {
+            schoolId: schoolId,
+            name: studentFullName,
+            email: emailForUserTable,
+            password: hashedPassword,
+            role: 'student',
+            isVerified: true,
+          }
+        });
+        // Return info that a new user was created
+        return { student: createdStudent, newUserCreated: true };
+      } else {
+        // If user exists, update the student record to link to the existing user
+        await tx.students.update({
+          where: { studentid: createdStudent.studentid },
+          data: { userId: existingUser.id }
+        });
+        // Return info that an existing user was linked
+        return { student: createdStudent, newUserCreated: false };
+      }
     });
 
-    // 9. Welcome email (sirf REAL email par) bhejein (No Change)
-    if (realEmail) { 
+    // 9. Welcome email (sirf REAL email par) bhejein (Updated to only send if new user was created)
+    if (realEmail && newStudent.newUserCreated) { 
       try {
         const schoolName = req.user.schoolName || 'MyEduPanel';
         const message = `<h1>Welcome to ${schoolName}!</h1><p>An account has been created for your child, ${studentFullName}.</p><p>You can use these details to log in to the student/parent portal.</p><p><strong>Email:</strong> ${realEmail}</p><p><strong>Temporary Password:</strong> ${tempPassword}</p><p>Please log in and change your password at your earliest convenience.</p>`;
@@ -372,8 +400,11 @@ const addSingleStudent = async (req, res) => {
       }
     }
 
-    // 10. Success response (No Change)
-    res.status(201).json({ message: 'Student added successfully!', student: newStudent });
+    // 10. Success response (Updated to indicate if user was linked)
+    const successMessage = newStudent.newUserCreated 
+      ? 'Student added successfully and linked to existing user account!' 
+      : 'Student added successfully!';
+    res.status(201).json({ message: successMessage, student: newStudent.student });
 
   } catch (error) {
     // 11. Catch block (Errors ko handle karein)
@@ -381,7 +412,7 @@ const addSingleStudent = async (req, res) => {
     if (error.code === 'P2002') { 
        const target = error.meta?.target || [];
        if (target.includes('email')) {
-           return res.status(400).json({ message: `An account with this email (${req.body.email || 'dummy email'}) already exists in the User table.` });
+           return res.status(400).json({ message: `An account with this email (${req.body.email || 'dummy email'}) already exists in the User table. Please use a different email or link this student to the existing account.` });
        }
        if (target.includes('roll_number')) {
            return res.status(400).json({ message: `Duplicate entry: A student with Roll Number ${req.body.roll_number} may already exist in ${req.body.class_name}.` });
