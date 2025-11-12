@@ -59,14 +59,21 @@ export default function LoginPage() {
     setError('');
 
     try {
+      // First, login to get the token
       const response = await axios.post('/api/auth/login', formData);
       
       if (response.data.token) {
         // Store token in localStorage
         localStorage.setItem('token', response.data.token);
         
+        // Set the token in axios default headers for future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        
+        // Fetch user data
+        const userResponse = await axios.get('/api/auth/me');
+        const { role } = userResponse.data;
+        
         // Redirect based on user role
-        const { role } = response.data.user;
         if (role === 'admin') {
           router.push('/admin');
         } else if (role === 'teacher') {
