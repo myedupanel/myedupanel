@@ -95,7 +95,7 @@ const ChatBot: React.FC = () => {
     
     try {
       // Send message to AI API
-      const response = await api.post('/api/ai/admin-assistant', {
+      const response = await api.post('/ai/admin-assistant', {
         question: inputValue
       });
       

@@ -1,5 +1,10 @@
 // File: backend/helpers/geminiClient.js
 
+// Load environment variables explicitly for server-side execution
+if (typeof process.env.NODE_ENV === 'undefined' || process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 // 1. Zaroori SDK import karein
 const { GoogleGenAI } = require('@google/genai');
 
