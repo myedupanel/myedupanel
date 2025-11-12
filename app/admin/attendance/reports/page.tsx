@@ -7,13 +7,8 @@ import jsPDF from 'jspdf'; // PDF ke liye
 import 'jspdf-autotable'; // PDF Table ke liye
 import { MdDownload } from 'react-icons/md';
 import AttendancePieChart from '@/components/admin/AttendancePieChart/AttendancePieChart';
-import api from '@/backend/utils/api'; // <-- 1. API IMPORT KIYA
-
-// --- 2. SAMPLE DATA HATA DIYA ---
-// const classOptions = [...]
-// const staffRoles = [...]
-// const allStudents = [...]
-// const allStaffMembers = [...]
+import api from '@/backend/utils/api';
+import { useAcademicYear } from '@/app/context/AcademicYearContext';
 
 // --- 3. NAYE INTERFACES ADD KIYE ---
 interface SchoolClass {
@@ -33,6 +28,7 @@ interface ReportRow {
 }
 
 const ReportsPage = () => {
+  const { currentYearId } = useAcademicYear();
   const [reportFor, setReportFor] = useState<'student' | 'staff'>('student');
   const [timeRange, setTimeRange] = useState('monthly');
   
@@ -71,14 +67,14 @@ const ReportsPage = () => {
       }
     };
     loadFilters();
-  }, [reportFor]); // Jab bhi 'reportFor' (student/staff) badlega, yeh chalega
+  }, [reportFor, currentYearId]); // Jab bhi 'reportFor' (student/staff) badlega, yeh chalega
 
   // --- 6. PIE CHART KA USEEFFECT UPDATE KIYA (LocalStorage hataya) ---
   useEffect(() => {
     // TODO: Is pie chart ke liye ek alag API route (e.g., GET /api/attendance/today-overview) banana behtar hoga.
     // Abhi ke liye, hum report generate hone ke baad ise update karenge.
     setPieChartData([]); // Default empty rakha
-  }, []);
+  }, [currentYearId]);
 
   // Dropdown options ko dynamically badlo
   const groupOptions = reportFor === 'student' ? fetchedClasses : staffRoles;

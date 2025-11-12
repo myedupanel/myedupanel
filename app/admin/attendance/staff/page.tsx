@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import styles from './StaffAttendancePage.module.scss';
-import api from '@/backend/utils/api'; 
+import api from '@/backend/utils/api';
+import { useAcademicYear } from '@/app/context/AcademicYearContext';
 
 // --- Interfaces (No Change) ---
 interface ApiStaff {
@@ -20,6 +21,7 @@ type AttendanceStatus = 'Present' | 'Absent' | 'Leave' | 'Unmarked';
 const statusOptions: AttendanceStatus[] = ['Present', 'Absent', 'Leave', 'Unmarked'];
 
 const StaffAttendancePage = () => {
+  const { currentYearId } = useAcademicYear();
   const [selectedRole, setSelectedRole] = useState(staffRoles[0]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   
@@ -55,7 +57,7 @@ const StaffAttendancePage = () => {
       }
     };
     fetchAllStaff();
-  }, []); // Run only once
+  }, [currentYearId]); // Run only once
 
   // --- FIX 2: Main Logic useEffect - Dependencies aur Logic ko theek kiya ---
   useEffect(() => {
@@ -105,7 +107,7 @@ const StaffAttendancePage = () => {
       }
     }
     setStaffList(staffToDisplay);
-  }, [selectedRole, selectedDate, showAllStaff, allStaff, isStaffLoading]); // isStaffLoading dependency rakha hai taaki jab initial fetch complete ho toh yeh ek baar chale
+  }, [selectedRole, selectedDate, showAllStaff, allStaff, isStaffLoading, currentYearId]); // isStaffLoading dependency rakha hai taaki jab initial fetch complete ho toh yeh ek baar chale
 
   // handleMarkAttendance (No Change)
   const handleMarkAttendance = (staffId: string, status: AttendanceStatus) => {

@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './StudentsPage.module.scss';
 
 // NAYA: Context और Provider को यहाँ से Import किया गया
-import { useStudentLayout, StudentLayoutProvider } from '@/app/context/StudentLayoutContext'; 
+import { useStudentLayout } from '@/app/context/StudentLayoutContext';
+import { useAcademicYear } from '@/app/context/AcademicYearContext'; // Add this import
 
 import StudentSidebar from './components/StudentSidebar';
 import StudentsTable from '@/components/admin/StudentsTable/StudentsTable';
@@ -129,6 +130,7 @@ const StudentsPageContent = () => {
     
     // Context hook is now imported and used
     const { isSidebarOpen, toggleSidebar } = useStudentLayout(); 
+    const { currentYearId } = useAcademicYear(); // Add this line to use academic year context
     
     const [isFiltersVisible, setIsFiltersVisible] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -162,7 +164,7 @@ const StudentsPageContent = () => {
         } catch (error) {
             console.error("Failed to fetch students. Token might be invalid.", error);
         }
-    }, []);
+    }, [currentYearId]); // Add currentYearId as dependency
 
     const fetchClasses = useCallback(async () => {
         try {
@@ -171,13 +173,13 @@ const StudentsPageContent = () => {
         } catch (error) {
             console.error("Failed to fetch classes.", error);
         }
-    }, []);
+    }, [currentYearId]); // Add currentYearId as dependency
 
 
     useEffect(() => {
         fetchStudents();
         fetchClasses(); 
-    }, [fetchStudents, fetchClasses]); 
+    }, [fetchStudents, fetchClasses, currentYearId]); // Add currentYearId as dependency
 
     useEffect(() => {
         const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "https://myedupanel.onrender.com");

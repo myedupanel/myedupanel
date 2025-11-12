@@ -1,7 +1,8 @@
 // File: app/admin/fee-counter/fee-dashboard/page.tsx
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
-import { io } from 'socket.io-client'; 
+import { io } from "socket.io-client";
+import { useAcademicYear } from '@/app/context/AcademicYearContext';
 import api from '@/backend/utils/api';
 import styles from './FeeDashboard.module.scss';
 import StatCard from '@/components/admin/StatCard/StatCard';
@@ -58,7 +59,8 @@ const feeMenuItems = [
 
 
 const FeeDashboardPage = () => {
-    
+    const { currentYearId } = useAcademicYear();
+
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [templates, setTemplates] = useState<Template[]>([]);
     const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -81,7 +83,7 @@ const FeeDashboardPage = () => {
             console.error("Failed to fetch dashboard overview:", err);
             setError('Failed to load dashboard data. Please try again.'); 
         }
-    }, []); 
+    }, [currentYearId]); 
 
     // 2. Fee Templates ki list fetch karna
     const fetchTemplates = useCallback(async () => {
@@ -98,7 +100,7 @@ const FeeDashboardPage = () => {
         } catch (err) {
             console.error("Failed to fetch templates:", err);
         }
-    }, [selectedTemplate]); 
+    }, [selectedTemplate, currentYearId]); 
 
     // 3. Selected Template ki details fetch karna
     const fetchTemplateDetails = useCallback(async (templateId: string) => {
@@ -112,7 +114,7 @@ const FeeDashboardPage = () => {
         } finally {
             setDetailsLoading(false);
         }
-    }, []); 
+    }, [currentYearId]); 
 
 
     // --- useEffects (No Change in logic) ---
@@ -126,7 +128,7 @@ const FeeDashboardPage = () => {
             setLoading(false);
         };
         fetchInitialData();
-    }, [fetchDashboardOverview, fetchTemplates]); 
+    }, [fetchDashboardOverview, fetchTemplates, currentYearId]); 
 
     useEffect(() => {
         if (selectedTemplate && selectedTemplate.id) { 

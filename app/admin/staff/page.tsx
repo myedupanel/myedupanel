@@ -14,6 +14,7 @@ import axios from 'axios';
 import api from '@/backend/utils/api';
 import { io } from "socket.io-client";
 import { useAuth } from '@/app/context/AuthContext';
+import { useAcademicYear } from '@/app/context/AcademicYearContext'; // Add this import
 
 const allRoles = ['All', 'Accountant', 'Office Admin', 'Librarian', 'Security', 'Transport Staff','Other' ];
 
@@ -100,6 +101,7 @@ const transformApiData = (apiStaff: ApiStaffMember): InternalStaffMember => {
 
 const StaffPage = () => {
   const { user } = useAuth();
+  const { currentYearId } = useAcademicYear(); // Add this line to use academic year context
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [staffList, setStaffList] = useState<InternalStaffMember[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -133,11 +135,11 @@ const StaffPage = () => {
       } finally {
           setIsLoading(false);
       }
-  }, [user?.schoolId]); 
+  }, [user?.schoolId, currentYearId]); 
 
   useEffect(() => {
     fetchStaff();
-  }, [fetchStaff]);
+  }, [fetchStaff, currentYearId]); 
 
   // Socket.IO useEffect (Fixed comparisons)
   useEffect(() => {

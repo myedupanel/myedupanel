@@ -7,6 +7,7 @@ import { MdMenu } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useAuth, User } from '@/app/context/AuthContext';
+import { useAcademicYear } from '@/app/context/AcademicYearContext'; // Add this import
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
     MdPeople, MdSchool, MdFamilyRestroom, MdBadge,
@@ -292,8 +293,8 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
 
 // --- DashboardControlCenter Component (Main) ---
 const DashboardControlCenter = () => {
-    // ... (All logic remains the same) ...
     const { token, user } = useAuth(); 
+    const { currentYearId } = useAcademicYear(); // Add this line to use academic year context
     const router = useRouter();
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -369,7 +370,7 @@ const DashboardControlCenter = () => {
         };
         fetchData();
         setWarningDismissed(localStorage.getItem('trialWarningDismissed') === 'true');
-    }, [token]);
+    }, [token, currentYearId]); // Add currentYearId as dependency
 
     useEffect(() => {
         if (subscriptionData.plan === 'TRIAL' && subscriptionData.planExpiryDate && !warningDismissed) {

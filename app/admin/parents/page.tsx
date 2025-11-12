@@ -11,7 +11,8 @@ import { FiPlus, FiMenu, FiSearch } from 'react-icons/fi';
 import api from '@/backend/utils/api'; 
 import Link from 'next/link';
 import { MdGridView } from 'react-icons/md';
-import { useAuth } from '@/app/context/AuthContext'; 
+import { useAuth } from '@/app/context/AuthContext';
+import { useAcademicYear } from '@/app/context/AcademicYearContext'; // Add this import
 
 // --- 1. INTERFACES (PRISMA-AWARE) ---
 
@@ -83,6 +84,7 @@ const ParentsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   
   const { user } = useAuth();
+  const { currentYearId } = useAcademicYear(); // Add this line to use academic year context
 
   const fetchParents = useCallback(async () => {
     try {
@@ -93,11 +95,11 @@ const ParentsPage = () => {
     } catch (error) {
       console.error("Failed to fetch parents", error);
     }
-  }, []);
+  }, [currentYearId]); // Add currentYearId as dependency
 
   useEffect(() => {
     fetchParents();
-  }, [fetchParents]);
+  }, [fetchParents, currentYearId]); // Add currentYearId as dependency
 
   const closeModal = () => {
     setIsModalOpen(false);

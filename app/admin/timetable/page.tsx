@@ -6,7 +6,8 @@ import Modal from '@/components/common/Modal/Modal';
 import AssignPeriodForm from '@/components/admin/AssignPeriodForm/AssignPeriodForm';
 import Link from 'next/link';
 // --- API Import ---
-import api from '@/backend/utils/api'; 
+import api from '@/backend/utils/api';
+import { useAcademicYear } from '@/app/context/AcademicYearContext'; // Add this import
 // --- End API Import ---
 
 // --- NEW INTERFACES (No Change) ---
@@ -29,6 +30,7 @@ interface PeriodAssignment {
 // --- END NEW INTERFACES ---
 
 const TimetablePage = () => {
+    const { currentYearId } = useAcademicYear(); // Add this line to use academic year context
     const [viewBy, setViewBy] = useState<'class' | 'teacher'>('class');
     const [selectedGroup, setSelectedGroup] = useState('');
     
@@ -52,7 +54,7 @@ const TimetablePage = () => {
         } catch(error) {
              console.error("Error fetching assignments:", error);
         }
-    }, []);
+    }, [currentYearId]); // Add currentYearId as dependency
 
     // --- 2. Fetching Settings (No Change) ---
     const fetchSettings = useCallback(async () => {
@@ -79,7 +81,7 @@ const TimetablePage = () => {
         } catch (error) {
             console.error("Error fetching settings:", error);
         }
-    }, [selectedGroup]);
+    }, [selectedGroup, currentYearId]); // Add currentYearId as dependency
 
     // --- 3. Initial Load Effect (No Change) ---
     useEffect(() => {
@@ -90,7 +92,7 @@ const TimetablePage = () => {
             setIsLoading(false);
         };
         loadData();
-    }, [fetchSettings, fetchAssignments]);
+    }, [fetchSettings, fetchAssignments, currentYearId]); // Add currentYearId as dependency
 
     // --- 4. ASYNC Save Logic (Argument Type 'any' किया) ---
     const handleSavePeriod = async (data: any) => {

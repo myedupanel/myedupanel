@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'; 
 import styles from './TeachersPage.module.scss';
 import { useAuth } from '@/app/context/AuthContext';
+import { useAcademicYear } from '@/app/context/AcademicYearContext';
 import TeachersTable from '@/components/admin/TeachersTable/TeachersTable';
 import Modal from '@/components/common/Modal/Modal';
 import AddTeacherForm from '@/components/admin/AddTeacherForm/AddTeacherForm';
@@ -51,7 +52,8 @@ const transformApiData = (apiTeacher: any): TeacherData => {
 
 const TeachersPage = () => {
   const { user } = useAuth();
-  
+  const { currentYearId } = useAcademicYear();
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -76,11 +78,11 @@ const TeachersPage = () => {
     } catch (error) {
       console.error("Failed to fetch teachers", error);
     }
-  }, [user?.schoolId]);
+  }, [user?.schoolId, currentYearId]);
 
   useEffect(() => {
     fetchTeachers();
-  }, [fetchTeachers]); 
+  }, [fetchTeachers, currentYearId]); 
 
   // Socket events (No Change)
   useEffect(() => {

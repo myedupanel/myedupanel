@@ -9,7 +9,8 @@ import PerformanceChart from '@/components/admin/academics/PerformanceChart';
 import UpcomingExamsList from '@/components/admin/academics/UpcomingExamsList';
 import RecentAssignmentsList from '@/components/admin/academics/RecentAssignmentsList';
 import { MdEventAvailable, MdAssignment, MdBook } from 'react-icons/md';
-import api from '@/backend/utils/api'; 
+import api from '@/backend/utils/api';
+import { useAcademicYear } from '@/app/context/AcademicYearContext'; // Add this import
 
 // Interfaces
 interface Exam {
@@ -29,6 +30,7 @@ interface PerformanceData {
 }
 
 const AcademicsDashboardPage = () => {
+  const { currentYearId } = useAcademicYear(); // Add this line to use academic year context
 
   const [upcomingExams, setUpcomingExams] = useState<Exam[]>([]);
   const [recentAssignments, setRecentAssignments] = useState<Assignment[]>([]);
@@ -106,7 +108,7 @@ const AcademicsDashboardPage = () => {
     };
 
     fetchDashboardData();
-  }, []); 
+  }, [currentYearId]); // Add currentYearId as dependency instead of empty array
 
   if (isLoading) {
     return <div className={styles.loadingMessage}>Loading Academics Dashboard...</div>;

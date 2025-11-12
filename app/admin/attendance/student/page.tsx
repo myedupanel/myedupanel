@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import styles from './StudentAttendancePage.module.scss';
-import api from '@/backend/utils/api'; 
+import api from '@/backend/utils/api';
+import { useAcademicYear } from '@/app/context/AcademicYearContext'; // Add this import
 
 // --- 1. CLASS INTERFACE (Aapka code, No Change) ---
 interface SchoolClass {
@@ -41,6 +42,7 @@ type AttendanceStatus = 'Present' | 'Absent' | 'Leave' | 'Unmarked';
 const statusOptions: AttendanceStatus[] = ['Present', 'Absent', 'Leave', 'Unmarked'];
 
 const AttendancePage = () => {
+  const { currentYearId } = useAcademicYear(); // Add this line to use academic year context
   // --- STATES (No Change, bas studentList ko type kiya) ---
   const [fetchedClasses, setFetchedClasses] = useState<SchoolClass[]>([]);
   const [isClassLoading, setIsClassLoading] = useState(true);
@@ -79,7 +81,7 @@ const AttendancePage = () => {
         }
     };
     loadClasses();
-  }, []); 
+  }, [currentYearId]); 
   
   // --- 4. STUDENT FETCH KARNE KA USEEFFECT (Poora naya) ---
   // Yeh 'selectedClass' ya 'selectedDate' badalne par chalega
@@ -132,7 +134,7 @@ const AttendancePage = () => {
     };
 
     fetchStudentsAndAttendance();
-  }, [selectedClass, selectedDate, isClassLoading]); // Dependency list update ki
+  }, [selectedClass, selectedDate, isClassLoading, currentYearId]); // Dependency list update ki
   // --- END FIX 4 ---
 
 
