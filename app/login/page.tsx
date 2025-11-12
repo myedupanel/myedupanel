@@ -33,6 +33,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showRoleCheckAnimation, setShowRoleCheckAnimation] = useState(false);
+  const [loginCompleted, setLoginCompleted] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -50,6 +51,7 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
     setShowRoleCheckAnimation(false);
+    setLoginCompleted(false);
 
     try {
       // Axios call ab aapke global 'api.ts' instance ko use nahi karega, 
@@ -64,6 +66,9 @@ export default function LoginPage() {
       await new Promise(resolve => setTimeout(resolve, 800));
       
       const user = await login(token);
+      
+      // Mark login as completed to prevent flickering
+      setLoginCompleted(true);
 
       if (user) {
         
@@ -96,9 +101,12 @@ export default function LoginPage() {
         }
       } else {
         setError("Could not verify user role after login.");
+        setShowRoleCheckAnimation(false);
+        setLoginCompleted(false);
       }
     } catch (err: any) {
       setShowRoleCheckAnimation(false);
+      setLoginCompleted(false);
       if (err.response && err.response.data.msg) {
         setError(err.response.data.msg);
       } else {
@@ -124,7 +132,7 @@ export default function LoginPage() {
 
           <main className={styles.formContent}>
             <h2>Login to your Account</h2>
-            {showRoleCheckAnimation ? (
+            {showRoleCheckAnimation || loginCompleted ? (
               <div className={styles.roleCheckContainer}>
                 <div className={styles.roleCheckAnimation}>
                   <FiLoader className={styles.spinner} />

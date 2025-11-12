@@ -73,13 +73,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('token', newToken);
     setToken(newToken);
     axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-    setIsLoading(true); // Set loading true while fetching user after login
+    // Note: We don't set isLoading to true here anymore to prevent flickering
+    // The login page will handle its own loading state
     try {
       // API response should match the exported User interface
       const response = await axios.get('/api/auth/me');
       // Naye fields yahaan bhi automatically aa jayenge
       setUser(response.data);
-      setIsLoading(false); // Set loading false after fetching
+      // We don't set isLoading to false here either
       return response.data;
     } catch (error) {
       console.error("Login failed: could not fetch user", error);
