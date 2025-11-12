@@ -4,6 +4,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import api from '@/backend/utils/api';
 
 // Academic Year ke structure ke liye TypeScript Interface
 interface AcademicYear {
@@ -37,32 +38,21 @@ export const AcademicYearProvider: React.FC<{ children: ReactNode }> = ({ childr
     const fetchYears = useCallback(async () => {
         setLoading(true);
         try {
-            // Get token from cookies
-            const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
-            const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-            
-            if (!token) {
-                console.log('No token found, skipping academic year fetch');
-                setAvailableYears([]);
-                setLoading(false);
-                return;
+            // Check if token exists in localStorage
+            if (typeof window !== 'undefined') {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    console.log('No token found, skipping academic year fetch');
+                    setAvailableYears([]);
+                    setLoading(false);
+                    return;
+                }
             }
 
-            // Backend API se years fetch karo
-            const response = await fetch(`${BACKEND_URL}/api/academic-years`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            // Use centralized API utility - it handles token automatically
+            const response = await api.get('/academic-years');
+            const years: AcademicYear[] = response.data;
             
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to fetch academic years.');
-            }
-            
-            const years: AcademicYear[] = await response.json();
             setAvailableYears(years);
 
             // Active year find karo (jo isCurrent true hai)
@@ -75,7 +65,7 @@ export const AcademicYearProvider: React.FC<{ children: ReactNode }> = ({ childr
 
         } catch (err: any) {
             console.error("Error fetching years:", err);
-            setError(err.message || "Could not load Academic Years. Please check the connection.");
+            setError(err.response?.data?.error || err.message || "Could not load Academic Years.");
         } finally {
             setLoading(false);
         }
@@ -85,34 +75,15 @@ export const AcademicYearProvider: React.FC<{ children: ReactNode }> = ({ childr
     const switchAcademicYear = useCallback(async (yearId: number, setAsDefault: boolean = false) => {
         setLoading(true);
         try {
-            // Get token from cookies
-            const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
-            const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-            
-            if (!token) {
-                throw new Error('Not authenticated');
-            }
-
             // If setAsDefault is true, update backend
             if (setAsDefault) {
-                const response = await fetch(`${BACKEND_URL}/api/academic-years/set-current`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ yearId }),
-                });
-                
-                const result = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(result.error || 'Failed to set current year.');
-                }
+                await api.post('/academic-years/set-current', { yearId });
             }
             
             // Set cookie for selected year (client-side)
-            document.cookie = `academicYearId=${yearId}; path=/; max-age=${30 * 24 * 60 * 60}`;
+            if (typeof window !== 'undefined') {
+                document.cookie = `academicYearId=${yearId}; path=/; max-age=${30 * 24 * 60 * 60}`;
+            }
             
             // Context State Update
             const newActiveYear = availableYears.find(y => y.id === yearId);
@@ -126,7 +97,7 @@ export const AcademicYearProvider: React.FC<{ children: ReactNode }> = ({ childr
 
         } catch (err: any) {
             console.error("Error switching year:", err);
-            setError("Switch failed: " + err.message);
+            setError(err.response?.data?.error || err.message || "Failed to switch year");
         } finally {
             setLoading(false);
         }

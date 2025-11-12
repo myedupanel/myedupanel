@@ -1,8 +1,8 @@
-// components/admin/AddAcademicYearForm/AddAcademicYearForm.tsx
 "use client";
 
 import React, { useState } from 'react';
 import styles from './AddAcademicYearForm.module.scss';
+import api from '@/backend/utils/api';
 
 interface AcademicYear {
   id: number;
@@ -54,41 +54,19 @@ const AddAcademicYearForm: React.FC<Props> = ({ existingYear, onSuccess, onCance
         throw new Error('End date must be after start date');
       }
 
-      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-      const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
-
-      let response;
-
       if (isEditing) {
         // Update existing year
-        response = await fetch(`${BACKEND_URL}/api/academic-years/${existingYear.id}`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-        });
+        await api.put(`/academic-years/${existingYear.id}`, formData);
       } else {
         // Create new year
-        response = await fetch('/api/admin/academic-year', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        });
-      }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to save academic year');
+        await api.post('/academic-years', formData);
       }
 
       alert(isEditing ? 'Year updated successfully!' : 'Year created successfully!');
       onSuccess();
     } catch (err: any) {
       console.error('Error saving year:', err);
-      setError(err.message);
+      setError(err.response?.data?.error || err.message);
     } finally {
       setLoading(false);
     }

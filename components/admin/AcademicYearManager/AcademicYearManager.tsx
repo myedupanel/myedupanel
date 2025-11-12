@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './AcademicYearManager.module.scss';
 import Modal from '@/components/common/Modal/Modal';
+import api from '@/backend/utils/api';
 
 // Import form dynamically to avoid build issues
 import dynamic from 'next/dynamic';
@@ -39,31 +40,12 @@ const AcademicYearManager: React.FC = () => {
   const fetchYears = async () => {
     try {
       setLoading(true);
-      const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
-      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-      
-      if (!token) {
-        throw new Error('Not authenticated');
-      }
-
-      const response = await fetch(`${BACKEND_URL}/api/academic-years`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch years');
-      }
-
-      setYears(data);
+      const response = await api.get('/academic-years');
+      setYears(response.data);
       setError(null);
     } catch (err: any) {
       console.error('Error fetching years:', err);
-      setError(err.message);
+      setError(err.response?.data?.error || err.message);
     } finally {
       setLoading(false);
     }
@@ -78,29 +60,12 @@ const AcademicYearManager: React.FC = () => {
     if (!confirm('Set this year as the current active year?')) return;
 
     try {
-      const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
-      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-
-      const response = await fetch(`${BACKEND_URL}/api/academic-years/set-current`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ yearId }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to set current year');
-      }
-
+      await api.post('/academic-years/set-current', { yearId });
       alert('Year set as current successfully!');
       fetchYears();
       window.location.reload(); // Reload to update the context
     } catch (err: any) {
-      alert(err.message);
+      alert(err.response?.data?.error || err.message);
     }
   };
 
@@ -109,27 +74,11 @@ const AcademicYearManager: React.FC = () => {
     if (!confirm(`Delete academic year "${yearName}"? This action cannot be undone.`)) return;
 
     try {
-      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-      const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
-
-      const response = await fetch(`${BACKEND_URL}/api/academic-years/${yearId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to delete year');
-      }
-
+      await api.delete(`/academic-years/${yearId}`);
       alert('Year deleted successfully!');
       fetchYears();
     } catch (err: any) {
-      alert(err.message);
+      alert(err.response?.data?.error || err.message);
     }
   };
 
