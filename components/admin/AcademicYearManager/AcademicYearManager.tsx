@@ -39,7 +39,20 @@ const AcademicYearManager: React.FC = () => {
   const fetchYears = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/academic-year');
+      const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
+      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+      
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(`${BACKEND_URL}/api/academic-years`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
       const data = await response.json();
 
       if (!response.ok) {
@@ -65,10 +78,16 @@ const AcademicYearManager: React.FC = () => {
     if (!confirm('Set this year as the current active year?')) return;
 
     try {
-      const response = await fetch('/api/admin/switch-year', {
+      const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
+      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+
+      const response = await fetch(`${BACKEND_URL}/api/academic-years/set-current`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ yearId, setAsDefault: true }),
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ yearId }),
       });
 
       const data = await response.json();
