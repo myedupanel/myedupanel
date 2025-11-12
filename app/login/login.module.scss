@@ -18,7 +18,8 @@
   justify-content: center;
   align-items: center;
   padding: 40px;
-  overflow-y: auto;
+  // Changed from overflow-y: auto to make entire section scrollable
+  overflow: auto;
 }
 
 .formCard {

@@ -37,10 +37,18 @@ function Navbar({ showLogin, showSignup, showFeatures, activeSection }: NavbarPr
     localStorage.setItem('theme', theme);
     
     // Apply theme to body for landing page specific styles
+    // Only apply dark mode styles to the landing page
     if (typeof window !== 'undefined') {
-      if (theme === 'dark') {
-        document.body.classList.add('dark-mode');
+      const isLandingPage = window.location.pathname === '/';
+      
+      if (isLandingPage) {
+        if (theme === 'dark') {
+          document.body.classList.add('dark-mode');
+        } else {
+          document.body.classList.remove('dark-mode');
+        }
       } else {
+        // Remove dark mode class from body on other pages
         document.body.classList.remove('dark-mode');
       }
     }
