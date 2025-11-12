@@ -1,11 +1,31 @@
-/* File: components/admin/Header/Header.module.scss */
+/* File: components/admin/Header/Header.module.scss - Futuristic Design */
 
 .headerWrapper {
-  background-color: #ffffff;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  padding: 1.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 0 40px rgba(99, 102, 241, 0.04);
   margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      transparent 0%,
+      rgba(99, 102, 241, 0.5) 30%,
+      rgba(168, 85, 247, 0.5) 50%,
+      rgba(99, 102, 241, 0.5) 70%,
+      transparent 100%
+    );
+  }
 }
 
 /* --- Part 1: Title Bar --- */
@@ -13,16 +33,32 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 0.75rem; /* Thoda kam padding kiya */
+  padding-bottom: 1rem;
   flex-wrap: wrap;
   gap: 1.5rem;
 }
 
 .pageTitle {
   margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1e293b;
+  font-size: 2.25rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #0f172a 0%, #475569 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, #a855f7);
+    border-radius: 2px;
+  }
 }
 
 .profileSection {

@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { MdEdit, MdMenu } from 'react-icons/md';
 import { FaGraduationCap } from 'react-icons/fa';
 import styles from './Header.module.scss';
-import { useAdminLayout } from '@/app/context/AdminLayoutContext'; 
+import { useAdminLayout } from '@/app/context/AdminLayoutContext';
+import AcademicYearSwitcher from '../AcademicYearSwitcher/AcademicYearSwitcher'; 
 
 // Helper functions (Same)
 const formatTime = (date: Date) => {
@@ -68,6 +69,9 @@ const Header = ({ admin }: HeaderProps) => {
         <h1 className={`${styles.pageTitle} ${titleAnimationClass}`}>
           {headerTitle}
         </h1>
+        
+        {/* Academic Year Switcher */}
+        <AcademicYearSwitcher />
 
         {/* Profile Section (Desktop Only) */}
         <div className={styles.profileSection}>

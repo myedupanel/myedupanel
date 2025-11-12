@@ -1,0 +1,106 @@
+// components/admin/AcademicYearSwitcher/AcademicYearSwitcher.module.scss - Futuristic
+
+.switcher {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+  border: 1.5px solid rgba(99, 102, 241, 0.2);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+  &:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 12px;
+    padding: 1.5px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.3));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  &:hover::before {
+    opacity: 1;
+  }
+}
+
+.icon {
+  color: #6366f1;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.3));
+  
+  .switcher:hover & {
+    transform: rotate(15deg) scale(1.1);
+    color: #a855f7;
+  }
+}
+
+.select {
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+  padding-right: 1.75rem;
+  outline: none;
+  appearance: none;
+  letter-spacing: -0.01em;
+  
+  option {
+    padding: 0.75rem;
+    background: #ffffff;
+    color: #0f172a;
+  }
+}
+
+.arrow {
+  position: absolute;
+  right: 0.75rem;
+  color: #6366f1;
+  font-size: 1.2rem;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  .switcher:hover & {
+    transform: translateY(2px);
+    color: #a855f7;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .switcher {
+    padding: 0.625rem 0.875rem;
+    gap: 0.5rem;
+  }
+
+  .select {
+    font-size: 0.9rem;
+  }
+
+  .icon {
+    font-size: 1.1rem;
+  }
+  
+  .arrow {
+    font-size: 1rem;
+  }
+}

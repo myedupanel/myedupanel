@@ -1,0 +1,95 @@
+/* src/components/admin/AcademicYearSwitcher/AcademicYearSwitcher.module.scss */
+
+.switcherContainer {
+    display: flex;
+    align-items: center;
+    background-color: #f0f4f8; /* Light Blue/Grey background */
+    border-radius: 8px;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #c9d2da;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+.icon {
+    color: #0F2E5E; /* Deep Sapphire Blue */
+    margin-right: 0.5rem;
+}
+
+.yearSelect {
+    appearance: none; /* Default dropdown arrow hatana */
+    background-color: transparent;
+    border: none;
+    padding: 0.4rem 0.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    cursor: pointer;
+    outline: none;
+    
+    /* Custom arrow daalna */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 12px;
+    padding-right: 2rem; /* Arrow ke liye space */
+    
+    &:focus {
+        box-shadow: 0 0 0 2px rgba(15, 46, 94, 0.2);
+        border-radius: 4px;
+    }
+    
+    option {
+        color: #111827;
+        font-weight: 500;
+    }
+}
+
+.settingsButton {
+    background: #D4AF37; /* Luminous Gold */
+    color: #111827;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem;
+    margin-left: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    
+    &:hover {
+        background-color: #c09f30;
+        transform: rotate(15deg);
+    }
+}
+
+.loadingText {
+    color: #6b7280;
+    font-size: 0.9rem;
+    padding: 0.4rem 0.2rem;
+}
+
+/* --- Spinner Animation (Optional, for visual feedback) --- */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.spinner {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ccc;
+    border-top-color: #0F2E5E; 
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 10;
+}
+
+@media (max-width: 768px) {
+    .switcherContainer {
+        min-width: 150px;
+        .settingsButton { display: none; } /* Mobile par settings button hide kar dete hain */
+    }
+}

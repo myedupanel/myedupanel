@@ -87,6 +87,10 @@ model School {
   // === NAYE SUBSCRIPTION KI RELATION ===
   subscriptions    AppSubscription[]
   // ===================================
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYears    AcademicYear[]
+  // ==============================
 }
 
 // 4. User Model
@@ -177,6 +181,11 @@ model Students {
 
   classid Int
   class   Classes @relation(fields: [classid], references: [classid])
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  // ==============================
 
   feeRecords   FeeRecord[]
   transactions Transaction[]
@@ -189,6 +198,7 @@ model Students {
   @@index([schoolId]) 
   @@index([classid]) 
   @@index([userId])
+  @@index([academicYearId])
 }
 
 // 7. Teachers Model
@@ -202,9 +212,15 @@ model Teachers {
 
   schoolId String
   school   School @relation(fields: [schoolId], references: [id])
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  // ==============================
 
   @@unique([schoolId, email])
   @@unique([schoolId, teacherId])
+  @@index([academicYearId])
 }
 
 // 8. FeeTemplate Model
@@ -247,6 +263,11 @@ model FeeRecord {
 
   templateId Int
   template   FeeTemplate @relation(fields: [templateId], references: [id])
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  // ==============================
 
   transactions Transaction[]
 
@@ -256,7 +277,8 @@ model FeeRecord {
   @@index([schoolId]) 
   @@index([studentId]) 
   @@index([classId]) 
-  @@index([templateId]) 
+  @@index([templateId])
+  @@index([academicYearId])
 }
 
 // 10. Transaction Model
@@ -291,6 +313,11 @@ model Transaction {
 
   collectedById Int?
   collectedBy   User? @relation(fields: [collectedById], references: [id])
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  // ==============================
 
   // === INDEXING ===
   @@index([schoolId]) 
@@ -298,7 +325,8 @@ model Transaction {
   @@index([feeRecordId]) 
   @@index([classId]) 
   @@index([paymentDate]) 
-  @@index([collectedById]) 
+  @@index([collectedById])
+  @@index([academicYearId])
 }
 
 // 11. Parent Model
@@ -337,11 +365,17 @@ model Attendance {
 
   studentId Int
   student   Students @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  // ==============================
 
   @@unique([studentId, date, schoolId])
 
   // === INDEXING ===
   @@index([schoolId, date])
+  @@index([academicYearId])
 }
 
 // 13. StaffAttendance Model
@@ -355,11 +389,17 @@ model StaffAttendance {
 
   school   School @relation(fields: [schoolId], references: [id])
   schoolId String
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  // ==============================
 
   @@unique([userId, date, schoolId])
 
   // === INDEXING ===
   @@index([schoolId, date])
+  @@index([academicYearId])
 }
 
 // 14. Exam Model
@@ -377,6 +417,11 @@ model Exam {
 
   schoolId String
   school   School @relation(fields: [schoolId], references: [id])
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  // ==============================
 
   marks Mark[]
 
@@ -384,7 +429,8 @@ model Exam {
 
   // === INDEXING ===
   @@index([schoolId, className]) 
-  @@index([schoolId, subject]) 
+  @@index([schoolId, subject])
+  @@index([academicYearId])
 }
 
 // 15. Mark Model
@@ -405,12 +451,18 @@ model Mark {
 
   assessmentId Int?
   assessment   Exam? @relation(fields: [assessmentId], references: [id])
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  // ==============================
 
   @@unique([studentId, assessmentId, subject, schoolId])
 
   // === INDEXING ===
   @@index([studentId]) 
-  @@index([assessmentId]) 
+  @@index([assessmentId])
+  @@index([academicYearId])
 }
 
 // 16. Assignment Model
@@ -433,6 +485,11 @@ model Assignment {
 
   studentId Int?
   student   Students? @relation(fields: [studentId], references: [studentid], onDelete: Cascade)
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  // ==============================
 
   createdAt DateTime @default(now())
 
@@ -440,6 +497,7 @@ model Assignment {
   @@index([schoolId])
   @@index([classId])
   @@index([studentId])
+  @@index([academicYearId])
 }
 
 // 17. Quiz Model
@@ -469,10 +527,16 @@ model Event {
 
   schoolId String
   school   School @relation(fields: [schoolId], references: [id])
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  // ==============================
 
   // === INDEXING ===
   @@index([schoolId])
-  @@index([schoolId, date]) 
+  @@index([schoolId, date])
+  @@index([academicYearId])
 }
 
 // 19. LiveClass Model
@@ -489,10 +553,16 @@ model LiveClass {
 
   schoolId String
   school   School @relation(fields: [schoolId], references: [id])
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  // ==============================
 
   // === INDEXING ===
   @@index([schoolId])
-  @@index([schoolId, date]) 
+  @@index([schoolId, date])
+  @@index([academicYearId])
 }
 
 // 20. GradingScale Model
@@ -517,6 +587,11 @@ model StudyMaterial {
 
   schoolId String
   school   School @relation(fields: [schoolId], references: [id])
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  // ==============================
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -524,7 +599,8 @@ model StudyMaterial {
   // === INDEXING ===
   @@index([schoolId])
   @@index([schoolId, className]) 
-  @@index([schoolId, subject]) 
+  @@index([schoolId, subject])
+  @@index([academicYearId])
 }
 
 // 22. TimeSlot Model
@@ -572,13 +648,19 @@ model TimetableAssignment {
 
   schoolId String
   school   School @relation(fields: [schoolId], references: [id])
+  
+  // === ACADEMIC YEAR RELATION ===
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  // ==============================
 
   @@unique([day, classId, timeSlotId, schoolId], name: "class_time_unique")
   @@unique([day, teacherId, timeSlotId, schoolId], name: "teacher_time_unique")
 
   // === INDEXING ===
   @@index([schoolId, classId]) 
-  @@index([schoolId, teacherId]) 
+  @@index([schoolId, teacherId])
+  @@index([academicYearId])
 }
 
 // ===================================
@@ -642,4 +724,43 @@ model Plan {
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now()) // Plan kab bana, yeh store karega
   @@index([isActive])
+}
+
+// ===================================
+// === ACADEMIC YEAR MODEL (NEW) ===
+// ===================================
+
+// 28. AcademicYear Model
+model AcademicYear {
+  id         Int      @id @default(autoincrement())
+  yearName   String   // "2024-2025", "2023-2024"
+  startDate  DateTime @db.Date
+  endDate    DateTime @db.Date
+  isCurrent  Boolean  @default(false) // Only one year can be current per school
+  
+  schoolId   String
+  school     School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  
+  // Relations with all data models
+  students         Students[]
+  teachers         Teachers[]
+  feeRecords       FeeRecord[]
+  transactions     Transaction[]
+  attendances      Attendance[]
+  exams            Exam[]
+  marks            Mark[]
+  assignments      Assignment[]
+  events           Event[]
+  liveClasses      LiveClass[]
+  studyMaterials   StudyMaterial[]
+  staffAttendances StaffAttendance[]
+  timetablePeriods TimetableAssignment[]
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@unique([schoolId, yearName]) // One school can't have duplicate year names
+  @@index([schoolId])
+  @@index([isCurrent])
+  @@index([schoolId, isCurrent])
 }

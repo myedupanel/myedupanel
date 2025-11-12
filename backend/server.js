@@ -7,6 +7,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const http = require('http');
 const { Server } = require("socket.io");
 const prisma = require('./config/prisma');
@@ -15,6 +16,7 @@ const prisma = require('./config/prisma');
 const paymentRoutes = require('./routes/payment'); 
 const couponRoutes = require('./routes/couponRoutes');
 const planRoutes = require('./routes/planRoutes'); 
+const academicYearRoutes = require('./routes/academicYear');
 
 const academicRoutes = require('./routes/academics');
 const eventRoutes = require('./routes/events');
@@ -36,6 +38,7 @@ const attendanceRoutes = require('./routes/attendance');
 const timetableRoutes = require('./routes/timetable');
 
 const { apiLimiter } = require('./middleware/rateLimiter'); // Global Limiter Import
+const { injectAcademicYear } = require('./middleware/academicYearMiddleware');
 
 // --- Allowed URLs ki list (No Change) ---
 const allowedOrigins = [
@@ -50,14 +53,16 @@ const allowedOrigins = [
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- Standard Middlewares (Order: CORS, JSON) ---
+// --- Standard Middlewares (Order: CORS, JSON, Cookies) ---
 app.use(cors({
   origin: allowedOrigins,
-  methods: ["GET", "POST", "PUT", "DELETE"]
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true // Enable cookies
 }));
 
 app.use(express.json({ limit: '5mb' })); 
 app.use(express.urlencoded({ limit: '5mb', extended: true }));
+app.use(cookieParser()); // Parse cookies
 
 // --- Debugging Middleware (No Change) ---
 app.use((req, res, next) => {
@@ -93,7 +98,11 @@ app.use('/api/auth', authRoutes);
 // [Threat D solved for feature routes]
 app.use('/api', apiLimiter);
 
+// 2.5 ACADEMIC YEAR MIDDLEWARE (Inject current year into all requests)
+app.use('/api', injectAcademicYear);
+
 // 3. FEATURE ROUTES (Ab ye sabhi rate limited hain)
+app.use('/api/academic-years', academicYearRoutes);
 app.use('/api/school', schoolRoutes); 
 app.use('/api/admin', adminRoutes);
 app.use('/api/students', studentRoutes);
