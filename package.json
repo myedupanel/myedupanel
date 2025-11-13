@@ -7,14 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "build:backend": "cd backend && npm install && npx prisma generate --schema=../prisma/schema.prisma"
+    "build:backend": "cd backend && npm install && npx prisma generate --schema=../prisma/schema.prisma",
+    "test:vercel-backend": "node test-vercel-backend.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.18.0",
     "@tanstack/react-table": "^8.21.3",
     "@types/uuid": "^10.0.0",
-    "axios": "^1.6.8",
+    "axios": "^1.13.2",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

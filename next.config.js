@@ -7,7 +7,8 @@ const nextConfig = {
         source: '/api/:path*',
         // --- YAHAN BADLAAV KIYA GAYA HAI ---
         // Humne /api ko destination URL mein wapas jod diya hai
-        destination: 'https://myedupanel.onrender.com/api/:path*', 
+        // Updated to point to Vercel backend instead of Render
+        destination: 'https://myedupanel-backend.vercel.app/api/:path*', 
       },
     ];
   },
