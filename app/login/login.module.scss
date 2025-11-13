@@ -16,19 +16,26 @@
 .formContainer {
   display: flex;
   justify-content: center;
-  align-items: center;
+  /* FIX 1: Vertical alignment को flex-start किया ताकि स्क्रॉलिंग सही से हो */
+  align-items: flex-start; 
   padding: 40px;
   overflow-y: auto;
+  
+  /* FIX 2: ऊपर से padding जोड़ी ताकि पूरा फॉर्म नीचे खिसक जाए */
+  padding-top: 80px; 
 }
 
 .formCard {
   width: 100%;
   max-width: 420px;
+  /* स्क्रॉलिंग के बाद नीचे खाली जगह के लिए margin जोड़ी */
+  margin-bottom: 60px;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 20px;
+  /* FIX 3: नीचे की margin बढ़ाई ताकि H2 चिपके नहीं */
+  margin-bottom: 30px; 
   
   h1 {
     font-weight: 700;
