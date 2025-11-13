@@ -1,15 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Pehla section: Rewrites (No Change)
+  // Removed API rewrites since we're now using direct API calls to the backend
   async rewrites() {
     return [
-      {
-        source: '/api/:path*',
-        // --- YAHAN BADLAAV KIYA GAYA HAI ---
-        // Humne /api ko destination URL mein wapas jod diya hai
-        // Updated to point to Vercel backend instead of Render
-        destination: 'https://myedupanel-backend.vercel.app/api/:path*', 
-      },
+      // API rewrites have been removed as we're now calling the backend directly
     ];
   },
 

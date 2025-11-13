@@ -35,23 +35,38 @@ To access the chatbot, log in as an admin and navigate to the dashboard. Click t
 
 ## Deployment to Vercel
 
-### Frontend Deployment
-1. Create a new project in Vercel
-2. Connect your GitHub repository
-3. Set the root directory to `/` (root of the repository)
-4. Vercel will automatically detect it's a Next.js application
-5. Add the required environment variables from `VERCEL_ENV_VARIABLES.md`
-6. Deploy the project
+### Prerequisites
+Before deploying, ensure you have:
+1. A Vercel account
+2. All required environment variables (see `VERCEL_ENV_VARIABLES.md`)
+3. A MySQL database accessible from Vercel
 
-### Backend Deployment
+### Deployment Guide
+For detailed deployment instructions, see [VERCEL_DEPLOYMENT_GUIDE.md](VERCEL_DEPLOYMENT_GUIDE.md)
+
+### Quick Deployment Steps
+
+#### Backend Deployment
 1. Create a new project in Vercel
 2. Connect your GitHub repository
 3. Set the root directory to `/backend`
-4. Vercel will use the `vercel.json` configuration file
-5. Add the required environment variables from `VERCEL_ENV_VARIABLES.md`
-6. Deploy the project
+4. Add all required environment variables from `VERCEL_ENV_VARIABLES.md`
+5. Deploy the project
 
-### Environment Variables
+#### Frontend Deployment
+1. Create a new project in Vercel
+2. Connect your GitHub repository
+3. Set the root directory to `/` (root of the repository)
+4. Add the `NEXT_PUBLIC_API_URL` environment variable pointing to your backend
+5. Deploy the project
+
+### Testing Deployment
+After deployment, run the test script to verify the backend is working:
+```bash
+npm run test:vercel-backend
+```
+
+## Environment Variables
 Refer to `VERCEL_ENV_VARIABLES.md` for a complete list of environment variables that need to be configured in the Vercel dashboard.
 
 ## Learn More
