@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -15,7 +15,12 @@ const slideshowImages = [
   "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1170",
   "https://images.unsplash.com/photo-1560780552-ba54683cb263?auto=format&fit=crop&q=80&w=1170",
   "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1170",
-  "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=1170"
+  "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=1170",
+  // Adding 4 more professional school-related images
+  "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&q=80&w=1170", // Students studying together
+  "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1170", // Teacher with students
+  "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&q=80&w=1170", // Parent-teacher meeting
+  "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1170"  // Classroom
 ];
 
 export default function LoginPage() {
@@ -30,15 +35,45 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [loginStep, setLoginStep] = useState<'idle' | 'authenticating' | 'fetching' | 'redirecting'>('idle');
   const [successMessage, setSuccessMessage] = useState('');
+  const slideIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const carouselTrackRef = useRef<HTMLDivElement>(null);
 
   // Slideshow effect
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % slideshowImages.length);
-    }, 5000);
+    startSlideShow();
     
-    return () => clearInterval(interval);
+    return () => {
+      if (slideIntervalRef.current) {
+        clearInterval(slideIntervalRef.current);
+      }
+    };
   }, []);
+
+  useEffect(() => {
+    // Update the transform property for smooth sliding
+    if (carouselTrackRef.current) {
+      carouselTrackRef.current.style.transform = `translateX(-${currentImageIndex * 100}%)`;
+    }
+  }, [currentImageIndex]);
+
+  const startSlideShow = () => {
+    if (slideIntervalRef.current) {
+      clearInterval(slideIntervalRef.current);
+    }
+    
+    slideIntervalRef.current = setInterval(() => {
+      setCurrentImageIndex(prevIndex => (prevIndex + 1) % slideshowImages.length);
+    }, 5000);
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentImageIndex(index);
+    // Reset the interval when manually changing slides
+    if (slideIntervalRef.current) {
+      clearInterval(slideIntervalRef.current);
+    }
+    startSlideShow();
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -153,13 +188,15 @@ export default function LoginPage() {
         <div className={`${styles.slideshowContainer} ${montserrat.className}`}>
           <div className={styles.overlay}></div>
           
-          {slideshowImages.map((src, index) => (
-            <div
-              key={index}
-              className={`${styles.slide} ${index === currentImageIndex ? styles.active : ''}`}
-              style={{ backgroundImage: `url(${src})` }}
-            />
-          ))}
+          <div className={styles.carouselTrack} ref={carouselTrackRef}>
+            {slideshowImages.map((src, index) => (
+              <div
+                key={index}
+                className={`${styles.carouselSlide} ${index === currentImageIndex ? styles.active : ''}`}
+                style={{ backgroundImage: `url(${src})` }}
+              />
+            ))}
+          </div>
           
           <div className={styles.slideshowContent}>
             <div className={styles.tagline}>
@@ -248,26 +285,33 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* --- Right Side: Slideshow --- */}
+      {/* --- Right Side: Infinite Carousel Slideshow --- */}
       <div className={`${styles.slideshowContainer} ${montserrat.className}`}>
         <div className={styles.overlay}></div>
         
-        {slideshowImages.map((src, index) => (
-          <div
-            key={index}
-            className={`${styles.slide} ${index === currentImageIndex ? styles.active : ''}`}
-            style={{ backgroundImage: `url(${src})` }}
-          />
-        ))}
+        <div className={styles.carouselTrack} ref={carouselTrackRef}>
+          {slideshowImages.map((src, index) => (
+            <div
+              key={index}
+              className={`${styles.carouselSlide}`}
+              style={{ backgroundImage: `url(${src})` }}
+            />
+          ))}
+        </div>
         
         <div className={styles.slideshowContent}>
           <div className={styles.tagline}>
             Your Complete School Management System
           </div>
           
-          <div className={styles.navArrows}>
-            <span onClick={() => setCurrentImageIndex((prev) => (prev - 1 + slideshowImages.length) % slideshowImages.length)}>❮</span>
-            <span onClick={() => setCurrentImageIndex((prev) => (prev + 1) % slideshowImages.length)}>❯</span>
+          <div className={styles.navDots}>
+            {slideshowImages.map((_, index) => (
+              <span 
+                key={index}
+                className={`${styles.dot} ${index === currentImageIndex ? styles.active : ''}`}
+                onClick={() => goToSlide(index)}
+              />
+            ))}
           </div>
         </div>
       </div>

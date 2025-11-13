@@ -218,7 +218,7 @@
   min-height: 1.5em;
 }
 
-/* --- Right Side: Slideshow --- */
+/* --- Right Side: Infinite Carousel Slideshow --- */
 .slideshowContainer {
   position: relative;
   height: 100vh;
@@ -241,23 +241,19 @@
   z-index: 2;
 }
 
-.slide {
-  position: absolute;
-  top: 0;
-  left: 0;
+.carouselTrack {
+  display: flex;
+  height: 100%;
   width: 100%;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.carouselSlide {
+  min-width: 100%;
   height: 100%;
   background-size: cover;
   background-position: center;
-  opacity: 0;
-  transform: scale(1.1);
-  transition: opacity 1.5s ease-in-out, transform 8s ease-out; 
-  z-index: 1;
-}
-
-.slide.active {
-  opacity: 1;
-  transform: scale(1);
+  position: relative;
 }
 
 .slideshowContent {
@@ -280,23 +276,22 @@
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
-.navArrows {
+.navDots {
   display: flex;
   gap: 10px;
-  span {
-    width: 45px;
-    height: 45px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    backdrop-filter: blur(5px);
-    transition: background-color 0.2s;
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  
+  &.active {
+    background-color: white;
+    transform: scale(1.2);
   }
 }
 
