@@ -2,7 +2,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
-import axios from 'axios';
+// FIX: Use our configured API instance instead of default axios
+import api from '../../backend/utils/api';
 import styles from './VerifyOtpPage.module.scss';
 import Link from 'next/link';
 
@@ -63,7 +64,8 @@ const VerifyOtpPage = () => {
     }
 
     try {
-      const response = await axios.post('/api/auth/verify-otp', {
+      // FIX: Use our configured api instance instead of default axios
+      const response = await api.post('/auth/verify-otp', {
         email: email, otp: enteredOtp,
       });
       if (response.data.success) {
@@ -85,7 +87,8 @@ const VerifyOtpPage = () => {
     setResendStatus('');
     
     try {
-      const response = await axios.post('/api/auth/resend-otp', { email });
+      // FIX: Use our configured api instance instead of default axios
+      const response = await api.post('/auth/resend-otp', { email });
       if (response.data.success) {
         setResendStatus(response.data.message);
         setCountdown(120);

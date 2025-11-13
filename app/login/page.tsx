@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+// FIX: Use our configured API instance instead of default axios
+import api from '../../backend/utils/api';
 import { FiEye, FiEyeOff, FiArrowRight, FiHome, FiUser, FiShield } from 'react-icons/fi';
 import styles from './login.module.scss';
 import { Inter, Montserrat } from 'next/font/google';
@@ -103,7 +104,8 @@ export default function LoginPage() {
     
     try {
       // 1. First, login to get the token
-      const response = await axios.post('/api/auth/login', formData);
+      // FIX: Use our configured api instance instead of default axios
+      const response = await api.post('/auth/login', formData);
       
       if (response.data.token) {
         const token = response.data.token;

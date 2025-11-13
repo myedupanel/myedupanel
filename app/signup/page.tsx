@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 // --- BADLAAV 1: 'useSearchParams' ko import karein ---
 import { useRouter, useSearchParams } from 'next/navigation'; 
-import axios from 'axios';
+// FIX: Use our configured API instance instead of default axios
+import api from '../../backend/utils/api';
 import { FiHome, FiUser, FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff } from 'react-icons/fi';
 import styles from './signup.module.scss';
 import { Inter, Montserrat } from 'next/font/google';
@@ -71,7 +72,8 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('/api/auth/signup', formData);
+      // FIX: Use our configured api instance instead of default axios
+      const response = await api.post('/auth/signup', formData);
       setMessage(response.data.message || "OTP sent successfully!");
 
       if (response.data.success) {

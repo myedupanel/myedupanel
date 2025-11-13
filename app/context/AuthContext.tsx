@@ -1,7 +1,8 @@
 "use client";
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import axios from 'axios';
+// FIX: Use our configured API instance instead of default axios
+import api from '../../backend/utils/api';
 
 export interface User { 
   id: number;
@@ -44,9 +45,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       setToken(storedToken);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
       try {
-        const response = await axios.get('/api/auth/me');
+        // FIX: Use our configured api instance instead of default axios
+        const response = await api.get('/auth/me');
         // Fetched data should match the exported User interface
         // Naye fields (plan, planExpiryDate) yahaan automatically aa jayenge
         setUser(response.data);
@@ -72,12 +74,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (newToken: string): Promise<User | null> => {
     localStorage.setItem('token', newToken);
     setToken(newToken);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
     // Note: We don't set isLoading to true here anymore to prevent flickering
     // The login page will handle its own loading state
     try {
       // API response should match the exported User interface
-      const response = await axios.get('/api/auth/me');
+      // FIX: Use our configured api instance instead of default axios
+      const response = await api.get('/auth/me');
       // Naye fields yahaan bhi automatically aa jayenge
       setUser(response.data);
       // We don't set isLoading to false here either
@@ -95,7 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
-    delete axios.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common['Authorization'];
     setIsLoading(false); // Ensure loading is false
     // Redirect happens here
     window.location.href = '/login';
