@@ -135,39 +135,62 @@ export default function Home() {
           
           <div className="hero-illustration">
             <div className="illustration-container">
-              {/* Decorative circles */}
-              <div className="circle-decoration large"></div>
-              <div className="circle-decoration medium"></div>
-              <div className="circle-decoration small"></div>
+              {/* Floating geometric shapes */}
+              <div className="floating-shape shape-1"></div>
+              <div className="floating-shape shape-2"></div>
+              <div className="floating-shape shape-3"></div>
               
-              {/* Characters */}
-              <div className="character admin-character">
-                <div className="role-label">Admin</div>
+              {/* Floating laptop mockup with dashboard */}
+              <div className="laptop-mockup">
+                <div className="screen-content">
+                  <div className="dashboard-header">
+                    <div className="logo">SchoolPro</div>
+                    <div className="user">
+                      <div className="avatar"></div>
+                      <div className="name">Admin</div>
+                    </div>
+                  </div>
+                  <div className="dashboard-content">
+                    <div className="sidebar">
+                      <div className="menu-item"></div>
+                      <div className="menu-item"></div>
+                      <div className="menu-item"></div>
+                      <div className="menu-item"></div>
+                    </div>
+                    <div className="main-content">
+                      <div className="stats-row">
+                        <div className="stat-card"></div>
+                        <div className="stat-card"></div>
+                        <div className="stat-card"></div>
+                      </div>
+                      <div className="chart-area">
+                        <div className="graph-line"></div>
+                        <div className="graph-line"></div>
+                        <div className="graph-line"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
               
-              <div className="character teacher-character">
-                <div className="role-label">Teacher</div>
+              {/* Floating smartphone mockup */}
+              <div className="phone-mockup">
+                <div className="phone-screen">
+                  <div className="app-header">
+                    <div className="app-name">SchoolPro Mobile</div>
+                    <div className="menu"></div>
+                  </div>
+                  <div className="dashboard-item"></div>
+                  <div className="dashboard-item"></div>
+                  <div className="dashboard-item"></div>
+                  <div className="bottom-nav">
+                    <div className="nav-item"></div>
+                    <div className="nav-item active"></div>
+                    <div className="nav-item"></div>
+                    <div className="nav-item"></div>
+                  </div>
+                </div>
               </div>
-              
-              <div className="character student-character">
-                <div className="role-label">Student</div>
-              </div>
-              
-              {/* Devices */}
-              <div className="character desktop-computer">
-                <div className="screen">🖥️</div>
-              </div>
-              
-              <div className="character mobile-phone">
-                <div className="screen">📱</div>
-              </div>
-              
-              {/* Connection lines */}
-              <div className="connection-line admin-to-teacher"></div>
-              <div className="connection-line admin-to-student"></div>
-              <div className="connection-line teacher-to-student"></div>
-              <div className="connection-line admin-to-desktop"></div>
-              <div className="connection-line student-to-mobile"></div>
             </div>
           </div>
         </div>
@@ -176,7 +199,7 @@ export default function Home() {
       <section className="trusted-by">
         <div className="container">
           <div className="trusted-by-header">
-            <h3>Trusted by 9+ Leading Educational Institutions</h3>
+            <h3>Our Impact in Numbers</h3>
             <p>Join Hundreds of schools already transforming their management systems</p>
           </div>
         </div>
