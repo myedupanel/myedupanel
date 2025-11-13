@@ -12,10 +12,7 @@ const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] });
 const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] });
 
 const slideshowImages = [
-  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1920", // Professional school hallway
-  "https://images.unsplash.com/photo-1560780552-ba54683cb263?auto=format&fit=crop&q=80&w=1920", // Modern classroom
-  "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=1920", // Students collaborating
-  "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1920"  // Teacher explaining
+  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1920" // Professional school hallway
 ];
 
 export default function LoginPage() {
@@ -60,17 +57,18 @@ export default function LoginPage() {
     
     slideIntervalRef.current = setInterval(() => {
       setCurrentImageIndex(prevIndex => (prevIndex + 1) % slideshowImages.length);
-    }, 6000); // Increased to 6 seconds for more premium feel
+    }, 8000); // Increased to 8 seconds for more premium feel
   };
 
-  const goToSlide = (index: number) => {
-    setCurrentImageIndex(index);
-    // Reset the interval when manually changing slides
-    if (slideIntervalRef.current) {
-      clearInterval(slideIntervalRef.current);
-    }
-    startSlideShow();
-  };
+  // Removed goToSlide function as we now use only one image
+  // const goToSlide = (index: number) => {
+  //   setCurrentImageIndex(index);
+  //   // Reset the interval when manually changing slides
+  //   if (slideIntervalRef.current) {
+  //     clearInterval(slideIntervalRef.current);
+  //   }
+  //   startSlideShow();
+  // };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -112,8 +110,8 @@ export default function LoginPage() {
         setLoginStep('fetching');
         setSuccessMessage('Authentication successful!');
         
-        // Small delay to show the animation
-        await new Promise(resolve => setTimeout(resolve, 800));
+        // Smooth transition delays for professional feel
+        await new Promise(resolve => setTimeout(resolve, 1200));
         
         // Fetch user data
         const userResponse = await axios.get('/api/auth/me');
@@ -125,8 +123,8 @@ export default function LoginPage() {
         setLoginStep('redirecting');
         setSuccessMessage('Redirecting to your dashboard...');
         
-        // Small delay before redirect
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Smooth transition before redirect
+        await new Promise(resolve => setTimeout(resolve, 800));
         
         // Redirect based on user role
         // Using setTimeout to ensure state updates are processed before navigation
@@ -324,16 +322,6 @@ export default function LoginPage() {
         <div className={styles.slideshowContent}>
           <div className={styles.tagline}>
             Your Complete School Management System
-          </div>
-          
-          <div className={styles.navDots}>
-            {slideshowImages.map((_, index) => (
-              <span 
-                key={index}
-                className={`${styles.dot} ${index === currentImageIndex ? styles.active : ''}`}
-                onClick={() => goToSlide(index)}
-              />
-            ))}
           </div>
         </div>
       </div>
