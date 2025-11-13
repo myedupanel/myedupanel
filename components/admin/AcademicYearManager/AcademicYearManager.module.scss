@@ -42,6 +42,56 @@
   }
 }
 
+.headerActions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.dashboardButton {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  display: inline-block;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    
+    &::before {
+      width: 300px;
+      height: 300px;
+    }
+  }
+  
+  &:active {
+    transform: translateY(-1px) scale(0.98);
+  }
+}
+
 .addButton {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;
@@ -308,6 +358,15 @@
 
     h1 {
       font-size: 1.5rem;
+    }
+  }
+  
+  .headerActions {
+    flex-direction: column;
+    
+    .dashboardButton, .addButton {
+      width: 100%;
+      text-align: center;
     }
   }
 

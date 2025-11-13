@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import styles from './AcademicYearManager.module.scss';
 import Modal from '@/components/common/Modal/Modal';
 import api from '@/backend/utils/api';
+import Link from 'next/link';
 
 // Import form dynamically to avoid build issues
 import dynamic from 'next/dynamic';
@@ -106,14 +107,19 @@ const AcademicYearManager: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Academic Years Management</h1>
-        <button 
-          className={styles.addButton}
-          onClick={() => setShowAddForm(true)}
-        >
-          + Create New Year
-        </button>
+        <div className={styles.headerActions}>
+          <Link href="/admin/dashboard" className={styles.dashboardButton}>
+            Go to Dashboard
+          </Link>
+          <button 
+            className={styles.addButton}
+            onClick={() => setShowAddForm(true)}
+          >
+            + Create New Year
+          </button>
+        </div>
       </div>
-
+      
       {error && <div className={styles.error}>{error}</div>}
 
       <div className={styles.yearsList}>
