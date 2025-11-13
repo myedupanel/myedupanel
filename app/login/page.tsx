@@ -4,9 +4,14 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { FiEye, FiEyeOff, FiArrowRight, FiHome, FiCheck, FiUser, FiShield } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiArrowRight, FiHome, FiUser, FiShield } from 'react-icons/fi';
 import styles from './login.module.scss';
 import { Inter, Montserrat } from 'next/font/google';
+
+// =========================================================
+// FIX 1: Global Auth Context Import करें
+// =========================================================
+import { useAuth } from '@/app/context/AuthContext'; 
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] });
 const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] });
@@ -16,15 +21,17 @@ const slideshowImages = [
   "https://images.unsplash.com/photo-1560780552-ba54683cb263?auto=format&fit=crop&q=80&w=1170",
   "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1170",
   "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=1170",
-  // Adding 4 more professional school-related images
-  "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&q=80&w=1170", // Students studying together
-  "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1170", // Teacher with students
-  "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&q=80&w=1170", // Parent-teacher meeting
-  "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1170"  // Classroom
+  "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&q=80&w=1170",
+  "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1170",
+  "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&q=80&w=1170",
+  "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1170"
 ];
 
 export default function LoginPage() {
   const router = useRouter();
+  // FIX 2: useAuth hook से 'login' function को निकालें
+  const { login } = useAuth(); 
+  
   const [showPassword, setShowPassword] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [formData, setFormData] = useState({
@@ -38,7 +45,7 @@ export default function LoginPage() {
   const slideIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const carouselTrackRef = useRef<HTMLDivElement>(null);
 
-  // Slideshow effect
+  // Slideshow effect (No Change)
   useEffect(() => {
     startSlideShow();
     
@@ -50,7 +57,6 @@ export default function LoginPage() {
   }, []);
 
   useEffect(() => {
-    // Update the transform property for smooth sliding
     if (carouselTrackRef.current) {
       carouselTrackRef.current.style.transform = `translateX(-${currentImageIndex * 100}%)`;
     }
@@ -68,7 +74,6 @@ export default function LoginPage() {
 
   const goToSlide = (index: number) => {
     setCurrentImageIndex(index);
-    // Reset the interval when manually changing slides
     if (slideIntervalRef.current) {
       clearInterval(slideIntervalRef.current);
     }
@@ -81,14 +86,12 @@ export default function LoginPage() {
       [e.target.name]: e.target.value,
     });
     
-    // Clear error when user starts typing
     if (error) setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Basic validation
     if (!formData.email || !formData.password) {
       setError('Please enter both email and password');
       return;
@@ -99,15 +102,11 @@ export default function LoginPage() {
     setLoginStep('authenticating');
     
     try {
-      // First, login to get the token
+      // 1. First, login to get the token
       const response = await axios.post('/api/auth/login', formData);
       
       if (response.data.token) {
-        // Store token in localStorage
-        localStorage.setItem('token', response.data.token);
-        
-        // Set the token in axios default headers for future requests
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        const token = response.data.token;
         
         setLoginStep('fetching');
         setSuccessMessage('Authentication successful!');
@@ -115,9 +114,17 @@ export default function LoginPage() {
         // Small delay to show the animation
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Fetch user data
-        const userResponse = await axios.get('/api/auth/me');
-        const { role } = userResponse.data;
+        // 2. FIX 3: Context के 'login' function को कॉल करें।
+        // यह function अब token save करेगा, header सेट करेगा, और user data fetch करके 
+        // global state (setUser) को अपडेट करेगा।
+        const user = await login(token);
+        
+        if (!user) {
+             // Handle case where login succeeded but user fetch failed inside context
+             throw new Error('Could not retrieve user data after successful login.');
+        }
+
+        const { role } = user; // Use user data returned by context's login function
         
         setLoginStep('redirecting');
         setSuccessMessage('Redirecting to your dashboard...');
@@ -125,8 +132,7 @@ export default function LoginPage() {
         // Small delay before redirect
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Redirect based on user role
-        // Redirect based on user role
+        // 3. Redirect based on user role (using data returned from context)
         if (role === 'admin' || role === 'Admin') {
           router.push('/admin/dashboard');
         } else if (role === 'teacher' || role === 'Teacher') {
@@ -146,6 +152,7 @@ export default function LoginPage() {
     } catch (err: any) {
       setLoginStep('idle');
       console.error('Login error:', err);
+      // Handle the error which might be a network error or a specific API error
       if (err.response && err.response.data) {
         setError(err.response.data.message || 'Invalid email or password');
       } else {
@@ -156,7 +163,7 @@ export default function LoginPage() {
     }
   };
 
-  // Show login process animation
+  // Show login process animation (No Change)
   if (loginStep !== 'idle') {
     return (
       <div className={`${styles.pageWrapper} ${inter.className}`}>

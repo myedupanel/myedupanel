@@ -1,14 +1,14 @@
 # Professional Admin Assistant ChatBot - Complete Feature Set
 
 ## Overview
-The Admin Assistant ChatBot is a cutting-edge AI-powered solution integrated into the admin dashboard, providing multilingual support, voice interaction, and step-by-step guidance for all administrative tasks.
+The Admin Assistant ChatBot is a self-contained solution integrated into the admin dashboard, providing multilingual support, voice interaction, and step-by-step guidance for all administrative tasks - without any external API dependencies.
 
 ## Core Features
 
 ### 1. Multilingual Support
 - Responds in the same language as user questions
 - Supports major global languages (English, Hindi, French, Russian, etc.)
-- Uses Google Gemini AI for accurate language detection and response
+- Uses browser-based language detection for accurate response
 
 ### 2. Voice Interaction
 - **Voice Input**: Speak questions using the microphone button
@@ -37,9 +37,9 @@ The Admin Assistant ChatBot is a cutting-edge AI-powered solution integrated int
 - **Responsive Design**: Mobile-first approach
 
 ### Backend Services
-- **Google Gemini AI**: State-of-the-art natural language processing
+- **Local Knowledge Base**: Self-contained rule-based system
 - **Secure API**: Server-side processing for data protection
-- **Custom Prompt Engineering**: Education-specific response formatting
+- **Custom Response Formatting**: Education-specific response formatting
 - **Preview Parsing**: Extracts and formats step-by-step instructions
 
 ### Integration Points
@@ -240,7 +240,7 @@ Response:
 ### Common Issues
 1. **Voice Input Not Working**: Check browser permissions
 2. **No Audio Output**: Verify system volume settings
-3. **Slow Responses**: Check internet connection
+3. **Limited Responses**: Ask more specific questions about admin tasks
 4. **Language Mismatch**: Ensure correct input language
 
 ### Error Handling
@@ -252,7 +252,7 @@ Response:
 ## Maintenance
 
 ### Updates
-- **AI Model Updates**: Automatic through Google services
+- **Knowledge Base Expansion**: Manual updates to add new capabilities
 - **UI Enhancements**: Component-based updates
 - **Security Patches**: Regular dependency updates
 - **Feature Additions**: Modular expansion capability
