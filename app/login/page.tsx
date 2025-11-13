@@ -12,10 +12,10 @@ const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] });
 const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] });
 
 const slideshowImages = [
-  "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&q=80&w=1170", // Students studying together
-  "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1170", // Teacher with students
-  "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&q=80&w=1170", // Parent-teacher meeting
-  "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1170"  // Classroom learning
+  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1920", // Professional school hallway
+  "https://images.unsplash.com/photo-1560780552-ba54683cb263?auto=format&fit=crop&q=80&w=1920", // Modern classroom
+  "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=1920", // Students collaborating
+  "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1920"  // Teacher explaining
 ];
 
 export default function LoginPage() {
@@ -32,6 +32,7 @@ export default function LoginPage() {
   const [successMessage, setSuccessMessage] = useState('');
   const slideIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const carouselTrackRef = useRef<HTMLDivElement>(null);
+  const isMountedRef = useRef(true);
 
   // Slideshow effect
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function LoginPage() {
       if (slideIntervalRef.current) {
         clearInterval(slideIntervalRef.current);
       }
+      isMountedRef.current = false;
     };
   }, []);
 
@@ -58,7 +60,7 @@ export default function LoginPage() {
     
     slideIntervalRef.current = setInterval(() => {
       setCurrentImageIndex(prevIndex => (prevIndex + 1) % slideshowImages.length);
-    }, 5000);
+    }, 6000); // Increased to 6 seconds for more premium feel
   };
 
   const goToSlide = (index: number) => {
@@ -104,6 +106,9 @@ export default function LoginPage() {
         // Set the token in axios default headers for future requests
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
         
+        // Check if component is still mounted before updating state
+        if (!isMountedRef.current) return;
+        
         setLoginStep('fetching');
         setSuccessMessage('Authentication successful!');
         
@@ -114,6 +119,9 @@ export default function LoginPage() {
         const userResponse = await axios.get('/api/auth/me');
         const { role } = userResponse.data;
         
+        // Check if component is still mounted before updating state
+        if (!isMountedRef.current) return;
+        
         setLoginStep('redirecting');
         setSuccessMessage('Redirecting to your dashboard...');
         
@@ -121,23 +129,32 @@ export default function LoginPage() {
         await new Promise(resolve => setTimeout(resolve, 500));
         
         // Redirect based on user role
-        if (role === 'admin' || role === 'Admin') {
-          router.push('/admin/dashboard');
-        } else if (role === 'teacher' || role === 'Teacher') {
-          router.push('/teacher');
-        } else if (role === 'student' || role === 'Student') {
-          router.push('/student');
-        } else if (role === 'parent' || role === 'Parent') {
-          router.push('/parent');
-        } else {
-          // Default to admin dashboard for any other role
-          router.push('/admin/dashboard');
-        }
+        // Using setTimeout to ensure state updates are processed before navigation
+        setTimeout(() => {
+          // Check if component is still mounted before navigation
+          if (isMountedRef.current) {
+            if (role === 'admin' || role === 'Admin') {
+              router.push('/admin/dashboard');
+            } else if (role === 'teacher' || role === 'Teacher') {
+              router.push('/teacher');
+            } else if (role === 'student' || role === 'Student') {
+              router.push('/student');
+            } else if (role === 'parent' || role === 'Parent') {
+              router.push('/parent');
+            } else {
+              // Default to admin dashboard for any other role
+              router.push('/admin/dashboard');
+            }
+          }
+        }, 100);
       } else {
         setError(response.data.message || 'Login failed');
         setLoginStep('idle');
       }
     } catch (err: any) {
+      // Check if component is still mounted before updating state
+      if (!isMountedRef.current) return;
+      
       setLoginStep('idle');
       console.error('Login error:', err);
       if (err.response && err.response.data) {
@@ -146,6 +163,8 @@ export default function LoginPage() {
         setError('An error occurred. Please try again.');
       }
     } finally {
+      // Check if component is still mounted before updating state
+      if (!isMountedRef.current) return;
       setIsLoading(false);
     }
   };
@@ -188,7 +207,11 @@ export default function LoginPage() {
               <div
                 key={index}
                 className={`${styles.carouselSlide} ${index === currentImageIndex ? styles.active : ''}`}
-                style={{ backgroundImage: `url(${src})` }}
+                style={{ 
+                  backgroundImage: `url(${src})`,
+                  opacity: index === currentImageIndex ? 1 : 0,
+                  transition: 'opacity 1s ease-in-out'
+                }}
               />
             ))}
           </div>
@@ -289,7 +312,11 @@ export default function LoginPage() {
             <div
               key={index}
               className={`${styles.carouselSlide}`}
-              style={{ backgroundImage: `url(${src})` }}
+              style={{ 
+                backgroundImage: `url(${src})`,
+                opacity: index === currentImageIndex ? 1 : 0,
+                transition: 'opacity 1s ease-in-out'
+              }}
             />
           ))}
         </div>
