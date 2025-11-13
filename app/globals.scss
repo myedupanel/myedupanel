@@ -158,6 +158,25 @@ section {
   }
 }
 
+/* === FLOATING SHAPE ANIMATION === */
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(0) translateX(20px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(10px) translateX(10px) rotate(-5deg);
+  }
+  100% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+  }
+}
+
 
 // --- 3. Header & Navigation ---
 header {
@@ -271,6 +290,49 @@ main.hero {
       radial-gradient(circle at 10% 20%, rgba(100, 149, 237, 0.1) 0%, transparent 20%),
       radial-gradient(circle at 90% 80%, rgba(135, 206, 250, 0.1) 0%, transparent 20%);
     z-index: 0;
+  }
+  
+  // Floating geometric shapes
+  .floating-shape {
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+    
+    &.shape-1 {
+      width: 250px;
+      height: 250px;
+      top: 10%;
+      left: 5%;
+      background: linear-gradient(135deg, rgba(100, 160, 255, 0.1) 0%, transparent 70%);
+      animation: float 25s infinite ease-in-out;
+    }
+    
+    &.shape-2 {
+      width: 180px;
+      height: 180px;
+      bottom: 15%;
+      right: 7%;
+      background: linear-gradient(135deg, rgba(167, 199, 255, 0.1) 0%, transparent 70%);
+      animation: float 28s infinite ease-in-out reverse;
+    }
+    
+    &.shape-3 {
+      width: 120px;
+      height: 120px;
+      top: 40%;
+      right: 15%;
+      background: linear-gradient(135deg, rgba(100, 200, 255, 0.1) 0%, transparent 70%);
+      animation: float 20s infinite ease-in-out;
+    }
+    
+    &.shape-4 {
+      width: 90px;
+      height: 90px;
+      bottom: 25%;
+      left: 12%;
+      background: linear-gradient(135deg, rgba(100, 220, 255, 0.1) 0%, transparent 70%);
+      animation: float 22s infinite ease-in-out reverse;
+    }
   }
   
   // Two-column layout
@@ -974,8 +1036,35 @@ main.hero {
     background: linear-gradient(90deg, #64a0ff, #3a7bff, #a7c7ff);
   }
   
+  // Floating geometric shapes
+  .floating-shape {
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+    
+    &.shape-1 {
+      width: 120px;
+      height: 120px;
+      top: 10%;
+      left: 5%;
+      background: linear-gradient(135deg, rgba(100, 160, 255, 0.1) 0%, transparent 70%);
+      animation: float 12s infinite ease-in-out;
+    }
+    
+    &.shape-2 {
+      width: 80px;
+      height: 80px;
+      bottom: 15%;
+      right: 8%;
+      background: linear-gradient(135deg, rgba(167, 199, 255, 0.1) 0%, transparent 70%);
+      animation: float 15s infinite ease-in-out reverse;
+    }
+  }
+  
   .trusted-by-header {
     margin-bottom: var(--space-12);
+    position: relative;
+    z-index: 1;
     h3 { 
       font-size: 1.8rem; 
       color: #ffffff; 
@@ -996,6 +1085,7 @@ main.hero {
     max-width: 1200px;
     margin: 0 auto;
     padding: var(--space-8) 0;
+    z-index: 1;
     
     &:before, &:after {
       content: '';
@@ -1079,7 +1169,7 @@ main.hero {
 
 // --- 6. Impact Numbers Section ---
 .impact-numbers {
-  background: var(--color-white); 
+  background: linear-gradient(135deg, #1a1a5e 0%, #0d0d3d 100%); 
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -1093,19 +1183,55 @@ main.hero {
     left: 0;
     right: 0;
     height: 6px;
-    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--color-accent-yellow));
+    background: linear-gradient(90deg, #64a0ff, #3a7bff, #a7c7ff);
+  }
+  
+  // Floating geometric shapes
+  .floating-shape {
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+    
+    &.shape-1 {
+      width: 150px;
+      height: 150px;
+      top: 5%;
+      right: 10%;
+      background: linear-gradient(135deg, rgba(100, 160, 255, 0.1) 0%, transparent 70%);
+      animation: float 14s infinite ease-in-out;
+    }
+    
+    &.shape-2 {
+      width: 100px;
+      height: 100px;
+      bottom: 10%;
+      left: 7%;
+      background: linear-gradient(135deg, rgba(167, 199, 255, 0.1) 0%, transparent 70%);
+      animation: float 16s infinite ease-in-out reverse;
+    }
+    
+    &.shape-3 {
+      width: 70px;
+      height: 70px;
+      top: 40%;
+      left: 15%;
+      background: linear-gradient(135deg, rgba(100, 200, 255, 0.1) 0%, transparent 70%);
+      animation: float 10s infinite ease-in-out;
+    }
   }
   
   .impact-header {
     margin-bottom: var(--space-16);
+    position: relative;
+    z-index: 1;
     h2 { 
       font-size: 2.8rem; 
-      color: var(--color-text-heading); 
+      color: #ffffff; 
       margin-bottom: var(--space-4);
       font-weight: 800;
     }
     p { 
-      color: var(--color-text-body); 
+      color: #cbd6f0; 
       max-width: 600px; 
       margin: 0 auto; 
       font-size: 1.1rem;
@@ -1119,17 +1245,20 @@ main.hero {
     gap: var(--space-8); 
     max-width: 1100px; 
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
   }
   
   .impact-card {
-    background: var(--color-background); 
+    background: rgba(255, 255, 255, 0.05); 
     padding: var(--space-10);
     border-radius: var(--radius-xl); 
-    border: 1px solid var(--color-border);
+    border: 1px solid rgba(167, 199, 255, 0.3);
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     overflow: hidden;
-    box-shadow: var(--box-shadow-md);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1;
     
     // Decorative glow effect
     &::before {
@@ -1146,23 +1275,24 @@ main.hero {
     }
     
     &:nth-child(1) { 
-      box-shadow: inset 0 4px 0 0 var(--color-primary), 0 0 20px -4px var(--color-primary);
-      &::before { background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark)); }
+      box-shadow: inset 0 4px 0 0 #64a0ff, 0 0 20px -4px rgba(100, 160, 255, 0.3);
+      &::before { background: linear-gradient(90deg, #64a0ff, #3a7bff); }
     }
     
     &:nth-child(2) { 
-      box-shadow: inset 0 4px 0 0 var(--color-secondary), 0 0 20px -4px var(--color-secondary);
-      &::before { background: linear-gradient(90deg, var(--color-secondary), #059669); }
+      box-shadow: inset 0 4px 0 0 #a7c7ff, 0 0 20px -4px rgba(167, 199, 255, 0.3);
+      &::before { background: linear-gradient(90deg, #a7c7ff, #64a0ff); }
     }
     
     &:nth-child(3) { 
-      box-shadow: inset 0 4px 0 0 var(--color-accent-red), 0 0 20px -4px var(--color-accent-red);
-      &::before { background: linear-gradient(90deg, var(--color-accent-red), #dc2626); }
+      box-shadow: inset 0 4px 0 0 #64dcff, 0 0 20px -4px rgba(100, 220, 255, 0.3);
+      &::before { background: linear-gradient(90deg, #64dcff, #3ac8ff); }
     }
     
     &:hover { 
       transform: translateY(-15px);
-      box-shadow: var(--box-shadow-xl);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.1);
       
       &::before {
         transform: scaleX(1);
@@ -1173,28 +1303,28 @@ main.hero {
       font-size: 3.5rem; 
       font-weight: 800; 
       margin-top: var(--space-4);
-      background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+      background: linear-gradient(90deg, #64a0ff, #3a7bff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     
     &:nth-child(1) .card-number { 
-      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
+      background: linear-gradient(90deg, #64a0ff, #3a7bff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     
     &:nth-child(2) .card-number { 
-      background: linear-gradient(90deg, var(--color-secondary), #059669);
+      background: linear-gradient(90deg, #a7c7ff, #64a0ff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     
     &:nth-child(3) .card-number { 
-      background: linear-gradient(90deg, var(--color-accent-red), #dc2626);
+      background: linear-gradient(90deg, #64dcff, #3ac8ff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -1203,12 +1333,12 @@ main.hero {
     .card-title { 
       font-size: 1.5rem; 
       font-weight: 700; 
-      color: var(--color-text-heading); 
+      color: #ffffff; 
       margin: var(--space-4) 0 var(--space-2);
     }
     
     .card-description { 
-      color: var(--color-text-body);
+      color: #a7c7ff;
       line-height: 1.6;
     }
   }
@@ -1236,9 +1366,45 @@ main.hero {
     height: 6px;
     background: linear-gradient(90deg, #64a0ff, #3a7bff, #a7c7ff);
   }
+  
+  // Floating geometric shapes
+  .floating-shape {
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+    
+    &.shape-1 {
+      width: 180px;
+      height: 180px;
+      top: 8%;
+      left: 5%;
+      background: linear-gradient(135deg, rgba(100, 160, 255, 0.1) 0%, transparent 70%);
+      animation: float 18s infinite ease-in-out;
+    }
+    
+    &.shape-2 {
+      width: 120px;
+      height: 120px;
+      bottom: 12%;
+      right: 6%;
+      background: linear-gradient(135deg, rgba(167, 199, 255, 0.1) 0%, transparent 70%);
+      animation: float 20s infinite ease-in-out reverse;
+    }
+    
+    &.shape-3 {
+      width: 90px;
+      height: 90px;
+      top: 35%;
+      right: 12%;
+      background: linear-gradient(135deg, rgba(100, 200, 255, 0.1) 0%, transparent 70%);
+      animation: float 15s infinite ease-in-out;
+    }
+  }
 
   .features-header {
     margin-bottom: var(--space-10);
+    position: relative;
+    z-index: 1;
     .features-tag { 
       font-weight: 700; 
       color: #64a0ff;
@@ -1270,6 +1436,8 @@ main.hero {
     gap: var(--space-5);
     flex-wrap: wrap;
     margin-bottom: var(--space-8);
+    position: relative;
+    z-index: 1;
   }
 
   .tab-button {
@@ -1285,6 +1453,8 @@ main.hero {
     display: flex;
     align-items: center;
     gap: var(--space-2);
+    position: relative;
+    z-index: 1;
     
     i { 
       font-size: 1.2rem;
@@ -1414,6 +1584,40 @@ main.hero {
     height: 6px;
     background: linear-gradient(90deg, #64a0ff, #3a7bff, #a7c7ff);
   }
+  
+  // Floating geometric shapes
+  .floating-shape {
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+    
+    &.shape-1 {
+      width: 200px;
+      height: 200px;
+      top: 5%;
+      left: 3%;
+      background: linear-gradient(135deg, rgba(100, 160, 255, 0.1) 0%, transparent 70%);
+      animation: float 20s infinite ease-in-out;
+    }
+    
+    &.shape-2 {
+      width: 140px;
+      height: 140px;
+      bottom: 8%;
+      right: 4%;
+      background: linear-gradient(135deg, rgba(167, 199, 255, 0.1) 0%, transparent 70%);
+      animation: float 22s infinite ease-in-out reverse;
+    }
+    
+    &.shape-3 {
+      width: 100px;
+      height: 100px;
+      top: 30%;
+      right: 10%;
+      background: linear-gradient(135deg, rgba(100, 200, 255, 0.1) 0%, transparent 70%);
+      animation: float 18s infinite ease-in-out;
+    }
+  }
 }
 .pricing-toggle {
   display: flex;
@@ -1461,6 +1665,7 @@ main.hero {
   position: relative;
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  z-index: 1;
   
   /* Decorative element */
   &::before {
@@ -1533,6 +1738,7 @@ main.hero {
     position: relative;
     overflow: hidden;
     transition: all 0.3s ease;
+    z-index: 1;
     
     &:hover {
       transform: translateY(-10px);
@@ -2004,6 +2210,40 @@ footer {
     height: 4px;
     background: var(--glow-color);
   }
+  
+  // Floating geometric shapes
+  .floating-shape {
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+    
+    &.shape-1 {
+      width: 160px;
+      height: 160px;
+      top: 5%;
+      right: 8%;
+      background: linear-gradient(135deg, rgba(100, 160, 255, 0.1) 0%, transparent 70%);
+      animation: float 16s infinite ease-in-out;
+    }
+    
+    &.shape-2 {
+      width: 110px;
+      height: 110px;
+      bottom: 8%;
+      left: 6%;
+      background: linear-gradient(135deg, rgba(167, 199, 255, 0.1) 0%, transparent 70%);
+      animation: float 18s infinite ease-in-out reverse;
+    }
+    
+    &.shape-3 {
+      width: 80px;
+      height: 80px;
+      top: 40%;
+      left: 12%;
+      background: linear-gradient(135deg, rgba(100, 200, 255, 0.1) 0%, transparent 70%);
+      animation: float 14s infinite ease-in-out;
+    }
+  }
 
   h3 {
     font-size: 2rem;
@@ -2011,6 +2251,8 @@ footer {
     color: #ffffff;
     margin-top: 0;
     margin-bottom: var(--space-4);
+    position: relative;
+    z-index: 1;
   }
 
   .description {
@@ -2019,12 +2261,16 @@ footer {
     margin-bottom: var(--space-10);
     max-width: 80ch;
     line-height: 1.7;
+    position: relative;
+    z-index: 1;
   }
 
   .feature-points-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: var(--space-6);
+    position: relative;
+    z-index: 1;
   }
 
   .feature-point {
@@ -2037,6 +2283,8 @@ footer {
     border: 1px solid rgba(167, 199, 255, 0.2);
     border-left: 4px solid var(--glow-color); 
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
 
     i {
       color: var(--glow-color);
