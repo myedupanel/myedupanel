@@ -121,22 +121,105 @@ export default function Home() {
         activeSection={activeSection}
       />
 
-      <main id="hero" className="hero" style={{ position: 'relative' }}>
-        <div className="miss-minutes-container">
-          <NextImage
-            src="/images/miss-minutes.gif"
-            alt="Miss Minutes Animation"
-            width={140}
-            height={160}
-            unoptimized={true}
-          />
-        </div>
+      <main id="hero" className="hero">
+        {/* Geometric background elements */}
+        <div className="geometric-element-1"></div>
+        <div className="geometric-element-2"></div>
+        
         <p className="hero-subtitle">✨ Welcome to My EduPanel</p>
         <h1>Your Complete School<br />Management Solution</h1>
         <p className="hero-description">From admissions to academics, simplify every aspect of school administration with our comprehensive and user-friendly platform.</p>
         <div className="hero-buttons">
           <Link href="/signup" className="get-started-btn">Get Started</Link>
           <a href="#features-section" className="all-features-btn">See All features</a>
+        </div>
+        
+        {/* Device mockups container */}
+        <div className="devices-container">
+          {/* Laptop mockup with dashboard */}
+          <div className="laptop-mockup">
+            <div className="screen-content">
+              <div className="dashboard-header">
+                <h3>School Dashboard</h3>
+                <div className="user-info">
+                  <span>Admin</span>
+                  <div className="avatar"></div>
+                </div>
+              </div>
+              
+              <div className="metrics-container">
+                <div className="metric-card">
+                  <div className="metric-label">Students</div>
+                  <div className="metric-value">1,248</div>
+                  <div className="metric-label">+12% this month</div>
+                </div>
+                <div className="metric-card">
+                  <div className="metric-label">Attendance</div>
+                  <div className="metric-value">94.2%</div>
+                  <div className="metric-label">+2.1% this week</div>
+                </div>
+                <div className="metric-card">
+                  <div className="metric-label">Fees Collected</div>
+                  <div className="metric-value">₹8.2L</div>
+                  <div className="metric-label">82% of target</div>
+                </div>
+              </div>
+              
+              <div className="chart-container">
+                <svg className="chart-line" viewBox="0 0 200 60">
+                  <polyline 
+                    className="line"
+                    points="0,40 20,35 40,45 60,30 80,35 100,25 120,30 140,20 160,25 180,15 200,20"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          {/* Phone mockup with mobile app */}
+          <div className="phone-mockup">
+            <div className="phone-screen">
+              <div className="app-header">
+                <h4>Student Portal</h4>
+                <div className="menu-icon">☰</div>
+              </div>
+              
+              <div className="student-card">
+                <h5 className="student-name">Rahul Sharma</h5>
+                <div className="student-info">
+                  <span>Class X-B</span>
+                  <span>Roll No: 24</span>
+                </div>
+              </div>
+              
+              <div className="student-card">
+                <h5 className="student-name">Today's Schedule</h5>
+                <div className="student-info">
+                  <span>Mathematics - 9:00 AM</span>
+                  <span>Science - 11:00 AM</span>
+                </div>
+              </div>
+              
+              <div className="quick-actions">
+                <div className="action-button">
+                  <div className="action-icon">📊</div>
+                  <div className="action-label">Attendance</div>
+                </div>
+                <div className="action-button">
+                  <div className="action-icon">💰</div>
+                  <div className="action-label">Fees</div>
+                </div>
+                <div className="action-button">
+                  <div className="action-icon">📚</div>
+                  <div className="action-label">Library</div>
+                </div>
+                <div className="action-button">
+                  <div className="action-icon">📅</div>
+                  <div className="action-label">Events</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 

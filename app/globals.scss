@@ -247,22 +247,68 @@ header {
 
 // --- 4. Hero Section ---
 main.hero {
-  background: linear-gradient(135deg, var(--color-primary-light), var(--color-background));
+  // Updated background with deep indigo blue gradient
+  background: linear-gradient(135deg, #1a1a5e 0%, #0d0d3d 50%, #000022 100%);
   padding: var(--space-16) var(--space-8);
   text-align: center;
   position: relative;
   overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   
-  // Decorative elements
+  // Geometric light blue background elements for tech feel
   &::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+    top: -100px;
+    left: -100px;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(100, 200, 255, 0.15) 0%, transparent 70%);
     z-index: 0;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -200px;
+    right: -100px;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(100, 200, 255, 0.1) 0%, transparent 70%);
+    z-index: 0;
+  }
+  
+  // Additional geometric elements
+  .geometric-element-1 {
+    position: absolute;
+    top: 20%;
+    right: 15%;
+    width: 80px;
+    height: 80px;
+    border: 2px solid rgba(100, 200, 255, 0.2);
+    transform: rotate(45deg);
+    border-radius: 10px;
+    z-index: 0;
+    animation: float 8s ease-in-out infinite;
+  }
+  
+  .geometric-element-2 {
+    position: absolute;
+    bottom: 25%;
+    left: 10%;
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(100, 200, 255, 0.2);
+    border-radius: 50%;
+    z-index: 0;
+    animation: float 6s ease-in-out infinite;
+    animation-delay: 1s;
   }
   
   .hero-subtitle {
@@ -270,13 +316,14 @@ main.hero {
     position: relative;
     font-weight: 600;
     font-size: 1.25rem;
-    color: var(--color-text-heading);
+    color: #a0a0ff;
     margin-bottom: var(--space-6);
     z-index: 1;
     padding: 0.5rem 1.5rem;
     border-radius: 50px;
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
+    border: 1px solid rgba(100, 200, 255, 0.2);
     
     &::before {
       content: '';
@@ -289,7 +336,7 @@ main.hero {
       border-radius: 50%;
       z-index: -1;
       filter: blur(25px);
-      animation: glowing-background 8s linear infinite;
+      background: linear-gradient(90deg, rgba(100, 200, 255, 0.3) 0%, rgba(150, 100, 255, 0.3) 100%);
     }
   }
   
@@ -297,13 +344,13 @@ main.hero {
     font-size: clamp(2.8rem, 6vw, 4.8rem);
     font-weight: 800;
     margin-bottom: var(--space-6);
-    color: var(--color-text-heading);
+    color: #ffffff;
     line-height: 1.15;
     position: relative;
     z-index: 1;
     
     // Gradient text effect
-    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    background: linear-gradient(90deg, #ffffff 0%, #a0a0ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -314,7 +361,7 @@ main.hero {
     margin: 0 auto var(--space-10);
     font-size: 1.1rem; 
     line-height: 1.7;
-    color: var(--color-text-body);
+    color: #d0d0ff;
     position: relative;
     z-index: 1;
   }
@@ -325,6 +372,12 @@ main.hero {
     justify-content: center;
     position: relative;
     z-index: 1;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-4);
+    }
   }
 
   .get-started-btn, .all-features-btn {
@@ -361,7 +414,7 @@ main.hero {
   }
 
   .get-started-btn {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
     box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
     
     &:hover {
@@ -370,11 +423,310 @@ main.hero {
   }
   
   .all-features-btn {
-    background: linear-gradient(135deg, var(--color-secondary) 0%, #059669 100%);
-    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
     
     &:hover {
-        box-shadow: 0 15px 30px rgba(16, 185, 129, 0.4);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+  }
+  
+  // Device mockups container
+  .devices-container {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    margin: var(--space-12) auto 0;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 100px;
+    
+    @media (max-width: 992px) {
+      gap: 50px;
+    }
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+  }
+  
+  // Floating laptop mockup
+  .laptop-mockup {
+    position: relative;
+    width: 500px;
+    height: 300px;
+    background: #0a0a2a;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(100, 200, 255, 0.2);
+    overflow: hidden;
+    transform: perspective(1000px) rotateX(5deg) rotateY(-5deg);
+    animation: float 6s ease-in-out infinite;
+    
+    @media (max-width: 992px) {
+      width: 400px;
+      height: 250px;
+    }
+    
+    @media (max-width: 768px) {
+      width: 300px;
+      height: 200px;
+    }
+    
+    // Screen content
+    .screen-content {
+      width: 100%;
+      height: 100%;
+      background: #0f0f3f;
+      position: relative;
+      overflow: hidden;
+      
+      // Dashboard elements
+      .dashboard-header {
+        padding: 15px;
+        border-bottom: 1px solid rgba(100, 200, 255, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        
+        h3 {
+          color: #ffffff;
+          font-size: 1rem;
+          margin: 0;
+        }
+        
+        .user-info {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          
+          .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+          }
+        }
+      }
+      
+      .metrics-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        padding: 15px;
+        
+        .metric-card {
+          background: rgba(100, 200, 255, 0.05);
+          border-radius: 10px;
+          padding: 10px;
+          border: 1px solid rgba(100, 200, 255, 0.1);
+          
+          .metric-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 5px 0;
+          }
+          
+          .metric-label {
+            font-size: 0.7rem;
+            color: #a0a0ff;
+          }
+        }
+      }
+      
+      .chart-container {
+        height: 100px;
+        margin: 0 15px;
+        background: rgba(100, 200, 255, 0.05);
+        border-radius: 10px;
+        border: 1px solid rgba(100, 200, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+        
+        .chart-line {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 60px;
+          
+          .line {
+            stroke: #6366f1;
+            stroke-width: 2;
+            fill: none;
+          }
+        }
+      }
+    }
+    
+    // Laptop base
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: -50px;
+      width: calc(100% + 100px);
+      height: 20px;
+      background: #0a0a2a;
+      border-radius: 0 0 10px 10px;
+    }
+  }
+  
+  // Standing smartphone mockup
+  .phone-mockup {
+    position: relative;
+    width: 200px;
+    height: 400px;
+    background: #0a0a2a;
+    border-radius: 30px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(100, 200, 255, 0.2);
+    overflow: hidden;
+    transform: perspective(1000px) rotateX(5deg) rotateY(5deg);
+    animation: float 7s ease-in-out infinite;
+    animation-delay: 0.5s;
+    
+    @media (max-width: 768px) {
+      width: 150px;
+      height: 300px;
+    }
+    
+    // Screen content
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: #0f0f3f;
+      position: relative;
+      overflow: hidden;
+      padding: 15px;
+      
+      // Mobile app elements
+      .app-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        
+        h4 {
+          color: #ffffff;
+          font-size: 0.9rem;
+          margin: 0;
+        }
+        
+        .menu-icon {
+          color: #a0a0ff;
+          font-size: 1.2rem;
+        }
+      }
+      
+      .student-card {
+        background: rgba(100, 200, 255, 0.05);
+        border-radius: 15px;
+        padding: 15px;
+        border: 1px solid rgba(100, 200, 255, 0.1);
+        margin-bottom: 15px;
+        
+        .student-name {
+          color: #ffffff;
+          font-weight: 600;
+          margin: 0 0 5px 0;
+        }
+        
+        .student-info {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.8rem;
+          color: #a0a0ff;
+        }
+      }
+      
+      .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-top: 20px;
+        
+        .action-button {
+          background: rgba(100, 200, 255, 0.05);
+          border-radius: 10px;
+          padding: 10px;
+          text-align: center;
+          border: 1px solid rgba(100, 200, 255, 0.1);
+          
+          .action-icon {
+            font-size: 1.2rem;
+            color: #6366f1;
+            margin-bottom: 5px;
+          }
+          
+          .action-label {
+            font-size: 0.7rem;
+            color: #a0a0ff;
+          }
+        }
+      }
+    }
+    
+    // Phone notch
+    &::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 20px;
+      background: #0a0a2a;
+      border-radius: 0 0 15px 15px;
+      z-index: 2;
+    }
+    
+    // Home button
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 40px;
+      border: 2px solid rgba(100, 200, 255, 0.2);
+      border-radius: 50%;
+    }
+  }
+}
+
+// Floating animation keyframes
+@keyframes float {
+  0% {
+    transform: perspective(1000px) rotateX(5deg) rotateY(-5deg) translateY(0px);
+  }
+  50% {
+    transform: perspective(1000px) rotateX(5deg) rotateY(-5deg) translateY(-20px);
+  }
+  100% {
+    transform: perspective(1000px) rotateX(5deg) rotateY(-5deg) translateY(0px);
+  }
+}
+
+@media (max-width: 768px) {
+  main.hero {
+    .devices-container {
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+    
+    .laptop-mockup, .phone-mockup {
+      animation: none;
+      transform: none;
     }
   }
 }
