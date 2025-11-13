@@ -121,78 +121,22 @@ export default function Home() {
         activeSection={activeSection}
       />
 
-      <main id="hero" className="hero">
-        <div className="hero-content">
-          <div className="hero-text">
-            <p className="hero-subtitle">✨ EdTech Software Features</p>
-            <h1>Your Complete School<br /><span>Management Solution</span></h1>
-            <p className="hero-description">From admissions to academics, simplify every aspect of school administration with our comprehensive and user-friendly platform.</p>
-            <div className="hero-buttons">
-              <Link href="/signup" className="get-started-btn">Sign Up Now</Link>
-              <a href="#features-section" className="all-features-btn">See All Features</a>
-            </div>
-          </div>
-          
-          <div className="hero-illustration">
-            <div className="illustration-container">
-              {/* Floating geometric shapes */}
-              <div className="floating-shape shape-1"></div>
-              <div className="floating-shape shape-2"></div>
-              <div className="floating-shape shape-3"></div>
-              
-              {/* Floating laptop mockup with dashboard */}
-              <div className="laptop-mockup">
-                <div className="screen-content">
-                  <div className="dashboard-header">
-                    <div className="logo">SchoolPro</div>
-                    <div className="user">
-                      <div className="avatar"></div>
-                      <div className="name">Admin</div>
-                    </div>
-                  </div>
-                  <div className="dashboard-content">
-                    <div className="sidebar">
-                      <div className="menu-item"></div>
-                      <div className="menu-item"></div>
-                      <div className="menu-item"></div>
-                      <div className="menu-item"></div>
-                    </div>
-                    <div className="main-content">
-                      <div className="stats-row">
-                        <div className="stat-card"></div>
-                        <div className="stat-card"></div>
-                        <div className="stat-card"></div>
-                      </div>
-                      <div className="chart-area">
-                        <div className="graph-line"></div>
-                        <div className="graph-line"></div>
-                        <div className="graph-line"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Floating smartphone mockup */}
-              <div className="phone-mockup">
-                <div className="phone-screen">
-                  <div className="app-header">
-                    <div className="app-name">SchoolPro Mobile</div>
-                    <div className="menu"></div>
-                  </div>
-                  <div className="dashboard-item"></div>
-                  <div className="dashboard-item"></div>
-                  <div className="dashboard-item"></div>
-                  <div className="bottom-nav">
-                    <div className="nav-item"></div>
-                    <div className="nav-item active"></div>
-                    <div className="nav-item"></div>
-                    <div className="nav-item"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <main id="hero" className="hero" style={{ position: 'relative' }}>
+        <div className="miss-minutes-container">
+          <NextImage
+            src="/images/miss-minutes.gif"
+            alt="Miss Minutes Animation"
+            width={140}
+            height={160}
+            unoptimized={true}
+          />
+        </div>
+        <p className="hero-subtitle">✨ Welcome to My EduPanel</p>
+        <h1>Your Complete School<br />Management Solution</h1>
+        <p className="hero-description">From admissions to academics, simplify every aspect of school administration with our comprehensive and user-friendly platform.</p>
+        <div className="hero-buttons">
+          <Link href="/signup" className="get-started-btn">Get Started</Link>
+          <a href="#features-section" className="all-features-btn">See All features</a>
         </div>
       </main>
 
@@ -219,7 +163,7 @@ export default function Home() {
           </div>
           <div className="impact-cards">
             <div className="impact-card"><div className="card-icon-background"><i className="bi bi-building"></i></div><div className="card-number">9+</div><div className="card-title">Schools</div><p className="card-description">Institutions using our platform</p></div>
-            <div className="impact-card"><div className="card-icon-background"><i className="bi bi-people"></i></div><div className="card-number">2548+</div><div className="card-title">Students</div><p className="card-description">Learning through our system</p></div>
+            <div className="impact-card"><div className="card-icon-background"><i className="bi bi-people"></i></div><div className="card-number">90000+</div><div className="card-title">Students</div><p className="card-description">Learning through our system</p></div>
             <div className="impact-card"><div className="card-icon-background"><i className="bi bi-person"></i></div><div className="card-number">499+</div><div className="card-title">Parents</div><p className="card-description">Engaged with their children's education</p></div>
           </div>
         </div>
@@ -263,41 +207,49 @@ export default function Home() {
           <div className="pricing-box">
             {/* --- PRICING DETAILS (LEFT SIDE) (No Change) --- */}
             <div className="pricing-details">
-              <h2>Starter School Plan</h2>
-              <p>Get  access to our comprehensive school management system. One price, all Basic Features, unlimited users.</p>
+              <h2>Complete School Plan</h2>
+              <p>Get complete access to our comprehensive school management system. One price, all features, unlimited users.</p>
               <h3>All features, unlimited users:</h3>
               <ul className="features-list">
-                <li><span className="checkmark">✓</span> Admin Dashboard (Basic)</li>
                 <li><span className="checkmark">✓</span> Unlimited Student Management</li>
-                <li><span className="checkmark">✓</span> Unlimited Staff Management</li>
-                <li><span className="checkmark">✓</span> Unlimited Teachers Management</li>
-                <li><span className="checkmark">✓</span> Fee Counter</li>
-                <li><span className="checkmark">✓</span> Bonafide Generator</li>
-                <li><span className="checkmark">✓</span> LC Generator</li>
-                <li><span className="checkmark">✓</span> Fee Receipt Generator</li>
+                <li><span className="checkmark">✓</span> Unlimited Teacher & Staff Accounts</li>
+                <li><span className="checkmark">✓</span> Complete Admin Dashboard</li>
+                <li><span className="checkmark">✓</span> Fee Management & Online Payment</li>
+                <li><span className="checkmark">✓</span> Student Attendance Tracking</li>
+                <li><span className="checkmark">✓</span> Timetable Management</li>
+                <li><span className="checkmark">✓</span> Parent & Student Login Portals</li>
+                <li><span className="checkmark">✓</span> 24/7 Customer Support</li>
               </ul>
             </div>
             
             {/* === PRICING CARD (RIGHT SIDE) UPDATED === */}
             <div className="pricing-card">
-              <h4>Include All Basic Features</h4>
-                            
-              {/* Professional pricing display with enhanced styling */}
-              <div className="price-container">
-                <div className="price-wrapper">
-                  <span className="currency">₹</span>
-                  <span className="amount">4999</span>
-                </div>
-                <span className="price-unit">per year</span>
+              <h4>Include All Features</h4>
+              
+              {/* 1. Price layout fixed with inline styles */}
+              <div 
+                className="price" 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'baseline', 
+                  justifyContent: 'center', 
+                  gap: '8px', 
+                  margin: '1.5rem 0',
+                  whiteSpace: 'nowrap' /* Fix: Prevents line break */
+                }}
+              >
+                <span style={{ fontSize: '2.8rem', fontWeight: '700', color: '#111' }}>
+                  ₹4999
+                </span>
+                <span className="price-unit" style={{ fontSize: '1rem', color: '#555', fontWeight: '500' }}>
+                  /&nbsp;per&nbsp;year
+                </span>
               </div>
-                            
-              {/* Enhanced Get Started button */}
-              <Link href="/plans" className="cta-button professional">Get Started</Link>
-                            
-              {/* Value proposition */}
-              <div className="value-prop">
-                <span className="highlight">Complete Solution</span> • Unlimited Users
-              </div>
+              
+              {/* 2. Button text is correct */}
+              <Link href="/plans" className="cta-button">Grab Now Deal</Link>
+              
+              {/* 3. Trial info line is gone */}
             </div>
             {/* === END OF PRICING CARD UPDATES === */}
 
