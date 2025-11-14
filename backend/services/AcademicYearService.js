@@ -30,22 +30,20 @@ async function createAcademicYear({ yearName, startDate, endDate, schoolId, isCu
 }
 
 /**
- * Get all academic years for a school
+ * Get all academic years for a school with optimized performance
  */
 async function getAllAcademicYears(schoolId) {
+  // Optimized query: Only fetch essential data for the dropdown, not counts
+  // Counts can make the query very slow with large datasets
   const years = await prisma.academicYear.findMany({
     where: { schoolId },
     orderBy: { startDate: 'desc' },
-    include: {
-      _count: {
-        select: {
-          students: true,
-          teachers: true,
-          feeRecords: true,
-          transactions: true,
-          attendances: true,
-        }
-      }
+    select: {
+      id: true,
+      yearName: true,
+      isCurrent: true,
+      startDate: true,
+      endDate: true
     }
   });
   
@@ -65,7 +63,14 @@ async function getAllAcademicYears(schoolId) {
       isCurrent: true
     });
     
-    return [defaultYear];
+    // Return only essential data for the default year
+    return [{
+      id: defaultYear.id,
+      yearName: defaultYear.yearName,
+      isCurrent: defaultYear.isCurrent,
+      startDate: defaultYear.startDate,
+      endDate: defaultYear.endDate
+    }];
   }
   
   return years;
@@ -258,6 +263,26 @@ async function cloneYearData(sourceYearId, targetYearId, schoolId, options = {})
   });
 }
 
+/**
+ * Get detailed academic year info with counts (for management page only)
+ */
+async function getAcademicYearWithCounts(yearId, schoolId) {
+  return prisma.academicYear.findFirst({
+    where: { id: yearId, schoolId },
+    include: {
+      _count: {
+        select: {
+          students: true,
+          teachers: true,
+          feeRecords: true,
+          transactions: true,
+          attendances: true,
+        }
+      }
+    }
+  });
+}
+
 module.exports = {
   createAcademicYear,
   getAllAcademicYears,
@@ -267,4 +292,5 @@ module.exports = {
   updateAcademicYear,
   deleteAcademicYear,
   cloneYearData,
+  getAcademicYearWithCounts // Export the new function
 };

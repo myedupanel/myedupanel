@@ -34,9 +34,15 @@ export const AcademicYearProvider: React.FC<{ children: ReactNode }> = ({ childr
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Initial data fetch: Saare years aur current active year ID
+    // Optimized fetch: Only fetch essential data for faster loading
     const fetchYears = useCallback(async () => {
         setLoading(true);
+        // Add timeout to prevent indefinite loading
+        const timeoutId = setTimeout(() => {
+            setLoading(false);
+            setError("Loading timeout - please refresh the page");
+        }, 10000); // 10 seconds timeout
+        
         try {
             // Check if token exists in localStorage
             if (typeof window !== 'undefined') {
@@ -44,12 +50,14 @@ export const AcademicYearProvider: React.FC<{ children: ReactNode }> = ({ childr
                 if (!token) {
                     console.log('No token found, skipping academic year fetch');
                     setAvailableYears([]);
+                    clearTimeout(timeoutId);
                     setLoading(false);
                     return;
                 }
             }
 
             // Use centralized API utility - it handles token automatically
+            // Optimized: Only fetch what we need for the dropdown
             const response = await api.get('/academic-years');
             const years: AcademicYear[] = response.data;
             
@@ -71,13 +79,13 @@ export const AcademicYearProvider: React.FC<{ children: ReactNode }> = ({ childr
             console.error("Error fetching years:", err);
             setError(err.response?.data?.error || err.message || "Could not load Academic Years.");
         } finally {
+            clearTimeout(timeoutId);
             setLoading(false);
         }
     }, []);
 
-    // Year Switcher Logic
+    // Year Switcher Logic with improved error handling
     const switchAcademicYear = useCallback(async (yearId: number, setAsDefault: boolean = false) => {
-        setLoading(true);
         try {
             // If setAsDefault is true, update backend
             if (setAsDefault) {
@@ -102,8 +110,6 @@ export const AcademicYearProvider: React.FC<{ children: ReactNode }> = ({ childr
         } catch (err: any) {
             console.error("Error switching year:", err);
             setError(err.response?.data?.error || err.message || "Failed to switch year");
-        } finally {
-            setLoading(false);
         }
     }, [availableYears, router]);
 

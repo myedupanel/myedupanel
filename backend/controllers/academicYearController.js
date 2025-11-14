@@ -8,6 +8,7 @@ const {
   updateAcademicYear,
   deleteAcademicYear,
   cloneYearData,
+  getAcademicYearWithCounts, // Import the new function
 } = require('../services/AcademicYearService');
 
 /**
@@ -16,12 +17,54 @@ const {
 exports.getAcademicYears = async (req, res) => {
   try {
     const schoolId = req.user.schoolId;
+    const includeCounts = req.query.includeCounts === 'true'; // Check for includeCounts parameter
     
     if (!schoolId) {
       return res.status(400).json({ error: 'School ID not found.' });
     }
 
-    const years = await getAllAcademicYears(schoolId);
+    let years;
+    if (includeCounts) {
+      // If includeCounts is true, fetch detailed data with counts
+      years = await prisma.academicYear.findMany({
+        where: { schoolId },
+        orderBy: { startDate: 'desc' },
+        include: {
+          _count: {
+            select: {
+              students: true,
+              teachers: true,
+              feeRecords: true,
+              transactions: true,
+              attendances: true,
+            }
+          }
+        }
+      });
+    } else {
+      // Default optimized query without counts for faster loading
+      years = await prisma.academicYear.findMany({
+        where: { schoolId },
+        orderBy: { startDate: 'desc' },
+        select: {
+          id: true,
+          yearName: true,
+          isCurrent: true,
+          startDate: true,
+          endDate: true
+        }
+      });
+      
+      // Map to ensure consistent response structure
+      years = years.map(year => ({
+        id: year.id,
+        yearName: year.yearName,
+        isCurrent: year.isCurrent,
+        startDate: year.startDate,
+        endDate: year.endDate
+      }));
+    }
+
     return res.json(years);
   } catch (error) {
     console.error('Error fetching academic years:', error);
@@ -54,7 +97,7 @@ exports.getCurrentYear = async (req, res) => {
 };
 
 /**
- * GET a single academic year by ID
+ * GET a single academic year by ID with detailed counts
  */
 exports.getAcademicYearById = async (req, res) => {
   try {
@@ -65,7 +108,8 @@ exports.getAcademicYearById = async (req, res) => {
       return res.status(400).json({ error: 'Invalid year ID.' });
     }
 
-    const year = await getAcademicYearById(yearId, schoolId);
+    // Use the optimized function that includes counts
+    const year = await getAcademicYearWithCounts(yearId, schoolId);
     
     if (!year) {
       return res.status(404).json({ error: 'Academic year not found.' });

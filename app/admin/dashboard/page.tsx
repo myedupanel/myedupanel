@@ -92,12 +92,13 @@ const getAdmissionColor = (value: number, min: number, max: number): string => {
 
 const AdminDashboardPage = () => {
   const { user, token } = useAuth() as { user: User | null; token: string | null; login: (token: string) => Promise<any> };
-  const { currentYearId, loading: academicYearLoading } = useAcademicYear();
+  const { currentYearId, loading: academicYearLoading, error: academicYearError } = useAcademicYear();
   const [dashboardData, setDashboardData] = useState<FormattedDashboardData | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
   
-  // --- fetchDashboardData (No Change in core logic) ---
-  const fetchDashboardData = useCallback(async () => {
+  // --- fetchDashboardData with retry mechanism ---
+  const fetchDashboardData = useCallback(async (retryCount = 0) => {
     if (!token) {
         console.log("fetchDashboardData: No token found, skipping fetch.");
         return;
@@ -159,11 +160,23 @@ const AdminDashboardPage = () => {
       };
 
       setDashboardData(formattedData);
+      setDashboardError(null); // Clear any previous errors
       console.log("fetchDashboardData: Dashboard state updated.");
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to fetch dashboard data:", error);
+      
+      // Retry mechanism - retry up to 2 times
+      if (retryCount < 2) {
+        console.log(`Retrying fetchDashboardData (attempt ${retryCount + 1})...`);
+        setTimeout(() => {
+          fetchDashboardData(retryCount + 1);
+        }, 1000 * (retryCount + 1)); // Exponential backoff
+        return;
+      }
+      
       setDashboardData({ stats: [], monthlyAdmissions: [], classCounts: [], recentPayments: [] });
+      setDashboardError(error.response?.data?.error || error.message || "Failed to load dashboard data");
     }
   }, [token]);
   // --- END fetchDashboardData ---
@@ -257,9 +270,47 @@ const AdminDashboardPage = () => {
     return <div className={styles.loading}>Loading Dashboard...</div>;
   }
   
-  // Wait for academic year data to be loaded
-  if (!currentYearId && !academicYearLoading) {
+  // Wait for academic year data to be loaded, but don't block indefinitely
+  if (academicYearLoading) {
     return <div className={styles.loading}>Loading Academic Years...</div>;
+  }
+  
+  // Show error if academic year loading failed
+  if (academicYearError) {
+    return (
+      <div className={styles.dashboardContainer}>
+        <Header admin={{
+          adminName: adminProfile.adminName,
+          email: adminProfile.email,
+          profileImageUrl: adminProfile.profileImageUrl,
+          schoolName: adminProfile.schoolName
+        }} />
+        <div className={styles.errorState}>
+          <h2>Academic Year Loading Error</h2>
+          <p>{academicYearError}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+  
+  // Show error if dashboard loading failed
+  if (dashboardError) {
+    return (
+      <div className={styles.dashboardContainer}>
+        <Header admin={{
+          adminName: adminProfile.adminName,
+          email: adminProfile.email,
+          profileImageUrl: adminProfile.profileImageUrl,
+          schoolName: adminProfile.schoolName
+        }} />
+        <div className={styles.errorState}>
+          <h2>Dashboard Loading Error</h2>
+          <p>{dashboardError}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
   }
   
   // --- Error Handling/Empty State (No Change) ---
