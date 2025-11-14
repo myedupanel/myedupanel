@@ -25,8 +25,7 @@ const {
     createFeeTemplate,
     updateFeeTemplate, 
     deleteFeeTemplate, // <-- YEH MISSING THA (Receipt ke liye)
-    exportDetailReport, // <-- Export function
-    exportFeeData // <-- NEW: Export function for GET request with query params
+    // (Baaki functions...)
 } = require('../controllers/feeController'); 
 
 // Middleware
@@ -69,14 +68,6 @@ router.get('/edited-records', adminAuthWithAcademicYear, getEditedRecords);
 // @route   GET /api/fees/pdc-records (Fixing 404)
 // @desc    Dashboard tab ke liye
 router.get('/pdc-records', adminAuthWithAcademicYear, getPdcRecords);
-
-// @route   GET /api/fees/export-data (Fixing 404)
-// @desc    Export fee data with filters as query parameters
-router.get('/export-data', adminAuthWithAcademicYear, exportFeeData);
-
-// @route   POST /api/fees/export/detail (Existing export route)
-// @desc    Export fee data with filters in request body
-router.post('/export/detail', adminAuthWithAcademicYear, exportDetailReport);
 
 // --- END FIX ---
 

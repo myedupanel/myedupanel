@@ -979,452 +979,72 @@ const getClasswiseReport = async (req, res) => {
       } catch (error) { console.error("Error fetching class-wise report:", error); res.status(500).send("Server Error"); }
 };
 
-// 23. Get Student-wise Report (by Class) (No Change)
-const getStudentReportByClass = async (req, res) => {
+// 23. Export Fee Data (NEW FUNCTION)
+// This function handles GET requests with query parameters for exporting fee data
+const exportFeeData = async (req, res) => {
      try {
-        const schoolId = req.user.schoolId; const classIdInt = parseInt(req.params.classId); if (isNaN(classIdInt)) return res.status(400).json({ message: 'Invalid Class ID' });
+        const schoolId = req.user.schoolId; 
+        const filters = req.query || {}; 
+        
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId, academicYearId: req.academicYearId, classId: classIdInt };
-        const students = await prisma.students.findMany({ where: academicYearWhere, orderBy: { first_name: 'asc' } });
-        if (students.length === 0) return res.status(200).json([]);
-        const studentIds = students.map(s => s.studentid);
-        const paidData = await prisma.transaction.groupBy({ by: ['studentId'], where: { ...academicYearWhere, status: 'Success', studentId: { in: studentIds } }, _sum: { amountPaid: true } });
-        const feeData = await prisma.feeRecord.groupBy({ by: ['studentId'], where: { ...academicYearWhere, studentId: { in: studentIds } }, _sum: { amount: true, discount: true, balanceDue: true } });
-        const report = students.map(student => { const paid = paidData.find(p => p.studentId === student.studentid); const fee = feeData.find(f => f.studentId === student.studentid); return { studentId: student.studentid, studentName: getFullName(student), studentRegId: student.roll_number || 'N/A', totalPaid: paid?._sum.amountPaid || 0, totalDue: fee?._sum.amount || 0, totalDiscount: fee?._sum.discount || 0, totalBalance: fee?._sum.balanceDue || 0 } });
-        res.status(200).json(report);
-      } catch (error) { console.error("Error fetching student-wise report by class:", error); res.status(500).send("Server Error"); }
-};
-
-// 24. Create Payment Order (Razorpay) (No Change)
-const createPaymentOrder = async (req, res) => { 
-     try {
-let razorpay;if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
-
-    razorpay = new Razorpay({
-
-        key_id: process.env.RAZORPAY_KEY_ID,
-
-        key_secret: process.env.RAZORPAY_KEY_SECRET,
-
-    });
-
-   } else {
-
-    console.warn("RAZORPAY KEYS NOT SET. Online payments will fail. Server will start.");
-
-}
-
-        const { amount, feeRecordId } = req.body;
-        const schoolId = req.user.schoolId;
-        const feeRecordIdInt = parseInt(feeRecordId);
-
-        if (!amount || !feeRecordIdInt || Number(amount) <= 0) { return res.status(400).json({ message: "Valid Positive Amount and FeeRecordID are required" }); }
-
-         const feeRecord = await prisma.feeRecord.findUnique({
-             where: { id: feeRecordIdInt, schoolId },
-             select: { studentId: true, classId: true, balanceDue: true } 
-         });
-
-         if (!feeRecord) { return res.status(404).json({ message: 'Fee record not found.' }); }
-         if (!feeRecord.studentId || !feeRecord.classId) { return res.status(404).json({ message: 'Fee record is missing student or class details.' }); }
-         if (Number(amount) > feeRecord.balanceDue + 0.01) { return res.status(400).json({ message: `Payment amount (${amount}) cannot exceed balance due (${feeRecord.balanceDue}).` }); }
-
-        const options = {
-          amount: Math.round(Number(amount) * 100), // Paise
-          currency: "INR",
-          receipt: `rcpt_${feeRecordId}_${Date.now()}`,
-          notes: { // Prisma IDs (Int) ko string mein convert karein
-            feeRecordId: feeRecordIdInt.toString(),
-            studentId: feeRecord.studentId.toString(),
-            classId: feeRecord.classId.toString(),
-            schoolId: schoolId.toString()
-          }
-        };
-
-        console.log("[Razorpay] Creating order with options:", options);
-        const order = await razorpay.orders.create(options);
-        console.log("[Razorpay] Order created successfully:", order.id);
-        res.status(200).json(order);
-      } catch (error) { console.error("Error creating payment order:", error); const errorMessage = error.description || error.message || "Unknown error"; res.status(500).json({ message: `Server Error: ${errorMessage}` }); }
-};
-
-// 25. Verify Payment Webhook (Razorpay) (No Change)
-const verifyPaymentWebhook = async (req, res) => { 
-    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
-
-    if (!webhookSecret) {
-        console.error("FATAL: RAZORPAY_WEBHOOK_SECRET is not set.");
-        return res.status(200).json({ message: 'Webhook secret not configured.' });
-    }
-
-    try {
-        const shasum = crypto.createHmac('sha256', webhookSecret);
-        shasum.update(JSON.stringify(req.body));
-        const digest = shasum.digest('hex');
-
-        if (digest !== req.headers['x-razorpay-signature']) {
-          console.warn('Webhook Warning: Invalid signature.');
-          return res.status(400).json({ message: 'Invalid signature' });
-        }
-         console.log('Webhook Info: Signature verified.');
-    } catch(sigError) {
-         console.error("Webhook Error: Signature verification failed:", sigError);
-         return res.status(400).json({ message: 'Signature verification failed.' });
-    }
-
-    const paymentEvent = req.body.event;
-    const payment = req.body.payload?.payment?.entity;
-
-     console.log(`Webhook Info: Received event '${paymentEvent}'. Payment ID: ${payment?.id || 'N/A'}`);
-
-     if (paymentEvent !== 'payment.captured' || !payment || payment.status !== 'captured') {
-         console.log(`Webhook Info: Event ignored.`);
-         return res.status(200).json({ status: 'ignored' });
-     }
-
-    // Notes se IDs (string) ko Int mein convert karein
-    const feeRecordIdInt = parseInt(payment.notes?.feeRecordId);
-    const studentIdInt = parseInt(payment.notes?.studentId);
-    const classIdInt = parseInt(payment.notes?.classId);
-    const schoolId = payment.notes?.schoolId; // Yeh string hai
-
-    if (!feeRecordIdInt || !studentIdInt || !classIdInt || !schoolId) {
-        console.error('Webhook Error: Missing or invalid IDs in payment notes.', payment.notes);
-        return res.status(200).json({ message: 'Missing/Invalid IDs in notes.' });
-    }
-
-    let updatedFeeRecord;
-    let newTransaction;
-
-    try {
-        // Prisma transaction
-        const result = await prisma.$transaction(async (tx) => {
-            const existingTransaction = await tx.transaction.findFirst({
-                where: { gatewayTransactionId: payment.id }
-            });
-            if (existingTransaction) { throw new Error('Transaction already processed'); }
-
-            const feeRecord = await tx.feeRecord.findUnique({
-                where: { id: feeRecordIdInt, schoolId }
-            });
-            if (!feeRecord) {
-                throw new Error(`FeeRecord ${feeRecordIdInt} not found for school ${schoolId}.`);
-            }
-
-            const amountPaid = Number(payment.amount) / 100; // Rupees
-            const receiptId = `TXN-${Date.now()}`;
-
-            // NAYA: Academic year ID ko transaction mein add karein
-            newTransaction = await tx.transaction.create({
-                data: {
-                    receiptId: receiptId,
-                    feeRecordId: feeRecordIdInt,
-                    studentId: studentIdInt,
-                    classId: classIdInt,
-                    schoolId: schoolId,
-                    academicYearId: req.academicYearId,
-                    templateId: feeRecord.templateId,
-                    amountPaid: amountPaid,
-                    paymentDate: new Date(payment.created_at * 1000),
-                    paymentMode: 'Online',
-                    status: 'Success',
-                    gatewayTransactionId: payment.id,
-                    gatewayOrderId: payment.orderid,
-                    gatewayMethod: payment.method,
-                    notes: `Online payment via ${payment.method}.`
-                }
-            });
-
-            const newAmountPaid = feeRecord.amountPaid + amountPaid;
-            const newBalanceDue = feeRecord.balanceDue - amountPaid;
-
-            updatedFeeRecord = await tx.feeRecord.update({
-                where: { id: feeRecord.id },
-                data: {
-                    amountPaid: newAmountPaid,
-                    balanceDue: newBalanceDue < 0 ? 0 : newBalanceDue,
-                    status: newBalanceDue < 0.01 ? 'Paid' : 'Partial'
-                }
-            });
-
-            return { newTransaction, updatedFeeRecord };
-        }); // Transaction khatam
-
-        console.log(`Webhook Success: Processed payment ${payment.id}.`);
-
-        let studentName = 'A Student';
-        try {
-            const student = await prisma.students.findUnique({ where: { studentid: studentIdInt }});
-            if (student) studentName = getFullName(student);
-        } catch (e) { console.error("Webhook: Could not fetch student name:", e); }
-
-         const populatedTransactionForEmit = {
-            ...result.newTransaction,
-             studentName: studentName,
-         };
-
-        const io = req.app.get('socketio');
-        if (io) {
-            console.log("Webhook: Emitting Socket.IO events.");
-            io.emit('updateDashboard');
-            io.emit('fee_record_updated', result.updatedFeeRecord);
-            io.emit('transaction_added', populatedTransactionForEmit);
-            io.emit('new_transaction_feed', {
-                name: studentName,
-                amount: result.newTransaction.amountPaid
-            });
-        } else {
-             console.warn("Webhook Warning: Socket.IO instance not found.");
-        }
-
-        res.status(200).json({ status: 'ok' });
-
-    } catch (error) {
-        console.error('Webhook Error: Critical error processing payment:', payment?.id, error);
-        if (error.message === 'Transaction already processed') {
-            return res.status(200).json({ message: 'Transaction already processed' });
-        }
-        res.status(500).json({ message: `Server error processing payment: ${error.message}` });
-    }
-};
-
-const getTransactions = async (req, res) => { 
-
-    try {
-
-        const schoolId = req.user.schoolId;
-
+        const academicYearWhere = { schoolId, academicYearId: req.academicYearId };
+        let query = { ...academicYearWhere };
         
-
-        // --- FIX 1: 'classId' ko req.query se yahaan add kiya ---
-
-        const {
-
-            page = 1, limit = 15, search = "",
-
-            startDate, endDate, status, paymentMode,
-
-            studentId, classId // <-- YAHAN ADD KIYA GAYA
-
-        } = req.query;
-
-
-
-        const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-
-
-
-        // NAYA: Academic year ID ke basis par filter karein
-        let queryConditions = { schoolId: schoolId, academicYearId: req.academicYearId };
-
+        // Query filters - adapted for query parameters
+        if (filters.status && filters.status !== 'All') query.status = filters.status; 
+        if (filters.classId) query.classId = parseInt(filters.classId);
+        if (filters.templateId) query.templateId = parseInt(filters.templateId);
+        if (filters.startDate || filters.endDate) { 
+            query.paymentDate = {}; 
+            if (filters.startDate) query.paymentDate.gte = new Date(filters.startDate); 
+            if (filters.endDate) { 
+                const endDate = new Date(filters.endDate); 
+                endDate.setHours(23, 59, 59, 999); 
+                query.paymentDate.lte = endDate; 
+            } 
+        }
         
-
-        // --- Filter Conditions ---
-
-        const studentIdInt = parseInt(studentId);
-
-        if (studentIdInt) {
-
-            queryConditions.studentId = studentIdInt;
-
-        }
-
-
-
-        if (startDate || endDate) {
-
-            queryConditions.paymentDate = {};
-
-            if (startDate) queryConditions.paymentDate.gte = new Date(startDate);
-
-            if (endDate) {
-
-                const endOfDay = new Date(endDate);
-
-                endOfDay.setHours(23, 59, 59, 999);
-
-                queryConditions.paymentDate.lte = endOfDay;
-
-            }
-
-        }
-
-        if (status) queryConditions.status = status;
-
-        if (paymentMode) queryConditions.paymentMode = paymentMode;
-
-
-
-        // --- FIX 2: classId ko queryConditions mein add kiya ---
-
-        if (classId) {
-
-            const classIdInt = parseInt(classId);
-
-            if (!isNaN(classIdInt)) {
-
-                queryConditions.classId = classIdInt;
-
-            }
-
-        }
-
-        // --- END FIX 2 ---
-
-
-        if (search && !studentIdInt) {
-
-            queryConditions.OR = [
-
-                { student: { 
-
-                    OR: [
-
-                      { first_name: { contains: search } },
-
-                      { father_name: { contains: search } },
-
-                      { last_name: { contains: search } },
-
-                    ]
-
-                }},
-
-                { receiptId: { contains: search } }
-
-            ];
-
-        } else if (search && studentIdInt) {
-
-            queryConditions.receiptId = { contains: search };
-
-        }
-
-        // --- End Filter Conditions ---
-
-        
-
-        const totalDocuments = await prisma.transaction.count({ where: queryConditions });
-
-
-        const transactions = await prisma.transaction.findMany({
-
-            where: queryConditions,
-
-            include: {
-
+        const transactions = await prisma.transaction.findMany({ 
+            where: query, 
+            include: { 
                 student: { 
-
                     select: { 
-
                         first_name: true, 
-
                         father_name: true, 
-
                         last_name: true, 
-
-                        roll_number: true,
-
-                        // Class ko include kiya
-
-                        class: { select: { class_name: true } }
-
+                        roll_number: true, 
+                        class: { select: { class_name: true }} 
                     } 
-
-                },
-
-                template: { select: { name: true } },
-
-                collectedBy: { select: { name: true } }
-
-            },
-
-            orderBy: { paymentDate: 'desc' },
-
-            take: parseInt(limit, 10),
-
-            skip: skip
-
+                }, 
+                template: { select: { name: true } }, 
+                collectedBy: { select: { name: true } } 
+            }, 
+            orderBy: { paymentDate: 'desc' } 
         });
-
-        // --- Frontend Format Fix: Data ko Flat kiya (Yeh bhi pehle se sahi tha) ---
-
-        const formattedTransactions = transactions.map(tx => ({
-
-            id: tx.id,
-
-            receiptId: tx.receiptId,
-
-            amountPaid: tx.amountPaid,
-
-            paymentMode: tx.paymentMode,
-
-            paymentDate: tx.paymentDate ? tx.paymentDate.toISOString().split('T')[0] : 'N/A', // Date format fix
-
-            status: tx.status,
-
-            
-
-            // Frontend table fields
-
-            studentName: getFullName(tx.student) || 'N/A',
-
-            className: tx.student?.class?.class_name || 'N/A',
-
-            templateName: tx.template?.name || 'N/A',
-
+        
+        // Data for Sheet
+        const dataForSheet = transactions.map(tx => ({ 
+            'Receipt ID': tx.receiptId, 
+            'Payment Date': tx.paymentDate ? tx.paymentDate.toLocaleDateString('en-GB') : 'N/A', 
+            'Student ID': tx.student?.roll_number || 'N/A', 
+            'Student Name': getFullName(tx.student) || 'N/A', 
+            'Class Name': tx.student?.class?.class_name || 'N/A', 
+            'Fee Template': tx.template?.name || 'N/A', 
+            'Amount Paid': tx.amountPaid, 
+            'Payment Mode': tx.paymentMode, 
+            'Status': tx.status, 
+            'Gateway Txn ID': tx.gatewayTransactionId || '-', 
+            'Collected By': tx.collectedBy?.name || (tx.paymentMode === 'Online' ? 'System (Online)' : 'N/A'), 
+            'Notes': tx.notes || '', 
+            'Cheque No': tx.chequeNumber || '-', 
+            'Bank Name': tx.bankName || '-' 
         }));
-
-
-        res.status(200).json({
-
-            data: formattedTransactions,
-
-            totalPages: Math.ceil(totalDocuments / parseInt(limit, 10)),
-
-            currentPage: parseInt(page, 10),
-
-            totalRecords: totalDocuments
-
-        });
-
-
-
-    } catch (error) {
-
-        console.error("Error in getTransactions:", error);
-
-        res.status(500).send("Server Error fetching transactions");
-
-    }
-
-};
-module.exports = {
-  getDashboardOverview,
-  getFeeTemplates,
-  getTemplateDetails,
-  getLatePayments,
-  calculateLateFees,
-  sendLateFeeReminders,
-  getStudentFeeRecords,
-  getProcessingPayments,
-  getEditedRecords,
-  getPdcRecords,
-  assignAndCollectFee,
-  createFeeTemplate,
-  updateFeeTemplate,
-  deleteFeeTemplate,
-  getSampleSheet,
-  updateExistingRecords,
-  exportDetailReport,
-  getPaidTransactions,
-  getFailedTransactions,
-  getPaymentHistory,
-  collectManualFee,
-  getTransactionById,
-  getClasswiseReport,
-  getStudentReportByClass,
-  createPaymentOrder,
-  verifyPaymentWebhook,
-  getTransactions,
+        
+        // Return data as JSON for frontend to process
+        res.status(200).json(dataForSheet);
+        
+      } catch (error) { 
+          console.error("Error exporting fee data:", error); 
+          res.status(500).json({ message: "Server Error: " + error.message }); 
+      }
 };
