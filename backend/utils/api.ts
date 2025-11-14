@@ -3,7 +3,7 @@ import axios from 'axios';
 // Create a new Axios instance
 // Updated to use the Vercel backend URL directly instead of relying on Next.js rewrites
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://myedupanel.vercel.app',
   // Removed hardcoded 'Content-Type' header.
   // Axios will now set Content-Type based on the request data.
   // (e.g., 'multipart/form-data' for file uploads, 'application/json' for text)
