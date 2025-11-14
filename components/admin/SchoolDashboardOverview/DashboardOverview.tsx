@@ -54,20 +54,14 @@ const DashboardControlCenter = () => {
     const closeModal = () => setActiveModal(null);
     
     // NOTE: Modal handlers added back for full functionality
-    const handleStudentSuccess = async (studentData: any) => { 
+    const handleStudentSuccess = async () => { 
       try {
-        const response = await axios.post('/api/students', studentData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        console.log("Student added successfully", response.data);
-        closeModal();
-        // Refresh dashboard data
+        // Refresh dashboard data after successful student addition
         fetchData();
-        return Promise.resolve();
+        closeModal();
       } catch (error) {
-        console.error("Error adding student:", error);
-        alert("Failed to add student. Please try again.");
-        return Promise.reject(error);
+        console.error("Error refreshing data after student addition:", error);
+        alert("Student added successfully, but there was an issue refreshing the dashboard.");
       }
     }
     const handleTeacherSuccess = async (teacherData: any) => { 
