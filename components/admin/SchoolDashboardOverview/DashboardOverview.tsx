@@ -54,10 +54,70 @@ const DashboardControlCenter = () => {
     const closeModal = () => setActiveModal(null);
     
     // NOTE: Modal handlers added back for full functionality
-    const handleStudentSuccess = () => { console.log("Student added!"); closeModal(); }
-    const handleTeacherSuccess = () => { console.log("Teacher added!"); closeModal(); }
-    const handleParentSuccess = () => { console.log("Parent added!"); closeModal(); }
-    const handleStaffSuccess = async (staffData: any) => { console.log("Staff added/updated", staffData); closeModal(); return Promise.resolve(); }
+    const handleStudentSuccess = async (studentData: any) => { 
+      try {
+        const response = await axios.post('/api/students', studentData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log("Student added successfully", response.data);
+        closeModal();
+        // Refresh dashboard data
+        fetchData();
+        return Promise.resolve();
+      } catch (error) {
+        console.error("Error adding student:", error);
+        alert("Failed to add student. Please try again.");
+        return Promise.reject(error);
+      }
+    }
+    const handleTeacherSuccess = async (teacherData: any) => { 
+      try {
+        const response = await axios.post('/api/teachers', teacherData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log("Teacher added successfully", response.data);
+        closeModal();
+        // Refresh dashboard data
+        fetchData();
+        return Promise.resolve();
+      } catch (error) {
+        console.error("Error adding teacher:", error);
+        alert("Failed to add teacher. Please try again.");
+        return Promise.reject(error);
+      }
+    }
+    const handleParentSuccess = async (parentData: any) => { 
+      try {
+        const response = await axios.post('/api/parents', parentData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log("Parent added successfully", response.data);
+        closeModal();
+        // Refresh dashboard data
+        fetchData();
+        return Promise.resolve();
+      } catch (error) {
+        console.error("Error adding parent:", error);
+        alert("Failed to add parent. Please try again.");
+        return Promise.reject(error);
+      }
+    }
+    const handleStaffSuccess = async (staffData: any) => { 
+      try {
+        const response = await axios.post('/api/staff', staffData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log("Staff added successfully", response.data);
+        closeModal();
+        // Refresh dashboard data
+        fetchData();
+        return Promise.resolve();
+      } catch (error) {
+        console.error("Error adding staff:", error);
+        alert("Failed to add staff. Please try again.");
+        return Promise.reject(error);
+      }
+    }
 
     const getModalTitle = () => {
         switch (activeModal) {
