@@ -40,14 +40,14 @@ const timetableRoutes = require('./routes/timetable');
 const { apiLimiter } = require('./middleware/rateLimiter'); // Global Limiter Import
 const { injectAcademicYear } = require('./middleware/academicYearMiddleware');
 
-// --- Allowed URLs ki list (Updated for Render) ---
+// --- Allowed URLs ki list (No Change) ---
 const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:3000", 
   "http://localhost:3000",
-  "https://myedupanel.vercel.app",
-  "https://myedupanel.com"
+  "https://myedupanel.vercel.app" 
 ];
 // --- END ---
+
 
 // --- Express App Setup (No Change) ---
 const app = express();
@@ -126,7 +126,6 @@ app.use('/api/payment', paymentRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/plans', planRoutes);
 app.set('trust proxy', 1);
-
 // --- Socket.IO Connection Handler (No Change) ---
 io.on('connection', (socket) => {
   console.log('A user connected via Socket.IO:', socket.id);
@@ -148,7 +147,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// --- DATABASE CONNECTION & START SERVER (Modified for Render) ---
+// --- DATABASE CONNECTION & START SERVER (No Change) ---
 async function startServer() {
   try {
     // Prisma client ko connect karein
