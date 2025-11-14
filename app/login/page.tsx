@@ -31,12 +31,6 @@ const slideshowData = [
     cta: "Explore Solutions"
   },
   {
-    image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1170",
-    title: "Premium Experience",
-    subtitle: "Designed for excellence in education technology",
-    cta: "Upgrade Now"
-  },
-  {
     image: "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&q=80&w=1170",
     title: "Future Ready",
     subtitle: "Preparing students for tomorrow's challenges",
