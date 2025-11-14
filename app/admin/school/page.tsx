@@ -336,9 +336,51 @@ const DashboardControlCenter = () => {
     };
 
     const handleStudentSuccess = () => { console.log("Student added!"); closeModal(); }
-    const handleTeacherSuccess = () => { console.log("Teacher added!"); closeModal(); }
-    const handleParentSuccess = () => { console.log("Parent added!"); closeModal(); }
-    const handleStaffSuccess = async (staffData: any) => { console.log("Staff potentially added/updated via API call inside AddStaffForm", staffData); closeModal(); return Promise.resolve(); }
+    const handleTeacherSuccess = async (teacherData: any) => { 
+      try {
+        const response = await api.post('/teachers', teacherData);
+        console.log("Teacher added successfully", response.data);
+        closeModal();
+        // Refresh dashboard data
+        const response2 = await api.get<DashboardData>('/admin/dashboard-data');
+        setData(response2.data);
+        return Promise.resolve();
+      } catch (error: any) {
+        console.error("Error adding teacher:", error);
+        alert("Failed to add teacher. Please try again.");
+        return Promise.reject(error);
+      }
+    }
+    const handleParentSuccess = async (parentData: any) => { 
+      try {
+        const response = await api.post('/parents', parentData);
+        console.log("Parent added successfully", response.data);
+        closeModal();
+        // Refresh dashboard data
+        const response2 = await api.get<DashboardData>('/admin/dashboard-data');
+        setData(response2.data);
+        return Promise.resolve();
+      } catch (error: any) {
+        console.error("Error adding parent:", error);
+        alert("Failed to add parent. Please try again.");
+        return Promise.reject(error);
+      }
+    }
+    const handleStaffSuccess = async (staffData: any) => { 
+      try {
+        const response = await api.post('/staff', staffData);
+        console.log("Staff added successfully", response.data);
+        closeModal();
+        // Refresh dashboard data
+        const response2 = await api.get<DashboardData>('/admin/dashboard-data');
+        setData(response2.data);
+        return Promise.resolve();
+      } catch (error: any) {
+        console.error("Error adding staff:", error);
+        alert("Failed to add staff. Please try again.");
+        return Promise.reject(error);
+      }
+    }
 
     const getModalTitle = () => {
         switch (activeModal) {

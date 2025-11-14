@@ -19,13 +19,17 @@ exports.getAcademicYears = async (req, res) => {
     const schoolId = req.user.schoolId;
     const includeCounts = req.query.includeCounts === 'true'; // Check for includeCounts parameter
     
+    console.log(`[GET /academic-years] Request received for schoolId: ${schoolId}, includeCounts: ${includeCounts}`);
+    
     if (!schoolId) {
+      console.log("[GET /academic-years] School ID not found in request");
       return res.status(400).json({ error: 'School ID not found.' });
     }
 
     let years;
     if (includeCounts) {
       // If includeCounts is true, fetch detailed data with counts
+      console.log("[GET /academic-years] Fetching years with counts");
       years = await prisma.academicYear.findMany({
         where: { schoolId },
         orderBy: { startDate: 'desc' },
@@ -43,6 +47,7 @@ exports.getAcademicYears = async (req, res) => {
       });
     } else {
       // Default optimized query without counts for faster loading
+      console.log("[GET /academic-years] Fetching years without counts");
       years = await prisma.academicYear.findMany({
         where: { schoolId },
         orderBy: { startDate: 'desc' },
@@ -64,10 +69,13 @@ exports.getAcademicYears = async (req, res) => {
         endDate: year.endDate
       }));
     }
+    
+    console.log(`[GET /academic-years] Successfully fetched ${years.length} years for schoolId: ${schoolId}`);
 
     return res.json(years);
   } catch (error) {
     console.error('Error fetching academic years:', error);
+    console.error('Error stack:', error.stack);
     return res.status(500).json({ error: 'Failed to fetch academic years.' });
   }
 };

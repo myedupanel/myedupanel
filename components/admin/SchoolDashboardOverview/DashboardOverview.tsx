@@ -54,16 +54,7 @@ const DashboardControlCenter = () => {
     const closeModal = () => setActiveModal(null);
     
     // NOTE: Modal handlers added back for full functionality
-    const handleStudentSuccess = async () => { 
-      try {
-        // Refresh dashboard data after successful student addition
-        fetchData();
-        closeModal();
-      } catch (error) {
-        console.error("Error refreshing data after student addition:", error);
-        alert("Student added successfully, but there was an issue refreshing the dashboard.");
-      }
-    }
+    const handleStudentSuccess = () => { console.log("Student added!"); closeModal(); }
     const handleTeacherSuccess = async (teacherData: any) => { 
       try {
         const response = await axios.post('/api/teachers', teacherData, {
@@ -74,7 +65,7 @@ const DashboardControlCenter = () => {
         // Refresh dashboard data
         fetchData();
         return Promise.resolve();
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error adding teacher:", error);
         alert("Failed to add teacher. Please try again.");
         return Promise.reject(error);
@@ -90,7 +81,7 @@ const DashboardControlCenter = () => {
         // Refresh dashboard data
         fetchData();
         return Promise.resolve();
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error adding parent:", error);
         alert("Failed to add parent. Please try again.");
         return Promise.reject(error);
@@ -106,7 +97,7 @@ const DashboardControlCenter = () => {
         // Refresh dashboard data
         fetchData();
         return Promise.resolve();
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error adding staff:", error);
         alert("Failed to add staff. Please try again.");
         return Promise.reject(error);
