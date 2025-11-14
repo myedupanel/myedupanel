@@ -266,7 +266,7 @@ const BonafideBuilderPage = () => {
     const fetchSchoolProfile = async () => {
       console.log("Fetching full school profile for certificate...");
       try {
-        const res = await api.get('/api/school/profile');
+        const res = await api.get('/school/profile');
         if (res.data) {
           console.log("School profile data received:", res.data);
           setSchoolDetails({

@@ -39,8 +39,8 @@ const FeeExportForm = () => {
     const fetchData = useCallback(async () => {
         try {
             const [classRes, templateRes] = await Promise.all([
-                api.get('/api/classes'),
-                api.get('/api/fees/templates')
+                api.get('/classes'),
+                api.get('/fees/templates')
             ]);
 
             // FIX: Ensure class IDs are consistent (assuming backend sends numeric IDs)

@@ -53,7 +53,7 @@ export default function ReceiptPage() {
         // Ek hi baar mein dono cheezein fetch karein
         const [transactionRes, schoolRes] = await Promise.all([
           api.get(`/fees/transaction/${transactionId}`),
-          api.get('/api/school/profile') 
+          api.get('/school/profile') 
         ]);
         
         setTransaction(transactionRes.data);

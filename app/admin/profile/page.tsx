@@ -83,7 +83,7 @@ const SchoolProfilePage = () => {
       setIsLoading(true);
       setError('');
       try {
-        const res = await api.get('/api/school/profile');
+        const res = await api.get('/school/profile');
         const profileData = res.data; // Data ko ek variable mein store karein
 
         setFormData({
@@ -205,7 +205,7 @@ const SchoolProfilePage = () => {
         data.append('logo', imageFile); 
       }
       
-      const response = await api.put('/api/school/profile', data); 
+      const response = await api.put('/school/profile', data); 
       
       if (response.data.token) {
         console.log("Received new token, updating context.");

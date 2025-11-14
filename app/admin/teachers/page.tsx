@@ -131,9 +131,9 @@ const TeachersPage = () => {
 
     try {
       if (editingTeacher) {
-        await api.put(`/api/teachers/${editingTeacher.teacher_dbid}`, dataToSend);
+        await api.put(`/teachers/${editingTeacher.teacher_dbid}`, dataToSend);
       } else {
-        await api.post('/api/teachers', dataToSend);
+        await api.post('/teachers', dataToSend);
       }
       closeModal();
     } catch (error: any) {
@@ -150,7 +150,7 @@ const TeachersPage = () => {
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this teacher?')) {
       try {
-        await api.delete(`/api/teachers/${id}`);
+        await api.delete(`/teachers/${id}`);
       } catch (error) {
         console.error('Failed to delete teacher', error);
       }
@@ -191,7 +191,7 @@ const TeachersPage = () => {
       schoolName: user?.schoolName
     }));
     try {
-      const response = await api.post('/api/teachers/bulk', dataWithSchoolInfo);
+      const response = await api.post('/teachers/bulk', dataWithSchoolInfo);
       alert(response.data.message);
       fetchTeachers(); 
       setIsImportModalOpen(false);

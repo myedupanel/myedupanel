@@ -226,7 +226,7 @@ const LeavingCertificateBuilderPage = () => {
     const fetchSchoolProfile = async () => { 
       console.log("Fetching school profile for LC...");
       try {
-        const res = await api.get('/api/school/profile');
+        const res = await api.get('/school/profile');
         if (res.data) {
           // School details state set kiya
           setSchoolDetails({

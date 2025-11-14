@@ -216,7 +216,7 @@ const AdminDashboardPage = () => {
     // School profile ko fetch karke Header ke title ko update kiya
     const fetchSchoolProfileForHeader = async () => {
       try {
-        const res = await api.get('/api/school/profile');
+        const res = await api.get('/school/profile');
         if (res.data && res.data.name2) {
           // Admin profile state ko 'name2' (Certificate Name) se update kiya
           setAdminProfile(prevProfile => {

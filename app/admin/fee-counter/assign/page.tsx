@@ -62,8 +62,8 @@ const AssignFeePage = () => {
                 // Dono ko ek saath fetch karein
                 // Yeh 'Promise.all' classes aur templates ko ek hi baar mein fetch karega
                 const [classRes, templateRes] = await Promise.all([
-                    api.get('/api/classes'), // YEH AAPKE BACKEND FIX (Step 3) PAR NIRBHAR KARTA HAI
-                    api.get('/api/fees/templates')
+                    api.get('/classes'), // YEH AAPKE BACKEND FIX (Step 3) PAR NIRBHAR KARTA HAI
+                    api.get('/fees/templates')
                 ]);
                 
                 // Dono states ko update karein
@@ -157,7 +157,7 @@ const AssignFeePage = () => {
                 ...paymentDetails // Spread the payment details here
             };
 
-            const res = await api.post('/api/fees/assign-and-collect', payload);
+            const res = await api.post('/fees/assign-and-collect', payload);
             alert(res.data.message || 'Operation successful!');
 
             // Reset form on success

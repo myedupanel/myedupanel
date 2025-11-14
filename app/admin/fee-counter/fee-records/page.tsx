@@ -75,7 +75,7 @@ const FeeRecordsPage: React.FC = () => {
   // NEW: Fetch Classes from /api/classes (No Change)
   const fetchClasses = useCallback(async () => {
       try {
-          const res = await api.get('/api/classes');
+          const res = await api.get('/classes');
           const options = res.data.map((c: any) => ({ id: c.classid, name: c.class_name }));
           setClassOptions(options);
       } catch (err) {

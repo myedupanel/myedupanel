@@ -41,7 +41,7 @@ const StaffAttendancePage = () => {
     const fetchAllStaff = async () => {
       setIsStaffLoading(true);
       try {
-        const res = await api.get('/api/staff');
+        const res = await api.get('/staff');
         const transformedData: StaffMember[] = res.data.data.map((staff: ApiStaff) => ({
           id: staff.id.toString(), 
           name: staff.name,
@@ -78,7 +78,7 @@ const StaffAttendancePage = () => {
       
       const fetchAttendanceForDate = async (currentStaffList: StaffMember[]) => {
         try {
-          const res = await api.get(`/api/attendance/staff?date=${selectedDate}`);
+          const res = await api.get(`/attendance/staff?date=${selectedDate}`);
           const savedAttendance: Record<string, AttendanceStatus> = res.data;
 
           const initialAttendance: Record<string, AttendanceStatus> = {};
@@ -135,7 +135,7 @@ const StaffAttendancePage = () => {
     });
 
     try {
-      await api.post('/api/attendance/staff', {
+      await api.post('/attendance/staff', {
         date: selectedDate,
         attendanceData: dataToSubmit
       });

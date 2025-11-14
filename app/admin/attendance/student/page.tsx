@@ -63,7 +63,7 @@ const AttendancePage = () => {
     const loadClasses = async () => {
         setIsClassLoading(true);
         try {
-            const res = await api.get('/api/classes'); // Note: Yeh route 'students.js' se aa raha hai
+            const res = await api.get('/classes'); // Note: Yeh route 'students.js' se aa raha hai
             const classesData: SchoolClass[] = res.data || [];
             
             // Prisma se 'class_name' distinct nahi aa raha hoga, 
@@ -97,7 +97,7 @@ const AttendancePage = () => {
       try {
         // Kadam 1: Class ke students ko API se fetch karo
         // Hum 'students.js' route ko call kar rahe hain
-        const res = await api.get(`/api/students?class=${encodeURIComponent(selectedClass)}`);
+        const res = await api.get(`/students?class=${encodeURIComponent(selectedClass)}`);
         
         // API se mile data ko humare 'Student' interface mein transform karo
         const transformedStudents: Student[] = (res.data as ApiStudent[]).map((s: ApiStudent) => ({

@@ -235,7 +235,7 @@ const FeeCollectionPage: React.FC = () => {
       };
       // Log the request for debugging
       console.log("Sending collect-manual request with payload:", payload);
-      const response = await api.post('/api/fees/collect-manual', payload);
+      const response = await api.post('/fees/collect-manual', payload);
       setSubmitStatus({ message: 'Payment collected successfully!', type: 'success' });
       setLastTransactionForReceipt(response.data.transaction);
       setRecordToCollectOffline(null);

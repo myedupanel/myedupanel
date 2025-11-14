@@ -50,7 +50,7 @@ const ReportsPage = () => {
       setIsFilterLoading(true);
       try {
         // Classes fetch karo
-        const res = await api.get('/api/classes'); 
+        const res = await api.get('/classes'); 
         const classesData: SchoolClass[] = res.data || [];
         setFetchedClasses(classesData);
         
@@ -125,7 +125,7 @@ const ReportsPage = () => {
 
     try {
       // Naye API route ko call karein
-      const res = await api.get('/api/attendance/report', { params: apiParams });
+      const res = await api.get('/attendance/report', { params: apiParams });
       const data: ReportRow[] = res.data;
       setReportData(data);
 

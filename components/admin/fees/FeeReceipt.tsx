@@ -98,7 +98,7 @@ const FeeReceipt: React.FC<FeeReceiptProps> = ({ transaction }) => {
         const fetchSchoolProfile = async () => {
             setIsLoading(true);
             try {
-                const res = await api.get('/api/school/profile');
+                const res = await api.get('/school/profile');
                 setSchoolDetails(res.data);
             } catch (err) {
                 console.error("Failed to fetch school profile for receipt", err);
