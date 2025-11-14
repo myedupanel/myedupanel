@@ -108,6 +108,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/parents', parentRoutes);
+// Log fees route registration
+console.log('Registering /api/fees routes');
 app.use('/api/fees', feeRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/academics', academicRoutes);

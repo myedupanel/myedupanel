@@ -2,6 +2,9 @@
 
 const express = require('express');
 const router = express.Router();
+
+// Log router creation
+console.log('Creating fees router');
 const { authMiddleware, authorize } = require('../middleware/authMiddleware');
 const checkPremiumAccess = require('../middleware/checkPremiumAccess');
 // Academic year middleware import
@@ -83,6 +86,7 @@ router.post('/export/detail', adminAuthWithAcademicYear, exportDetailReport);
 
 // @route   POST /api/fees/collect-manual (Fixing 404)
 // @desc    Manual fee collection
+console.log('Registering POST /collect-manual route');
 router.post('/collect-manual', adminAuthWithoutAcademicYear, collectManualFee);
 
 // --- END FIX ---

@@ -10,6 +10,7 @@ const injectAcademicYear = async (req, res, next) => {
     const schoolId = req.user?.schoolId;
     
     console.log(`[injectAcademicYear] Processing request for schoolId: ${schoolId}`);
+    console.log(`[injectAcademicYear] Request URL: ${req.originalUrl}`);
     
     if (!schoolId) {
       console.log("[injectAcademicYear] No schoolId found, setting academicYearId to null");
@@ -76,7 +77,9 @@ const validateAcademicYear = async (req, res, next) => {
     ];
     
     const currentRoute = req.originalUrl;
+    console.log(`[validateAcademicYear] Checking route: ${currentRoute}`);
     const isExempt = exemptRoutes.some(route => currentRoute === route || currentRoute.startsWith(route + '/'));
+    console.log(`[validateAcademicYear] Is exempt: ${isExempt}`);
     
     if (isExempt) {
       console.log(`[validateAcademicYear] Route ${currentRoute} is exempt from academic year validation`);
