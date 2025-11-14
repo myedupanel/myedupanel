@@ -76,7 +76,7 @@ const validateAcademicYear = async (req, res, next) => {
     ];
     
     const currentRoute = req.originalUrl;
-    const isExempt = exemptRoutes.some(route => currentRoute.includes(route));
+    const isExempt = exemptRoutes.some(route => currentRoute === route || currentRoute.startsWith(route + '/'));
     
     if (isExempt) {
       console.log(`[validateAcademicYear] Route ${currentRoute} is exempt from academic year validation`);
