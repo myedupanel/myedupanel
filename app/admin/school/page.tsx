@@ -122,7 +122,7 @@ const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, 
 
                 <div className={styles.modalActions}>
 
-                    <Link href="/upgrade" className={styles.upgradeLinkButton}>
+                    <Link href="/app/upgrade" className={styles.upgradeLinkButton}>
 
                         Upgrade
 
@@ -183,7 +183,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                 return {
                     icon: MdFlashOn,
                     text: 'Free Trial Active', // More professional text
-                    link: '/upgrade', 
+                    link: '/app/upgrade', 
                     buttonText: 'Upgrade',
                     className: styles.trialBanner,
                     isPaid: false,
@@ -192,7 +192,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                 return {
                     icon: MdStar,
                     text: 'Starter Plan',
-                    link: '/admin/upgrade', 
+                    link: '/app/upgrade', 
                     buttonText: 'Manage', 
                     className: styles.paidPlanBanner, 
                     isPaid: true,
@@ -201,7 +201,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                 return {
                     icon: MdStar,
                     text: 'Pro Plan',
-                    link: '/admin/upgrade', 
+                    link: '/app/upgrade', 
                     buttonText: 'Manage', 
                     className: styles.paidPlanBanner, 
                     isPaid: true,
@@ -211,7 +211,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                 return {
                     icon: MdFlashOn,
                     text: 'No Active Plan',
-                    link: '/upgrade',
+                    link: '/app/upgrade',
                     buttonText: 'Upgrade',
                     className: styles.freeBanner,
                     isPaid: false,
