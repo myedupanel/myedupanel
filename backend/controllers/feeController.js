@@ -1048,3 +1048,34 @@ const exportFeeData = async (req, res) => {
           res.status(500).json({ message: "Server Error: " + error.message }); 
       }
 };
+
+module.exports = {
+  getDashboardOverview,
+  getFeeTemplates,
+  getTemplateDetails,
+  getLatePayments,
+  calculateLateFees,
+  sendLateFeeReminders,
+  getStudentFeeRecords,
+  getProcessingPayments,
+  getEditedRecords,
+  getPdcRecords,
+  assignAndCollectFee,
+  createFeeTemplate,
+  updateFeeTemplate,
+  deleteFeeTemplate,
+  getSampleSheet,
+  updateExistingRecords,
+  exportDetailReport,
+  getPaidTransactions,
+  getFailedTransactions,
+  getPaymentHistory,
+  collectManualFee,
+  getTransactionById,
+  getClasswiseReport,
+  getStudentReportByClass,
+  createPaymentOrder,
+  verifyPaymentWebhook,
+  getTransactions,
+  exportFeeData // Export the new function
+};
