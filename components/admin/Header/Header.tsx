@@ -104,7 +104,7 @@ const Header = ({ admin }: HeaderProps) => {
         </h1>
         
         {/* Academic Year Switcher - Hidden on mobile */}
-        <AcademicYearSwitcher />
+        {!isMobile && <AcademicYearSwitcher />}
 
         {/* Profile Section (Desktop Only) */}
         <div className={styles.profileSection}>

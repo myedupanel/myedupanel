@@ -92,7 +92,7 @@ const getAdmissionColor = (value: number, min: number, max: number): string => {
 
 const AdminDashboardPage = () => {
   const { user, token } = useAuth() as { user: User | null; token: string | null; login: (token: string) => Promise<any> };
-  const { currentYearId } = useAcademicYear();
+  const { currentYearId, loading: academicYearLoading } = useAcademicYear();
   const [dashboardData, setDashboardData] = useState<FormattedDashboardData | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   
@@ -252,9 +252,14 @@ const AdminDashboardPage = () => {
     };
   }, [fetchDashboardData, loadProfileData, token, user, currentYearId]); // Add currentYearId as dependency
 
-  // --- Loading state (No Change) ---
+  // --- Loading state (Updated to wait for academic years) ---
   if (!adminProfile || !dashboardData) {
     return <div className={styles.loading}>Loading Dashboard...</div>;
+  }
+  
+  // Wait for academic year data to be loaded
+  if (!currentYearId && !academicYearLoading) {
+    return <div className={styles.loading}>Loading Academic Years...</div>;
   }
   
   // --- Error Handling/Empty State (No Change) ---
