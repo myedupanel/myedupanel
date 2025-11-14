@@ -80,10 +80,10 @@ const validateAcademicYear = async (req, res, next) => {
     console.log(`[validateAcademicYear] Checking route: ${currentRoute}`);
     
     // More specific check for the exact route we're having trouble with
-    const isCollectManualRoute = currentRoute === '/api/fees/collect-manual';
+    const isCollectManualRoute = currentRoute.includes('/api/fees/collect-manual');
     console.log(`[validateAcademicYear] Is collect manual route: ${isCollectManualRoute}`);
     
-    const isExempt = exemptRoutes.some(route => currentRoute === route || currentRoute.startsWith(route + '/')) || isCollectManualRoute;
+    const isExempt = exemptRoutes.some(route => currentRoute.includes(route)) || isCollectManualRoute;
     console.log(`[validateAcademicYear] Is exempt: ${isExempt}`);
     
     if (isExempt) {
