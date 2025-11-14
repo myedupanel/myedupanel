@@ -37,12 +37,11 @@ const AcademicYearManager: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingYear, setEditingYear] = useState<AcademicYear | null>(null);
 
-  // Fetch all academic years with detailed counts
-  const fetchYearsWithCounts = async () => {
+  // Fetch all academic years
+  const fetchYears = async () => {
     try {
       setLoading(true);
-      // Fetch detailed data with counts only for the management page
-      const response = await api.get('/academic-years?includeCounts=true');
+      const response = await api.get('/academic-years');
       setYears(response.data);
       setError(null);
     } catch (err: any) {
@@ -54,7 +53,7 @@ const AcademicYearManager: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchYearsWithCounts();
+    fetchYears();
   }, []);
 
   // Set a year as current
@@ -64,7 +63,7 @@ const AcademicYearManager: React.FC = () => {
     try {
       await api.post('/academic-years/set-current', { yearId });
       alert('Year set as current successfully!');
-      fetchYearsWithCounts();
+      fetchYears();
       window.location.reload(); // Reload to update the context
     } catch (err: any) {
       alert(err.response?.data?.error || err.message);
@@ -78,7 +77,7 @@ const AcademicYearManager: React.FC = () => {
     try {
       await api.delete(`/academic-years/${yearId}`);
       alert('Year deleted successfully!');
-      fetchYearsWithCounts();
+      fetchYears();
     } catch (err: any) {
       alert(err.response?.data?.error || err.message);
     }
@@ -88,7 +87,7 @@ const AcademicYearManager: React.FC = () => {
   const handleFormSuccess = () => {
     setShowAddForm(false);
     setEditingYear(null);
-    fetchYearsWithCounts();
+    fetchYears();
   };
 
   // Format date
