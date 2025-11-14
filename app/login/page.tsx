@@ -19,28 +19,10 @@ const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] });
 
 const slideshowData = [
   {
-    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1170",
-    title: "Empowering Education",
-    subtitle: "Modern learning environments for future leaders",
-    cta: "Learn More"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1560780552-ba54683cb263?auto=format&fit=crop&q=80&w=1170",
-    title: "Innovative Teaching",
-    subtitle: "Advanced tools for educators to inspire students",
-    cta: "Discover Features"
-  },
-  {
     image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1170",
     title: "Student Success",
     subtitle: "Comprehensive tracking for academic excellence",
     cta: "See Results"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=1170",
-    title: "Collaborative Learning",
-    subtitle: "Connect students, teachers, and parents seamlessly",
-    cta: "Join Community"
   },
   {
     image: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&q=80&w=1170",
