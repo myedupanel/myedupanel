@@ -55,20 +55,9 @@ const PORT = process.env.PORT || 5000;
 
 // --- Standard Middlewares (Order: CORS, JSON, Cookies) ---
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Check if the origin is in our allowed list
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true, // Enable cookies
-  optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true // Enable cookies
 }));
 
 app.use(express.json({ limit: '5mb' })); 
@@ -85,19 +74,8 @@ app.use((req, res, next) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: function (origin, callback) {
-      // Allow requests with no origin
-      if (!origin) return callback(null, true);
-      
-      // Check if the origin is in our allowed list
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    credentials: true
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE"]
   }
 });
 
@@ -115,15 +93,6 @@ app.get('/', (req, res) => {
 
 // 1. AUTH ROUTES (Yeh apne custom 'authLimiter' ka upyog karte hain)
 app.use('/api/auth', authRoutes);
-
-// Explicitly handle preflight requests for CORS
-app.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', allowedOrigins);
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.sendStatus(200);
-});
 
 // 2. GLOBAL API LIMITER (Ab iske neeche ke sabhi routes par apiLimiter lag jayega)
 // [Threat D solved for feature routes]

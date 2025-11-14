@@ -241,15 +241,6 @@ router.post('/verify-otp', async (req, res) => {
 });
 
 // ===== LOGIN ROUTE =====
-// Add explicit CORS headers for login route
-router.options('/login', (req, res) => {
-  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
-  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.sendStatus(200);
-});
-
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   const lowerCaseEmail = email.toLowerCase();
