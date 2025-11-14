@@ -78,6 +78,7 @@ export const AcademicYearProvider: React.FC<{ children: ReactNode }> = ({ childr
         } catch (err: any) {
             console.error("Error fetching years:", err);
             setError(err.response?.data?.error || err.message || "Could not load Academic Years.");
+            // Even if there's an error, we should stop loading to show the page
         } finally {
             clearTimeout(timeoutId);
             setLoading(false);

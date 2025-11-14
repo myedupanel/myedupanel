@@ -3,10 +3,11 @@ import axios from 'axios';
 // Create a new Axios instance
 // Updated to use the Vercel backend URL directly instead of relying on Next.js rewrites
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://myedupanel-backend.vercel.app',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
   // Removed hardcoded 'Content-Type' header.
   // Axios will now set Content-Type based on the request data.
   // (e.g., 'multipart/form-data' for file uploads, 'application/json' for text)
+  timeout: 5000, // 5 second timeout
 });
 
 // Request Interceptor: Adds token AND adjusts URL before every request.
@@ -86,6 +87,11 @@ api.interceptors.response.use(
       }
     }
     // --- Logout Ends Here ---
+
+    // For network errors or timeouts, don't crash the app
+    if (!error.response) {
+      console.log('Network error or timeout occurred');
+    }
 
     // For all other errors, just pass them along.
     return Promise.reject(error);

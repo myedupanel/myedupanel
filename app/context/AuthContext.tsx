@@ -58,10 +58,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // It's safer to logout on any fetch error to prevent inconsistent state
         logout(); // Call logout which handles cleanup and redirect
       } finally {
-        // Only set loading false if we didn't logout (logout causes redirect)
-         if (localStorage.getItem('token')) { // Check if token still exists
-             setIsLoading(false);
-         }
+        // Always set loading to false to prevent the app from being stuck
+        setIsLoading(false);
       }
     };
 
