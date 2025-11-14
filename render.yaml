@@ -13,10 +13,13 @@ services:
   - type: web
     name: myedupanel-backend
     env: node
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npx prisma db push --accept-data-loss && npm start
+    region: oregon
+    buildCommand: cd backend && npm install && npx prisma generate && npx prisma db push --accept-data-loss
+    startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
         sync: false
+      - key: PORT
+        value: 10000

@@ -1,14 +1,18 @@
 import axios from 'axios';
 
+// --- NEW FIX: Set up local and production URLs ---
+const LOCAL_API_URL = 'http://localhost:5000'; // आपका लोकल पोर्ट 5000 है
+const PRODUCTION_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://myedupanel.vercel.app';
+
 // Create a new Axios instance
-// Updated to use the Vercel backend URL directly instead of relying on Next.js rewrites
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://myedupanel.vercel.app',
+  // FIX: Always use the NEXT_PUBLIC_API_URL for frontend requests
+  baseURL: PRODUCTION_API_URL,
+  
   // Removed hardcoded 'Content-Type' header.
-  // Axios will now set Content-Type based on the request data.
-  // (e.g., 'multipart/form-data' for file uploads, 'application/json' for text)
   timeout: 5000, // 5 second timeout
 });
+// --- END NEW FIX ---
 
 // Request Interceptor: Adds token AND adjusts URL before every request.
 api.interceptors.request.use(

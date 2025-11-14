@@ -5,6 +5,15 @@ if (process.env.NODE_ENV !== 'production') {
 }
 // --- END FIX ---
 
+// Load environment variables in production (for Render)
+if (process.env.NODE_ENV === 'production') {
+  console.log("Running in production mode");
+  // In production, environment variables are set by Render
+  // but we can log them for debugging
+  console.log("DATABASE_URL present:", !!process.env.DATABASE_URL);
+  console.log("PORT:", process.env.PORT || 5000);
+}
+
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -51,7 +60,7 @@ const allowedOrigins = [
 
 // --- Express App Setup (No Change) ---
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 
 // --- Standard Middlewares (Order: CORS, JSON, Cookies) ---
 app.use(cors({
@@ -89,6 +98,11 @@ app.use((req, res, next) => {
 
 app.get('/', (req, res) => {
   res.send('SchoolPro Backend is running (Prisma Version)!'); 
+});
+
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
 // 1. AUTH ROUTES (Yeh apne custom 'authLimiter' ka upyog karte hain)

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "build:backend": "cd backend && npm install && npx prisma generate --schema=../prisma/schema.prisma",
+    "build:backend": "cd backend && npm install && npx prisma generate",
     "test:vercel-backend": "node test-vercel-backend.js"
   },
   "dependencies": {
