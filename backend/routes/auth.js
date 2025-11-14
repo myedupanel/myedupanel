@@ -12,7 +12,7 @@ const { Prisma } = require('@prisma/client'); // Prisma errors ke liye
 
 // ===== SIGNUP ROUTE (UPDATED with Trial Logic) =====
 router.post('/signup', async (req, res) => {
-  const { schoolName, adminName, email, password } = req.body;
+  const { schoolName, adminName, email, password, mobileNumber } = req.body;
   const lowerCaseEmail = email.toLowerCase(); // Consistent casing
 
   // Basic validation
@@ -95,6 +95,7 @@ router.post('/signup', async (req, res) => {
             otp: otp,
             otpExpires: otpExpires,
             role: 'Admin', // Ensure role is set/updated
+            mobileNumber: mobileNumber || null, // Add mobile number
           },
         });
       } else {
@@ -108,6 +109,7 @@ router.post('/signup', async (req, res) => {
             otp: otp,
             otpExpires: otpExpires,
             role: 'Admin', // Role 'Admin' set karein
+            mobileNumber: mobileNumber || null, // Add mobile number
           },
         });
       }
