@@ -17,15 +17,55 @@ import { useAuth } from '@/app/context/AuthContext';
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] });
 const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] });
 
-const slideshowImages = [
-  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1170",
-  "https://images.unsplash.com/photo-1560780552-ba54683cb263?auto=format&fit=crop&q=80&w=1170",
-  "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1170",
-  "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=1170",
-  "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&q=80&w=1170",
-  "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1170",
-  "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&q=80&w=1170",
-  "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1170"
+const slideshowData = [
+  {
+    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1170",
+    title: "Empowering Education",
+    subtitle: "Modern learning environments for future leaders",
+    cta: "Learn More"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1560780552-ba54683cb263?auto=format&fit=crop&q=80&w=1170",
+    title: "Innovative Teaching",
+    subtitle: "Advanced tools for educators to inspire students",
+    cta: "Discover Features"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1170",
+    title: "Student Success",
+    subtitle: "Comprehensive tracking for academic excellence",
+    cta: "See Results"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=1170",
+    title: "Collaborative Learning",
+    subtitle: "Connect students, teachers, and parents seamlessly",
+    cta: "Join Community"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&q=80&w=1170",
+    title: "Smart Administration",
+    subtitle: "Efficient management tools for educational institutions",
+    cta: "Explore Solutions"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1170",
+    title: "Premium Experience",
+    subtitle: "Designed for excellence in education technology",
+    cta: "Upgrade Now"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&q=80&w=1170",
+    title: "Future Ready",
+    subtitle: "Preparing students for tomorrow's challenges",
+    cta: "Get Started"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1170",
+    title: "Trusted by Educators",
+    subtitle: "Join thousands of schools transforming education",
+    cta: "View Testimonials"
+  }
 ];
 
 export default function LoginPage() {
@@ -69,7 +109,7 @@ export default function LoginPage() {
     }
     
     slideIntervalRef.current = setInterval(() => {
-      setCurrentImageIndex(prevIndex => (prevIndex + 1) % slideshowImages.length);
+      setCurrentImageIndex(prevIndex => (prevIndex + 1) % slideshowData.length);
     }, 5000);
   };
 
@@ -199,12 +239,19 @@ export default function LoginPage() {
           <div className={styles.overlay}></div>
           
           <div className={styles.carouselTrack} ref={carouselTrackRef}>
-            {slideshowImages.map((src, index) => (
+            {slideshowData.map((slide, index) => (
               <div
                 key={index}
                 className={`${styles.carouselSlide} ${index === currentImageIndex ? styles.active : ''}`}
-                style={{ backgroundImage: `url(${src})` }}
-              />
+                style={{ backgroundImage: `url(${slide.image})` }}
+              >
+                <div className={styles.carouselSlideContent}>
+                  <div className={styles.premiumBadge}>Premium Experience</div>
+                  <h2 className={styles.carouselTitle}>{slide.title}</h2>
+                  <p className={styles.carouselSubtitle}>{slide.subtitle}</p>
+                  <a href="#" className={styles.carouselCtaButton}>{slide.cta}</a>
+                </div>
+              </div>
             ))}
           </div>
           
@@ -213,7 +260,15 @@ export default function LoginPage() {
               Your Complete School Management System
             </div>
             
-
+            <div className={styles.navDots}>
+              {slideshowData.map((_, index) => (
+                <div
+                  key={index}
+                  className={`${styles.dot} ${index === currentImageIndex ? styles.active : ''}`}
+                  onClick={() => goToSlide(index)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -302,12 +357,19 @@ export default function LoginPage() {
         <div className={styles.overlay}></div>
         
         <div className={styles.carouselTrack} ref={carouselTrackRef}>
-          {slideshowImages.map((src, index) => (
+          {slideshowData.map((slide, index) => (
             <div
               key={index}
               className={`${styles.carouselSlide}`}
-              style={{ backgroundImage: `url(${src})` }}
-            />
+              style={{ backgroundImage: `url(${slide.image})` }}
+            >
+              <div className={styles.carouselSlideContent}>
+                <div className={styles.premiumBadge}>Premium Experience</div>
+                <h2 className={styles.carouselTitle}>{slide.title}</h2>
+                <p className={styles.carouselSubtitle}>{slide.subtitle}</p>
+                <a href="#" className={styles.carouselCtaButton}>{slide.cta}</a>
+              </div>
+            </div>
           ))}
         </div>
         
@@ -316,7 +378,15 @@ export default function LoginPage() {
             Your Complete School Management System
           </div>
           
-          
+          <div className={styles.navDots}>
+            {slideshowData.map((_, index) => (
+              <div
+                key={index}
+                className={`${styles.dot} ${index === currentImageIndex ? styles.active : ''}`}
+                onClick={() => goToSlide(index)}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
