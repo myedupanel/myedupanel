@@ -145,6 +145,7 @@ const AcademicYearManager: React.FC = () => {
                 </div>
               </div>
 
+              {/* Stats section - only show if count data is available */}
               {year._count && (
                 <div className={styles.stats}>
                   <div className={styles.stat}>
