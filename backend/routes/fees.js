@@ -32,7 +32,10 @@ const {
 // Middleware
 const adminAuth = [authMiddleware, authorize('Admin')];
 // Academic year middleware with admin auth
+// Modified to not require academic year for fee collection routes
 const adminAuthWithAcademicYear = [authMiddleware, authorize('Admin'), validateAcademicYear];
+// For fee collection routes, we don't require academic year validation
+const adminAuthWithoutAcademicYear = [authMiddleware, authorize('Admin')];
 
 // --- Dashboard & Template Routes ---
 router.get('/dashboard-overview', adminAuthWithAcademicYear, getDashboardOverview);
@@ -42,7 +45,7 @@ router.get('/templates/:id', adminAuthWithAcademicYear, getTemplateDetails);
 router.put('/templates/:id', adminAuthWithAcademicYear, updateFeeTemplate);
 router.delete('/templates/:id', adminAuthWithAcademicYear, deleteFeeTemplate);
 // --- Pichle Fixes (Correct Routes) ---
-router.post('/assign-and-collect', adminAuthWithAcademicYear, assignAndCollectFee);
+router.post('/assign-and-collect', adminAuthWithoutAcademicYear, assignAndCollectFee);
 router.get('/transactions', adminAuthWithAcademicYear, getTransactions);
 router.get('/late-payments', adminAuthWithAcademicYear, getLatePayments);
 router.post('/calculate-fine', adminAuthWithAcademicYear, calculateLateFees);
@@ -80,12 +83,12 @@ router.post('/export/detail', adminAuthWithAcademicYear, exportDetailReport);
 
 // @route   POST /api/fees/collect-manual (Fixing 404)
 // @desc    Manual fee collection
-router.post('/collect-manual', adminAuthWithAcademicYear, collectManualFee);
+router.post('/collect-manual', adminAuthWithoutAcademicYear, collectManualFee);
 
 // --- END FIX ---
 
 // --- Existing Route ---
 // @route   POST /api/fees/ (Manual fee collect - kept for backward compatibility)
-router.post('/', adminAuthWithAcademicYear, collectManualFee);
+router.post('/', adminAuthWithoutAcademicYear, collectManualFee);
 
 module.exports = router;

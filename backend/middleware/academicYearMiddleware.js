@@ -59,6 +59,7 @@ const injectAcademicYear = async (req, res, next) => {
 
 /**
  * Middleware to verify academic year exists and belongs to school
+ * Modified to be more permissive for certain routes
  */
 const validateAcademicYear = async (req, res, next) => {
   try {
@@ -66,6 +67,21 @@ const validateAcademicYear = async (req, res, next) => {
     const schoolId = req.user?.schoolId;
     
     console.log(`[validateAcademicYear] Validating academicYearId: ${academicYearId} for schoolId: ${schoolId}`);
+
+    // For certain routes that don't require academic year validation, allow to proceed
+    // This includes fee collection routes which should work regardless of academic year selection
+    const exemptRoutes = [
+      '/api/fees/collect-manual',
+      '/api/fees/assign-and-collect'
+    ];
+    
+    const currentRoute = req.originalUrl;
+    const isExempt = exemptRoutes.some(route => currentRoute.includes(route));
+    
+    if (isExempt) {
+      console.log(`[validateAcademicYear] Route ${currentRoute} is exempt from academic year validation`);
+      return next();
+    }
 
     if (!academicYearId || !schoolId) {
       // Try to get or create a default academic year

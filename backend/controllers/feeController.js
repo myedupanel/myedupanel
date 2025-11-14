@@ -34,6 +34,80 @@ const getFullName = (student) => {
   return [student.first_name, student.father_name, student.last_name].filter(Boolean).join(' ');
 }
 
+// 24. Get Student Report by Class (NEW FUNCTION)
+const getStudentReportByClass = async (req, res) => {
+     try {
+        const schoolId = req.user.schoolId; 
+        const { classId } = req.query; 
+        
+        if (!classId) {
+            return res.status(400).json({ message: 'Class ID is required.' });
+        }
+        
+        // NAYA: Academic year ID ke basis par filter karein
+        const academicYearWhere = { schoolId, classId: parseInt(classId) };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
+        
+        // Get all students in the class
+        const students = await prisma.students.findMany({
+            where: { ...academicYearWhere },
+            select: { 
+                studentid: true, 
+                first_name: true, 
+                father_name: true, 
+                last_name: true,
+                roll_number: true
+            },
+            orderBy: { roll_number: 'asc' }
+        });
+        
+        if (students.length === 0) {
+            return res.status(404).json({ message: 'No students found in this class.' });
+        }
+        
+        // Get fee records for all students in the class
+        const feeRecords = await prisma.feeRecord.findMany({
+            where: { ...academicYearWhere },
+            include: { template: { select: { name: true } } }
+        });
+        
+        // Group fee records by student
+        const studentFeeMap = {};
+        feeRecords.forEach(record => {
+            if (!studentFeeMap[record.studentId]) {
+                studentFeeMap[record.studentId] = [];
+            }
+            studentFeeMap[record.studentId].push(record);
+        });
+        
+        // Create report data
+        const reportData = students.map(student => {
+            const studentRecords = studentFeeMap[student.studentid] || [];
+            const totalAssigned = studentRecords.reduce((sum, record) => sum + (record.amount || 0), 0);
+            const totalPaid = studentRecords.reduce((sum, record) => sum + (record.amountPaid || 0), 0);
+            const totalDue = totalAssigned - totalPaid;
+            
+            return {
+                studentId: student.studentid,
+                rollNumber: student.roll_number,
+                studentName: getFullName(student),
+                totalAssigned,
+                totalPaid,
+                totalDue,
+                status: totalDue <= 0 ? 'Paid' : 'Pending'
+            };
+        });
+        
+        res.status(200).json(reportData);
+        
+      } catch (error) { 
+          console.error("Error generating student report by class:", error); 
+          res.status(500).json({ message: "Server Error: " + error.message }); 
+      }
+};
+
 // --- 2. CONTROLLER FUNCTIONS (Sanitization Implemented) ---
 
 // 1. Get Dashboard Overview (No Change)
@@ -41,8 +115,11 @@ const getDashboardOverview = async (req, res) => {
     try {
         const schoolId = req.user.schoolId; 
         
-        // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId: schoolId, academicYearId: req.academicYearId };
+        // NAYA: Academic year ID ke basis par filter karein (handle null case)
+        const academicYearWhere = { schoolId: schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
         
         const totalStudentCount = await prisma.students.count({ 
             where: academicYearWhere 
@@ -84,7 +161,11 @@ const getFeeTemplates = async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId: schoolId, academicYearId: req.academicYearId };
+        const whereClause = { schoolId: schoolId };
+        // Only filter by academic year if it exists
+        if (req.academicYearId) {
+            whereClause.academicYearId = req.academicYearId;
+        }
         
         // Fee templates school level par hain, isliye academic year filter nahi karna padega
         const templates = await prisma.feeTemplate.findMany({ 
@@ -109,7 +190,10 @@ const getTemplateDetails = async (req, res) => {
         if (!template) return res.status(404).json({ msg: 'Template not found' });
 
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { templateId: templateIdInt, schoolId: schoolId, academicYearId: req.academicYearId };
+        const academicYearWhere = { templateId: templateIdInt, schoolId: schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
         
         const stats = await prisma.feeRecord.aggregate({
             where: academicYearWhere,
@@ -221,7 +305,10 @@ const calculateLateFees = async (req, res) => {
         today.setHours(0, 0, 0, 0);
 
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId: schoolId, academicYearId: req.academicYearId };
+        const academicYearWhere = { schoolId: schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
         
         const result = await prisma.feeRecord.updateMany({
           where: { 
@@ -248,7 +335,7 @@ const calculateLateFees = async (req, res) => {
               LATE_FINE_AMOUNT
             );
         }
-
+        
         if (req.io && result.count > 0) { 
             req.io.emit('updateDashboard');
             req.io.emit('fee_records_updated'); 
@@ -303,7 +390,10 @@ const getStudentFeeRecords = async (req, res) => {
         const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
         
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId, academicYearId: req.academicYearId };
+        const academicYearWhere = { schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
         let query = { ...academicYearWhere };
         
         if (status) {
@@ -372,7 +462,10 @@ const getProcessingPayments = async (req, res) => {
         const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
         
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId, academicYearId: req.academicYearId };
+        const academicYearWhere = { schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
         let whereClause = { ...academicYearWhere, status: 'Pending' };
 
         if (search) {
@@ -431,7 +524,10 @@ const getEditedRecords = async (req, res) => {
         }
  
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId, academicYearId: req.academicYearId };
+        const academicYearWhere = { schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
         const query = { ...academicYearWhere, discount: { gt: 0 }, student: studentWhereClause }; 
         
         const records = await prisma.feeRecord.findMany({
@@ -465,7 +561,10 @@ const getPdcRecords = async (req, res) => {
         const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
 
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId, academicYearId: req.academicYearId };
+        const academicYearWhere = { schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
         let whereClause = { ...academicYearWhere, paymentMode: 'Cheque', status: 'Pending' };
 
         if (search) {
@@ -551,9 +650,27 @@ const assignAndCollectFee = async (req, res) => {
       const balanceDue = templateTotalAmount - numericAmountPaid;
       const feeStatus = balanceDue <= 0.01 ? 'Paid' : (isPayingNow ? 'Partial' : 'Pending');
       
-      // NAYA: Academic year ID ko fee record mein add karein
+      // NAYA: Academic year ID ko fee record mein add karein (handle null case)
+      const feeRecordData = {
+        studentId: studentIdInt, 
+        templateId: templateIdInt, 
+        schoolId: schoolId, 
+        classId: foundClassId, 
+        amount: templateTotalAmount, 
+        discount: 0, 
+        amountPaid: numericAmountPaid, 
+        balanceDue: balanceDue < 0 ? 0 : balanceDue, 
+        status: feeStatus, 
+        dueDate: new Date(dueDate)
+      };
+      
+      // Only add academicYearId if it exists
+      if (req.academicYearId) {
+        feeRecordData.academicYearId = req.academicYearId;
+      }
+      
       savedFeeRecord = await tx.feeRecord.create({
-        data: { studentId: studentIdInt, templateId: templateIdInt, schoolId: schoolId, classId: foundClassId, academicYearId: req.academicYearId, amount: templateTotalAmount, discount: 0, amountPaid: numericAmountPaid, balanceDue: balanceDue < 0 ? 0 : balanceDue, status: feeStatus, dueDate: new Date(dueDate) }
+        data: feeRecordData
       });
       
       console.log(`[assignAndCollectFee] FeeRecord created: ${savedFeeRecord.id}, Status: ${feeStatus}`);
@@ -562,24 +679,30 @@ const assignAndCollectFee = async (req, res) => {
         const receiptId = `TXN-${Date.now()}`;
         const transactionStatus = (paymentMode === 'Cheque') ? 'Pending' : 'Success';
         
-        // NAYA: Academic year ID ko transaction mein add karein
+        // NAYA: Academic year ID ko transaction mein add karein (handle null case)
+        const transactionData = {
+          receiptId, 
+          feeRecordId: savedFeeRecord.id, 
+          studentId: studentIdInt, 
+          classId: foundClassId, 
+          schoolId: schoolId, 
+          templateId: templateIdInt, 
+          amountPaid: numericAmountPaid, 
+          paymentDate: paymentDateObj, 
+          paymentMode: paymentMode, 
+          status: transactionStatus, 
+          collectedById: collectedByUserId, 
+          notes: sanitizedNotes, // <-- SANITIZED NOTES
+          chequeNumber: (paymentMode === 'Cheque') ? sanitizedNotes : null 
+        };
+        
+        // Only add academicYearId if it exists
+        if (req.academicYearId) {
+          transactionData.academicYearId = req.academicYearId;
+        }
+        
         savedTransaction = await tx.transaction.create({
-          data: { 
-            receiptId, 
-            feeRecordId: savedFeeRecord.id, 
-            studentId: studentIdInt, 
-            classId: foundClassId, 
-            schoolId: schoolId, 
-            templateId: templateIdInt, 
-            academicYearId: req.academicYearId, // NAYA: Academic year ID
-            amountPaid: numericAmountPaid, 
-            paymentDate: paymentDateObj, 
-            paymentMode: paymentMode, 
-            status: transactionStatus, 
-            collectedById: collectedByUserId, 
-            notes: sanitizedNotes, // <-- SANITIZED NOTES
-            chequeNumber: (paymentMode === 'Cheque') ? sanitizedNotes : null 
-          }
+          data: transactionData
         });
         console.log(`[assignAndCollectFee] Transaction created: ${savedTransaction.id}, Status: ${transactionStatus}`);
       }
@@ -757,8 +880,30 @@ const updateExistingRecords = async (req, res) => {
                 
                 const transactionStatus = (mode === 'Cheque') ? 'Pending' : 'Success';
                 
-                // NAYA: Academic year ID ko transaction mein add karein
-                await tx.transaction.create({ data: { feeRecordId: feeRecord.id, studentId: feeRecord.studentId, classId: feeRecord.classId, schoolId: schoolId, templateId: feeRecord.templateId, academicYearId: req.academicYearId, amountPaid: amountPaid, paymentDate: paymentDate, paymentMode: mode, status: transactionStatus, collectedById: collectedByUserId, notes: notes || `Imported via Excel`, chequeNumber, bankName, receiptId: `TXN-${paymentDate.getTime()}-${index}` } });
+                // NAYA: Academic year ID ko transaction mein add karein (handle null case)
+                const transactionData = {
+                  feeRecordId: feeRecord.id, 
+                  studentId: feeRecord.studentId, 
+                  classId: feeRecord.classId, 
+                  schoolId: schoolId, 
+                  templateId: feeRecord.templateId, 
+                  amountPaid: amountPaid, 
+                  paymentDate: paymentDate, 
+                  paymentMode: mode, 
+                  status: transactionStatus, 
+                  collectedById: collectedByUserId, 
+                  notes: notes || `Imported via Excel`, 
+                  chequeNumber, 
+                  bankName, 
+                  receiptId: `TXN-${paymentDate.getTime()}-${index}`
+                };
+                
+                // Only add academicYearId if it exists
+                if (req.academicYearId) {
+                  transactionData.academicYearId = req.academicYearId;
+                }
+                
+                await tx.transaction.create({ data: transactionData });
                 
                 if (transactionStatus === 'Success') {
                     const newAmountPaid = feeRecord.amountPaid + amountPaid; const newBalanceDue = feeRecord.balanceDue - amountPaid;
@@ -786,7 +931,10 @@ const exportDetailReport = async (req, res) => {
         const filters = req.body || {}; 
         
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId, academicYearId: req.academicYearId };
+        const academicYearWhere = { schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
         let query = { ...academicYearWhere };
         // Query filters (No Change)
         if (filters.status) query.status = filters.status; if (filters.paymentMode) query.paymentMode = filters.paymentMode; if (filters.classId) query.classId = parseInt(filters.classId);
@@ -828,7 +976,12 @@ const getPaidTransactions = async (req, res) => {
      try {
         const studentIdInt = parseInt(req.params.studentId); const schoolId = req.user.schoolId; if (isNaN(studentIdInt)) return res.status(400).json({ message: 'Invalid Student ID.' });
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId: schoolId, academicYearId: req.academicYearId, studentId: studentIdInt, status: 'Success' };
+        const academicYearWhere = { schoolId: schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
+        academicYearWhere.studentId = studentIdInt;
+        academicYearWhere.status = 'Success';
         const allPaidTransactions = await prisma.transaction.findMany({ where: academicYearWhere, include: { template: { select: { name: true } }, feeRecord: { select: { isDeposit: true } } }, orderBy: { paymentDate: 'desc' } });
         const deposits = allPaidTransactions.filter(tx => tx.feeRecord?.isDeposit === true); const paidRecords = allPaidTransactions.filter(tx => !tx.feeRecord || tx.feeRecord?.isDeposit !== true);
         res.status(200).json({ deposits, paidRecords });
@@ -840,7 +993,12 @@ const getFailedTransactions = async (req, res) => {
      try {
         const studentIdInt = parseInt(req.params.id); const schoolId = req.user.schoolId; if (isNaN(studentIdInt)) return res.status(400).json({ message: 'Invalid Student ID.' });
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId: schoolId, academicYearId: req.academicYearId, studentId: studentIdInt, status: 'Failed' };
+        const academicYearWhere = { schoolId: schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
+        academicYearWhere.studentId = studentIdInt;
+        academicYearWhere.status = 'Failed';
         const failedTransactions = await prisma.transaction.findMany({ where: academicYearWhere, include: { template: { select: { name: true } } }, orderBy: { id: 'desc' } });
         res.status(200).json(failedTransactions);
       } catch (error) { console.error("Error fetching failed transactions:", error); res.status(500).send("Server Error"); }
@@ -851,7 +1009,11 @@ const getPaymentHistory = async (req, res) => {
      try {
         const studentIdInt = parseInt(req.params.id); const schoolId = req.user.schoolId; if (isNaN(studentIdInt)) return res.status(400).json({ message: 'Invalid Student ID.' });
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId: schoolId, academicYearId: req.academicYearId, studentId: studentIdInt };
+        const academicYearWhere = { schoolId: schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
+        academicYearWhere.studentId = studentIdInt;
         const historyRecords = await prisma.transaction.findMany({ where: academicYearWhere, include: { template: { select: { name: true } } }, orderBy: { paymentDate: 'desc' } });
         res.status(200).json(historyRecords);
       } catch (error) { console.error("Error fetching payment history:", error); res.status(500).send("Server Error"); }
@@ -889,11 +1051,32 @@ const collectManualFee = async (req, res) => {
             const receiptId = `TXN-${Date.now()}`; 
             const transactionStatus = (paymentMode === 'Cheque') ? 'Pending' : 'Success';
             
-            // NAYA: Academic year ID ko transaction mein add karein
-            newTransaction = await tx.transaction.create({ data: { 
-                receiptId, feeRecordId: feeRecord.id, studentId: feeRecord.studentId, classId: feeRecord.classId, schoolId, templateId: feeRecord.templateId, academicYearId: req.academicYearId, amountPaid: amountPaid, paymentDate: paymentDateObj, paymentMode, status: transactionStatus, collectedById: collectedByUserId, 
-                notes, chequeNumber, bankName // <--- SANITIZED DATA
-            } });
+            // NAYA: Academic year ID ko transaction mein add karein (handle null case)
+            const transactionData = {
+              receiptId, 
+              feeRecordId: feeRecord.id, 
+              studentId: feeRecord.studentId, 
+              classId: feeRecord.classId, 
+              schoolId, 
+              templateId: feeRecord.templateId, 
+              amountPaid: amountPaid, 
+              paymentDate: paymentDateObj, 
+              paymentMode, 
+              status: transactionStatus, 
+              collectedById: collectedByUserId, 
+              notes, 
+              chequeNumber, 
+              bankName // <--- SANITIZED DATA
+            };
+            
+            // Only add academicYearId if it exists
+            if (req.academicYearId) {
+              transactionData.academicYearId = req.academicYearId;
+            }
+            
+            newTransaction = await tx.transaction.create({ 
+              data: transactionData
+            });
             
             if (newTransaction.status === 'Success') {
                 const newAmountPaid = feeRecord.amountPaid + amountPaid; const newBalanceDue = feeRecord.balanceDue - amountPaid;
@@ -921,7 +1104,10 @@ const getTransactionById = async (req, res) => {
         const transactionIdInt = parseInt(req.params.id); const schoolId = req.user.schoolId; if (isNaN(transactionIdInt)) return res.status(400).json({ message: 'Invalid Transaction ID' });
         
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { id: transactionIdInt, schoolId: schoolId, academicYearId: req.academicYearId };
+        const academicYearWhere = { id: transactionIdInt, schoolId: schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
         const transaction = await prisma.transaction.findUnique({ where: academicYearWhere, include: { student: { include: { class: { select: { class_name: true } } } }, template: { select: { name: true, items: true } }, collectedBy: { select: { name: true } } } });
         
         if (!transaction) return res.status(404).json({ message: 'Transaction not found or access denied.' });
@@ -952,7 +1138,6 @@ const getTransactionById = async (req, res) => {
             lateFineApplied: feeRecord?.lateFine || 0, 
             currentBalanceDue: feeRecord?.balanceDue ?? 0, 
             feeRecordStatus: feeRecord?.status || 'Pending', 
-
             schoolInfo: { 
                 name: schoolInfo?.name || 'School Name', 
                 address: schoolInfo?.address || 'School Address', 
@@ -972,11 +1157,96 @@ const getClasswiseReport = async (req, res) => {
         const schoolId = req.user.schoolId;
         const classes = await prisma.classes.findMany({ where: { schoolId }, include: { _count: { select: { students: true } } }, orderBy: { class_name: 'asc' } });
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId: schoolId, academicYearId: req.academicYearId, status: 'Success' };
+        const academicYearWhere = { schoolId: schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
+        academicYearWhere.status = 'Success';
         const reportData = await prisma.transaction.groupBy({ by: ['classId'], where: academicYearWhere, _sum: { amountPaid: true } });
         const report = classes.map(cls => { const collection = reportData.find(r => r.classId === cls.classid); return { classId: cls.classid, className: cls.class_name, totalCollection: collection?._sum.amountPaid || 0, studentCount: cls._count.students || 0 } });
         res.status(200).json(report);
       } catch (error) { console.error("Error fetching class-wise report:", error); res.status(500).send("Server Error"); }
+};
+
+// 25. Get Transactions (NEW FUNCTION)
+const getTransactions = async (req, res) => {
+     try {
+        const schoolId = req.user.schoolId; 
+        const { page = 1, limit = 10, search = "", status, paymentMode, classId, startDate, endDate } = req.query;
+        const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+        
+        // NAYA: Academic year ID ke basis par filter karein
+        const academicYearWhere = { schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
+        let whereClause = { ...academicYearWhere };
+        
+        // Add filters
+        if (status && status !== 'All') whereClause.status = status;
+        if (paymentMode && paymentMode !== 'All') whereClause.paymentMode = paymentMode;
+        if (classId) whereClause.classId = parseInt(classId);
+        
+        // Date range filter
+        if (startDate || endDate) {
+            whereClause.paymentDate = {};
+            if (startDate) whereClause.paymentDate.gte = new Date(startDate);
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                whereClause.paymentDate.lte = end;
+            }
+        }
+        
+        // Search filter
+        if (search) {
+            whereClause.OR = [
+                { student: { first_name: { contains: search } } },
+                { student: { father_name: { contains: search } } },
+                { student: { last_name: { contains: search } } },
+                { receiptId: { contains: search } }
+            ];
+        }
+        
+        const transactions = await prisma.transaction.findMany({ 
+            where: whereClause,
+            include: { 
+                student: { 
+                    select: { 
+                        first_name: true, 
+                        father_name: true, 
+                        last_name: true, 
+                        class: { select: { class_name: true } } 
+                    } 
+                },
+                template: { select: { name: true } },
+                collectedBy: { select: { name: true } }
+            },
+            orderBy: { paymentDate: 'desc' },
+            take: parseInt(limit, 10),
+            skip: skip
+        });
+        
+        const formattedTransactions = transactions.map(tx => ({
+            ...tx,
+            studentName: getFullName(tx.student) || 'N/A',
+            className: tx.student?.class?.class_name || 'N/A',
+            templateName: tx.template?.name || 'N/A',
+            collectedByName: tx.collectedBy?.name || (tx.paymentMode === 'Online' ? 'System (Online)' : 'N/A')
+        }));
+        
+        const totalDocuments = await prisma.transaction.count({ where: whereClause });
+        
+        res.status(200).json({ 
+            data: formattedTransactions, 
+            totalPages: Math.ceil(totalDocuments / parseInt(limit, 10)), 
+            currentPage: parseInt(page, 10) 
+        });
+        
+      } catch (error) { 
+          console.error("Error fetching transactions:", error); 
+          res.status(500).json({ message: "Server Error: " + error.message }); 
+      }
 };
 
 // 23. Export Fee Data (NEW FUNCTION)
@@ -987,7 +1257,10 @@ const exportFeeData = async (req, res) => {
         const filters = req.query || {}; 
         
         // NAYA: Academic year ID ke basis par filter karein
-        const academicYearWhere = { schoolId, academicYearId: req.academicYearId };
+        const academicYearWhere = { schoolId };
+        if (req.academicYearId) {
+            academicYearWhere.academicYearId = req.academicYearId;
+        }
         let query = { ...academicYearWhere };
         
         // Query filters - adapted for query parameters
@@ -1074,8 +1347,6 @@ module.exports = {
   getTransactionById,
   getClasswiseReport,
   getStudentReportByClass,
-  createPaymentOrder,
-  verifyPaymentWebhook,
   getTransactions,
   exportFeeData // Export the new function
 };
