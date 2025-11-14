@@ -192,7 +192,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                 return {
                     icon: MdStar,
                     text: 'Starter Plan',
-                    link: '/admin/settings/billing', 
+                    link: '/admin/upgrade', 
                     buttonText: 'Manage', 
                     className: styles.paidPlanBanner, 
                     isPaid: true,
