@@ -107,23 +107,7 @@ app.get('/health', (req, res) => {
 
 // 1. AUTH ROUTES (Yeh apne custom 'authLimiter' ka upyog karte hain)
 app.use('/api/auth', authRoutes);
-app.get('/api/health', async (req, res) => {
-  try {
-    // Prisma se ek bahut halka query karein
-    // Yeh database se sirf 1 school ka ID maangega
-    await prisma.school.findFirst({
-      select: { id: true }
-    });
-    
-    // Agar query safal hai, toh server aur DB dono zinda hain
-    res.status(200).json({ status: 'ok', message: 'Server and DB are awake.' });
-    
-  } catch (error) {
-    // Agar DB mein error hai, toh UptimeRobot ko pata chalega
-    console.error("Health check failed:", error.message);
-    res.status(500).json({ status: 'error', message: 'Database connection failed.' });
-  }
-});
+
 // 2. GLOBAL API LIMITER (Ab iske neeche ke sabhi routes par apiLimiter lag jayega)
 // [Threat D solved for feature routes]
 app.use('/api', apiLimiter);
