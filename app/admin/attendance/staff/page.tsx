@@ -42,7 +42,7 @@ const StaffAttendancePage = () => {
       setIsStaffLoading(true);
       try {
         const res = await api.get('/staff');
-        const transformedData: StaffMember[] = res.data.data.map((staff: ApiStaff) => ({
+        const transformedData: StaffMember[] = (res.data?.data || []).map((staff: ApiStaff) => ({
           id: staff.id.toString(), 
           name: staff.name,
           role: staff.role,

@@ -231,11 +231,11 @@ const FeeDashboardPage = () => {
                 <div className={styles.feeStructureCard}>
                     <div className={styles.cardHeader}>
                         <h3>Fee Structure</h3>
-                        <span className={styles.templateCount}>{templates.length} Templates</span>
+                        <span className={styles.templateCount}>{(templates || []).length} Templates</span>
                     </div>
                     <ul className={styles.templateList}>
-                        {templates.length > 0 ? (
-                            templates.map(template => (
+                        {(templates || []).length > 0 ? (
+                            (templates || []).map(template => (
                                 <li 
                                     key={template.id} 
                                     className={`${styles.templateItem} ${selectedTemplate?.id === template.id ? styles.active : ''}`}
@@ -296,7 +296,7 @@ const FeeDashboardPage = () => {
                         </div>
                     ) : (
                         <ul className={styles.feedList}>
-                            {feed.map((item, index) => (
+                            {(feed || []).map((item, index) => (
                                 <li key={index} className={styles.feedItem}>
                                     <span className={styles.feedName}>{item.name}</span>
                                     <span className={styles.feedAmount}>

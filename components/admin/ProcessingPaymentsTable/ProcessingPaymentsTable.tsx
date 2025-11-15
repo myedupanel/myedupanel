@@ -38,8 +38,8 @@ const ProcessingPaymentsTable = () => {
             setLoading(true);
             // Route: /fees/processing-payments
             const res = await api.get(`/fees/processing-payments?page=${currentPage}&limit=10`);
-            setRecords(res.data.data);
-            setTotalPages(res.data.totalPages);
+            setRecords(res.data?.data || []);
+            setTotalPages(res.data?.totalPages || 0);
         } catch (err) {
             setError('Could not fetch processing/failed payment records.');
         } finally {

@@ -38,8 +38,8 @@ const PdcRecordsTable = () => {
             setLoading(true);
             const res = await api.get(`/fees/pdc-records?page=${currentPage}&limit=10`);
             // Backend se aane wala data `PdcRecord[]` interface se match hona chahiye
-            setRecords(res.data.data); 
-            setTotalPages(res.data.totalPages);
+            setRecords(res.data?.data || []); 
+            setTotalPages(res.data?.totalPages || 0);
         } catch (err) {
             console.error("Error fetching PDC records:", err);
             setError('Could not fetch PDC records.');

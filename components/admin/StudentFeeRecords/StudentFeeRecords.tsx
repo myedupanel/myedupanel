@@ -71,8 +71,8 @@ const StudentFeeRecords = () => {
                 status: filters.status, 
             });
             const res = await api.get(`/fees/student-records?${params.toString()}`);
-            setRecords(res.data.data);
-            setTotalPages(res.data.totalPages);
+            setRecords(res.data?.data || []);
+            setTotalPages(res.data?.totalPages || 0);
         } catch (err) {
             console.error("Error fetching student fee records:", err);
             setError('Could not fetch student fee records.');

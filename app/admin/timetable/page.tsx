@@ -64,7 +64,7 @@ const TimetablePage = () => {
                 api.get('/teachers') 
             ]);
             const fetchedClasses = classesRes.data.map((c: any) => c.class_name);
-            const fetchedTeachers = teachersRes.data.data.map((t: any) => t.name);
+            const fetchedTeachers = (teachersRes.data?.data || []).map((t: any) => t.name);
             
             setClassOptions(fetchedClasses);
             setTeacherOptions(fetchedTeachers);

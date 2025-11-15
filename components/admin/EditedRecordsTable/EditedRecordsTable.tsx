@@ -38,8 +38,8 @@ const EditedRecordsTable = () => {
             // Backend route 9: /fees/edited-records
             const res = await api.get(`/fees/edited-records?page=${currentPage}&limit=10`);
             
-            setRecords(res.data.data); 
-            setTotalPages(res.data.totalPages);
+            setRecords(res.data?.data || []); 
+            setTotalPages(res.data?.totalPages || 0);
         } catch (err) {
             console.error("Error fetching edited fee records:", err);
             setError('Could not fetch edited fee records.');

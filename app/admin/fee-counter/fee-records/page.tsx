@@ -101,8 +101,8 @@ const FeeRecordsPage: React.FC = () => {
     try {
       const res = await api.get(`/fees/transactions?${params.toString()}`);
       
-      setTransactions(res.data.data); 
-      setTotalPages(res.data.totalPages);
+      setTransactions(res.data?.data || []); 
+      setTotalPages(res.data?.totalPages || 1);
       
     } catch (err) {
       console.error("Failed to fetch transactions", err);
