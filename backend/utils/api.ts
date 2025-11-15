@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // --- NEW FIX: Set up local and production URLs ---
 const LOCAL_API_URL = 'http://localhost:5000'; // आपका लोकल पोर्ट 5000 है
-const PRODUCTION_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://myedupanel.vercel.app';
+const PRODUCTION_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://myedupanel.onrender.com';
 
 // Create a new Axios instance
 const api = axios.create({
@@ -83,9 +83,11 @@ api.interceptors.response.use(
       // 401 (Unauthorized) error means token is invalid.
       if (typeof window !== 'undefined') {
         console.log('Unauthorized (401) error detected. Logging out.');
-        localStorage.removeItem('token');
-        // Send the user to the login page.
-        if (window.location.pathname !== '/login') {
+        // Only redirect if we're not already on the login page
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/login' && !currentPath.startsWith('/reset-password')) {
+          localStorage.removeItem('token');
+          // Send the user to the login page.
           window.location.href = '/login';
         }
       }

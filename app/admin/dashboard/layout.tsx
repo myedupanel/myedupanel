@@ -57,16 +57,26 @@ export default function AdminLayout({
     // Auth Logic (Same)
     if (!isLoading) {
       const isAdminOrSuperAdmin = user?.role === 'Admin' || user?.role === 'SuperAdmin';
-      if (!isAuthenticated) { router.push('/login'); } 
-      else if (!isAdminOrSuperAdmin) { router.push('/login'); }
+      if (!isAuthenticated) { 
+        // Check if we're already on the login page to prevent redirect loops
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          router.push('/login'); 
+        }
+      } 
+      else if (!isAdminOrSuperAdmin) { 
+        // Check if we're already on the login page to prevent redirect loops
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          router.push('/login'); 
+        }
+      }
     }
   }, [isLoading, isAuthenticated, router, user]);
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return <div className={styles.loadingState}>Loading Admin Area...</div>; 
   }
 
-  const isAdminOrSuperAdmin = user.role === 'Admin' || user.role === 'SuperAdmin';
+  const isAdminOrSuperAdmin = user?.role === 'Admin' || user?.role === 'SuperAdmin';
   if (!isAuthenticated || !isAdminOrSuperAdmin) {
      return <div className={styles.loadingState}>Redirecting...</div>;
   }

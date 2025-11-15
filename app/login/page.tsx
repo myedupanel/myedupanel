@@ -114,6 +114,11 @@ export default function LoginPage() {
       return;
     }
     
+    // Prevent multiple simultaneous login attempts
+    if (isLoading) {
+      return;
+    }
+    
     setIsLoading(true);
     setError('');
     setLoginStep('authenticating');
@@ -151,6 +156,9 @@ export default function LoginPage() {
         await new Promise(resolve => setTimeout(resolve, 500));
         
         // 3. Redirect based on user role (using data returned from context)
+        // Add a small delay to ensure state is properly set
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         if (role === 'admin' || role === 'Admin') {
           router.push('/admin/dashboard');
         } else if (role === 'teacher' || role === 'Teacher') {

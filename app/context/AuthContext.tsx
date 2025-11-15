@@ -54,9 +54,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(response.data);
       } catch (error: any) {
         console.error("Failed to fetch user from token:", error.response?.status, error.message);
-        // Handle token errors (like 401 Unauthorized) by logging out
-        // It's safer to logout on any fetch error to prevent inconsistent state
-        logout(); // Call logout which handles cleanup and redirect
+        // Only logout on 401 errors, not on network errors
+        if (error.response?.status === 401) {
+          logout(); // Call logout which handles cleanup and redirect
+        } else {
+          // For network errors, we should still set the user as null but not redirect
+          setUser(null);
+        }
       } finally {
         // Always set loading to false to prevent the app from being stuck
         setIsLoading(false);
@@ -85,8 +89,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return response.data;
     } catch (error) {
       console.error("Login failed: could not fetch user", error);
-      logout(); // Clean up on failure
-      // isLoading will be set to false by logout
+      // Clean up on failure but don't redirect immediately
+      localStorage.removeItem('token');
+      setToken(null);
+      delete api.defaults.headers.common['Authorization'];
+      // isLoading will be handled by the calling component
       return null;
     }
   };

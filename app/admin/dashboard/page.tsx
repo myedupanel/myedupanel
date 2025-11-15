@@ -267,6 +267,14 @@ const AdminDashboardPage = () => {
 
   // --- Loading state (Updated to wait for academic years) ---
   if (!adminProfile || !dashboardData) {
+    // Don't show loading indefinitely, check if we have a token
+    if (!token) {
+      // If no token, redirect to login
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      return <div className={styles.loading}>Redirecting to login...</div>;
+    }
     return <div className={styles.loading}>Loading Dashboard...</div>;
   }
   
