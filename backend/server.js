@@ -118,7 +118,7 @@ app.use('/api', injectAcademicYear);
 // 3. FEATURE ROUTES (Ab ye sabhi rate limited hain)
 app.use('/api/academic-years', academicYearRoutes);
 app.use('/api/school', schoolRoutes); 
-app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminRoutes);        
 app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/parents', parentRoutes);
