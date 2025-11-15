@@ -10,7 +10,7 @@ const api = axios.create({
   baseURL: PRODUCTION_API_URL,
   
   // Removed hardcoded 'Content-Type' header.
-  timeout: 5000, // 5 second timeout
+  timeout: 15000, // Increased timeout to 15 seconds to prevent timeout errors
 });
 // --- END NEW FIX ---
 

@@ -25,6 +25,7 @@ const {
     getEditedRecords,      // <-- YEH MISSING THA
     getPdcRecords,         // <-- YEH MISSING THA
     getTransactionById,  
+    getFeeRecordById,  // <-- NEW: Get fee record details
     createFeeTemplate,
     updateFeeTemplate, 
     deleteFeeTemplate, // <-- YEH MISSING THA (Receipt ke liye)
@@ -35,7 +36,6 @@ const {
 // Middleware
 const adminAuth = [authMiddleware, authorize('Admin')];
 // Academic year middleware with admin auth
-// Modified to not require academic year for fee collection routes
 const adminAuthWithAcademicYear = [authMiddleware, authorize('Admin'), validateAcademicYear];
 // For fee collection routes, we don't require academic year validation
 const adminAuthWithoutAcademicYear = [authMiddleware, authorize('Admin')];
@@ -64,6 +64,10 @@ router.get('/student-records', adminAuthWithAcademicYear, getStudentFeeRecords);
 // @desc    Receipt details ke liye single transaction
 router.get('/transaction/:id', adminAuthWithAcademicYear, getTransactionById);
 
+// @route   GET /api/fees/record/:id (NEW)
+// @desc    Fee record details for receipts
+router.get('/record/:id', adminAuthWithAcademicYear, getFeeRecordById);
+
 // @route   GET /api/fees/processing-payments (Fixing 404)
 // @desc    Dashboard tab ke liye
 router.get('/processing-payments', adminAuthWithAcademicYear, getProcessingPayments);
@@ -88,8 +92,6 @@ router.post('/export/detail', adminAuthWithAcademicYear, exportDetailReport);
 // @desc    Manual fee collection
 console.log('Registering POST /collect-manual route');
 router.post('/collect-manual', adminAuthWithoutAcademicYear, collectManualFee);
-
-// --- END FIX ---
 
 // --- Existing Route ---
 // @route   POST /api/fees/ (Manual fee collect - kept for backward compatibility)

@@ -173,6 +173,8 @@ export default function LoginPage() {
       // Handle the error which might be a network error or a specific API error
       if (err.response && err.response.data) {
         setError(err.response.data.message || 'Invalid email or password');
+      } else if (err.code === 'ECONNABORTED') {
+        setError('Request timeout. Please check your internet connection and try again.');
       } else if (err.message) {
         setError(err.message);
       } else {
