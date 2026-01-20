@@ -11,7 +11,7 @@ export interface User {
   email: string;
   schoolId: string;
   schoolNameLastUpdated?: string; 
-  
+
   // === YEH FIELDS ADD KIYE HAIN ===
   plan: string;                 // (e.g., 'TRIAL', 'STARTER', 'NONE')
   planExpiryDate: string | null;  // (ISO date string)
@@ -25,6 +25,11 @@ interface AuthContextType {
   login: (token: string) => Promise<User | null>;
   logout: () => void;
   isLoading: boolean;
+  showSubscriptionModal: boolean;
+  setShowSubscriptionModal: (show: boolean) => void;
+  subscriptionModalType: 'TRIAL_EXPIRED' | 'SUBSCRIPTION_EXPIRED' | 'SUBSCRIPTION_WARNING' | null;
+  daysUntilExpiration: number | null;
+  handleSubscriptionModalAction: (action: 'UPGRADE' | 'CANCEL') => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,6 +38,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true); // Start as true
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [subscriptionModalType, setSubscriptionModalType] = useState<'TRIAL_EXPIRED' | 'SUBSCRIPTION_EXPIRED' | 'SUBSCRIPTION_WARNING' | null>(null);
+  const [daysUntilExpiration, setDaysUntilExpiration] = useState<number | null>(null);
+
+  // Check if plan is expired or expiring soon
+  const checkPlanStatus = (user: User) => {
+    if (!user.planExpiryDate) return;
+
+    const expiryDate = new Date(user.planExpiryDate);
+    const today = new Date();
+    const timeDiff = expiryDate.getTime() - today.getTime();
+    const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+    // Check if trial has expired (TRIAL plan after 14 days)
+    if (user.plan === 'TRIAL' && daysLeft <= 0) {
+      setSubscriptionModalType('TRIAL_EXPIRED');
+      setDaysUntilExpiration(daysLeft);
+      setShowSubscriptionModal(true);
+    }
+    // Check if subscription has expired (STARTER/PRO plan after 365 days)
+    else if ((user.plan === 'STARTER' || user.plan === 'PRO') && daysLeft <= 0) {
+      setSubscriptionModalType('SUBSCRIPTION_EXPIRED');
+      setDaysUntilExpiration(daysLeft);
+      setShowSubscriptionModal(true);
+    }
+    // Check if subscription is about to expire (12 days warning)
+    else if ((user.plan === 'STARTER' || user.plan === 'PRO') && daysLeft <= 12 && daysLeft > 0) {
+      setSubscriptionModalType('SUBSCRIPTION_WARNING');
+      setDaysUntilExpiration(daysLeft);
+      setShowSubscriptionModal(true);
+    }
+  };
 
   useEffect(() => {
     const loadUserFromToken = async () => {
@@ -49,7 +86,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const response = await axios.get('/api/auth/me');
         // Fetched data should match the exported User interface
         // Naye fields (plan, planExpiryDate) yahaan automatically aa jayenge
-        setUser(response.data);
+        const userData = response.data;
+        setUser(userData);
+        
+        // Check plan status after loading user data
+        checkPlanStatus(userData);
       } catch (error: any) {
         console.error("Failed to fetch user from token:", error.response?.status, error.message);
         // Handle token errors (like 401 Unauthorized) by logging out
@@ -66,7 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loadUserFromToken();
     // Intentionally only running on mount, logout dependency removed
     // to prevent potential loops if logout clears state causing re-renders.
-  }, []); // Empty dependency array: runs only once on mount
+  }, []);
 
   // Login function
   const login = async (newToken: string): Promise<User | null> => {
@@ -78,14 +119,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // API response should match the exported User interface
       const response = await axios.get('/api/auth/me');
       // Naye fields yahaan bhi automatically aa jayenge
-      setUser(response.data);
+      const userData = response.data;
+      setUser(userData);
+      
+      // Check plan status after login
+      checkPlanStatus(userData);
+      
       setIsLoading(false); // Set loading false after fetching
-      return response.data;
+      return userData;
     } catch (error) {
       console.error("Login failed: could not fetch user", error);
       logout(); // Clean up on failure
       // isLoading will be set to false by logout
       return null;
+    }
+  };
+
+  // Handle subscription modal actions
+  const handleSubscriptionModalAction = (action: 'UPGRADE' | 'CANCEL') => {
+    if (action === 'UPGRADE') {
+      // Close modal and redirect to upgrade page
+      setShowSubscriptionModal(false);
+      window.location.href = '/upgrade';
+    } else if (action === 'CANCEL') {
+      // Close modal and logout user
+      setShowSubscriptionModal(false);
+      logout();
     }
   };
 
@@ -102,7 +161,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Provide the context value
   return (
-    <AuthContext.Provider value={{ isAuthenticated: !!user, user, token, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ 
+      isAuthenticated: !!user, 
+      user, 
+      token, 
+      login, 
+      logout, 
+      isLoading,
+      showSubscriptionModal,
+      setShowSubscriptionModal,
+      subscriptionModalType,
+      daysUntilExpiration,
+      handleSubscriptionModalAction
+    }}>
       {/* Render children only when loading is complete */}
       {!isLoading ? children : null /* Or a loading spinner */}
     </AuthContext.Provider>

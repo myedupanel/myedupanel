@@ -36,6 +36,7 @@ const schoolMenuItems: NavItem[] = [
     { name: 'Teachers', path: '/admin/teachers', icon: <MdSchool />, type: 'free' },
     { name: 'Parents', path: '/admin/parents', icon: <MdFamilyRestroom />, type: 'free' },
     { name: 'Staff', path: '/admin/staff', icon: <MdBadge />, type: 'free' },
+    { name: 'Notify Parents', path: '/admin/communication', icon: <MdPublic />, type: 'premium' },
     { name: 'Manage Classes', path: '/admin/school/classes', icon: <MdClass />, type: 'free' },
     { name: 'Settings', path: '/admin/settings', icon: <MdSettings />, type: 'free' },
     { name: 'Fee Counter', path: '/admin/fee-counter', icon: <MdAttachMoney />, type: 'premium' }, 

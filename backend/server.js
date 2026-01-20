@@ -34,6 +34,7 @@ const analyticsRoutes = require('./routes/analytics');
 const classRoutes = require('./routes/classes');
 const attendanceRoutes = require('./routes/attendance'); 
 const timetableRoutes = require('./routes/timetable');
+const communicationRoutes = require('./routes/communicationRoutes');
 
 const { apiLimiter } = require('./middleware/rateLimiter'); // Global Limiter Import
 
@@ -114,6 +115,7 @@ app.use('/api/timetable', timetableRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/plans', planRoutes);
+app.use('/api/communication', communicationRoutes);
 app.set('trust proxy', 1);
 // --- Socket.IO Connection Handler (No Change) ---
 io.on('connection', (socket) => {

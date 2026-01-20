@@ -119,6 +119,13 @@ model User {
   // === NAYE SUBSCRIPTION KI RELATION ===
   appSubscriptions AppSubscription[] // Admin ne jo payments ki hain
   // ===================================
+  
+  // === COMMUNICATION FEATURES ===
+  notifications   Notification[]
+  preferences     UserPreference[]
+  sentMessages    Message[] @relation("MessageSender")
+  conversations   Conversation[] @relation("ConversationParticipants")
+  // ============================
 
   // === INDEXING ===
   @@index([schoolId]) 
@@ -641,4 +648,67 @@ model Plan {
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now()) // Plan kab bana, yeh store karega
   @@index([isActive])
+}
+
+// 28. Notification Model (Communication notifications)
+model Notification {
+  id         Int      @id @default(autoincrement())
+  type       String   // "FEE_REMINDER", "ATTENDANCE_ALERT", etc.
+  title      String
+  message    String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+  
+  // Additional metadata as JSON
+  metadata Json?
+  
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// 29. Conversation Model (For teacher-parent chat)
+model Conversation {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  // Many-to-many relation for participants
+  participants User[] @relation("ConversationParticipants")
+  
+  // Messages in this conversation
+  messages Message[]
+}
+
+// 30. Message Model (For teacher-parent chat)
+model Message {
+  id            Int      @id @default(autoincrement())
+  content       String
+  read          Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  
+  // Relations
+  senderId        Int
+  sender          User @relation("MessageSender", fields: [senderId], references: [id])
+  
+  conversationId  Int
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+// 31. User Preference Model (Attendance alert preferences)
+model UserPreference {
+  id        Int      @id @default(autoincrement())
+  key       String   // "attendance_alerts", "email_notifications", etc.
+  value     Json     // Configuration object
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+  
+  @@unique([userId, key])
+  @@index([userId])
 }

@@ -1,0 +1,84 @@
+// components/common/SubscriptionExpirationModal.module.scss
+
+.expirationModal {
+  max-width: 500px;
+  width: 90%;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.modalContent {
+  padding: 20px;
+  text-align: center;
+}
+
+.iconContainer {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+
+  .warningIcon {
+    color: #ff9800;
+  }
+}
+
+.message {
+  margin: 0 0 25px 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+
+  .upgradeButton, .cancelButton, .dismissButton {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .upgradeButton {
+    background-color: #4caf50;
+    color: white;
+
+    &:hover {
+      background-color: #45a049;
+    }
+  }
+
+  .cancelButton {
+    background-color: #f44336;
+    color: white;
+
+    &:hover {
+      background-color: #d32f2f;
+    }
+  }
+
+  .dismissButton {
+    background-color: #e0e0e0;
+    color: #333;
+
+    &:hover {
+      background-color: #d5d5d5;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .modalActions {
+    flex-direction: column;
+
+    .upgradeButton, .cancelButton, .dismissButton {
+      width: 100%;
+    }
+  }
+}

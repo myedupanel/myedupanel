@@ -11,7 +11,7 @@ import { useUpcomingFeature } from '@/app/context/UpcomingFeatureContext';
 
 import { 
   MdPeople, MdSchool, MdFamilyRestroom, MdBadge, MdClass, MdSettings, MdAttachMoney, 
-  MdEventAvailable, MdSchedule, MdAssessment, MdArrowBack, MdBolt 
+  MdEventAvailable, MdSchedule, MdAssessment, MdArrowBack, MdBolt, MdPublic
 } from 'react-icons/md'; 
 
 // --- NavItem Interface (Unchanged) ---
@@ -30,6 +30,7 @@ const Colors = {
     Teachers: '#10B981',      
     Parents: '#F59E0B',        
     Staff: '#EC4899',         
+    NotifyParents: '#6366F1',  // Using indigo color for notifications
     Classes: '#8B5CF6',       
     Settings: '#64748B',      
     // Revenue/Premium (Gold/Vibrant)
@@ -49,6 +50,7 @@ const schoolMenuItems: NavItem[] = [
     { name: 'Teachers', path: '/admin/teachers', icon: <MdSchool style={{ color: Colors.Teachers }} />, type: 'free' },
     { name: 'Parents', path: '/admin/parents', icon: <MdFamilyRestroom style={{ color: Colors.Parents }} />, type: 'free' },
     { name: 'Staff', path: '/admin/staff', icon: <MdBadge style={{ color: Colors.Staff }} />, type: 'free' },
+    { name: 'Notify Parents', path: '/admin/communication', icon: <MdPublic style={{ color: Colors.NotifyParents }} />, type: 'locked' },
     { name: 'Manage Classes', path: '/admin/classes', icon: <MdClass style={{ color: Colors.Classes }} />, type: 'free' },
     
     // Starter Plan Features (Fee Counter is Starter/Trial)
