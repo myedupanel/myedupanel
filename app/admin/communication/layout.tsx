@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import styles from './CommunicationLayout.module.scss';
 import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import CommunicationSidebar from './CommunicationSidebar';
 
 // Layout for the communication section
 export default function CommunicationLayout({
@@ -42,6 +43,7 @@ export default function CommunicationLayout({
 
   return (
     <div className={styles.communicationLayout}>
+      <CommunicationSidebar />
       <main className={styles.mainContent}>
         {children}
       </main>
