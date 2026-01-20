@@ -29,7 +29,8 @@ export default function AdminLayout({
         pathname.startsWith('/admin/attendance') ||
         pathname.startsWith('/admin/academics') ||
         pathname.startsWith('/admin/timetable') ||
-        pathname.startsWith('/admin/fee-counter');
+        pathname.startsWith('/admin/fee-counter') ||
+        pathname.startsWith('/admin/communication');
                         
   const shouldRenderMainSidebar = !isSchoolOrFeeRoute;
 
