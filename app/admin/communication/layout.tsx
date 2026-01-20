@@ -14,7 +14,7 @@ export default function CommunicationLayout({
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
-  // Check if user has premium access hddgfg
+  // Check if user has premium access hddgfg iygyfgysd
   useEffect(() => {
     if (!isLoading && user) {
       // Logic: Agar plan free hai (aur demo mode nahi hai), to upgrade page par bhej do
