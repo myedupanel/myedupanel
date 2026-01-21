@@ -35,6 +35,8 @@ const classRoutes = require('./routes/classes');
 const attendanceRoutes = require('./routes/attendance'); 
 const timetableRoutes = require('./routes/timetable');
 const communicationRoutes = require('./routes/communicationRoutes');
+const parentAuthRoutes = require('./routes/parentAuth');
+const parentDashboardRoutes = require('./routes/parentDashboard');
 
 const { apiLimiter } = require('./middleware/rateLimiter'); // Global Limiter Import
 
@@ -93,6 +95,7 @@ app.get('/', (req, res) => {
 
 // 1. AUTH ROUTES (Yeh apne custom 'authLimiter' ka upyog karte hain)
 app.use('/api/auth', authRoutes);
+app.use('/api/parent-auth', parentAuthRoutes);
 
 // 2. GLOBAL API LIMITER (Ab iske neeche ke sabhi routes par apiLimiter lag jayega)
 // [Threat D solved for feature routes]
@@ -105,6 +108,7 @@ app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/parents', parentRoutes);
 app.use('/api/fees', feeRoutes);
+app.use('/api/parent-dashboard', parentDashboardRoutes); // Parent dashboard routes
 app.use('/api/staff', staffRoutes);
 app.use('/api/academics', academicRoutes);
 app.use('/api/events', eventRoutes);
@@ -119,7 +123,7 @@ app.use('/api/timetable', timetableRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/plans', planRoutes);
-app.use('/api/communication', communicationRoutes);
+app.use('/api/communication', communicationRoutes); // Communication routes for parent-chat
 app.set('trust proxy', 1);
 // --- Socket.IO Connection Handler (No Change) ---
 io.on('connection', (socket) => {

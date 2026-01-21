@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto'); 
 const sendEmail = require('../utils/sendEmail'); 
 const { Prisma } = require('@prisma/client'); // Prisma errors ke liye
+const ParentOnboardingService = require('../services/parentOnboardingService'); // Parent onboarding service
 
 // === NAYA FIX 1: THE SANITIZER FUNCTION (XSS Prevention) ===
 // यह फंक्शन किसी भी स्ट्रिंग से सभी HTML टैग्स को हटा देगा।
@@ -248,6 +249,10 @@ const addSingleStudent = async (req, res) => {
       roll_number,
       father_name,
       guardian_contact,
+      parent_email, // Parent email for automatic onboarding
+      parent_name,  // Parent name
+      parent_contact, // Parent contact
+      parent_occupation, // Parent occupation
       ...otherDetails
     } = sanitizedBody;
     // === END FIX 3 ===
@@ -343,8 +348,41 @@ const addSingleStudent = async (req, res) => {
       }
     }
 
-    // 9. Success response (No Change)
-    res.status(201).json({ message: 'Student added successfully!', student: newStudent });
+    // 9. Automatic Parent Onboarding
+    let parentOnboardingResult = null;
+    if (parent_email && parent_name) {
+      try {
+        const parentData = {
+          name: parent_name,
+          email: parent_email,
+          contactNumber: parent_contact || guardian_contact,
+          studentId: newStudent.studentid,
+          occupation: parent_occupation || null
+        };
+        
+        parentOnboardingResult = await ParentOnboardingService.createParentAccount(
+          parentData, 
+          schoolId, 
+          req.user.id
+        );
+        
+        console.log('Parent onboarding result:', parentOnboardingResult);
+      } catch (parentError) {
+        console.error('Parent onboarding failed:', parentError);
+        // Don't fail the student creation if parent onboarding fails
+        parentOnboardingResult = { 
+          success: false, 
+          message: `Student created but parent onboarding failed: ${parentError.message}` 
+        };
+      }
+    }
+
+    // 10. Success response
+    res.status(201).json({ 
+      message: 'Student added successfully!', 
+      student: newStudent,
+      parentOnboarding: parentOnboardingResult
+    });
 
   } catch (error) {
     // 10. Catch block (Errors ko handle karein)
