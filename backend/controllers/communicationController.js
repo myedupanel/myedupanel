@@ -9,7 +9,7 @@ function setIO(ioInstance) {
     io = ioInstance;
 }
 
-module.exports.setIO = setIO;
+// setIO will be exported with other functions at the end
 
 // Send fee reminder to a specific student's parent
 const sendFeeReminder = async (req, res) => {
@@ -353,6 +353,7 @@ const getMessages = async (req, res) => {
 };
 
 module.exports = {
+    setIO,
     sendFeeReminder,
     sendBulkFeeReminders,
     configureAttendanceAlerts,
