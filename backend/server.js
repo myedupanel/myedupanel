@@ -146,20 +146,49 @@ app.use((err, req, res, next) => {
   });
 });
 
-// --- DATABASE CONNECTION & START SERVER (No Change) ---
+// --- DATABASE CONNECTION & START SERVER (Production Ready) ---
 async function startServer() {
   try {
     // Prisma client ko connect karein
     await prisma.$connect();
     console.log("Prisma Database connected successfully!");
 
+    // Health check endpoint
+    app.get('/health', (req, res) => {
+      res.status(200).json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+      });
+    });
+
     // Database connect hone ke baad hi server listen karein
-    server.listen(PORT, '0.0.0.0', () => { 
+    const listener = server.listen(PORT, '0.0.0.0', () => { 
       console.log(`Server (Prisma Version) is running on port: ${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+
+    // Handle graceful shutdown
+    process.on('SIGTERM', async () => {
+      console.log('SIGTERM received, shutting down gracefully');
+      await prisma.$disconnect();
+      server.close(() => {
+        console.log('Process terminated');
+      });
+    });
+
+    process.on('SIGINT', async () => {
+      console.log('SIGINT received, shutting down gracefully');
+      await prisma.$disconnect();
+      server.close(() => {
+        console.log('Process terminated');
+      });
     });
 
   } catch (err) {
     console.error("Database connection error:", err);
+    console.error("Error code:", err.code);
+    console.error("Error message:", err.message);
     process.exit(1); // Agar connect na ho toh exit karein
   }
 }
