@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken } = require('../middleware/authMiddleware');
+const { authMiddleware } = require('../middleware/authMiddleware');
 const { checkPremiumAccess } = require('../middleware/checkPremiumAccess');
 const { 
     sendFeeReminder, 
@@ -13,7 +13,7 @@ const {
 } = require('../controllers/communicationController');
 
 // All communication routes require authentication only
-router.use(authenticateToken);
+router.use(authMiddleware);
 
 // Fee Reminders
 router.post('/fee-reminders/send', sendFeeReminder);
