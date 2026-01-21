@@ -83,6 +83,10 @@ app.use((req, res, next) => {
 
 // --- Register API Routes (CORRECT ORDER) ---
 
+// Set up communication controller with Socket.IO
+const communicationController = require('./controllers/communicationController');
+communicationController.setIO(io);
+
 app.get('/', (req, res) => {
   res.send('SchoolPro Backend is running (Prisma Version)!'); 
 });

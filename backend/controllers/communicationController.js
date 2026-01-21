@@ -1,6 +1,16 @@
 const prisma = require('../config/prisma');
 const { sendEmail } = require('../utils/sendEmail'); // Assuming this utility exists
 
+// Get the IO instance from app
+let io;
+
+// Function to set the io instance
+function setIO(ioInstance) {
+    io = ioInstance;
+}
+
+module.exports.setIO = setIO;
+
 // Send fee reminder to a specific student's parent
 const sendFeeReminder = async (req, res) => {
     try {
@@ -37,7 +47,7 @@ const sendFeeReminder = async (req, res) => {
         await sendEmail(student.parent.email, subject, html);
 
         // Log the notification
-        await prisma.notification.create({
+        const notification = await prisma.notification.create({
             data: {
                 type: 'FEE_REMINDER',
                 title: 'Fee Reminder Sent',
@@ -50,6 +60,11 @@ const sendFeeReminder = async (req, res) => {
                 }
             }
         });
+
+        // Emit real-time notification event if io is available
+        if (io) {
+            io.emit('new_notification', notification);
+        }
 
         res.status(200).json({ message: 'Fee reminder sent successfully' });
     } catch (error) {
@@ -96,7 +111,7 @@ const sendBulkFeeReminders = async (req, res) => {
 
                     await sendEmail(student.parent.email, subject, html);
 
-                    await prisma.notification.create({
+                    const notification = await prisma.notification.create({
                         data: {
                             type: 'FEE_REMINDER',
                             title: 'Fee Reminder Sent',
@@ -109,6 +124,11 @@ const sendBulkFeeReminders = async (req, res) => {
                             }
                         }
                     });
+
+                    // Emit real-time notification event if io is available
+                    if (io) {
+                        io.emit('new_notification', notification);
+                    }
 
                     successCount++;
                 }
@@ -146,6 +166,15 @@ const configureAttendanceAlerts = async (req, res) => {
                 }
             }
         });
+
+        // Emit real-time update event if io is available
+        if (io) {
+            io.emit('updateCommunication', {
+                type: 'ATTENDANCE_ALERTS_UPDATE',
+                userId: userId,
+                preferences: updatedUser.attendanceAlertPreferences
+            });
+        }
 
         res.status(200).json({ 
             message: 'Attendance alert preferences updated successfully',
@@ -221,6 +250,14 @@ const sendMessage = async (req, res) => {
                 read: false
             }
         });
+
+        // Emit real-time message event if io is available
+        if (io) {
+            io.emit('new_message', {
+                ...message,
+                senderName: req.user.name || req.user.email
+            });
+        }
 
         res.status(201).json(message);
     } catch (error) {

@@ -1,14 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { io, Socket } from 'socket.io-client';
 import styles from './CommunicationHub.module.scss';
 import { FaBell, FaEnvelope, FaComments, FaLock, FaStar } from 'react-icons/fa';
 import { useAuth } from '@/app/context/AuthContext';
 
 const CommunicationHub = () => {
   const { user } = useAuth();
-  const isPremiumUser = user?.plan !== 'free';
   const [activeTab, setActiveTab] = useState('fee-reminders');
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   const tabs = [
     { id: 'fee-reminders', label: 'Fee Reminders', icon: <FaEnvelope /> },
@@ -16,23 +18,71 @@ const CommunicationHub = () => {
     { id: 'teacher-parent-chat', label: 'Teacher-Parent Chat', icon: <FaComments /> },
   ];
 
-  // Show upgrade prompt if not premium user
-  if (!isPremiumUser) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.upgradePrompt}>
-          <h2>This feature is available for Premium users only</h2>
-          <p>Upgrade to Premium to access the Communication & Notification Hub</p>
-          <button 
-            className={styles.upgradeBtn}
-            onClick={() => window.location.href = '/upgrade'}
-          >
-            Upgrade Now
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Initialize socket connection
+  useEffect(() => {
+    if (user) {
+      const socketIo = io(process.env.NEXT_PUBLIC_SOCKET_URL || "https://myedupanel.onrender.com", {
+        auth: {
+          token: localStorage.getItem('token'),
+        },
+      });
+      
+      setSocket(socketIo);
+      
+      // Make socket globally available for child components
+      (window as any).globalSocket = socketIo;
+      
+      // Listen for real-time notifications
+      socketIo.on('new_notification', (notification) => {
+        setNotifications(prev => [notification, ...prev.slice(0, 9)]); // Keep only last 10 notifications
+      });
+      
+      // Listen for real-time messages
+      socketIo.on('new_message', (message) => {
+        // Update messages in the chat interface
+        console.log('New message received:', message);
+      });
+      
+      // Listen for dashboard updates
+      socketIo.on('updateCommunication', () => {
+        // Refresh data when updates occur
+        console.log('Communication data updated');
+      });
+      
+      return () => {
+        socketIo.off('new_notification');
+        socketIo.off('new_message');
+        socketIo.off('updateCommunication');
+        socketIo.disconnect();
+        
+        // Clean up global socket
+        delete (window as any).globalSocket;
+      };
+    }
+  }, [user]);
+  
+  // Fetch initial notifications
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const response = await fetch('/api/communication/recent-notifications', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setNotifications(data);
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+    
+    if (user) {
+      fetchInitialData();
+    }
+  }, [user]);
 
   return (
     <div className={styles.container}>
@@ -185,10 +235,66 @@ const FeeRemindersTab = () => {
       </div>
 
       <div className={styles.actions}>
-        <button className={styles.sendReminderBtn}>
+        <button 
+          className={styles.sendReminderBtn}
+          onClick={async () => {
+            if (selectedStudents.length > 0) {
+              try {
+                const response = await fetch('/api/communication/fee-reminders/send-bulk', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                  },
+                  body: JSON.stringify({
+                    studentIds: selectedStudents,
+                    amount: 250,
+                    dueDate: '2024-12-31'
+                  })
+                });
+                
+                if (response.ok) {
+                  alert(`Successfully sent reminders to ${selectedStudents.length} students`);
+                } else {
+                  alert('Failed to send reminders');
+                }
+              } catch (error) {
+                console.error('Error sending reminders:', error);
+                alert('Error sending reminders');
+              }
+            }
+          }}
+        >
           Send Selected Reminders ({selectedStudents.length})
         </button>
-        <button className={styles.sendBulkBtn}>
+        <button 
+          className={styles.sendBulkBtn}
+          onClick={async () => {
+            try {
+              const response = await fetch('/api/communication/fee-reminders/send-bulk', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                  studentIds: [1, 2], // In a real app, this would be all students
+                  amount: 250,
+                  dueDate: '2024-12-31'
+                })
+              });
+              
+              if (response.ok) {
+                alert('Successfully sent bulk reminders to all students');
+              } else {
+                alert('Failed to send bulk reminders');
+              }
+            } catch (error) {
+              console.error('Error sending bulk reminders:', error);
+              alert('Error sending bulk reminders');
+            }
+          }}
+        >
           Send Bulk Reminder to All
         </button>
       </div>
@@ -205,10 +311,36 @@ const AttendanceAlertsTab = () => {
   });
 
   const handleSettingChange = (setting: keyof typeof settings) => {
-    setSettings(prev => ({
-      ...prev,
-      [setting]: !prev[setting]
-    }));
+    setSettings(prev => {
+      const newSettings = {
+        ...prev,
+        [setting]: !prev[setting]
+      };
+      
+      // Save settings to backend
+      (async () => {
+        try {
+          const response = await fetch('/api/communication/attendance-alerts', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(newSettings)
+          });
+          
+          if (response.ok) {
+            console.log('Attendance alert settings saved successfully');
+          } else {
+            console.error('Failed to save attendance alert settings');
+          }
+        } catch (error) {
+          console.error('Error saving attendance alert settings:', error);
+        }
+      })();
+      
+      return newSettings;
+    });
   };
 
   return (
@@ -294,22 +426,74 @@ const AttendanceAlertsTab = () => {
 
 // Teacher-Parent Chat Tab Component
 const TeacherParentChatTab = () => {
+  const { user } = useAuth();
   const [selectedConversation, setSelectedConversation] = useState(0);
   const [messageText, setMessageText] = useState('');
-  const [conversations] = useState([
+  const [conversations, setConversations] = useState([
     { id: 1, name: 'Rahul Sharma (Parent)', lastMessage: 'Hi, how is Rahul doing?', time: '10:30 AM', unread: 1 },
     { id: 2, name: 'Priya Patel (Parent)', lastMessage: 'Thanks for the update!', time: 'Yesterday', unread: 0 },
     { id: 3, name: 'Amit Kumar (Parent)', lastMessage: 'Can we schedule a meeting?', time: 'Dec 18', unread: 0 },
   ]);
+  
 
-  const handleSendMessage = () => {
-    if (messageText.trim()) {
-      // In a real app, this would send the message to the backend
-      console.log('Sending message:', messageText);
-      setMessageText('');
+
+  const handleSendMessage = async (socket: Socket | null) => {
+    if (messageText.trim() && socket && user) {
+      try {
+        // Send message via API
+        const response = await fetch('/api/communication/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            recipientId: conversations[selectedConversation]?.id,
+            content: messageText,
+          }),
+        });
+        
+        if (response.ok) {
+          // Emit real-time message to socket
+          socket.emit('new_message', {
+            content: messageText,
+            sender: user.name,
+            timestamp: new Date().toISOString(),
+            conversationId: conversations[selectedConversation]?.id
+          });
+          
+          setMessageText('');
+          console.log('Message sent successfully');
+        } else {
+          console.error('Failed to send message');
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
     }
   };
 
+  // Load conversations when component mounts
+  useEffect(() => {
+    const loadConversations = async () => {
+      try {
+        const response = await fetch('/api/communication/conversations', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setConversations(data);
+        }
+      } catch (error) {
+        console.error('Error loading conversations:', error);
+      }
+    };
+    
+    loadConversations();
+  }, []);
+  
   return (
     <div className={styles.tabContent}>
       <div className={styles.sectionHeader}>
@@ -411,13 +595,17 @@ const TeacherParentChatTab = () => {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
-                      handleSendMessage();
+                      const mainSocket = (window as any).globalSocket;
+                      handleSendMessage(mainSocket);
                     }
                   }}
                 ></textarea>
                 <button 
                   className={styles.sendMessageBtn}
-                  onClick={handleSendMessage}
+                  onClick={() => {
+                    const mainSocket = (window as any).globalSocket;
+                    handleSendMessage(mainSocket);
+                  }}
                 >
                   Send
                 </button>

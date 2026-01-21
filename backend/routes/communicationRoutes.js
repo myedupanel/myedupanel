@@ -12,8 +12,8 @@ const {
     getMessages
 } = require('../controllers/communicationController');
 
-// All communication routes require authentication and premium access
-router.use(authenticateToken, checkPremiumAccess);
+// All communication routes require authentication only
+router.use(authenticateToken);
 
 // Fee Reminders
 router.post('/fee-reminders/send', sendFeeReminder);

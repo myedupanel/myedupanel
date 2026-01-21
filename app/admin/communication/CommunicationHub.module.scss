@@ -1,7 +1,15 @@
 .container {
-  padding: 2rem;
+  padding: 1.5rem;
   margin: 0;
   min-height: calc(100vh - 120px);
+  width: calc(100% - 220px); /* Account for sidebar width */
+  margin-left: 220px; /* Ensure content doesn't overlap with sidebar */
+  box-sizing: border-box;
+  
+  @media (max-width: 1024px) {
+    width: 100%;
+    margin-left: 0;
+  }
 }
 
 .upgradePrompt {
@@ -40,19 +48,19 @@
 }
 
 .header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .title {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: #1f2937;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .subtitle {
   color: #6b7280;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .tabsContainer {
@@ -161,6 +169,7 @@
 .tableContainer {
   overflow-x: auto;
   margin-bottom: 1.5rem;
+  width: 100%;
 }
 
 .table {
@@ -366,10 +375,11 @@
   border: 1px solid #e5e7eb;
   border-radius: 0.375rem;
   overflow: hidden;
+  width: 100%;
 }
 
 .chatSidebar {
-  width: 300px;
+  width: 250px;
   border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
