@@ -62,8 +62,11 @@ router.get('/pdc-records', adminAuth, getPdcRecords);
 
 // --- END FIX ---
 
-// --- Existing Route ---
-// @route   POST /api/fees/ (Manual fee collect)
+// --- Manual Fee Collection Routes ---
+// @route   POST /api/fees/ (Manual fee collect - original route)
 router.post('/', adminAuth, collectManualFee);
+
+// @route   POST /api/fees/collect-manual (Manual fee collect - alternative route for frontend)
+router.post('/collect-manual', adminAuth, collectManualFee);
 
 module.exports = router;

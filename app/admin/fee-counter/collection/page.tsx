@@ -191,10 +191,9 @@ const FeeCollectionPage: React.FC = () => {
       const payload = {
         feeRecordId: recordToCollectOffline.id, amountPaid: amountToPay,
         paymentMode: manualPaymentMode, paymentDate: manualPaymentDate, notes: manualNotes,
-        studentId: recordToCollectOffline.studentId, 
         ...(manualPaymentMode === 'Cheque' && { chequeNumber: manualNotes, bankName: 'N/A' })
       };
-      const response = await api.post('/api/fees/collect-manual', payload);
+      const response = await api.post('/fees/collect-manual', payload);
       setSubmitStatus({ message: 'Payment collected successfully!', type: 'success' });
       setLastTransactionForReceipt(response.data.transaction);
       setRecordToCollectOffline(null);
@@ -202,7 +201,8 @@ const FeeCollectionPage: React.FC = () => {
       fetchData(); 
     } catch (error: any) {
       console.error("Error collecting manual payment:", error);
-      setSubmitStatus({ message: error.response?.data?.message || 'Failed to save payment.', type: 'error' });
+      const errorMessage = error.response?.data?.msg || error.response?.data?.message || error.message || 'Failed to save payment.';
+      setSubmitStatus({ message: `Error: ${errorMessage}`, type: 'error' });
     } finally { setIsSubmittingManual(false); }
   };
 
