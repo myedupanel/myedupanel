@@ -8,29 +8,51 @@ import { FiPrinter, FiDownload } from 'react-icons/fi'; // Download button ke li
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-// --- Data types (Updated for better handling) ---
-interface StudentDetails { name: string; class: string; }
-interface TemplateDetails { name: string; }
+// --- Import correct interface from types ---
+import { Transaction as TransactionType } from '@/components/types/fees';
+// --- FIX ENDS ---
+
+// --- Data types (Updated to match backend response) ---
+
 
 interface Transaction {
-  id: string;
+  id: number; // Backend returns transaction ID as number
+  receiptId: string;
   amountPaid: number;
+  paymentMode: string; // Backend uses paymentMode, not mode
   paymentDate: string;
-  mode: string;
-  status: string;
-  studentId: StudentDetails; // Assuming nested structure
-  templateId: TemplateDetails; 
-  feeRecordId: string;
+  status: 'Success' | 'Pending' | 'Failed';
+  notes?: string;
+  transactionId?: string;
+  chequeNumber?: string;
+  bankName?: string;
+  walletName?: string;
+  gatewayMethod?: string;
+  
+  // Populated fields from backend
+  studentName?: string;
+  className?: string;
+  studentRegId?: string;
+  templateName?: string;
+  collectedByName?: string;
+  totalFeeAmount?: number;
+  discountGiven?: number;
+  lateFineApplied?: number;
+  currentBalanceDue?: number;
+  feeRecordStatus?: string;
+  
+  // School information
+  schoolInfo?: {
+    name?: string;
+    name2?: string; // Certificate name
+    address?: string;
+    logo?: string;
+    session?: string;
+    phone?: string;
+    email?: string;
+    udiseNo?: string;
+  };
 }
-
-// --- YAHAN FIX KIYA: School Details ke liye Interface ---
-interface SchoolDetails {
-  name: string;
-  name2: string;
-  address: string;
-  udiseNo: string;
-}
-// --- FIX ENDS ---
 
 export default function ReceiptPage() {
   const params = useParams();
@@ -38,9 +60,8 @@ export default function ReceiptPage() {
 
   const printableRef = useRef<HTMLDivElement>(null); // Ref for the printable area
 
-  const [transaction, setTransaction] = useState<Transaction | null>(null);
-  // --- YAHAN FIX KIYA: School Details ke liye state ---
-  const [schoolDetails, setSchoolDetails] = useState<SchoolDetails | null>(null);
+  const [transaction, setTransaction] = useState<TransactionType | null>(null);
+  // --- School details will be included in the transaction response from backend ---
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -50,14 +71,10 @@ export default function ReceiptPage() {
       if (!transactionId) return;
       setLoading(true);
       try {
-        // Ek hi baar mein dono cheezein fetch karein
-        const [transactionRes, schoolRes] = await Promise.all([
-          api.get(`/fees/transaction/${transactionId}`),
-          api.get('/api/school/profile') 
-        ]);
+        // Fetch transaction details which includes school info from backend
+        const transactionRes = await api.get(`/fees/transaction/${transactionId}`);
         
         setTransaction(transactionRes.data);
-        setSchoolDetails(schoolRes.data);
 
       } catch (err) {
         console.error("Error fetching receipt data:", err);
@@ -139,8 +156,22 @@ export default function ReceiptPage() {
   // --- YAHAN FIX KIYA: Loading state ko update kiya ---
   if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading Receipt...</div>; 
   if (error) return <div className={styles.errorContainer}>{error}</div>; 
-  // Ab check karein ki dono cheezein loaded hain
-  if (!transaction || !schoolDetails) return <div>Transaction or School Details not found.</div>;
+  // Check if transaction is loaded and school info is available
+  if (!transaction) return <div>Transaction not found.</div>;
+  const schoolInfo = transaction.schoolInfo || {};
+  const feeRecordIdDisplay = typeof transaction.feeRecordId === 'string' ? transaction.feeRecordId : (transaction.feeRecordId as any)?.id || 'N/A';
+  
+  // Type assertion for school info to access all properties
+  const typedSchoolInfo = schoolInfo as {
+    name?: string;
+    name2?: string;
+    address?: string;
+    logo?: string;
+    session?: string;
+    phone?: string;
+    email?: string;
+    udiseNo?: string;
+  };
   // --- FIX ENDS ---
 
   return (
@@ -161,10 +192,10 @@ export default function ReceiptPage() {
         
         {/* --- YAHAN FIX KIYA: Header ko School Details se update kiya --- */}
         <header className={styles.receiptHeader}>
-          {/* 'name2' (Certificate Name) ko main title banaya */}
-          <h1>{schoolDetails.name2 || schoolDetails.name}</h1>
-          <p>{schoolDetails.address}</p>
-          <p>UDISE: {schoolDetails.udiseNo}</p>
+          {/* School information from transaction */}
+          <h1>{typedSchoolInfo.name2 || typedSchoolInfo.name || 'School Name'}</h1>
+          <p>{typedSchoolInfo.address || 'School Address'}</p>
+          <p>UDISE: {typedSchoolInfo.udiseNo || 'N/A'}</p>
           <hr />
           <h2>Payment Receipt</h2>
           <p><strong>Transaction ID:</strong> {transaction.id}</p>
@@ -175,8 +206,8 @@ export default function ReceiptPage() {
         <section className={styles.detailsGrid}>
           <div className={styles.studentDetails}>
             <h2>Student Details</h2>
-            <p><strong>Name:</strong> {transaction.studentId.name}</p>
-            <p><strong>Class:</strong> {transaction.studentId.class}</p>
+            <p><strong>Name:</strong> {transaction.studentName || 'N/A'}</p>
+            <p><strong>Class:</strong> {transaction.className || 'N/A'}</p>
           </div>
           
           <div className={styles.paymentDetails}>
@@ -186,15 +217,15 @@ export default function ReceiptPage() {
                 currency: 'INR',
               }).format(transaction.amountPaid)}</p>
             <p><strong>Date:</strong> {new Date(transaction.paymentDate).toLocaleDateString('en-GB')}</p>
-            <p><strong>Payment Mode:</strong> {transaction.mode}</p>
+            <p><strong>Payment Mode:</strong> {transaction.paymentMode}</p>
             <p><strong>Status:</strong> {transaction.status}</p>
           </div>
         </section>
         
         <section className={styles.feeDetails}>
           <h2>For Fee</h2>
-          <p><strong>Fee Type:</strong> {transaction.templateId.name}</p>
-          <p><strong>Fee Record ID:</strong> {transaction.feeRecordId}</p>
+          <p><strong>Fee Type:</strong> {transaction.templateName || 'N/A'}</p>
+          <p><strong>Fee Record ID:</strong> {feeRecordIdDisplay}</p>
         </section>
 
         <footer className={styles.receiptFooter}>

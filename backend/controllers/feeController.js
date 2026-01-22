@@ -895,7 +895,7 @@ const getTransactionById = async (req, res) => {
             } 
         });
         
-        const schoolInfo = await prisma.school.findUnique({ where: { id: schoolId }, select: { name: true, address: true, logo: true, session: true } });
+        const schoolInfo = await prisma.school.findUnique({ where: { id: schoolId }, select: { name: true, name2: true, address: true, logo: true, session: true, udiseNo: true } });
         
         const receiptData = { 
             ...transaction, 

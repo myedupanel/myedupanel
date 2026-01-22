@@ -10,39 +10,8 @@ import FeeReceipt from '@/components/admin/fees/FeeReceipt';
 import { FiUser, FiCreditCard, FiRefreshCw, FiDollarSign, FiPrinter, FiXCircle, FiCalendar, FiSearch, FiCheckCircle, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import StudentSearch from '@/components/admin/StudentSearch/StudentSearch'; 
 
-// --- FIX 4 (UPAR): Interface definitions ko error ke hisaab se update kiya ---
-
-// 'items' ko naye error ke hisaab se correct type diya
-export interface TemplateInfo {
-  id: string; // Component ko templateId.id string chahiye (pichle error se)
-  name: string;
-  items?: { name: string; amount: number; }[]; // Naye error se
-  totalAmount?: number; 
-}
-
-export interface Transaction {
-  id: number; // Component ko transaction.id number chahiye (naye error se)
-  receiptId: string;
-  amountPaid: number;
-  paymentMode: string;
-  paymentDate: string;
-  status: 'Success' | 'Pending' | 'Failed';
-  templateName?: string;
-  templateId?: TemplateInfo; 
-}
-
-// Baaki types waise hi rahenge
-export interface StudentInfo { [key: string]: any; }
-export interface FeeRecordInfo { [key: string]: any; }
-export interface CollectorInfo { [key: string]: any; }
-export interface SchoolInfo { [key: string]: any; }
-
-export interface ReceiptData extends Transaction {
-  studentInfo?: StudentInfo;
-  schoolInfo?: SchoolInfo;
-  collectorInfo?: CollectorInfo;
-  feeRecordInfo?: FeeRecordInfo;
-}
+// --- Import correct interface from types ---
+import { Transaction, ReceiptData } from '@/components/types/fees';
 // --- END FIX ---
 
 
@@ -431,7 +400,7 @@ const FeeCollectionPage: React.FC = () => {
                           <tbody>
                             {failedTransactions.map((tx) => (
                               <tr key={tx.id}>
-                                G<td>{tx.receiptId}</td>
+                                <td>{tx.receiptId}</td>
                                 <td>{tx.templateName || tx.templateId?.name || 'N/A'}</td>
                                 <td>{formatCurrency(tx.amountPaid)}</td>
                                 <td>{tx.paymentMode}</td>
@@ -505,25 +474,9 @@ const FeeCollectionPage: React.FC = () => {
           {loadingReceipt ? <p>Loading Receipt...</p> :
             receiptError ? <p className={styles.errorMessage}>{receiptError}</p> :
             
-            // --- FIX 4 (NICHE): Dono naye errors ko fix karne ke liye object ko manually banaya ---
             receiptDataForModal ? (
               <FeeReceipt 
-                transaction={{
-                  ...receiptDataForModal, // Baaki saari properties (status, amountPaid, etc.)
-                  
-                  // FIX 1: 'id' ko NUMBER hi pass kiya
-                  id: receiptDataForModal.id, 
-                  
-                  // FIX 2: 'templateId' ko manually banaya taaki types match karein
-                  templateId: {
-                    // Pichla error chahta tha ki 'id' string ho
-                    id: Number(receiptDataForModal.templateId?.id || '0'), 
-                    name: receiptDataForModal.templateId?.name || 'N/A',
-                    // Naya error chahta tha ki 'items' ek valid array ho
-                    items: receiptDataForModal.templateId?.items || [], 
-                    totalAmount: receiptDataForModal.templateId?.totalAmount || 0
-                  }
-                }} 
+                transaction={receiptDataForModal}
               />
             ) : (
               <p>Could not load receipt data.</p>
