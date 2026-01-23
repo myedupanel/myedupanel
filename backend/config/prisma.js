@@ -1,4 +1,5 @@
 // File: backend/config/prisma.js
+// Use Prisma client from the root directory to avoid duplicate installations
 const { PrismaClient } = require('../../node_modules/@prisma/client');
 
 let prisma;
