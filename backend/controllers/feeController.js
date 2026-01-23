@@ -820,58 +820,205 @@ const getPaymentHistory = async (req, res) => {
 
 // 20. Collect Manual Fee (UPDATED)
 const collectManualFee = async (req, res) => {
-    // === FIX 7: USER INPUT KO SANITIZE KAREIN ===
-    const sanitizedBody = {};
-    for (const key in req.body) {
-        sanitizedBody[key] = removeHtmlTags(req.body[key]);
-    }
-    const { feeRecordId, amountPaid: amountPaidString, paymentMode, paymentDate, notes, chequeNumber, bankName } = sanitizedBody;
-    // === END FIX 7 ===
-
-    const schoolId = req.user.schoolId; const collectedByUserId = req.user.id; const collectedByName = req.user.name || 'Admin';
-    const feeRecordIdInt = parseInt(feeRecordId); 
-    if (isNaN(feeRecordIdInt)) return res.status(400).json({ msg: 'Invalid or missing Fee Record ID.' });
+    console.log("[collectManualFee] START - Received request body:", req.body);
     
-    const amountPaid = Number(amountPaidString); 
-    if (isNaN(amountPaid) || amountPaid <= 0) return res.status(400).json({ msg: 'Invalid or missing Amount Paid.' });
-    if (!paymentMode) return res.status(400).json({ msg: 'Payment Mode is required.' }); 
-    // Cheque check ab Sanitized ChequeNumber par hoga
-    if (paymentMode === 'Cheque' && !chequeNumber) return res.status(400).json({ msg: 'Cheque number is required.' });
-    
-    const paymentDateObj = paymentDate ? new Date(paymentDate) : new Date();
-    let updatedFeeRecord; let newTransaction;
-
     try {
+        // === FIX 7: USER INPUT KO SANITIZE KAREIN ===
+        const sanitizedBody = {};
+        for (const key in req.body) {
+            sanitizedBody[key] = removeHtmlTags(req.body[key]);
+        }
+        const { feeRecordId, amountPaid: amountPaidString, paymentMode, paymentDate, notes, chequeNumber, bankName } = sanitizedBody;
+        console.log("[collectManualFee] Sanitized body:", sanitizedBody);
+        // === END FIX 7 ===
+
+        const schoolId = req.user.schoolId; 
+        const collectedByUserId = req.user.id; 
+        const collectedByName = req.user.name || 'Admin';
+        
+        console.log("[collectManualFee] User context - School ID:", schoolId, "User ID:", collectedByUserId);
+        
+        const feeRecordIdInt = parseInt(feeRecordId); 
+        if (isNaN(feeRecordIdInt)) {
+            console.log("[collectManualFee] Invalid feeRecordId:", feeRecordId);
+            return res.status(400).json({ msg: 'Invalid or missing Fee Record ID.' });
+        }
+        
+        const amountPaid = Number(amountPaidString); 
+        if (isNaN(amountPaid) || amountPaid <= 0) {
+            console.log("[collectManualFee] Invalid amountPaid:", amountPaidString);
+            return res.status(400).json({ msg: 'Invalid or missing Amount Paid.' });
+        }
+        
+        if (!paymentMode) {
+            console.log("[collectManualFee] Missing paymentMode");
+            return res.status(400).json({ msg: 'Payment Mode is required.' }); 
+        }
+        
+        // Cheque check ab Sanitized ChequeNumber par hoga
+        if (paymentMode === 'Cheque' && !chequeNumber) {
+            console.log("[collectManualFee] Missing chequeNumber for Cheque payment");
+            return res.status(400).json({ msg: 'Cheque number is required.' });
+        }
+        
+        const paymentDateObj = paymentDate ? new Date(paymentDate) : new Date();
+        console.log("[collectManualFee] Payment date:", paymentDateObj);
+        
+        let updatedFeeRecord; 
+        let newTransaction;
+
+        console.log(`[collectManualFee] Starting transaction for fee record ID: ${feeRecordIdInt}, School ID: ${schoolId}`);
+        
         const result = await prisma.$transaction(async (tx) => {
-            const feeRecord = await tx.feeRecord.findUnique({ where: { id: feeRecordIdInt, schoolId } });
-            if (!feeRecord) throw new Error('Fee Record not found or does not belong to this school.');
-            if (amountPaid > feeRecord.balanceDue + 0.01) throw new Error(`Amount paid (${amountPaid}) exceeds balance due (${feeRecord.balanceDue})`);
+            console.log(`[collectManualFee] Inside transaction - Looking for fee record ID: ${feeRecordIdInt}, School ID: ${schoolId}`);
+            
+            // First check if fee record exists
+            const feeRecord = await tx.feeRecord.findUnique({ 
+                where: { id: feeRecordIdInt } 
+            });
+            
+            console.log("[collectManualFee] Found fee record:", feeRecord);
+            
+            if (!feeRecord) {
+                console.log(`[collectManualFee] Fee record not found with ID: ${feeRecordIdInt}`);
+                throw new Error(`Fee Record with ID ${feeRecordIdInt} not found.`);
+            }
+            
+            // Check if fee record belongs to the same school
+            if (feeRecord.schoolId !== schoolId) {
+                console.log(`[collectManualFee] School ID mismatch. Record school: ${feeRecord.schoolId}, User school: ${schoolId}`);
+                throw new Error('Fee Record does not belong to your school.');
+            }
+            
+            // Check amount validation
+            if (amountPaid > feeRecord.balanceDue + 0.01) {
+                console.log(`[collectManualFee] Amount exceeds balance. Paid: ${amountPaid}, Balance: ${feeRecord.balanceDue}`);
+                throw new Error(`Amount paid (${amountPaid}) exceeds balance due (${feeRecord.balanceDue})`);
+            }
+            
+            console.log("[collectManualFee] Validation passed. Creating transaction...");
             
             const receiptId = `TXN-${Date.now()}`; 
             const transactionStatus = (paymentMode === 'Cheque') ? 'Pending' : 'Success';
             
-            newTransaction = await tx.transaction.create({ data: { 
-                receiptId, feeRecordId: feeRecord.id, studentId: feeRecord.studentId, classId: feeRecord.classId, schoolId, templateId: feeRecord.templateId, amountPaid: amountPaid, paymentDate: paymentDateObj, paymentMode, status: transactionStatus, collectedById: collectedByUserId, 
-                notes, chequeNumber, bankName // <--- SANITIZED DATA
-            } });
+            console.log("[collectManualFee] Creating transaction with data:", { 
+                receiptId, 
+                feeRecordId: feeRecord.id, 
+                studentId: feeRecord.studentId, 
+                classId: feeRecord.classId, 
+                schoolId, 
+                templateId: feeRecord.templateId, 
+                amountPaid: amountPaid, 
+                paymentDate: paymentDateObj, 
+                paymentMode, 
+                status: transactionStatus, 
+                collectedById: collectedByUserId,
+                notes, 
+                chequeNumber, 
+                bankName 
+            });
+            
+            newTransaction = await tx.transaction.create({ 
+                data: { 
+                    receiptId, 
+                    feeRecordId: feeRecord.id, 
+                    studentId: feeRecord.studentId, 
+                    classId: feeRecord.classId, 
+                    schoolId, 
+                    templateId: feeRecord.templateId, 
+                    amountPaid: amountPaid, 
+                    paymentDate: paymentDateObj, 
+                    paymentMode, 
+                    status: transactionStatus, 
+                    collectedById: collectedByUserId, 
+                    notes, 
+                    chequeNumber, 
+                    bankName // <--- SANITIZED DATA
+                } 
+            });
+            
+            console.log("[collectManualFee] Transaction created:", newTransaction);
             
             if (newTransaction.status === 'Success') {
-                const newAmountPaid = feeRecord.amountPaid + amountPaid; const newBalanceDue = feeRecord.balanceDue - amountPaid;
-                updatedFeeRecord = await tx.feeRecord.update({ where: { id: feeRecord.id }, data: { amountPaid: newAmountPaid, balanceDue: newBalanceDue < 0 ? 0 : newBalanceDue, status: newBalanceDue < 0.01 ? 'Paid' : 'Partial' } });
-            } else { updatedFeeRecord = feeRecord; }
+                console.log("[collectManualFee] Updating fee record for successful transaction");
+                const newAmountPaid = feeRecord.amountPaid + amountPaid; 
+                const newBalanceDue = feeRecord.balanceDue - amountPaid;
+                updatedFeeRecord = await tx.feeRecord.update({ 
+                    where: { id: feeRecord.id }, 
+                    data: { 
+                        amountPaid: newAmountPaid, 
+                        balanceDue: newBalanceDue < 0 ? 0 : newBalanceDue, 
+                        status: newBalanceDue < 0.01 ? 'Paid' : 'Partial' 
+                    } 
+                });
+                console.log("[collectManualFee] Fee record updated:", updatedFeeRecord);
+            } else { 
+                updatedFeeRecord = feeRecord; 
+                console.log("[collectManualFee] Keeping fee record unchanged for pending transaction");
+            }
             
             return { newTransaction, updatedFeeRecord };
         });
 
+        console.log("[collectManualFee] Transaction completed successfully. Fetching additional data...");
+        
         // Socket logic and response (No Change)
-        const studentInfo = await prisma.students.findUnique({ where: { studentid: result.updatedFeeRecord.studentId }, include: { class: { select: { class_name: true } } } });
-        const templateInfo = await prisma.feeTemplate.findUnique({ where: { id: result.updatedFeeRecord.templateId } });
-        const schoolInfo = await prisma.school.findUnique({ where: { id: schoolId } });
-        const populatedTransaction = { ...result.newTransaction, studentName: getFullName(studentInfo) || 'N/A', className: studentInfo?.class?.class_name || 'N/A', templateName: templateInfo?.name || 'N/A', collectedByName: collectedByName, schoolInfo: { name: schoolInfo?.name || 'School Name', address: schoolInfo?.address || 'School Address', logo: schoolInfo?.logo } };
-        if (req.io) { console.log("[Manual Collect] Emitting Socket events..."); req.io.emit('updateDashboard'); req.io.emit('fee_record_updated', result.updatedFeeRecord); req.io.emit('transaction_added', populatedTransaction); if (result.newTransaction.status === 'Success') { req.io.emit('new_transaction_feed', { name: studentInfo ? getFullName(studentInfo) : 'A Student', amount: result.newTransaction.amountPaid }); } }
-        else { console.warn('[Manual Collect] Socket.IO instance (req.io) not found.'); }
+        const studentInfo = await prisma.students.findUnique({ 
+            where: { studentid: result.updatedFeeRecord.studentId }, 
+            include: { class: { select: { class_name: true } } } 
+        });
+        
+        const templateInfo = await prisma.feeTemplate.findUnique({ 
+            where: { id: result.updatedFeeRecord.templateId } 
+        });
+        
+        const schoolInfo = await prisma.school.findUnique({ 
+            where: { id: schoolId } 
+        });
+        
+        const populatedTransaction = { 
+            ...result.newTransaction, 
+            studentName: getFullName(studentInfo) || 'N/A', 
+            className: studentInfo?.class?.class_name || 'N/A', 
+            templateName: templateInfo?.name || 'N/A', 
+            collectedByName: collectedByName, 
+            schoolInfo: { 
+                name: schoolInfo?.name || 'School Name', 
+                address: schoolInfo?.address || 'School Address', 
+                logo: schoolInfo?.logo 
+            } 
+        };
+        
+        console.log("[collectManualFee] Populated transaction:", populatedTransaction);
+        
+        if (req.io) { 
+            console.log("[Manual Collect] Emitting Socket events..."); 
+            req.io.emit('updateDashboard'); 
+            req.io.emit('fee_record_updated', result.updatedFeeRecord); 
+            req.io.emit('transaction_added', populatedTransaction); 
+            if (result.newTransaction.status === 'Success') { 
+                req.io.emit('new_transaction_feed', { 
+                    name: studentInfo ? getFullName(studentInfo) : 'A Student', 
+                    amount: result.newTransaction.amountPaid 
+                }); 
+            } 
+        } else { 
+            console.warn('[Manual Collect] Socket.IO instance (req.io) not found.'); 
+        }
+        
+        console.log("[collectManualFee] Sending success response");
         res.status(201).json({ message: 'Fee collected successfully', transaction: populatedTransaction });
-    } catch (error) { console.error('Error collecting manual fee:', error); res.status(500).json({ msg: `Server error: ${error.message}` }); }
+        
+    } catch (error) { 
+        console.error('[collectManualFee] ERROR:', error);
+        console.error('[collectManualFee] ERROR stack:', error.stack);
+        res.status(500).json({ 
+            msg: `Server error: ${error.message}`,
+            error: error.message,
+            // Only include stack in development
+            ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+        }); 
+    }
 };
 
 // 21. Get Single Transaction Details (Receipt) (No Change)

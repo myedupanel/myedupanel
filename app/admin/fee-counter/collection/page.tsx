@@ -25,7 +25,7 @@ interface FeeRecordListItem {
   status: 'Pending' | 'Partial' | 'Paid' | 'Late';
   templateId: { id: number; name: string }; 
   studentId: number; 
-  classId: string;
+  classId: number;
   studentName?: string;
   className?: string;
 }
@@ -108,6 +108,7 @@ const FeeCollectionPage: React.FC = () => {
           params.append('status', 'Pending,Partial');
           url = `/api/fees/student-records?${params.toString()}`; 
           const resFR = await api.get(url);
+          console.log("Fee records response:", resFR.data);
           setFeeRecords(resFR.data.data || []);
           break;
         case 'paid': 
@@ -178,32 +179,100 @@ const FeeCollectionPage: React.FC = () => {
   };
 
   const handleCollectManually = async () => {
-    if (!recordToCollectOffline || !manualAmount || isSubmittingManual || !selectedStudent?.id) return;
+    if (!recordToCollectOffline || !manualAmount || isSubmittingManual || !selectedStudent?.id) {
+      console.log("Validation failed - recordToCollectOffline:", recordToCollectOffline, "manualAmount:", manualAmount, "isSubmittingManual:", isSubmittingManual, "selectedStudent?.id:", selectedStudent?.id);
+      return;
+    }
+    
     const amountToPay = Number(manualAmount);
     if (isNaN(amountToPay) || amountToPay <= 0 || amountToPay > recordToCollectOffline.balanceDue + 0.01) {
-      setSubmitStatus({ message: amountToPay > recordToCollectOffline.balanceDue ? 'Amount exceeds balance.' : 'Invalid amount.', type: 'error' }); return;
+      setSubmitStatus({ 
+        message: amountToPay > recordToCollectOffline.balanceDue ? 
+          `Amount exceeds balance. Maximum allowed: ${formatCurrency(recordToCollectOffline.balanceDue)}` : 
+          'Invalid amount. Please enter a positive value.', 
+        type: 'error' 
+      }); 
+      return;
     }
+    
     if (manualPaymentMode === 'Cheque' && !manualNotes.trim()) {
-      setSubmitStatus({ message: 'Cheque details required in notes.', type: 'error' }); return;
+      setSubmitStatus({ message: 'Cheque details required in notes.', type: 'error' }); 
+      return;
     }
-    setIsSubmittingManual(true); setLastTransactionForReceipt(null); setSubmitStatus(null);
+    
+    setIsSubmittingManual(true); 
+    setLastTransactionForReceipt(null); 
+    setSubmitStatus(null);
+    
     try {
       const payload = {
-        feeRecordId: recordToCollectOffline.id, amountPaid: amountToPay,
-        paymentMode: manualPaymentMode, paymentDate: manualPaymentDate, notes: manualNotes,
+        feeRecordId: recordToCollectOffline.id, 
+        amountPaid: amountToPay,
+        paymentMode: manualPaymentMode, 
+        paymentDate: manualPaymentDate, 
+        notes: manualNotes,
         ...(manualPaymentMode === 'Cheque' && { chequeNumber: manualNotes, bankName: 'N/A' })
       };
+      
+      console.log("[Frontend] Sending fee collection payload:", payload);
+      console.log("[Frontend] recordToCollectOffline:", recordToCollectOffline);
+      console.log("[Frontend] Selected student ID:", selectedStudent.id);
+      
       const response = await api.post('/fees/collect-manual', payload);
+      
+      console.log("[Frontend] Success response:", response.data);
+      
       setSubmitStatus({ message: 'Payment collected successfully!', type: 'success' });
       setLastTransactionForReceipt(response.data.transaction);
       setRecordToCollectOffline(null);
       setManualAmount('');
       fetchData(); 
     } catch (error: any) {
-      console.error("Error collecting manual payment:", error);
-      const errorMessage = error.response?.data?.msg || error.response?.data?.message || error.message || 'Failed to save payment.';
-      setSubmitStatus({ message: `Error: ${errorMessage}`, type: 'error' });
-    } finally { setIsSubmittingManual(false); }
+      console.error("[Frontend] Error collecting manual payment:", error);
+      console.error("[Frontend] Error response:", error.response);
+      console.error("[Frontend] Error request:", error.request);
+      console.error("[Frontend] Error message:", error.message);
+      
+      // More detailed error handling
+      let errorMessage = 'Failed to save payment.';
+      
+      if (error.response) {
+        // Server responded with error
+        console.log("[Frontend] Response status:", error.response.status);
+        console.log("[Frontend] Response data:", error.response.data);
+        
+        if (error.response.data) {
+          if (typeof error.response.data === 'string') {
+            errorMessage = error.response.data;
+          } else if (error.response.data.msg) {
+            errorMessage = error.response.data.msg;
+          } else if (error.response.data.message) {
+            errorMessage = error.response.data.message;
+          } else if (error.response.data.error) {
+            errorMessage = error.response.data.error;
+          } else {
+            errorMessage = JSON.stringify(error.response.data);
+          }
+        } else {
+          errorMessage = `Server error (${error.response.status})`;
+        }
+      } else if (error.request) {
+        // Request was made but no response received
+        console.log("[Frontend] No response received");
+        errorMessage = 'No response from server. Please check your connection.';
+      } else {
+        // Something else happened
+        console.log("[Frontend] Error message:", error.message);
+        errorMessage = error.message || 'Unknown error occurred.';
+      }
+      
+      setSubmitStatus({ 
+        message: `Error: ${errorMessage}`, 
+        type: 'error' 
+      });
+    } finally { 
+      setIsSubmittingManual(false); 
+    }
   };
 
   const handleViewReceipt = async (transactionId: number) => { 
@@ -354,8 +423,29 @@ const FeeCollectionPage: React.FC = () => {
                             <div className={styles.totalSection}>
                               <span>Paying Now:</span><strong>{formatCurrency(Number(manualAmount) || 0)}</strong>
                             </div>
-                            <button className={styles.proceedButton} onClick={handleCollectManually} disabled={isSubmittingManual || !manualAmount || Number(manualAmount) <= 0 || Number(manualAmount) > recordToCollectOffline.balanceDue + 0.01}>
-                              {isSubmittingManual ? 'Saving...' : 'Save Payment'}
+                            <button 
+                              className={styles.proceedButton} 
+                              onClick={handleCollectManually} 
+                              disabled={
+                                isSubmittingManual || 
+                                !manualAmount || 
+                                Number(manualAmount) <= 0 || 
+                                Number(manualAmount) > recordToCollectOffline.balanceDue + 0.01 ||
+                                (manualPaymentMode === 'Cheque' && !manualNotes.trim())
+                              }
+                              title={
+                                isSubmittingManual ? 'Saving payment...' :
+                                !manualAmount || Number(manualAmount) <= 0 ? 'Please enter amount' :
+                                Number(manualAmount) > recordToCollectOffline.balanceDue + 0.01 ? `Amount exceeds balance of ${formatCurrency(recordToCollectOffline.balanceDue)}` :
+                                manualPaymentMode === 'Cheque' && !manualNotes.trim() ? 'Cheque details required' :
+                                'Click to save payment'
+                              }
+                            >
+                              {isSubmittingManual ? (
+                                <>
+                                  <FiRefreshCw className={styles.spin} /> Saving...
+                                </>
+                              ) : 'Save Payment'}
                             </button>
                           </div>
                         </div>
