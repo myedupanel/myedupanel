@@ -18,21 +18,25 @@ export default function AdminLayout({
   // FIX: usePathname hook का उपयोग करें
   const pathname = usePathname(); 
   
-  // FIX: School और Fee routes के लिए Main Sidebar hide करें
-  const isSchoolOrFeeRoute = 
-        pathname.startsWith('/admin/school') ||
-        pathname.startsWith('/admin/students') || 
-        pathname.startsWith('/admin/teachers') ||
-        pathname.startsWith('/admin/parents') ||
-        pathname.startsWith('/admin/staff') ||
-        pathname.startsWith('/admin/settings') ||
-        pathname.startsWith('/admin/attendance') ||
-        pathname.startsWith('/admin/academics') ||
-        pathname.startsWith('/admin/timetable') ||
-        pathname.startsWith('/admin/fee-counter') ||
-        pathname.startsWith('/admin/communication');
+  // FIX: Specific sub-routes के लिए Main Sidebar hide करें, but show on main dashboard pages
+  const isSpecificPageRoute = 
+        pathname.startsWith('/admin/school/') ||
+        pathname.startsWith('/admin/students/') || 
+        pathname.startsWith('/admin/teachers/') ||
+        pathname.startsWith('/admin/parents/') ||
+        pathname.startsWith('/admin/staff/') ||
+        pathname.startsWith('/admin/settings/') ||
+        pathname.startsWith('/admin/attendance/') ||
+        pathname.startsWith('/admin/academics/') ||
+        pathname.startsWith('/admin/timetable/') ||
+        pathname.startsWith('/admin/fee-counter/collection') ||
+        pathname.startsWith('/admin/fee-counter/templates') ||
+        pathname.startsWith('/admin/fee-counter/reports') ||
+        pathname.startsWith('/admin/fee-counter/history') ||
+        pathname.startsWith('/admin/communication/') ||
+        pathname.startsWith('/admin/profile/');
                         
-  const shouldRenderMainSidebar = !isSchoolOrFeeRoute;
+  const shouldRenderMainSidebar = !isSpecificPageRoute;
 
 
   useEffect(() => {
