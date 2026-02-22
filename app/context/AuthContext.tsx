@@ -63,6 +63,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setDaysUntilExpiration(daysLeft);
       setShowSubscriptionModal(true);
     }
+    // Check if trial is about to expire (show warning when 3 days left)
+    else if (user.plan === 'TRIAL' && daysLeft <= 3 && daysLeft > 0) {
+      setSubscriptionModalType('SUBSCRIPTION_WARNING');
+      setDaysUntilExpiration(daysLeft);
+      setShowSubscriptionModal(true);
+    }
     // Check if subscription is about to expire (12 days warning)
     else if ((user.plan === 'STARTER' || user.plan === 'PRO') && daysLeft <= 12 && daysLeft > 0) {
       setSubscriptionModalType('SUBSCRIPTION_WARNING');

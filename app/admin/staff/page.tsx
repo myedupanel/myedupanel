@@ -21,8 +21,8 @@ interface StaffTableMemberType {
   staffId: string; 
   name: string;
   role: string;
-  contact: string;
-  joiningDate: string; 
+  contact?: string;
+  joiningDate?: string; 
   leavingDate?: string; 
 }
 

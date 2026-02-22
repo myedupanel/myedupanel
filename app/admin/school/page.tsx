@@ -86,7 +86,7 @@ const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, 
                 <p>To avoid any disruption to your school's operations, please consider **upgrading** to a paid plan today.</p>
                 <p className={styles.warningMessage}>
                     <MdFlashOn size={20} style={{ marginRight: '8px' }}/> 
-                    Once your trial ends, access to some features will be restricted.
+                    Once your trial ends, access to premium features will be restricted until you upgrade.
                 </p>
                 <div className={styles.modalActions}>
                     <Link href="/upgrade" className={styles.upgradeLinkButton}>
