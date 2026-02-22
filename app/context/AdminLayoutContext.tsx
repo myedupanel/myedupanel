@@ -7,6 +7,8 @@ import styles from '@/app/admin/dashboard/layout.module.scss'; // Style file ko 
 // 1. Context banayein
 interface AdminLayoutContextType {
   showUpcomingFeatureModal: () => void;
+  isSidebarOpen: boolean;
+  toggleSidebar: () => void;
 }
 
 const AdminLayoutContext = createContext<AdminLayoutContextType | undefined>(undefined);
@@ -23,11 +25,14 @@ export const useAdminLayout = () => {
 // 3. Provider component banayein (jise layout.tsx use karega)
 export const AdminLayoutProvider = ({ children }: { children: ReactNode }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
   const showUpcomingFeatureModal = () => setIsModalOpen(true);
   const hideModal = () => setIsModalOpen(false);
+  const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
   return (
-    <AdminLayoutContext.Provider value={{ showUpcomingFeatureModal }}>
+    <AdminLayoutContext.Provider value={{ showUpcomingFeatureModal, isSidebarOpen, toggleSidebar }}>
       {children}
 
       {/* === YEH HAI AAPKA "UPCOMING FEATURE" MODAL === */}
