@@ -19,10 +19,10 @@ enum PlanType {
   PRO     // Future ke liye 
 } 
 
-enum AppSubscriptionStatus {
+enum AppSubscriptionStatus { 
   PENDING
   SUCCESS
-  FAILED
+  FAILED 
 }
 
 enum DiscountType {
