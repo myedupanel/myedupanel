@@ -16,7 +16,7 @@ enum PlanType {
   NONE    // Jinhone abhi tak koi plan nahi chuna
   TRIAL   // 14-day free trial
   STARTER // Aapka paid plan
-  PRO     // Future ke liye
+  PRO     // Future ke liye 
 } 
 
 enum AppSubscriptionStatus {
