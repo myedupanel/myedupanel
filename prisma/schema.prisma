@@ -25,7 +25,7 @@ enum AppSubscriptionStatus {
   FAILED 
 }
 
-enum DiscountType { 
+enum DiscountType {
   PERCENTAGE
   FIXED_AMOUNT
 }
