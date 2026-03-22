@@ -22,7 +22,9 @@ const getFeeTemplates = async (req, res) => {
     const templates = await prisma.feeTemplate.findMany({
       where: { schoolId: req.user.schoolId }
     });
-    res.json(templates);
+    // Ensure items is always an array for the frontend
+    const normalized = templates.map(t => ({ ...t, items: t.items || [] }));
+    res.json(normalized);
   } catch (error) {
     console.error('Error in getFeeTemplates:', error);
     res.status(500).json({ error: 'Failed to fetch fee templates' });
@@ -38,7 +40,8 @@ const getTemplateDetails = async (req, res) => {
     if (!template) {
       return res.status(404).json({ error: 'Template not found' });
     }
-    res.json(template);
+    // Normalize items for clients
+    res.json({ ...template, items: template.items || [] });
   } catch (error) {
     console.error('Error in getTemplateDetails:', error);
     res.status(500).json({ error: 'Failed to fetch template details' });

@@ -228,7 +228,10 @@ model FeeTemplate {
   id          Int     @id @default(autoincrement())
   name        String
   description String?
-  items       Json
+  // Make items nullable so adding this column to an existing DB with rows
+  // does not fail during `prisma db push`. Existing rows can have NULL
+  // and new templates will populate this field.
+  items       Json?
   totalAmount Float
 
   schoolId String
