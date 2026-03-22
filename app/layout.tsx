@@ -33,7 +33,7 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <AuthProvider>
+        <AuthProvider> 
           <AcademicYearProvider>
             {children}
           </AcademicYearProvider>
