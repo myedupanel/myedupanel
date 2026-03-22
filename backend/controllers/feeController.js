@@ -127,11 +127,40 @@ const assignAndCollectFee = async (req, res) => {
 
 const createFeeTemplate = async (req, res) => {
   try {
-    // Mock implementation
-    res.json({ message: 'Fee template created successfully' });
+    const { name, description, items } = req.body;
+
+    if (!name || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Invalid payload: name and items are required.' });
+    }
+
+    // Ensure amounts are numbers
+    const sanitizedItems = items.map((it) => ({
+      name: it.name,
+      amount: Number(it.amount) || 0,
+    }));
+
+    const totalAmount = sanitizedItems.reduce((s, it) => s + it.amount, 0);
+
+    const schoolId = req.user?.schoolId;
+    if (!schoolId) {
+      return res.status(403).json({ error: 'User not associated with a school.' });
+    }
+
+    const created = await prisma.feeTemplate.create({
+      data: {
+        name,
+        description: description || '',
+        items: sanitizedItems,
+        totalAmount: totalAmount,
+        schoolId
+      }
+    });
+
+    return res.status(201).json({ message: 'Fee template created successfully', template: created });
   } catch (error) {
     console.error('Error in createFeeTemplate:', error);
-    res.status(500).json({ error: 'Failed to create fee template' });
+    // Provide more context in development
+    return res.status(500).json({ error: 'Failed to create fee template', details: process.env.NODE_ENV === 'development' ? error.message : undefined });
   }
 };
 
