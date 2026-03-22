@@ -73,7 +73,8 @@ const validateAcademicYear = async (req, res, next) => {
     // This includes fee collection routes which should work regardless of academic year selection
     const exemptRoutes = [
       '/api/fees/collect-manual',
-      '/api/fees/assign-and-collect'
+      '/api/fees/assign-and-collect',
+      '/api/fees/templates' // Fee template management doesn't require academic year
     ];
     
     const currentRoute = req.originalUrl;

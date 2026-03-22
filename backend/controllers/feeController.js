@@ -134,15 +134,26 @@ const createFeeTemplate = async (req, res) => {
     console.log('[createFeeTemplate] authenticated user:', req.user && { id: req.user.id, role: req.user.role, schoolId: req.user.schoolId });
     const { name, description, items } = req.body;
 
-    if (!name || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ error: 'Invalid payload: name and items are required.' });
+    // Validate input
+    if (!name || typeof name !== 'string') {
+      return res.status(400).json({ error: 'Invalid payload: name is required and must be a string.' });
+    }
+    
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Invalid payload: items array is required and must not be empty.' });
     }
 
     // Ensure amounts are numbers
-    const sanitizedItems = items.map((it) => ({
-      name: it.name,
-      amount: Number(it.amount) || 0,
-    }));
+    const sanitizedItems = items.map((it) => {
+      const amount = Number(it.amount);
+      if (isNaN(amount)) {
+        throw new Error(`Invalid amount for item: ${it.name}`);
+      }
+      return {
+        name: it.name || '',
+        amount: amount,
+      };
+    });
 
     const totalAmount = sanitizedItems.reduce((s, it) => s + it.amount, 0);
 
@@ -150,6 +161,14 @@ const createFeeTemplate = async (req, res) => {
     if (!schoolId) {
       return res.status(403).json({ error: 'User not associated with a school.' });
     }
+
+    console.log('[createFeeTemplate] creating template with data:', {
+      name,
+      description: description || '',
+      items: sanitizedItems,
+      totalAmount,
+      schoolId
+    });
 
     const created = await prisma.feeTemplate.create({
       data: {
@@ -166,13 +185,31 @@ const createFeeTemplate = async (req, res) => {
     return res.status(201).json({ message: 'Fee template created successfully', template: created });
   } catch (error) {
     console.error('Error in createFeeTemplate:', error);
+    console.error('Error details:', {
+      code: error.code,
+      message: error.message,
+      meta: error.meta,
+      stack: error.stack
+    });
+    
     // Handle unique constraint (template name per school)
     if (error.code === 'P2002' && error.meta && error.meta.target && error.meta.target.includes('name')) {
       return res.status(409).json({ error: 'A template with this name already exists for this school.' });
     }
 
-    // Provide more context in development
-    return res.status(500).json({ error: 'Failed to create fee template', details: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    // Handle Prisma errors
+    if (error.code && error.code.startsWith('P')) {
+      return res.status(400).json({ 
+        error: 'Database error occurred',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+      });
+    }
+
+    // Generic error
+    return res.status(500).json({ 
+      error: 'Failed to create fee template',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    });
   }
 };
 
