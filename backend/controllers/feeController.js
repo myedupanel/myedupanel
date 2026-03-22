@@ -130,6 +130,8 @@ const assignAndCollectFee = async (req, res) => {
 
 const createFeeTemplate = async (req, res) => {
   try {
+    console.log('[createFeeTemplate] incoming request body:', req.body);
+    console.log('[createFeeTemplate] authenticated user:', req.user && { id: req.user.id, role: req.user.role, schoolId: req.user.schoolId });
     const { name, description, items } = req.body;
 
     if (!name || !Array.isArray(items) || items.length === 0) {
@@ -159,9 +161,16 @@ const createFeeTemplate = async (req, res) => {
       }
     });
 
+    console.log('[createFeeTemplate] created template id=', created.id);
+
     return res.status(201).json({ message: 'Fee template created successfully', template: created });
   } catch (error) {
     console.error('Error in createFeeTemplate:', error);
+    // Handle unique constraint (template name per school)
+    if (error.code === 'P2002' && error.meta && error.meta.target && error.meta.target.includes('name')) {
+      return res.status(409).json({ error: 'A template with this name already exists for this school.' });
+    }
+
     // Provide more context in development
     return res.status(500).json({ error: 'Failed to create fee template', details: process.env.NODE_ENV === 'development' ? error.message : undefined });
   }
