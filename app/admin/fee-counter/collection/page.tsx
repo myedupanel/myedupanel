@@ -1,67 +1,18 @@
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import api from '@/backend/utils/api'; 
-import styles from './FeeCollection.module.scss'; 
-import Modal from '@/components/common/Modal/Modal'; 
+import api from '@/backend/utils/api';
+import styles from './FeeCollection.module.scss';
+import Modal from '@/components/common/Modal/Modal';
 
 // CRITICAL FIX: All Fi icons consolidated (FiMenu, FiDownload are included)
 import { FiUser, FiCreditCard, FiRefreshCw, FiDollarSign, FiPrinter, FiXCircle, FiCalendar, FiSearch, FiCheckCircle, FiChevronLeft, FiChevronRight, FiDownload, FiMenu } from 'react-icons/fi';
 
-import StudentSearch from '@/components/admin/StudentSearch/StudentSearch'; 
-import FeeReceipt from '@/components/admin/fees/FeeReceipt'; 
+import StudentSearch from '@/components/admin/StudentSearch/StudentSearch';
+import FeeReceipt from '@/components/admin/fees/FeeReceipt';
 
-import { FiUser, FiCreditCard, FiRefreshCw, FiDollarSign, FiPrinter, FiXCircle, FiCalendar, FiSearch, FiCheckCircle, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import StudentSearch from '@/components/admin/StudentSearch/StudentSearch'; 
-
-// --- Import correct interface from types ---
-import { Transaction, ReceiptData } from '@/components/types/fees';
-// --- END FIX --- 
-  totalAmount?: number; 
-}
-
-export interface Transaction {
-  id: number; 
-  receiptId: string;
-  amountPaid: number;
-  paymentMode: string;
-  paymentDate: string;
-  status: 'Success' | 'Pending' | 'Failed';
-  templateName?: string;
-  templateId?: TemplateInfo; 
-}
-
-export interface StudentInfo { [key: string]: any; }
-export interface FeeRecordInfo { [key: string]: any; }
-export interface CollectorInfo { [key: string]: any; }
-export interface SchoolInfo { [key: string]: any; }
-
-export interface ReceiptData extends Transaction {
-  studentInfo?: StudentInfo;
-  schoolInfo?: SchoolInfo;
-  collectorInfo?: CollectorInfo;
-  feeRecordInfo?: FeeRecordInfo;
-}
-
-interface FeeRecordListItem {
-  id: number; 
-  amount: number;
-  amountPaid: number;
-  balanceDue: number;
-  dueDate: string;
-  status: 'Pending' | 'Partial' | 'Paid' | 'Late';
-  templateId: { id: number; name: string }; 
-  studentId: number; 
-  classId: number;
-  studentName?: string;
-  className?: string;
-}
-
-interface StudentSearchResult {
-  id: string; 
-  name: string;
-  class: string;
-  studentId?: string; 
-}
+// --- Import correct interfaces from types ---
+import { Transaction, ReceiptData, FeeRecordListItem, StudentSearchResult } from '@/components/types/fees';
+// --- END FIX ---
 
 // Mobile Nav Menu Data
 const subTabs = [
