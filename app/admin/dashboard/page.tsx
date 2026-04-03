@@ -10,7 +10,9 @@ import StudentClassChart from '@/components/admin/academics/StudentClassChart'; 
 import RecentPayments from '@/components/admin/RecentPayments/RecentPayments';
 import { MdPeople, MdSchool, MdAttachMoney, MdFamilyRestroom, MdBadge, MdClass } from 'react-icons/md';
 import styles from './AdminDashboard.module.scss';
-import { useAuth, User } from '../../context/AuthContext'; 
+import { useAuth, User } from '../../context/AuthContext';
+import { useAcademicYear } from '../../context/AcademicYearContext'; 
+import ChatBot from '@/components/admin/ChatBot/ChatBot';
 
 // --- TYPE DEFINITIONS (No Change) ---
 interface MonthlyAdmissionData {
@@ -90,11 +92,13 @@ const getAdmissionColor = (value: number, min: number, max: number): string => {
 
 const AdminDashboardPage = () => {
   const { user, token } = useAuth() as { user: User | null; token: string | null; login: (token: string) => Promise<any> };
+  const { currentYearId, loading: academicYearLoading, error: academicYearError } = useAcademicYear();
   const [dashboardData, setDashboardData] = useState<FormattedDashboardData | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
   
-  // --- fetchDashboardData (No Change in core logic) ---
-  const fetchDashboardData = useCallback(async () => {
+  // --- fetchDashboardData with retry mechanism ---
+  const fetchDashboardData = useCallback(async (retryCount = 0) => {
     if (!token) {
         console.log("fetchDashboardData: No token found, skipping fetch.");
         return;
@@ -156,11 +160,23 @@ const AdminDashboardPage = () => {
       };
 
       setDashboardData(formattedData);
+      setDashboardError(null); // Clear any previous errors
       console.log("fetchDashboardData: Dashboard state updated.");
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to fetch dashboard data:", error);
+      
+      // Retry mechanism - retry up to 2 times
+      if (retryCount < 2) {
+        console.log(`Retrying fetchDashboardData (attempt ${retryCount + 1})...`);
+        setTimeout(() => {
+          fetchDashboardData(retryCount + 1);
+        }, 1000 * (retryCount + 1)); // Exponential backoff
+        return;
+      }
+      
       setDashboardData({ stats: [], monthlyAdmissions: [], classCounts: [], recentPayments: [] });
+      setDashboardError(error.response?.data?.error || error.message || "Failed to load dashboard data");
     }
   }, [token]);
   // --- END fetchDashboardData ---
@@ -200,7 +216,7 @@ const AdminDashboardPage = () => {
     // School profile ko fetch karke Header ke title ko update kiya
     const fetchSchoolProfileForHeader = async () => {
       try {
-        const res = await api.get('/api/school/profile');
+        const res = await api.get('/school/profile');
         if (res.data && res.data.name2) {
           // Admin profile state ko 'name2' (Certificate Name) se update kiya
           setAdminProfile(prevProfile => {
@@ -247,18 +263,74 @@ const AdminDashboardPage = () => {
       socket.disconnect();
       console.log('Socket.IO: Disconnected');
     };
-  }, [fetchDashboardData, loadProfileData, token, user]); // 'user' ko dependency mein add kiya
+  }, [fetchDashboardData, loadProfileData, token, user, currentYearId]); // Add currentYearId as dependency
 
-  // --- Loading state (No Change) ---
+  // --- Loading state (Updated to wait for academic years) ---
   if (!adminProfile || !dashboardData) {
+    // Don't show loading indefinitely, check if we have a token
+    if (!token) {
+      // If no token, redirect to login
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      return <div className={styles.loading}>Redirecting to login...</div>;
+    }
     return <div className={styles.loading}>Loading Dashboard...</div>;
+  }
+  
+  // Wait for academic year data to be loaded, but don't block indefinitely
+  if (academicYearLoading) {
+    return <div className={styles.loading}>Loading Academic Years...</div>;
+  }
+  
+  // Show error if academic year loading failed
+  if (academicYearError) {
+    return (
+      <div className={styles.dashboardContainer}>
+        <Header admin={{
+          adminName: adminProfile.adminName,
+          email: adminProfile.email,
+          profileImageUrl: adminProfile.profileImageUrl,
+          schoolName: adminProfile.schoolName
+        }} />
+        <div className={styles.errorState}>
+          <h2>Academic Year Loading Error</h2>
+          <p>{academicYearError}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+  
+  // Show error if dashboard loading failed
+  if (dashboardError) {
+    return (
+      <div className={styles.dashboardContainer}>
+        <Header admin={{
+          adminName: adminProfile.adminName,
+          email: adminProfile.email,
+          profileImageUrl: adminProfile.profileImageUrl,
+          schoolName: adminProfile.schoolName
+        }} />
+        <div className={styles.errorState}>
+          <h2>Dashboard Loading Error</h2>
+          <p>{dashboardError}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
   }
   
   // --- Error Handling/Empty State (No Change) ---
   if (dashboardData.stats.length === 0) {
       return (
           <div className={styles.dashboardContainer}>
-              <Header admin={adminProfile} />
+              <Header admin={{
+                adminName: adminProfile.adminName,
+                email: adminProfile.email,
+                profileImageUrl: adminProfile.profileImageUrl,
+                schoolName: adminProfile.schoolName
+              }} />
               <div className={styles.emptyState}>
                   <h2>Dashboard Data Unavailable</h2>
                   <p>Could not fetch dashboard data. Please check the backend server and try logging in again.</p>
@@ -268,10 +340,15 @@ const AdminDashboardPage = () => {
   }
 
 
-  // --- JSX (No Change) ---
+  // --- JSX (Updated to include ChatBot) ---
   return (
     <div className={styles.dashboardContainer}>
-      <Header admin={adminProfile} />
+      <Header admin={{
+        adminName: adminProfile.adminName,
+        email: adminProfile.email,
+        profileImageUrl: adminProfile.profileImageUrl,
+        schoolName: adminProfile.schoolName
+      }} />
       
       <div className={styles.statsGrid}>
         {dashboardData.stats.map((stat) => {
@@ -319,6 +396,8 @@ const AdminDashboardPage = () => {
       <div className={styles.paymentsContainer}>
         <RecentPayments payments={dashboardData.recentPayments} />
       </div>
+      
+      <ChatBot />
     </div>
   );
 };
@@ -328,6 +407,14 @@ export default AdminDashboardPage;
 // --- AdminProfile Interface (No Change) ---
 interface AdminProfile {
   id: number;
+  adminName: string;
+  email: string;
+  profileImageUrl: string;
+  schoolName: string;
+}
+
+// Interface for Header component
+interface HeaderAdmin {
   adminName: string;
   email: string;
   profileImageUrl: string;

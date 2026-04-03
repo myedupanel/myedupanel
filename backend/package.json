@@ -5,16 +5,23 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "npx prisma generate --schema=../prisma/schema.prisma"
+    "postinstall": "npx prisma generate",
+    "db:push": "npx prisma db push --accept-data-loss",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+<<<<<<< HEAD
     "@prisma/client": "^6.19.0",
+=======
+    "@google/generative-ai": "^0.24.1",
+    "@prisma/client": "^6.18.0",
+>>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
     "bcryptjs": "^3.0.2",
     "cloudinary": "^1.41.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",

@@ -7,16 +7,24 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+<<<<<<< HEAD
     "heroku-postbuild": "npm run build",
     "predeploy": "npm install && npx prisma generate --schema=./prisma/schema.prisma",
     "deploy": "npm run build && cd backend && npm install && npx prisma generate --schema=../prisma/schema.prisma"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
+=======
+    "build:backend": "cd backend && npm install && npx prisma generate",
+    "test:vercel-backend": "node test-vercel-backend.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+>>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
     "@prisma/client": "^6.18.0",
     "@tanstack/react-table": "^8.21.3",
     "@types/uuid": "^10.0.0",
-    "axios": "^1.6.8",
+    "axios": "^1.13.2",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -24,14 +32,24 @@
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
     "jwt-decode": "^4.0.0",
+<<<<<<< HEAD
     "next": "^16.1.4",
+=======
+    "next": "^16.2.1",
+>>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
     "next-auth": "^4.24.11",
     "papaparse": "^5.5.3",
     "prop-types": "^15.8.1",
     "razorpay": "^2.9.6",
+<<<<<<< HEAD
     "react": "^19.2.3",
     "react-csv": "^2.2.2",
     "react-dom": "^19.2.3",
+=======
+    "react": "^19.2.4",
+    "react-csv": "^2.2.2",
+    "react-dom": "^19.2.4",
+>>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
     "react-icons": "^5.2.1",
     "react-select": "^5.10.2",
     "react-to-print": "^3.2.0",

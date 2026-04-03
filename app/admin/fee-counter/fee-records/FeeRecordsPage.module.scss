@@ -11,13 +11,66 @@ $white: #FFFFFF;
 $radius: 8px;
 
 .pageContainer {
-    /* FULL WIDTH FIT: Side padding adjust kiya */
-    /* Humne padding ko kam kiya takhi yeh sidebar ke bagal mein zyada space le sake */
-    /* Pehle: 2.5rem 2rem, Ab: 2.5rem 1.5rem */
     padding: 2.5rem 1.5rem; 
     background-color: $background-light;
     min-height: 100vh;
 }
+
+/* --- Mobile Header Bar (Hidden on Desktop) --- */
+.mobileHeaderBar {
+    display: none; /* Default: Hidden on Desktop */
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid $border-color;
+    margin-bottom: 1rem;
+
+    .menuButton, .searchToggleButton {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 28px;
+        padding: 8px;
+        color: $text-dark;
+        flex-shrink: 0;
+    }
+    
+    .title {
+        font-size: 1.5rem;
+        text-align: left;
+        flex-shrink: 0;
+        margin: 0 0.5rem;
+    }
+    
+    /* NAYA: Compact Filter Container for Header */
+    .headerFilters {
+        display: flex;
+        align-items: center;
+        flex-grow: 1; /* Space lene dega */
+        gap: 0.25rem; /* Bahut kam gap */
+        justify-content: flex-start;
+        overflow: hidden;
+    }
+
+    /* NAYA: Super Compact Dropdown Styles */
+    .headerFilterDropdown {
+        flex-shrink: 1; /* Dropdown ko shrink hone dega */
+        padding: 0.25rem 0.4rem; /* Bahut kam padding */
+        border: 1px solid $border-color;
+        border-radius: $radius;
+        font-size: 0.7rem; /* Chota font */
+        color: $text-dark;
+        cursor: pointer;
+        background-color: $white;
+        min-width: 0; /* Ensures it can shrink */
+        
+        option {
+            font-size: 0.9rem;
+        }
+    }
+}
+/* --- END Mobile Header Bar --- */
+
 
 .header {
     display: flex;
@@ -29,6 +82,7 @@ $radius: 8px;
         font-size: 2.2rem; 
         font-weight: 700;
         color: $text-dark;
+        margin: 0; 
     }
     .exportButton {
         background-color: $primary-color;
@@ -42,14 +96,11 @@ $radius: 8px;
         display: flex;
         align-items: center;
         gap: 0.5rem;
-
-        &:hover {
-            background-color: darken($primary-color, 10%);
-            box-shadow: 0 4px 10px rgba($primary-color, 0.3);
-        }
+        &:hover { background-color: darken($primary-color, 10%); box-shadow: 0 4px 10px rgba($primary-color, 0.3); }
     }
 }
 
+/* --- Desktop Controls (To be hidden) --- */
 .controls {
     display: flex;
     gap: 1rem; 
@@ -62,59 +113,29 @@ $radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     flex-wrap: wrap; 
 
-
-    .searchBar {
+    .searchBar { /* Search Bar ko Modal mein use kiya gaya hai */
         position: relative;
-        /* Search bar ko zyada flexibility di */
         flex: 1 1 300px; 
-
+        
         .searchIcon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: $text-medium;
+            position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: $text-medium;
         }
         input {
-            width: 100%;
-            padding: 0.75rem 0.75rem 0.75rem 3rem;
-            border: 1px solid $border-color;
-            border-radius: $radius;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-
-            &:focus {
-                outline: none;
-                border-color: $primary-color;
-            }
+            width: 100%; padding: 0.75rem 0.75rem 0.75rem 3rem; border: 1px solid $border-color; border-radius: $radius; font-size: 1rem; transition: border-color 0.3s;
+            &:focus { outline: none; border-color: $primary-color; }
         }
     }
     
-    .filters {
-        display: flex;
-        gap: 0.75rem;
-
+    .filters { /* Filters ko Mobile Header mein use kiya gaya hai */
+        display: flex; gap: 0.75rem;
         select {
-            padding: 0.75rem 1rem;
-            border: 1px solid $border-color;
-            border-radius: $radius;
-            font-size: 1rem;
-            color: $text-dark;
-            cursor: pointer;
-            background-color: $white;
-            transition: border-color 0.3s;
-            flex-shrink: 0;
-
-            &:focus {
-                outline: none;
-                border-color: $primary-color;
-            }
+            padding: 0.75rem 1rem; border: 1px solid $border-color; border-radius: $radius; font-size: 1rem; color: $text-dark; cursor: pointer; background-color: $white; transition: border-color 0.3s; flex-shrink: 0;
+            &:focus { outline: none; border-color: $primary-color; }
         }
     }
 }
 
 .tableContainer {
-    /* Horizontal scroll ko dabaya */
     overflow-x: hidden; 
     width: 100%;
     background-color: $white;
@@ -130,149 +151,107 @@ $radius: 8px;
     thead {
         background-color: $text-dark;
         th {
-            color: $white;
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            white-space: nowrap;
-            font-size: 0.9rem; 
+            color: $white; padding: 1rem; text-align: left; font-weight: 600; white-space: nowrap; font-size: 0.9rem; 
         }
         
-        /* === COLUMN WIDTHS OPTIMIZATION (YAHAN CHANGES KIYE HAIN) === */
-        th:nth-child(1) { width: 12%; }  /* Receipt ID (Kam kiya) */
-        th:nth-child(2) { width: 20%; }  /* Student Name (Badhaya) */
-        th:nth-child(3) { width: 7%; }   /* Class (Kam kiya) */
-        th:nth-child(4) { width: 11%; }  /* Amount Paid (Kam kiya) */
-        th:nth-child(5) { width: 10%; }  /* Payment Mode (Kam kiya) */
-        th:nth-child(6) { width: 15%; }  /* Date (Badhaya) */
-        th:nth-child(7) { width: 10%; }  /* Status (Badhaya) */
-        th:nth-child(8) { width: 15%; }  /* Actions (Kam kiya) */
-        /* Total: 12+20+7+11+10+15+10+15 = 100% */
+        /* Column Widths (No Change) */
+        th:nth-child(1) { width: 12%; } 
+        th:nth-child(2) { width: 20%; } 
+        th:nth-child(3) { width: 7%; } 
+        th:nth-child(4) { width: 11%; } 
+        th:nth-child(5) { width: 10%; } 
+        th:nth-child(6) { width: 15%; } 
+        th:nth-child(7) { width: 10%; } 
+        th:nth-child(8) { width: 15%; } 
     }
 
     tbody {
-        tr {
-            border-bottom: 1px solid $border-color;
-            &:last-child { border-bottom: none; }
-            &:hover { background-color: $background-light; }
-        }
-        td {
-            padding: 1rem;
-            color: $text-dark;
-            font-size: 0.95rem;
-            /* CRITICAL: Text ko wrap hone se roka aur overflow hidden kiya */
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap; 
-        }
+        tr { border-bottom: 1px solid $border-color; &:last-child { border-bottom: none; } &:hover { background-color: $background-light; } }
+        td { padding: 1rem; color: $text-dark; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     }
     
     .amountCol { font-weight: 600; color: $success-color; }
-    .receiptIdCol a {
-        color: $primary-color;
-        text-decoration: none;
-        font-weight: 600;
-        &:hover { text-decoration: underline; }
-    }
+    .receiptIdCol a { color: $primary-color; text-decoration: none; font-weight: 600; &:hover { text-decoration: underline; } }
 
     .statusBadge {
-        padding: 0.3rem 0.7rem;
-        border-radius: 9999px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        
+        padding: 0.3rem 0.7rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
         &.paid { background-color: lighten($success-color, 35%); color: darken($success-color, 10%); }
         &.partial { background-color: lighten($warning-color, 30%); color: darken($warning-color, 10%); }
         &.void { background-color: lighten($danger-color, 40%); color: darken($danger-color, 10%); }
     }
 
     .viewButton {
-        background-color: transparent;
-        color: $primary-color;
-        border: 1px solid $primary-color;
-        padding: 0.5rem 1rem;
-        border-radius: $radius;
-        cursor: pointer;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        transition: all 0.3s ease;
-
-        &:hover {
-            background-color: $primary-color;
-            color: $white;
-        }
+        background-color: transparent; color: $primary-color; border: 1px solid $primary-color; padding: 0.5rem 1rem; border-radius: $radius; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.4rem; transition: all 0.3s ease;
+        &:hover { background-color: $primary-color; color: $white; }
     }
-    .noData {
-        text-align: center;
-        padding: 2rem;
-        color: $text-medium;
-        font-style: italic;
-    }
+    .noData { text-align: center; padding: 2rem; color: $text-medium; font-style: italic; }
 }
 
-/* --- Pagination Controls --- */
+/* --- Pagination Controls (No Change) --- */
 .paginationControls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    margin-top: 1rem;
-    
+    display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; margin-top: 1rem;
     .paginationButton {
-        background: $primary-color;
-        color: $white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: $radius;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
+        background: $primary-color; color: $white; border: none; padding: 0.5rem 1rem; border-radius: $radius; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; gap: 0.4rem;
+        &:disabled { background: $border-color; color: $text-medium; cursor: not-allowed; }
+    }
+    .pageInfo { font-weight: 500; color: $text-dark; }
+}
 
-        &:disabled {
-            background: $border-color;
-            color: $text-medium;
-            cursor: not-allowed;
-        }
-    }
-    .pageInfo {
-        font-weight: 500;
-        color: $text-dark;
-    }
+
+/* --- Mobile Modal Styles --- */
+.modalActionLink {
+    display: block; width: 100%; padding: 1rem; margin-bottom: 0.5rem; background-color: $primary-color; color: $white; border-radius: $radius; font-weight: 600; text-decoration: none; text-align: center; transition: background-color 0.2s;
+    &:hover { background-color: darken($primary-color, 10%); }
+}
+
+/* --- Modal Filters (Cleaned up for Search ONLY) --- */
+.modalFiltersContainer {
+    display: flex; flex-direction: column; gap: 1rem; padding: 1rem 0;
+}
+.modalSearchControls {
+    display: flex; flex-direction: column; gap: 1rem;
+}
+.modalFilterGroup { /* Desktop filters ki styling remove ki */
+    select { width: 100%; }
 }
 
 
 /* --- Responsive Adjustments --- */
-@media (max-width: 1200px) {
-     /* 1200px se neeche, padding ko thoda kam kiya */
-    .pageContainer {
-        padding: 2rem;
-    }
-}
-
 @media (max-width: 768px) {
-    .controls {
-        flex-direction: column;
-        gap: 1rem;
+    .pageContainer {
+        padding: 1rem;
     }
-    /* Filters ko full width diya */
-    .controls .filters {
-        width: 100%;
+    /* Hide desktop header and controls */
+    .header, .controls {
+        display: none !important;
+    }
+    /* Show mobile header bar */
+    .mobileHeaderBar {
+        display: flex;
         justify-content: space-between;
+        align-items: center;
+        padding-bottom: 0.5rem;
+        
+        .title {
+            text-align: left;
+            flex-grow: 0;
+            margin: 0 0.5rem 0 0.25rem; /* Title ko Hamburger se chipka diya */
+        }
+        
+        /* Filters ko center mein align karna */
+        .headerFilters {
+            flex-grow: 1; /* Filters ko zyada space diya */
+            justify-content: center;
+            margin-right: 0.5rem;
+        }
     }
-    .controls .searchBar {
-        width: 100%;
-    }
-    /* Mobile par scroll enable kiya */
+    
+    /* Mobile Table Fix (Horizontal Scroll) */
     .tableContainer {
         overflow-x: auto;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
     }
     .transactionsTable {
-        /* Mobile par minimum width set kiya takki scroll ho sake */
         min-width: 900px; 
         table-layout: auto; 
     }

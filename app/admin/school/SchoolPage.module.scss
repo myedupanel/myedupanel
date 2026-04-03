@@ -1,116 +1,84 @@
+/* File: app/admin/school/SchoolPage.module.scss (Final Code) */
+
 /* Main container for the whole page */
 .schoolPageContainer {
     display: flex;
-    background-color: #f8f9fa; // Lighter background color
+    background-color: #f8f9fa; 
     min-height: 100vh;
 }
 
-/* === FIX for Sidebar Overlap === */
+/* FIX for Sidebar Overlap (main content area) */
 .mainContent {
     flex-grow: 1;
     padding: 1.5rem 2rem;
     overflow-y: auto;
-    margin-left: 260px; 
+    margin-left: 260px; /* Desktop Margin */
+    transition: margin-left 0.3s ease; 
 }
 
-/* Rest of the styles */
 .overviewContainer {
     max-width: 1600px;
     margin: 0 auto;
 }
 
-// === NEW: Header Row for Title and Banner ===
+// === Header Row for Title, Hamburger, and Banner ===
 .headerRow {
     display: flex;
     justify-content: space-between; 
     align-items: center;
-    margin-bottom: 2rem;
-    gap: 1.5rem; 
+    margin-bottom: 1.5rem; /* 75% of original size */
+    gap: 1.125rem; /* 75% of original size */
+    flex-wrap: wrap; 
 }
-// ===========================================
 
 .mainTitle {
-    font-size: 2.25rem;
+    font-size: 1.6875rem; /* 75% of original size */
     font-weight: 700;
     color: #212529;
     margin: 0; 
     flex-shrink: 0; 
 }
 
-/* Premium Stat Cards (RESTORED - FULL CODE ADDED) */
-.statsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-}
-
-.statCard {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    border: 1px solid #e9ecef;
-    border-top: 4px solid; 
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    &:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.07);
-    }
-}
-.iconWrapper {
-    padding: 1rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    svg { font-size: 1.75rem; }
-}
-.statInfo {
-    .statTitle { font-size: 0.9rem; color: #6c757d; margin: 0 0 0.25rem 0; font-weight: 500; }
-    .statValue { font-size: 1.75rem; font-weight: 700; color: #212529; margin: 0; }
-}
-
-
-/* Premium Main Grid (RESTORED - FULL CODE ADDED) */
+/* --- Base Grid Styles (Same) --- */
 .mainGrid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); // 3-column layout
+    grid-template-columns: repeat(3, 1fr); 
     gap: 1.5rem;
 }
 
+/* --- Summary Box Styling (PROFESSIONAL UPDATE) --- */
 .summaryBox {
-    background-color: #fff;
+    background-color: #ffffff;
     border-radius: 12px;
-    border: 1px solid #e9ecef;
+    border: 1px solid #e2e8f0; 
     display: flex;
     flex-direction: column;
-    grid-column: span 1; // Default to 1 column wide
+    transition: all 0.2s ease;
+    
+    &:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
 }
 
 .chartBox {
-    grid-column: span 3; // Chart takes full width
+    grid-column: span 3;
     height: 380px;
-    padding: 1rem;
-}
-.chartContainer {
-    width: 100%;
-    height: 100%;
+    padding: 1.5rem; 
+    &:hover { transform: none; box-shadow: none; } 
 }
 
-/* Box Header Styles (RESTORED - FULL CODE ADDED) */
+/* --- Box Header Styles (Same) --- */
 .boxHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid #f1f5f9; 
     h2 {
         font-size: 1.1rem;
         font-weight: 600;
-        color: #343a40;
+        color: #4F46E5; /* Primary color for title (Indigo) */
         margin: 0;
         display: flex;
         align-items: center;
@@ -118,19 +86,14 @@
     }
 }
 .viewAllLink {
-    font-size: 0.8rem;
-    color: #495057;
+    font-size: 0.85rem;
+    color: #4F46E5; 
     text-decoration: none;
     font-weight: 500;
-    &:hover { color: #007bff; }
+    &:hover { text-decoration: underline; }
 }
 
-.boxContent {
-    padding: 1.25rem;
-    flex-grow: 1;
-    p { margin: 0.25rem 0; }
-}
-
+/* --- Recent List Styles (Same) --- */
 .recentList {
     list-style: none;
     padding: 0;
@@ -141,238 +104,440 @@
         justify-content: space-between;
         align-items: center;
         padding: 0.85rem 1.25rem;
-        font-size: 0.9rem;
-        border-bottom: 1px solid #f1f3f5;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #f8f9fa; 
         &:last-child { border-bottom: none; }
     }
 }
 .subject {
-    color: #6c757d;
-    font-size: 0.85rem;
+    color: #64748b;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+.noRecent {
+    padding: 1rem 1.25rem;
+    color: #94a3b8;
+    font-style: italic;
+    text-align: center;
 }
 
+/* --- Box Footer/Button Styles (Same) --- */
 .boxFooter {
     padding: 0.75rem 1.25rem;
     background-color: #f8f9fa;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid #e2e8f0;
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
 }
-
-/* Base Add Button (RESTORED - FULL CODE ADDED) */
 .addButton {
     width: 100%;
-    padding: 0.6rem;
-    background-color: #f8f9fa;
-    color: #495057;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    font-weight: 500;
+    padding: 0.65rem;
+    background-color: #4F46E5; /* Indigo button */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    &:hover { background-color: #007bff; color: #fff; border-color: #007bff; }
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    &:hover { background-color: #4338CA; }
 }
 
-.smallText { 
-    font-size: 0.9rem; 
-    color: #6c757d; 
-    text-align: center;
-    strong { color: #212529; }
-}
-.schoolLayoutWrapper {
-    display: flex;
-    flex-grow: 1; 
-    position: relative; 
+/* === SUBSCRIPTION BANNER STYLES (PREMIUM UPDATE) === */
+
+@keyframes border-glow-paid {
+    0%   { border-color: #4F46E5; box-shadow: 0 0 10px rgba(79, 70, 229, 0.5); } 
+    50%  { border-color: #10B981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.7); }
+    100% { border-color: #4F46E5; box-shadow: 0 0 10px rgba(79, 70, 229, 0.5); }
 }
 
-.schoolContent {
-    flex-grow: 1; 
-    overflow-y: auto;
-    min-height: 100vh;
-    margin-left: 260px; 
-    padding: 1.5rem 2rem;
-    background-color: #f4f7fa; 
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3);
+    }
+    70% {
+        transform: scale(1.01);
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
 }
 
-
-// === PREMIUM GLOW ANIMATION KEYFRAMES (NEW) ===
-@keyframes border-glow-subtle {
-    0%   { border-color: #fcd34d; box-shadow: 0 0 10px rgba(252, 211, 77, 0.4); } 
-    25%  { border-color: #6ee7b7; box-shadow: 0 0 10px rgba(110, 231, 183, 0.4); } // Greenish
-    50%  { border-color: #fca5a5; box-shadow: 0 0 10px rgba(252, 165, 165, 0.4); } // Reddish
-    75%  { border-color: #93c5fd; box-shadow: 0 0 10px rgba(147, 197, 253, 0.4); } // Sky Blue
-    100% { border-color: #fcd34d; box-shadow: 0 0 10px rgba(252, 211, 77, 0.4); } // Yellowish
-}
-
-// === SUBSCRIPTION BANNER BASE ===
 .subscriptionBanner {
     display: flex;
     align-items: center;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
+    padding: 0.375rem 0.75rem; /* 75% of original size */
+    border-radius: 8px; /* Reduced border radius */
     font-weight: 600;
-    flex-shrink: 1;
-    min-width: 250px; 
+    flex-shrink: 0; 
+    min-width: 210px; /* 75% of original size */
     transition: all 0.5s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Reduced shadow */
 }
 
-// --- TRIAL BANNER (Light Yellow, New Slogan Structure) ---
-.trialBanner {
-    background-color: #fffbeb; // Light yellow background
-    border: 2px solid #fcd34d; // Premium Border
-    color: #92400e;
-}
-
-// --- PAID PLAN BANNER (Subtle Multi-Color Glow) ---
 .paidPlanBanner {
-    background-color: #f0fdfa; // Very light greenish background
+    background: linear-gradient(135deg, #f0fdfa 0%, #dcfce7 100%);
     color: #065f46;
-    border: 2px solid; 
-    animation: border-glow-subtle 8s infinite alternate ease-in-out; // Slow glow transition
+    border: 1px solid #10b981; /* Professional green border */
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.5s;
+    }
+    
+    &:hover::before {
+        left: 100%;
+    }
 }
 
-// --- UPGRADE BUTTON (Sky Blue Normal Glowing) ---
-.upgradeButton {
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: 600;
-    text-decoration: none;
-    margin-left: 1rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    flex-shrink: 0;
+.trialBanner {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    color: #92400e;
+    border: 1px solid #fcd34d;
+    padding: 0.5625rem 0.75rem; /* 75% of original size */
+    min-width: 240px; /* 75% of original size */
+    position: relative;
+    overflow: hidden;
+    animation: pulse 1.5s infinite; /* Slightly faster pulse */
     
-    .trialBanner & {
-        background-color: #3b82f6; // Sky Blue
-        color: #fff;
-        border: 1px solid #3b82f6;
-        box-shadow: 0 0 8px rgba(59, 130, 246, 0.6); // Normal glowing
-        &:hover { 
-            background-color: #2563eb; 
-            box-shadow: 0 0 12px rgba(59, 130, 246, 0.8);
-            transform: translateY(-1px);
+    // Desktop Trial Content Layout
+    .trialContent {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        
+        .trialSlogan {
+            font-weight: 700;
+            margin-bottom: 0.375rem; /* 75% of original size */
+            display: flex;
+            align-items: center;
+            gap: 0.375rem; /* 75% of original size */
+            font-size: 0.875rem; /* Slightly smaller font */
+        }
+        
+        .trialCountdown {
+            display: flex;
+            align-items: center;
+            gap: 7.5px; /* 75% of original size */
+            font-size: 0.675rem; /* 75% of original size */
+            
+            .countdownValue {
+                font-size: 1.125rem; /* 75% of original size */
+                font-weight: 900;
+                color: #ef4444;
+                text-shadow: 0 1.5px 3px rgba(0, 0, 0, 0.1); /* 75% of original size */
+            }
+            .countdownLabel {
+                font-weight: 500;
+                color: #4b5563;
+                text-transform: uppercase;
+            }
+            
+            .progressBar {
+                flex-grow: 1;
+                height: 6px; /* 75% of original size */
+                background-color: #fde68a;
+                border-radius: 3px; /* 75% of original size */
+                overflow: hidden;
+                .progressFill {
+                    height: 100%;
+                    background: linear-gradient(90deg, #f59e0b 0%, #f97316 100%);
+                    transition: width 0.5s ease;
+                    box-shadow: 0 1.5px 3px rgba(0, 0, 0, 0.1); /* 75% of original size */
+                }
+            }
         }
     }
 }
 
-// --- TRIAL SPECIFIC CONTENT (Slogan + Countdown) ---
-.trialContent {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    gap: 0.25rem; // Reduced gap for tighter look
-    padding: 0.3rem 0;
-}
-.trialSlogan {
-    font-size: 1rem; // Slightly larger slogan
-    font-weight: 700;
-    color: #92400e; // Dark yellow text
-}
-.trialCountdown {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-}
-.countdownValue {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: #ef4444; 
-    line-height: 1;
-}
-.countdownLabel {
-    font-size: 0.7rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    color: #92400e;
-    line-height: 1;
-}
-
-.progressBar {
-    flex-grow: 1;
-    height: 8px;
-    background-color: #fde68a; 
-    border-radius: 4px;
-    overflow: hidden;
-    margin-left: 1rem;
-}
-
-.progressFill {
-    height: 100%;
-    background-color: #ef4444; 
-    border-radius: 4px;
-    transition: width 0.5s ease-out; 
-}
-// --- PAID PLAN CONTENT ---
 .planContent {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
+    gap: 0.5625rem; /* 75% of original size */
+    font-size: 0.875rem; /* Slightly smaller font */
     flex-grow: 1;
+    
+    .bannerAbbreviation {
+        display: none; 
+    }
+    
+    span:not(.bannerAbbreviation) {
+        display: block; 
+    }
 }
+
+/* 1 Year Remaining Alert for Paid Users */
 .paidExpiryWarning {
-    color: #ef4444;
-    font-weight: 700;
-    font-size: 0.85rem;
-    margin-left: 1rem;
-    padding: 2px 6px;
-    background-color: rgba(239, 68, 68, 0.1);
-    border-radius: 4px;
-    // Animation/Glow for the warning text itself
-    box-shadow: 0 0 5px rgba(239, 68, 68, 0.4);
+    background-color: #fffbeb;
+    color: #d97706;
+    padding: 0.1875rem 0.375rem; /* 75% of original size */
+    border-radius: 3px; /* 75% of original size */
+    font-weight: 600;
+    font-size: 0.6rem; /* 75% of original size */
+    margin-left: 0.375rem; /* 75% of original size */
+    border: 1px solid #fde68a;
 }
 
+/* --- Hamburger Button Style --- */
+.menuButton {
+    display: none; 
+    font-size: 1.5rem; /* 75% of original size */
+    color: #3b82f6;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
 
-// === WARNING MODAL STYLES (Unchanged) ===
+.upgradeButton {
+    padding: 0.375rem 0.75rem; /* 75% of original size */
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); /* Professional blue color */
+    color: white;
+    border-radius: 6px; /* 75% of original size */
+    text-decoration: none;
+    font-size: 0.7125rem; /* 75% of original size */
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3); /* Blue shadow */
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem; /* 75% of original size */
+    
+    &:hover {
+        transform: translateY(-1.5px); /* 75% of original size */
+        box-shadow: 0 4px 8px rgba(37, 99, 235, 0.4); /* Blue shadow */
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); /* Slightly darker blue */
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
+}
 .warningModal {
-    max-width: 550px !important; 
+    /* Main Modal Container ki Styling (Is class ko Modal component use karta hai) */
+    max-width: 375px; /* 75% of original size */
+    
+    /* Strong Gold/Blue Shadow for Premium Urgency */
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.4), 0 0 15px rgba(15, 46, 94, 0.6); /* 75% of original size */
+    
+    /* Header/Title ko highlight karna */
+    h2 { 
+        color: #ef4444; /* Bright Red for Trial Ending */
+        border-bottom: 1.5px solid #fde047; /* 75% of original size */
+        padding-bottom: 0.75rem; /* 75% of original size */
+        font-size: 1.5rem; /* Smaller font size */
+    }
 }
 
 .modalContent {
-    padding: 1rem 0;
+    /* Main text content area */
+    display: flex;
+    flex-direction: column;
+    gap: 0.9375rem; /* 75% of original size */
+    padding-top: 0.375rem; /* 75% of original size */
+
     p {
-        margin: 0 0 0.8rem 0;
-        font-size: 1rem;
-        color: #495057;
-        font-weight: 500;
+        font-size: 0.875rem; /* 75% of original size */
+        color: #333;
+        line-height: 1.6;
+        
+        strong {
+            font-weight: 700;
+            color: #ef4444; /* Days Left ko Red highlight karna */
+        }
     }
 }
 
 .warningMessage {
+    /* Critical Warning Line: Access will be restricted */
     display: flex;
     align-items: center;
-    background-color: #fef3c7;
-    border-left: 4px solid #f59e0b;
-    padding: 0.8rem;
-    border-radius: 4px;
-    color: #92400e !important;
-    font-weight: 600 !important;
+    background-color: #fef2f2; /* Very light red background */
+    border-left: 3.75px solid #ef4444; /* 75% of original size */
+    padding: 0.75rem; /* 75% of original size */
+    border-radius: 4.5px; /* 75% of original size */
+    font-weight: 600;
+    color: #b91c1c; /* Darker red text */
+    font-size: 0.875rem; /* 75% of original size */
+    
+    svg {
+        color: #ef4444; 
+        font-size: 1.125rem; /* 75% of original size */
+    }
 }
 
 .modalActions {
+    /* Button container */
     display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 1.5rem;
+    justify-content: space-between;
+    gap: 0.75rem; /* 75% of original size */
+    margin-top: 0.75rem; /* 75% of original size */
+}
+
+.upgradeLinkButton, .dismissButton {
+    /* Base Button Styles */
+    padding: 0.6rem 1.125rem; /* 75% of original size */
+    border-radius: 6px; /* 75% of original size */
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.875rem; /* 75% of original size */
+    text-align: center;
+    text-decoration: none;
+    flex-grow: 1; 
 }
 
 .upgradeLinkButton {
-    @extend .addButton !optional; 
-    background-color: #10b981;
-    color: #fff;
+    /* Primary CTA: Premium Gold Button */
+    background-color: #D4AF37; /* Luminous Gold */
+    color: #111;
     border: none;
-    &:hover { background-color: #059669; color: #fff; }
+    box-shadow: 0 3px 7.5px rgba(212, 175, 55, 0.4); /* 75% of original size */
+    
+    &:hover {
+        background-color: #c09f30;
+        transform: translateY(-1.5px); /* 75% of original size */
+        box-shadow: 0 4.5px 11.25px rgba(212, 175, 55, 0.6); /* 75% of original size */
+    }
 }
 
 .dismissButton {
-    @extend .addButton !optional; 
-    background-color: #f8f9fa;
-    color: #495057;
-    border-color: #dee2e6;
-    &:hover { background-color: #e9ecef; }
+    /* Secondary CTA: Clean/Subtle Dark Blue */
+    background-color: #4F46E5; /* Indigo */
+    color: #fff;
+    border: 1px solid #4F46E5;
+    
+    &:hover {
+        background-color: #4338CA;
+        transform: translateY(-1.5px); /* 75% of original size */
+    }
 }
-// =================================
+/* === MOBILE RESPONSIVENESS (FINAL ALIGNMENT FIX) === */
+@media (max-width: 1024px) {
+    .mainContent {
+        margin-left: 0 !important; 
+        padding: 1rem; 
+    }
+    
+    .mainGrid {
+        grid-template-columns: 1fr; 
+    }
+    
+    .chartBox {
+        grid-column: span 1; 
+        height: 300px; 
+    }
+
+    /* --- Mobile Header and Banner Alignment FIX --- */
+    .headerRow {
+        flex-direction: row; 
+        align-items: center; 
+        justify-content: space-between; 
+        flex-wrap: nowrap; 
+        gap: 0.375rem; /* 75% of original size */
+        margin-bottom: 0.75rem; /* 75% of original size */
+        padding-top: 0; 
+    }
+    
+    /* Hamburger Button (Left) */
+    .menuButton {
+        display: block; 
+        order: 1; 
+        flex-shrink: 0;
+        margin: 0; 
+        font-size: 1.125rem; /* 75% of original size */
+    }
+    
+    .mainTitle {
+        font-size: 0.9375rem; /* 75% of original size */
+        line-height: 1.2; 
+        order: 2; 
+        flex-grow: 1; 
+        padding-right: 0.1875rem; /* 75% of original size */
+        white-space: nowrap; 
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: 0; 
+        padding-left: 0.375rem; /* 75% of original size */
+    }
+
+    /* --- CRITICAL MOBILE BANNER FIX --- */
+    .subscriptionBanner {
+        order: 3; 
+        flex-shrink: 0; 
+        min-width: unset;
+        padding: 0; /* Remove padding from outer banner container */
+        background: transparent !important; /* Remove background */
+        border: none !important; /* Remove border */
+        box-shadow: none !important;
+        animation: none !important; /* Remove animations on mobile */
+        
+        .planContent {
+            // Mobile: Only show the trial icon
+            span { display: none !important; }
+            svg {
+                display: block !important;
+                font-size: 1.125rem !important; /* 75% of original size */
+                color: #f59e0b !important; /* Orange/Warning color */
+                filter: drop-shadow(0 1.5px 3px rgba(0, 0, 0, 0.1)); /* 75% of original size */
+            }
+        }
+        
+        /* Align upgrade button next to the icon */
+        .upgradeButton {
+            padding: 0.375rem 0.5625rem; /* 75% of original size */
+            font-size: 0.6rem; /* 75% of original size */
+            margin-left: 0.375rem; /* 75% of original size */
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); /* Professional blue */
+            border-radius: 4.5px; /* 75% of original size */
+            box-shadow: 0 1.5px 3px rgba(37, 99, 235, 0.3); /* 75% of original size */
+            
+            &:hover { 
+                background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); /* Slightly darker blue */
+                transform: translateY(-0.75px); /* 75% of original size */
+                box-shadow: 0 3px 6px rgba(37, 99, 235, 0.4); /* 75% of original size */
+            }
+        }
+        
+        /* Hide the large trial content blocks */
+        .trialBanner .trialContent {
+            display: none;
+        }
+    }
+}
+
+/* --- Sidebar Overlay (Same) --- */
+.sidebarOverlay {
+    display: none; 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 1040; 
+    transition: opacity 0.3s ease-in-out;
+    
+    @media (max-width: 1024px) {
+      display: block; 
+    }
+    @media (min-width: 1025px) {
+      display: none !important; 
+    }
+}

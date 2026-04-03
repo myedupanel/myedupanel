@@ -6,29 +6,58 @@
   align-items: flex-start; /* Taaki page top se shuru ho */
   min-height: 100vh;
   padding: 2rem 1rem; /* Mobile ke liye padding */
-  background-color: #f0f2f5;
+  background: linear-gradient(135deg, #f0f2f5 0%, #e0e5ec 100%);
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .upgradeBox {
   width: 100%;
   max-width: 1100px; /* Bada container taaki 3 box fit ho sakein */
   background: #ffffff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   text-align: center;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s;
+  }
+  
+  &:hover::before {
+    left: 100%;
+  }
 
   h2 {
-    font-size: 2rem;
+    font-size: 2.5rem;
     color: #333;
     margin-top: 0;
     margin-bottom: 0.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   
   p {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     color: #666;
     margin-bottom: 2rem;
+    font-weight: 500;
   }
 }
 
@@ -36,175 +65,237 @@
 .planGrid {
   display: grid;
   grid-template-columns: 1fr; /* Mobile par ek column */
-  gap: 1.5rem;
+  gap: 2rem;
 
   /* Tablet aur Desktop par 3 column */
   @media (min-width: 768px) {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   }
 }
 
 /* === STYLE BADLA GAYA: planDetails -> planBox === */
 .planBox {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 1.5rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 2rem;
   text-align: left; /* Box ke andar content left-aligned */
   background: #fdfdfd;
   display: flex;
   flex-direction: column; /* Taaki button neeche rahe */
   height: 100%; /* Taaki sabhi box ek size ke dikhein */
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    border-color: #007bff;
+  }
   
   h3 {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     color: var(--primary-color, #007bff);
     margin-top: 0;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
   
   ul {
     list-style: none;
     padding: 0;
-    margin: 1rem 0;
+    margin: 1.5rem 0;
     flex-grow: 1; /* Yeh feature list ko expand karega taaki button neeche chipak jaaye */
 
     li {
-      font-size: 0.95rem;
+      font-size: 1rem;
       color: #555;
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
       display: flex;
       align-items: center;
+      font-weight: 500;
       
       /* ✓ icon ko text se align karein */
       &::before {
         content: '✓';
         color: #28a745;
         font-weight: bold;
-        font-size: 1.2rem;
-        margin-right: 0.5rem;
+        font-size: 1.3rem;
+        margin-right: 0.75rem;
+        flex-shrink: 0;
       }
     }
   }
 }
 
 .priceContainer {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 10px;
 }
 
 .price {
-  font-size: 2.2rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
   color: #222;
   margin: 0;
   
   span {
-    font-size: 0.9rem;
-    font-weight: 400;
+    font-size: 1rem;
+    font-weight: 500;
     color: #777;
     margin-left: 0.25rem;
   }
 }
 
 .originalPrice {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: #999;
   text-decoration: line-through;
+  margin-right: 0.5rem;
 }
 
 /* === NAYA STYLE: Locked Plan === */
 .locked {
-  opacity: 0.7;
-  background: #f8f9fa;
+  opacity: 0.8;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   
   ul li::before {
     color: #999; /* Locked features ka icon grey */
+  }
+  
+  &:hover {
+    transform: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border-color: #e0e0e0;
   }
 }
 
 .lockedButton {
   width: 100%;
-  padding: 0.8rem 1rem;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 1rem 1.2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: #fff;
-  background-color: #6c757d; /* Grey button */
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%); /* Grey button */
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: not-allowed;
   margin-top: auto; /* Button ko hamesha neeche rakhega */
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+  transition: all 0.3s ease;
 }
 
-/* Coupon aur Buy Button Styles (Bina Badlaav) */
+/* Coupon aur Buy Button Styles (Enhanced) */
 .couponSection {
   display: flex;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   width: 100%;
+  gap: 0.5rem;
 }
 
 .couponInput {
   flex-grow: 1;
-  border: 1px solid #ccc;
-  padding: 0 0.75rem;
-  font-size: 0.9rem;
-  border-radius: 5px 0 0 5px;
+  border: 2px solid #ccc;
+  padding: 0 1rem;
+  font-size: 1rem;
+  border-radius: 8px 0 0 8px;
   &:disabled {
     background: #eee;
+  }
+  
+  &:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
   }
 }
 
 .applyButton {
-  padding: 0.75rem 1rem;
+  padding: 0.9rem 1.2rem;
   border: none;
-  background: #555;
+  background: linear-gradient(135deg, #555 0%, #333 100%);
   color: white;
-  border-radius: 0 5px 5px 0;
+  border-radius: 0 8px 8px 0;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(85, 85, 85, 0.3);
+  
   &:hover {
-    background: #333;
+    background: linear-gradient(135deg, #333 0%, #222 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(85, 85, 85, 0.4);
   }
+  
   &:disabled {
-    background: #999;
+    background: linear-gradient(135deg, #999 0%, #777 100%);
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 }
 
 .couponMessage {
   width: 100%;
-  padding: 0.75rem;
-  margin-top: 1rem;
-  border-radius: 5px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  padding: 1rem;
+  margin-top: 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
   
   &.success {
-    background: #d4edda;
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
     color: #155724;
+    border: 1px solid #28a745;
   }
+  
   &.error {
-    background: #f8d7da;
+    background: linear-gradient(135deg, #f8d7da 0%, #f1b0b7 100%);
     color: #721c24;
+    border: 1px solid #dc3545;
   }
 }
 
 .buyButton {
   width: 100%;
-  padding: 0.9rem 1rem;
-  font-size: 1.1rem;
-  font-weight: 600;
+  padding: 1.1rem 1.2rem;
+  font-size: 1.2rem;
+  font-weight: 700;
   color: #fff;
-  background-color: #007bff;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-top: 1.5rem; /* Coupon section se gap */
-  transition: background-color 0.2s ease;
+  margin-top: 2rem; /* Coupon section se gap */
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 
   &:hover {
-    background-color: #0056b3;
+    background: linear-gradient(135deg, #0056b3 0%, #004080 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 123, 255, 0.4);
   }
+  
   &:disabled {
-    background-color: #999;
+    background: linear-gradient(135deg, #999 0%, #777 100%);
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 }

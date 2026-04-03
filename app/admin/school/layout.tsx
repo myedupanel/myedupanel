@@ -1,20 +1,18 @@
-// File: app/admin/school/layout.tsx
-"use client"; // Client-side logic ke liye zaroori
-
-import React from 'react';
-// मौजूदा AdminLayout के styles को import करें 
+"use client"; 
+import React, { ReactNode } from 'react'; 
 import styles from './SchoolPage.module.scss';
-// SchoolSidebar कंपोनेंट को import करें
-import SchoolSidebar from '@/app/admin/school/SchoolSidebar'; 
-// === NEW CONTEXT IMPORTS ===
-import { UpcomingFeatureProvider, useUpcomingFeature } from '@/app/context/UpcomingFeatureContext';
+import SchoolSidebar from '@/app/admin/school/SchoolSidebar';
 import Modal from '@/components/common/Modal/Modal';
 import { MdFlashOn } from 'react-icons/md';
 
+// CRITICAL FIX: Importing Provider and Hook from the new external context file
+import { SchoolLayoutProvider, useSchoolLayout } from '@/app/context/SchoolLayoutContext'; 
+import { UpcomingFeatureProvider, useUpcomingFeature } from '@/app/context/UpcomingFeatureContext'; 
 
-// === UPCOMING FEATURE MODAL DEFINITION (Yahan define kiya gaya) ===
+
+// === UPCOMING FEATURE MODAL DEFINITION ===
 const UpcomingFeatureModal = () => {
-    // Context hook is used here to get state
+    // Hook call is safe here (inside a component, and Provider is used in export default)
     const { showModal, setShowModal } = useUpcomingFeature();
 
     return (
@@ -28,7 +26,6 @@ const UpcomingFeatureModal = () => {
                 <h3 style={{ marginBottom: '0.5rem', color: '#333' }}>Feature Under Construction</h3>
                 <p style={{ color: '#666' }}>
                     This feature is under development and will be available soon. 
-                    We are working hard to bring you the best experience!
                 </p>
                 <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>
                     Thank you for your patience.
@@ -39,33 +36,47 @@ const UpcomingFeatureModal = () => {
 };
 // =================================================================
 
-export default function SchoolLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  
-  return (
-    // === WRAPPING WITH PROVIDER ===
-    // Provider Sidebar aur children (page.tsx) dono ko wrap karta hai
-    <UpcomingFeatureProvider>
-        
-        {/* Main Flex Container */}
+// === SchoolLayoutContent (The Visual Shell Component) ===
+const SchoolLayoutContent = ({ children }: { children: React.ReactNode }) => {
+    // Hook call is safe here, consuming the context provided in the final export
+    const { isSidebarOpen, toggleSidebar } = useSchoolLayout(); 
+    
+    return (
         <div className={styles.container}>
             
-            {/* 1. School Sidebar */}
             <SchoolSidebar /> 
             
-            {/* 2. Content Area (Renders page.tsx) */}
+            {/* Mobile Overlay is conditional based on context */}
+            {isSidebarOpen && <div className={styles.sidebarOverlay} onClick={toggleSidebar} />}
+
             <main className={styles.content}>
                 {children}
             </main>
             
         </div>
-        
-        {/* 3. Modal Rendering: यह Provider के अंदर कहीं भी render हो सकता है */}
-        <UpcomingFeatureModal /> 
+    );
+};
+// =======================================================================
 
-    </UpcomingFeatureProvider>
-  );
+
+// === 🏆 FINAL EXPORT: The only part Next.js recognizes ===
+export default function SchoolLayout({
+    children,
+}: {
+    children: React.ReactNode
+}) {
+    // This is the only place we use the Provider components to wrap the content
+    return (
+        <UpcomingFeatureProvider>
+            <SchoolLayoutProvider> {/* Imported from the new context file */}
+                
+                <SchoolLayoutContent>
+                    {children}
+                </SchoolLayoutContent>
+                
+                <UpcomingFeatureModal /> 
+
+            </SchoolLayoutProvider>
+        </UpcomingFeatureProvider>
+    );
 }

@@ -4,7 +4,8 @@ import styles from './SettingsPage.module.scss';
 import { MdEdit, MdDelete, MdGridView } from 'react-icons/md';
 import Link from 'next/link';
 // --- API Import ---
-import api from '@/backend/utils/api'; 
+import api from '@/backend/utils/api';
+import { useAcademicYear } from '@/app/context/AcademicYearContext'; // Add this import
 // --- End API Import ---
 
 // Interface for TimeSlot
@@ -26,6 +27,7 @@ interface WorkingDay {
 const allDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 const SettingsPage = () => {
+    const { currentYearId } = useAcademicYear(); // Add this line to use academic year context
     // States for Time Slot form
     const [slotName, setSlotName] = useState('');
     const [startTime, setStartTime] = useState('');
@@ -56,12 +58,12 @@ const SettingsPage = () => {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [currentYearId]); // Add currentYearId as dependency
 
     useEffect(() => {
         // Replace localStorage load with API call
         fetchSettings();
-    }, [fetchSettings]);
+    }, [fetchSettings, currentYearId]); // Add currentYearId as dependency
 
     // --- 2. Handle Working Days Change (POST to API) ---
     const handleWorkingDaysChange = async (day: string) => {

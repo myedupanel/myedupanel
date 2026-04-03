@@ -1,10 +1,8 @@
 "use client";
 
-
 import { useState } from 'react';
 import SimpleHeader from '../../components/SimpleHeader';
 import Footer from '../../components/Footer';
-
 
 export default function ContactUs() {
   // State for form fields
@@ -16,21 +14,19 @@ export default function ContactUs() {
     painPoints: '',
   });
 
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prevState => ({ ...prevState, [name]: value }));
   };
 
-
   return (
     <>
       <SimpleHeader />
       
-      <div className="contact-page-wrapper">
-        <div className="contact-form-container">
+      <div className="contact-page-wrapper responsive-section">
+        <div className="contact-form-container responsive-card">
           <form className="contact-form">
-            <div className="form-grid">
+            <div className="form-grid responsive-grid cols-1 cols-2">
               <div className="form-field">
                 <label htmlFor="schoolWebsite">Enter Your School Name</label>
                 <input type="text" id="schoolWebsite" name="schoolWebsite" value={formData.schoolWebsite} onChange={handleInputChange} className="form-input" />
@@ -60,7 +56,6 @@ export default function ContactUs() {
           </form>
         </div>
       </div>
-
 
       <Footer />
     </>

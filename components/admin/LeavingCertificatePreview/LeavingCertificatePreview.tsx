@@ -147,6 +147,8 @@ const LeavingCertificatePreview: React.FC<LeavingCertificatePreviewProps> = ({
             {/* 4. Contact Line */}
             <div className={styles.schoolContact}>{contactLine}</div>
           </div>
+          {/* Empty div to balance the layout */}
+          <div></div>
         </header>
           
         {/* === METADATA (SERIAL & GR NO.) === */}

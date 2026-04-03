@@ -1,21 +1,55 @@
 "use client";
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '@/backend/utils/api'; 
 import styles from './FeeCollection.module.scss'; 
 import Modal from '@/components/common/Modal/Modal'; 
 
-// Import *only* the default component 'FeeReceipt'
+// CRITICAL FIX: All Fi icons consolidated (FiMenu, FiDownload are included)
+import { FiUser, FiCreditCard, FiRefreshCw, FiDollarSign, FiPrinter, FiXCircle, FiCalendar, FiSearch, FiCheckCircle, FiChevronLeft, FiChevronRight, FiDownload, FiMenu } from 'react-icons/fi';
+
+import StudentSearch from '@/components/admin/StudentSearch/StudentSearch'; 
 import FeeReceipt from '@/components/admin/fees/FeeReceipt'; 
 
+<<<<<<< HEAD
 import { FiUser, FiCreditCard, FiRefreshCw, FiDollarSign, FiPrinter, FiXCircle, FiCalendar, FiSearch, FiCheckCircle, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import StudentSearch from '@/components/admin/StudentSearch/StudentSearch'; 
 
 // --- Import correct interface from types ---
 import { Transaction, ReceiptData } from '@/components/types/fees';
 // --- END FIX ---
+=======
+// --- Interface Definitions (No changes) ---
+export interface TemplateInfo {
+  id: string; 
+  name: string;
+  items?: { name: string; amount: number; }[]; 
+  totalAmount?: number; 
+}
 
+export interface Transaction {
+  id: number; 
+  receiptId: string;
+  amountPaid: number;
+  paymentMode: string;
+  paymentDate: string;
+  status: 'Success' | 'Pending' | 'Failed';
+  templateName?: string;
+  templateId?: TemplateInfo; 
+}
 
-// --- Interface Definitions (Only keeping local types that FeeReceipt does NOT use) ---
+export interface StudentInfo { [key: string]: any; }
+export interface FeeRecordInfo { [key: string]: any; }
+export interface CollectorInfo { [key: string]: any; }
+export interface SchoolInfo { [key: string]: any; }
+
+export interface ReceiptData extends Transaction {
+  studentInfo?: StudentInfo;
+  schoolInfo?: SchoolInfo;
+  collectorInfo?: CollectorInfo;
+  feeRecordInfo?: FeeRecordInfo;
+}
+>>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
+
 interface FeeRecordListItem {
   id: number; 
   amount: number;
@@ -36,11 +70,19 @@ interface StudentSearchResult {
   class: string;
   studentId?: string; 
 }
+
+// Mobile Nav Menu Data
+const subTabs = [
+  { id: 'feeRecord', title: 'Fee Record' },
+  { id: 'paid', title: 'Paid Transaction' },
+  { id: 'failed', title: 'Fail Transaction' },
+  { id: 'history', title: 'History' },
+];
 // ---
 
 const FeeCollectionPage: React.FC = () => {
-  // --- States ---
-  const [selectedStudent, setSelectedStudent] = useState<StudentSearchResult | null>(null);
+  // CRITICAL FIX: State initialization corrected
+  const [selectedStudent, setSelectedStudent] = useState<StudentSearchResult | null>(null); 
   const [activeSubTab, setActiveSubTab] = useState<'feeRecord' | 'paid' | 'failed' | 'history'>('feeRecord');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +101,7 @@ const FeeCollectionPage: React.FC = () => {
   const [submitStatus, setSubmitStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [lastTransactionForReceipt, setLastTransactionForReceipt] = useState<Transaction | null>(null);
 
+  // History Filter States (To be used in the History Tab's filterBar)
   const [historySearch, setHistorySearch] = useState('');
   const [historyStartDate, setHistoryStartDate] = useState('');
   const [historyEndDate, setHistoryEndDate] = useState('');
@@ -73,6 +116,10 @@ const FeeCollectionPage: React.FC = () => {
   const [receiptDataForModal, setReceiptDataForModal] = useState<ReceiptData | null>(null); 
   const [loadingReceipt, setLoadingReceipt] = useState(false);
   const [receiptError, setReceiptError] = useState<string | null>(null);
+  
+  // NAYE MOBILE STATES
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
 
   // --- Helper: Format Currency ---
@@ -90,7 +137,7 @@ const FeeCollectionPage: React.FC = () => {
         } catch (e) { return 'Invalid Date'; }
     };
 
-  // --- Main Data Fetching Logic ---
+  // --- Main Data Fetching Logic (No changes in logic) ---
   const fetchData = useCallback(async (page = 1) => {
     const studentIdForBackend = selectedStudent?.id ? parseInt(selectedStudent.id, 10) : null; 
     
@@ -112,19 +159,19 @@ const FeeCollectionPage: React.FC = () => {
           setFeeRecords(resFR.data.data || []);
           break;
         case 'paid': 
-          params.append('status', 'Success'); params.append('limit', HISTORY_LIMIT.toString()); params.append('page', '1');
+          params.append('status', 'Success'); params.append('limit', '15'); params.append('page', '1');
           url = `/api/fees/transactions?${params.toString()}`; 
           const resPaid = await api.get(url);
           setPaidTransactions(resPaid.data.data || []);
           break;
         case 'failed': 
-          params.append('status', 'Failed,Pending'); params.append('limit', HISTORY_LIMIT.toString()); params.append('page', '1');
+          params.append('status', 'Failed,Pending'); params.append('limit', '15'); params.append('page', '1');
           url = `/api/fees/transactions?${params.toString()}`; 
           const resFailed = await api.get(url);
           setFailedTransactions(resFailed.data.data || []);
           break;
         case 'history': 
-          params.append('page', page.toString()); params.append('limit', HISTORY_LIMIT.toString());
+          params.append('page', page.toString()); params.append('limit', '15');
           if (historySearch) params.append('search', historySearch);
           if (historyStartDate) params.append('startDate', historyStartDate);
           if (historyEndDate) params.append('endDate', historyEndDate);
@@ -146,7 +193,8 @@ const FeeCollectionPage: React.FC = () => {
       if (activeSubTab === 'failed') setFailedTransactions([]);
       if (activeSubTab === 'history') setHistoryTransactions([]);
     } finally { setLoading(false); }
-  }, [selectedStudent, activeSubTab, historyPage, historySearch, historyStartDate, historyEndDate, historyStatusFilter, historyPaymentModeFilter]); // Dependencies updated
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedStudent, activeSubTab, historyPage, historySearch, historyStartDate, historyEndDate, historyStatusFilter, historyPaymentModeFilter]); 
 
   // --- useEffect Hooks (No changes) ---
   useEffect(() => {
@@ -156,14 +204,14 @@ const FeeCollectionPage: React.FC = () => {
       setRecordToCollectOffline(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedStudent, activeSubTab]); // fetchData removed from dependencies
+  }, [selectedStudent, activeSubTab]); 
 
   useEffect(() => {
     if (activeSubTab === 'history') {
       fetchData(historyPage);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [historyPage]); // fetchData removed
+  }, [historyPage]); 
 
 
   // --- Handlers ---
@@ -213,6 +261,7 @@ const FeeCollectionPage: React.FC = () => {
         notes: manualNotes,
         ...(manualPaymentMode === 'Cheque' && { chequeNumber: manualNotes, bankName: 'N/A' })
       };
+<<<<<<< HEAD
       
       console.log("[Frontend] Sending fee collection payload:", payload);
       console.log("[Frontend] recordToCollectOffline:", recordToCollectOffline);
@@ -222,6 +271,11 @@ const FeeCollectionPage: React.FC = () => {
       
       console.log("[Frontend] Success response:", response.data);
       
+=======
+      // Log the request for debugging
+      console.log("Sending collect-manual request with payload:", payload);
+      const response = await api.post('/fees/collect-manual', payload);
+>>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
       setSubmitStatus({ message: 'Payment collected successfully!', type: 'success' });
       setLastTransactionForReceipt(response.data.transaction);
       setRecordToCollectOffline(null);
@@ -294,14 +348,54 @@ const FeeCollectionPage: React.FC = () => {
          setHistoryPage(1); 
     }
   };
+  
+  // NAYA: Handle tab change from modal
+  const handleTabChange = (tabId: 'feeRecord' | 'paid' | 'failed' | 'history') => {
+      setActiveSubTab(tabId);
+      setIsMenuModalOpen(false);
+  };
+  
+  // NAYA: Handle search from modal
+  const handleModalSearch = (query: string) => {
+      // Since StudentSearch handles selection, this function is simplified
+      if (query) {
+         // This can be expanded later if a specific search logic is needed
+      }
+      setIsSearchModalOpen(false);
+  };
+
 
   // --- RENDER ---
   return (
+    <>
     <div className={styles.pageContainer}>
-      {/* --- Left Panel --- */}
+      {/* --- Mobile Header Bar --- */}
+      <header className={styles.mobileHeaderBar}>
+          <button 
+              className={styles.menuButton} 
+              onClick={() => setIsMenuModalOpen(true)}
+              aria-label="Open Fees Menu"
+          >
+              <FiMenu />
+          </button>
+          <h1 className={styles.title}>Select Student</h1>
+          
+          {/* Search Icon */}
+          <button 
+              className={styles.searchToggleButton} 
+              onClick={() => setIsSearchModalOpen(true)}
+              aria-label="Search Student"
+          >
+              <FiSearch />
+          </button>
+      </header>
+      
+      
+      {/* --- Left Panel (Desktop Sidebar / Mobile Content Top) --- */}
       <aside className={styles.leftPanel}>
          <div className={styles.panelHeader}><FiUser /><h3>Select Student</h3></div>
         <div className={styles.panelContent}>
+          {/* CRITICAL FIX: StudentSearch is here on desktop */}
           <StudentSearch onStudentSelect={(student: StudentSearchResult | null) => { setSelectedStudent(student); setActiveSubTab('feeRecord'); }} />
           {selectedStudent && (
             <div className={styles.selectedStudentInfo}>
@@ -314,10 +408,11 @@ const FeeCollectionPage: React.FC = () => {
         </div>
         <nav className={styles.verticalNav}>
           <ul>
-            <li className={activeSubTab === 'feeRecord' ? styles.active : ''} onClick={() => setActiveSubTab('feeRecord')}>Fee Record</li>
-            <li className={activeSubTab === 'paid' ? styles.active : ''} onClick={() => setActiveSubTab('paid')}>Paid Transaction</li>
-            <li className={activeSubTab === 'failed' ? styles.active : ''} onClick={() => setActiveSubTab('failed')}>Fail Transaction</li>
-            <li className={activeSubTab === 'history' ? styles.active : ''} onClick={() => setActiveSubTab('history')}>History</li>
+            {subTabs.map(tab => (
+                 <li key={tab.id} className={activeSubTab === tab.id ? styles.active : ''} onClick={() => setActiveSubTab(tab.id as 'feeRecord')}>
+                    {tab.title}
+                </li>
+            ))}
           </ul>
         </nav>
       </aside>
@@ -566,7 +661,20 @@ const FeeCollectionPage: React.FC = () => {
             
             receiptDataForModal ? (
               <FeeReceipt 
+<<<<<<< HEAD
                 transaction={receiptDataForModal}
+=======
+                transaction={{
+                  ...receiptDataForModal, 
+                  id: receiptDataForModal.id, 
+                  templateId: {
+                    id: Number(receiptDataForModal.templateId?.id || '0'), 
+                    name: receiptDataForModal.templateId?.name || 'N/A',
+                    items: receiptDataForModal.templateId?.items || [], 
+                    totalAmount: receiptDataForModal.templateId?.totalAmount || 0
+                  }
+                }} 
+>>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
               />
             ) : (
               <p>Could not load receipt data.</p>
@@ -575,7 +683,41 @@ const FeeCollectionPage: React.FC = () => {
         </Modal>
       )}
 
-    </div> // End pageContainer
+      {/* --- NAYA: Mobile Menu Modal --- */}
+      <Modal isOpen={isMenuModalOpen} onClose={() => setIsMenuModalOpen(false)} title="Fees Records Menu">
+          <nav className={styles.mobileMenuNav}>
+              {subTabs.map(tab => (
+                   <button 
+                       key={tab.id}
+                       onClick={() => handleTabChange(tab.id as 'feeRecord')}
+                       className={`${styles.modalActionLink} ${activeSubTab === tab.id ? styles.active : ''}`}
+                   >
+                       {tab.title}
+                   </button>
+              ))}
+              <button 
+                   onClick={() => alert('Exporting data via backend API route 16...')}
+                   className={`${styles.modalActionLink} ${styles.exportButton}`}
+               >
+                   <FiDownload /> Export Data
+              </button>
+          </nav>
+      </Modal>
+      
+      {/* --- NAYA: Mobile Search Modal (Select Student) --- */}
+      <Modal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} title="Select Student">
+        <div className={styles.modalSearchContent}>
+             {/* CRITICAL FIX: The StudentSearch component handles search and selection */}
+             <StudentSearch onStudentSelect={(student: StudentSearchResult | null) => { 
+                 setSelectedStudent(student); 
+                 setActiveSubTab('feeRecord'); 
+                 setIsSearchModalOpen(false); // Close modal on select
+             }} />
+        </div>
+      </Modal>
+
+    </div> 
+    </>
   );
 };
 

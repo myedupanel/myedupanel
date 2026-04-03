@@ -1,23 +1,18 @@
 "use client";
 import React, { useEffect } from 'react';
-// FIX: usePathname को import करें
 import { useRouter, usePathname } from 'next/navigation'; 
 import Sidebar from '@/components/layout/Sidebar/Sidebar'; 
 import styles from './layout.module.scss';
+import sidebarStyles from '@/components/layout/Sidebar/Sidebar.module.scss'; 
 import { useAuth } from '@/app/context/AuthContext';
-import { AdminLayoutProvider } from '@/app/context/AdminLayoutContext'; 
+import { AdminLayoutProvider, useAdminLayout } from '@/app/context/AdminLayoutContext';
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const { isAuthenticated, isLoading, user } = useAuth();
-  const router = useRouter();
-  
-  // FIX: usePathname hook का उपयोग करें
+// --- AdminContent Component ---
+const AdminContent = ({ children }: { children: React.ReactNode }) => {
+  const { isSidebarOpen, toggleSidebar } = useAdminLayout();
   const pathname = usePathname(); 
   
+<<<<<<< HEAD
   // FIX: Specific sub-routes के लिए Main Sidebar hide करें, but show on main dashboard pages
   const isSpecificPageRoute = 
         pathname.startsWith('/admin/school/') ||
@@ -35,39 +30,80 @@ export default function AdminLayout({
         pathname.startsWith('/admin/fee-counter/history') ||
         pathname.startsWith('/admin/communication/') ||
         pathname.startsWith('/admin/profile/');
+=======
+  // FIX: Conditional Rendering
+  const isSchoolOrFeeRoute = 
+        pathname.startsWith('/admin/school') ||
+        pathname.startsWith('/admin/students') || 
+        pathname.startsWith('/admin/teachers') ||
+        pathname.startsWith('/admin/parents') ||
+        pathname.startsWith('/admin/staff') ||
+        pathname.startsWith('/admin/settings') ||
+        pathname.startsWith('/admin/attendance') ||
+        pathname.startsWith('/admin/academics') ||
+        pathname.startsWith('/admin/timetable') ||
+        pathname.startsWith('/admin/fee-counter');
+>>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
                         
   const shouldRenderMainSidebar = !isSpecificPageRoute;
 
+  return (
+    <div className={styles.container}>
+      {/* 1. Sidebar */}
+      {shouldRenderMainSidebar && <Sidebar />} 
+      
+      {/* 2. Mobile Overlay */}
+      {isSidebarOpen && <div className={sidebarStyles.sidebarOverlay} onClick={toggleSidebar} />}
+      
+      {/* 3. Content Area */}
+      <main className={styles.content}>
+        {children}
+      </main>
+    </div>
+  );
+};
+// --- END AdminContent Component ---
 
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const router = useRouter();
+  
   useEffect(() => {
-    // Auth Logic (Remains the same)
+    // Auth Logic (Same)
     if (!isLoading) {
       const isAdminOrSuperAdmin = user?.role === 'Admin' || user?.role === 'SuperAdmin';
-      if (!isAuthenticated) { router.push('/login'); } 
-      else if (!isAdminOrSuperAdmin) { router.push('/login'); }
+      if (!isAuthenticated) { 
+        // Check if we're already on the login page to prevent redirect loops
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          router.push('/login'); 
+        }
+      } 
+      else if (!isAdminOrSuperAdmin) { 
+        // Check if we're already on the login page to prevent redirect loops
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          router.push('/login'); 
+        }
+      }
     }
   }, [isLoading, isAuthenticated, router, user]);
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return <div className={styles.loadingState}>Loading Admin Area...</div>; 
   }
 
-  const isAdminOrSuperAdmin = user.role === 'Admin' || user.role === 'SuperAdmin';
+  const isAdminOrSuperAdmin = user?.role === 'Admin' || user?.role === 'SuperAdmin';
   if (!isAuthenticated || !isAdminOrSuperAdmin) {
      return <div className={styles.loadingState}>Redirecting...</div>;
   }
   
   return (
     <AdminLayoutProvider>
-      <div className={styles.container}>
-        {/* FIX: Conditional Rendering */}
-        {shouldRenderMainSidebar && <Sidebar />} 
-        
-        {/* Content Area */}
-        <main className={styles.content}>
-          {children}
-        </main>
-      </div>
+      <AdminContent>{children}</AdminContent>
     </AdminLayoutProvider>
   );
 }

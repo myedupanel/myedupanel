@@ -1,33 +1,71 @@
+/* File: app/admin/students/components/StudentSidebar.module.scss */
+
 .sidebarContainer {
   width: 250px;
   flex-shrink: 0;
-  background-color: #1e293b; /* Admin sidebar jaisa dark color */
-  height: 100%;
+  background-color: #1e293b; 
+  height: 100vh; 
   display: flex;
   flex-direction: column;
   color: white;
+  position: fixed; 
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  
+  transform: translateX(0); /* Desktop default */
+  transition: transform 0.3s ease-out;
 }
 
 .titleSection {
-  padding: 20px 25px 0 25px;
+  /* CRITICAL FIX: Title ko 25px offset par align karne ke liye */
+  padding: 20px 15px 0 15px; /* Outer padding 15px */
   margin-bottom: 20px;
   flex-shrink: 0;
+  display: flex; 
+  justify-content: space-between;
+  align-items: center;
+
   h3 {
     color: white;
     font-weight: 600;
     margin: 0;
+    /* Title bar ko poori width tak failaya */
+    flex-grow: 1; 
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    
+    /* FIX: Inner padding 10px (Total offset 15px + 10px = 25px) */
     padding-bottom: 15px;
+    padding-left: 10px; 
+    padding-right: 10px; 
   }
 }
 
+.closeSidebarButton {
+    display: none; 
+    background: none;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    margin-left: 10px;
+    transition: color 0.2s;
+    
+    @media (max-width: 1024px) {
+        display: block; 
+    }
+}
+
 .menuSection {
-  flex-grow: 1; /* Yeh important hai, isse footer neeche chala jaata hai */
-  overflow-y: auto; /* Agar items zyada honge to scrollbar aayega */
+  flex-grow: 1; 
+  overflow-y: auto; 
   
   ul {
     list-style: none;
-    padding: 0 15px;
+    padding: 0 15px; /* UL padding 15px */
     margin: 0;
   }
 }
@@ -36,7 +74,7 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  padding: 12px 10px;
+  padding: 12px 10px; /* LI padding 10px */
   color: #cbd5e1;
   border-radius: 8px;
   cursor: pointer;
@@ -54,12 +92,11 @@
   }
 }
 
-/* === Naye Styles === */
 .footerSection {
   flex-shrink: 0;
   padding: 15px;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
-  margin-top: auto; /* Yeh button ko hamesha neeche rakhega */
+  margin-top: auto; 
 }
 
 .dashboardButton {
@@ -82,4 +119,23 @@
     background-color: #4f46e5;
     color: white;
   }
+}
+
+/* === MOBILE/TABLET RESPONSIVENESS FIXES (CRITICAL VISIBILITY FIX) === */
+
+/* Mobile view: Sidebar ko screen ke bahar feko */
+@media (max-width: 1024px) {
+  .sidebarContainer {
+    width: 280px; 
+    transform: translateX(-100%); 
+    z-index: 1050; 
+  }
+}
+
+/* Sidebar khulne par: sidebarContainer par mobileOpen class lag rahi hai */
+.sidebarContainer.mobileOpen { 
+    @media (max-width: 1024px) {
+        transform: translateX(0) !important; /* CRITICAL: Visibility fix */
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    }
 }

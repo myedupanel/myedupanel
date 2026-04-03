@@ -5,8 +5,18 @@ if (process.env.NODE_ENV !== 'production') {
 }
 // --- END FIX ---
 
+// Load environment variables in production (for Render)
+if (process.env.NODE_ENV === 'production') {
+  console.log("Running in production mode");
+  // In production, environment variables are set by Render
+  // but we can log them for debugging
+  console.log("DATABASE_URL present:", !!process.env.DATABASE_URL);
+  console.log("PORT:", process.env.PORT || 5000);
+}
+
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const http = require('http');
 const { Server } = require("socket.io");
 const prisma = require('./config/prisma');
@@ -15,6 +25,7 @@ const prisma = require('./config/prisma');
 const paymentRoutes = require('./routes/payment'); 
 const couponRoutes = require('./routes/couponRoutes');
 const planRoutes = require('./routes/planRoutes'); 
+const academicYearRoutes = require('./routes/academicYear');
 
 const academicRoutes = require('./routes/academics');
 const eventRoutes = require('./routes/events');
@@ -39,6 +50,7 @@ const parentAuthRoutes = require('./routes/parentAuth');
 const parentDashboardRoutes = require('./routes/parentDashboard');
 
 const { apiLimiter } = require('./middleware/rateLimiter'); // Global Limiter Import
+const { injectAcademicYear } = require('./middleware/academicYearMiddleware');
 
 // --- Allowed URLs ki list (No Change) ---
 const allowedOrigins = [
@@ -51,16 +63,18 @@ const allowedOrigins = [
 
 // --- Express App Setup (No Change) ---
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 
-// --- Standard Middlewares (Order: CORS, JSON) ---
+// --- Standard Middlewares (Order: CORS, JSON, Cookies) ---
 app.use(cors({
   origin: allowedOrigins,
-  methods: ["GET", "POST", "PUT", "DELETE"]
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true // Enable cookies
 }));
 
 app.use(express.json({ limit: '5mb' })); 
 app.use(express.urlencoded({ limit: '5mb', extended: true }));
+app.use(cookieParser()); // Parse cookies
 
 // --- Debugging Middleware (No Change) ---
 app.use((req, res, next) => {
@@ -93,6 +107,11 @@ app.get('/', (req, res) => {
   res.send('SchoolPro Backend is running (Prisma Version)!'); 
 });
 
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
 // 1. AUTH ROUTES (Yeh apne custom 'authLimiter' ka upyog karte hain)
 app.use('/api/auth', authRoutes);
 app.use('/api/parent-auth', parentAuthRoutes);
@@ -101,12 +120,18 @@ app.use('/api/parent-auth', parentAuthRoutes);
 // [Threat D solved for feature routes]
 app.use('/api', apiLimiter);
 
+// 2.5 ACADEMIC YEAR MIDDLEWARE (Inject current year into all requests)
+app.use('/api', injectAcademicYear);
+
 // 3. FEATURE ROUTES (Ab ye sabhi rate limited hain)
+app.use('/api/academic-years', academicYearRoutes);
 app.use('/api/school', schoolRoutes); 
-app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminRoutes);        
 app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/parents', parentRoutes);
+// Log fees route registration
+console.log('Registering /api/fees routes');
 app.use('/api/fees', feeRoutes);
 app.use('/api/parent-dashboard', parentDashboardRoutes); // Parent dashboard routes
 app.use('/api/staff', staffRoutes);

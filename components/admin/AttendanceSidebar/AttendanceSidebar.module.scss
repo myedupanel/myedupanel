@@ -1,8 +1,8 @@
-/* Sidebar ko naya dark theme de rahe hain */
+/* Sidebar with light theme */
 .sidebar {
   width: 260px;
-  background-color: #1e293b; /* Dark blue/gray */
-  border-right: 1px solid #334155;
+  background-color: #ffffff; /* White background */
+  border-right: 1px solid #e2e8f0; /* Light border */
   padding: 1.5rem;
   flex-shrink: 0;
   display: flex;
@@ -16,7 +16,7 @@
 .title {
   font-size: 1rem;
   font-weight: 700;
-  color: #94a3b8; /* Muted light gray */
+  color: #475569; /* Medium gray */
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 2rem;
@@ -24,7 +24,7 @@
   transition: color 0.2s ease;
 
   &:hover {
-    color: #ffffff;
+    color: #0f172a; /* Dark gray */
   }
 }
 
@@ -34,14 +34,14 @@
   margin: 0;
 }
 
-/* Sidebar ke sabhi links */
+/* Sidebar links */
 .sidebar a {
   display: flex;
   align-items: center;
   gap: 0.85rem;
   padding: 0.85rem 1.2rem;
   text-decoration: none;
-  color: #cbd5e1; /* Light gray text */
+  color: #475569; /* Medium gray text */
   border-radius: 8px;
   font-weight: 500;
   margin-bottom: 0.5rem;
@@ -50,32 +50,32 @@
   border-left: 3px solid transparent;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #ffffff;
+    background-color: #f1f5f9; /* Light gray background */
+    color: #0f172a; /* Dark gray */
   }
 
-  /* Active link ka style, bilkul main sidebar jaisa */
+  /* Active link style */
   &.active {
-    background-color: #3b82f6; /* Premium blue */
-    color: #ffffff;
+    background-color: #eef2ff; /* Light indigo */
+    color: #4f46e5; /* Indigo */
     font-weight: 600;
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.15); /* Light indigo shadow */
   }
 }
 
-/* Naye divider aur back button ke liye styles */
+/* Divider and back button styles */
 .divider {
     border: none;
-    border-top: 1px solid #334155; /* Dark border */
+    border-top: 1px solid #e2e8f0; /* Light border */
     margin: 1rem 0;
 }
 
 .backLink {
-    color: #94a3b8 !important; /* Muted light gray */
+    color: #64748b !important; /* Gray */
     font-size: 0.9rem !important;
 
     &:hover {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        color: #ffffff !important;
+        background-color: #f1f5f9 !important; /* Light gray background */
+        color: #0f172a !important; /* Dark gray */
     }
 }

@@ -1,3 +1,4 @@
+// file: app/admin/fee-counter/assign/page.tsx
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '@/backend/utils/api';
@@ -5,7 +6,7 @@ import styles from './AssignFee.module.scss';
 import { FiSave, FiDollarSign, FiCreditCard, FiSmartphone, FiHome, FiEdit } from 'react-icons/fi';
 import { FaRupeeSign, FaUniversity, FaWallet } from 'react-icons/fa'; 
 import StudentSearch from '@/components/admin/StudentSearch/StudentSearch';
-import Link from 'next/link'; // --- FIX: 'Link' component import करें (Onboarding message के लिए)
+import Link from 'next/link'; 
 
 // Helper function (if not globally available)
 const formatCurrency = (amount: number) => {
@@ -61,8 +62,8 @@ const AssignFeePage = () => {
                 // Dono ko ek saath fetch karein
                 // Yeh 'Promise.all' classes aur templates ko ek hi baar mein fetch karega
                 const [classRes, templateRes] = await Promise.all([
-                    api.get('/api/classes'), // YEH AAPKE BACKEND FIX (Step 3) PAR NIRBHAR KARTA HAI
-                    api.get('/api/fees/templates')
+                    api.get('/classes'), // YEH AAPKE BACKEND FIX (Step 3) PAR NIRBHAR KARTA HAI
+                    api.get('/fees/templates')
                 ]);
                 
                 // Dono states ko update karein
@@ -156,7 +157,7 @@ const AssignFeePage = () => {
                 ...paymentDetails // Spread the payment details here
             };
 
-            const res = await api.post('/api/fees/assign-and-collect', payload);
+            const res = await api.post('/fees/assign-and-collect', payload);
             alert(res.data.message || 'Operation successful!');
 
             // Reset form on success
@@ -195,6 +196,7 @@ const AssignFeePage = () => {
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <h1 className={styles.title}>Assign Fee / Quick Collect</h1>
+                <p className={styles.subtitle}>Select a student, choose a fee template, set due date, and optionally collect payment</p>
             </header>
 
             {/* --- YAHAN SE HAMAARA ONBOARDING FLOW SHURU HOTA HAI --- */}
@@ -205,12 +207,13 @@ const AssignFeePage = () => {
             
             ) : classes.length === 0 ? (
                 // 2. Agar Classes nahi hain
-                <div className={styles.onboardingMessage}> {/* Isse .scss file mein style karein */}
+                <div className={styles.onboardingMessage}>
+                    <div className={styles.onboardingIcon}>
+                        <FiEdit size={48} color="#3b82f6" />
+                    </div>
                     <h2>Step 1: Add Your Classes</h2>
                     <p>Before you can assign fees, you need to add at least one class to your school.</p>
-                    {/* Yeh link aapke "Add Class" page par jaana chahiye */}
-                    {/* NOTE: Link ko update karein agar aapka path alag hai */}
-                    <Link href="/admin/fee-counter/classes">
+                    <Link href="/admin/classes">
                         <button className={styles.assignButton}>+ Add Classes Now</button>
                     </Link>
                 </div>
@@ -218,9 +221,11 @@ const AssignFeePage = () => {
             ) : templates.length === 0 ? (
                 // 3. Agar Classes hain, lekin Templates nahi hain
                 <div className={styles.onboardingMessage}>
+                    <div className={styles.onboardingIcon}>
+                        <FiDollarSign size={48} color="#10b981" />
+                    </div>
                     <h2>Step 2: Create Fee Templates</h2>
                     <p>Great! You've added classes. Now create a fee template (e.g., "Annual Fee") before you can assign them.</p>
-                    {/* Yeh link aapke "Fee Templates" page par jaana chahiye */}
                     <Link href="/admin/fee-counter/templates"> 
                         <button className={styles.assignButton}>+ Create a Template</button>
                     </Link>
@@ -234,7 +239,10 @@ const AssignFeePage = () => {
                      <div className={styles.section}>
                       <div className={styles.sectionHeader}>
                         <span className={styles.sectionNumber}>1</span>
-                        <h2 className={styles.sectionTitle}>Select Student</h2>
+                        <div>
+                            <h2 className={styles.sectionTitle}>Select Student</h2>
+                            <p className={styles.sectionDescription}>Search and select the student to assign fees</p>
+                        </div>
                       </div>
                       <div className={styles.sectionContent}>
                         {/* StudentSearch component ab classes fetch hone ke baad hi render hoga */}
@@ -250,14 +258,17 @@ const AssignFeePage = () => {
                     <div className={styles.section}>
                       <div className={styles.sectionHeader}>
                         <span className={styles.sectionNumber}>2</span>
-                        <h2 className={styles.sectionTitle}>Select Template</h2>
+                        <div>
+                            <h2 className={styles.sectionTitle}>Select Template</h2>
+                            <p className={styles.sectionDescription}>Choose a fee template to assign to the student</p>
+                        </div>
                       </div>
                       <div className={styles.sectionContent}>
                         <select
                           className={styles.selectInput}
                           value={selectedTemplateId}
                           onChange={(e) => setSelectedTemplateId(e.target.value)}
-                          disabled={isLoading} // --- FIX: 'loadingTemplates' ki jagah 'isLoading'
+                          disabled={isLoading}
                         >
                           <option value="">{isLoading ? 'Loading...' : 'Select a Fee Template'}</option>
                           {templates.map((template) => (
@@ -266,14 +277,16 @@ const AssignFeePage = () => {
                             </option>
                           ))}
                         </select>
-                        {/* --- FIX: Yeh error message ab zaroori nahi hai, kyunki humne ise upar handle kar liya hai --- */}
                       </div>
                     </div>
                     
                     <div className={styles.section}>
                       <div className={styles.sectionHeader}>
                         <span className={styles.sectionNumber}>3</span>
-                        <h2 className={styles.sectionTitle}>Set Due Date</h2>
+                        <div>
+                            <h2 className={styles.sectionTitle}>Set Due Date</h2>
+                            <p className={styles.sectionDescription}>Specify when the fee payment is due</p>
+                        </div>
                       </div>
                       <div className={styles.sectionContent}>
                         <input 
@@ -290,7 +303,10 @@ const AssignFeePage = () => {
                     <div className={`${styles.section} ${styles.quickCollectSection}`}>
                         <div className={styles.sectionHeader}>
                             <span className={styles.sectionNumber}>4</span>
-                            <h2 className={styles.sectionTitle}>Collect Payment Now (Optional)</h2>
+                            <div>
+                                <h2 className={styles.sectionTitle}>Collect Payment Now (Optional)</h2>
+                                <p className={styles.sectionDescription}>Collect partial or full payment at the time of fee assignment</p>
+                            </div>
                         </div>
                         <div className={styles.sectionContent}>
                             {/* Amount Paid Input */}
@@ -302,6 +318,7 @@ const AssignFeePage = () => {
                                     value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)}
                                     min="0"
                                 />
+                                <p className={styles.fieldHint}>Enter amount to collect payment now, or leave blank to only assign fee demand</p>
                             </div>
 
                             {/* Conditional Payment Details */}
@@ -368,7 +385,7 @@ const AssignFeePage = () => {
                                     <div className={styles.formGroup}>
                                         <label htmlFor="notes">Notes / Remarks</label>
                                         <textarea id="notes" className={styles.textAreaInput} value={notes}
-                                                  onChange={(e) => setNotes(e.target.value)} rows={2}
+                                                  onChange={(e) => setNotes(e.target.value)} rows={3}
                                                   placeholder="Optional - e.g., Part payment, specific instructions" />
                                     </div>
                                 </>

@@ -6,6 +6,7 @@
   height: 100%;
 }
 
+/* --- Desktop Header --- */
 .header {
   display: flex;
   justify-content: space-between;
@@ -20,6 +21,35 @@
   color: #333;
 }
 
+/* NAYA: Mobile Icon Styling - Hidden on Desktop */
+.menuButton, .searchToggleButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 28px;
+    padding: 8px;
+    color: #333;
+    display: none; /* Default: hidden on desktop */
+    flex-shrink: 0;
+}
+
+/* NAYA: Mobile Header Bar (Visible on Mobile) */
+.mobileHeaderBar {
+    width: 100%;
+    display: none; /* Default: hidden on desktop */
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e0e0e0;
+    
+    .title {
+        flex-grow: 1;
+        text-align: center;
+        font-size: 1.5rem;
+    }
+}
+
+/* Desktop Add Button */
 .addButton {
   display: flex;
   align-items: center;
@@ -37,6 +67,9 @@
   &:hover {
     background-color: #0056b3;
   }
+}
+.desktopAddButton {
+    flex-shrink: 0;
 }
 
 .contentArea {
@@ -58,8 +91,9 @@
 }
 
 .templateItem {
-  display: grid;
-  grid-template-columns: 2fr 3fr 1fr 1fr; // 4 columns
+  /* Desktop: Name, Description, Amount, Actions */
+  grid-template-columns: 2fr 3fr 1fr 1fr; 
+  display: grid; /* Make sure it's a grid */
   align-items: center;
   padding: 1.25rem 1.5rem;
   gap: 1rem;
@@ -77,6 +111,8 @@
   font-size: 0.9rem;
   text-transform: uppercase;
   padding: 1rem 1.5rem;
+  display: grid; /* Make sure it's a grid */
+  grid-template-columns: 2fr 3fr 1fr 1fr; /* Desktop columns */
 }
 
 .templateName {
@@ -106,7 +142,7 @@
 
 .actionButton {
   background: none;
-  border: 1px solid #ccc;
+  border: 1px solid #ccc; /* Default border for desktop */
   color: #555;
   padding: 0.5rem;
   border-radius: 6px;
@@ -124,7 +160,7 @@
 
 .deleteButton {
   color: #d9534f;
-  border-color: #d9534f;
+  border-color: #d9534f; /* Default border-color for desktop */
   
   &:hover {
     background-color: #fdf2f2;
@@ -138,7 +174,7 @@
   color: #888;
 }
 
-/* --- NEW Delete Confirmation Styles --- */
+/* --- NEW Delete Confirmation Styles (No Change) --- */
 .confirmDelete {
   padding: 1rem;
   
@@ -181,4 +217,153 @@
   &:hover {
     background-color: #c9302c;
   }
+}
+
+
+/* --- NAYA: Mobile Menu/Search Modal Styles --- */
+.mobileMenuNav {
+    .modalActionLink {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 1rem;
+        text-align: left;
+        background-color: #f8f8f8;
+        color: #007bff;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background-color 0.2s;
+        
+        &:hover { background-color: #e9ecef; }
+    }
+}
+.searchModalContent {
+    padding: 1rem 0;
+    .searchBox {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 8px 12px;
+        
+        input {
+            border: none;
+            flex-grow: 1;
+            padding: 4px 8px;
+            font-size: 1rem;
+            &:focus { outline: none; }
+        }
+        svg {
+            color: #777;
+        }
+        .searchButton {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+    }
+}
+
+
+/* --- Mobile Responsive Overrides --- */
+@media (max-width: 768px) {
+    .pageContainer {
+        padding: 0; 
+    }
+    
+    .header {
+        padding: 0; 
+        border-bottom: none;
+        margin-bottom: 0;
+        justify-content: flex-start;
+    }
+
+    /* Show mobile header bar and hide desktop elements */
+    .mobileHeaderBar {
+        display: flex; 
+    }
+    .header > .title {
+        display: none;
+    }
+    .menuButton, .searchToggleButton {
+        display: block; 
+    }
+    .desktopAddButton {
+        display: none !important; 
+    }
+    
+    .contentArea {
+        padding: 1rem; 
+    }
+
+    .templateGrid {
+        border-radius: 0;
+        border: none;
+    }
+    
+    /* FIX: Table Grid Collapse */
+    .templateItem {
+        /* Columns: Name (2fr), Amount (1fr), Actions (auto) */
+        /* अब Actions को 'auto' कर दिया है ताकि वह अपनी content के हिसाब से width ले */
+        grid-template-columns: 2fr 1fr auto; 
+        padding: 1rem 0.5rem; 
+        gap: 0.5rem;
+        align-items: center; /* सुनिश्चित करें कि सभी items center-aligned हैं */
+    }
+    
+    .gridHeader {
+        display: none; 
+    }
+    
+    /* Mobile specific column visibility/alignment */
+    .templateDescription {
+        display: none; // Hide Description column
+    }
+    
+    /* FIX: Total Amount alignment */
+    .templateAmount {
+        text-align: right; 
+        font-size: 0.95rem;
+        padding-right: 0.25rem; /* Buttons के करीब थोड़ा स्पेस */
+    }
+    
+    /* FIX: Actions alignment और styling */
+    .templateActions {
+        justify-content: flex-end; /* Buttons को right most edge पे रखेगा */
+        align-items: center; /* Buttons को vertically center करे */
+        gap: 0.25rem;
+    }
+    
+    /* FIX: Mobile पे actionButton का border हटाना */
+    .actionButton {
+        border: none; /* Mobile पे border हटा दिया */
+        padding: 0.25rem; /* Padding कम कर दी ताकि छोटे दिखें */
+        font-size: 1.2rem; /* Icons थोड़े बड़े दिखें */
+        color: #333; /* Edit button black */
+        &:hover {
+            background-color: transparent; /* Hover पर background transparent रहे */
+            color: #555;
+        }
+    }
+    
+    /* FIX: Mobile पे deleteButton का border हटाना */
+    .deleteButton {
+        border: none; /* Mobile पे border हटा दिया */
+        color: #d9534f; /* Delete button red */
+        &:hover {
+            background-color: transparent; /* Hover पर background transparent रहे */
+            color: #b32d29;
+        }
+    }
+
+    .templateName {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
 }

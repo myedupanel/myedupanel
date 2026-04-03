@@ -1,21 +1,60 @@
+/* app/admin/fee-counter/fee-import-export/FeeImportExport.module.scss */
+$primary-color: #0d6efd;
+$text-dark: #343a40;
+$border-light: #e9ecef;
+$background-light: #f8f9fa;
+$white: #ffffff;
+
 .pageContainer {
     padding: 2rem;
 }
 
+/* --- Mobile Header Bar (Hidden on Desktop) --- */
+.mobileHeaderBar {
+    display: none; /* Default: Hidden on Desktop */
+    justify-content: flex-start;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid $border-light;
+    margin-bottom: 0.5rem;
+    
+    .menuButton {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 28px;
+        padding: 8px;
+        color: $text-dark;
+        flex-shrink: 0;
+        margin-right: 0.5rem;
+    }
+}
+/* --- END Mobile Header Bar --- */
+
+
 .header {
-    margin-bottom: 2rem;
+    margin-bottom: 2rem; 
 }
 
 .title {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #343a40;
+    color: $text-dark;
+    margin: 0;
+}
+
+/* --- Tab Navigation Fix --- */
+.tabNavWrapper { 
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin-bottom: 2rem;
 }
 
 .tabNav {
     display: flex;
-    border-bottom: 2px solid #e9ecef;
-    margin-bottom: 2rem;
+    border-bottom: 2px solid $border-light;
+    white-space: nowrap; 
+    margin-bottom: -2px; 
 
     button {
         padding: 0.8rem 1.5rem;
@@ -26,28 +65,82 @@
         color: #6c757d;
         cursor: pointer;
         border-bottom: 3px solid transparent;
-        margin-bottom: -2px; // To align with the bottom border
+        margin-bottom: -2px; 
         transition: all 0.2s ease;
+        flex-shrink: 0; 
 
         &.active {
-            color: #0d6efd;
-            border-bottom-color: #0d6efd;
+            color: $primary-color;
+            border-bottom-color: $primary-color;
         }
 
         &:hover:not(.active) {
-            background-color: #f8f9fa;
+            background-color: $background-light;
         }
     }
 }
 
 .tabContent {
-    background-color: #fff;
+    background-color: $white;
     padding: 2rem;
     border-radius: 12px;
-    border: 1px solid #e9ecef;
+    border: 1px solid $border-light;
     min-height: 400px;
 
     h3 {
         margin-top: 0;
+    }
+}
+
+/* --- Mobile Menu Modal Styles (No Change) --- */
+.mobileMenuNav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    
+    .modalActionLink {
+        display: block;
+        padding: 1rem;
+        text-decoration: none;
+        color: $text-dark;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+        
+        &:hover { background-color: $border-light; }
+        
+        &.active {
+             background-color: $primary-color;
+             color: $white;
+             font-weight: 600;
+             &:hover { background-color: darken($primary-color, 10%); }
+        }
+    }
+}
+
+
+/* --- Mobile Responsive Overrides --- */
+@media (max-width: 768px) {
+    .pageContainer {
+        padding: 1rem; 
+    }
+    
+    .header {
+        display: none !important;
+    }
+    .mobileHeaderBar {
+        display: flex;
+        .title { font-size: 1.5rem; }
+    }
+    
+    .tabNavWrapper {
+        display: none;
+    }
+    
+    .tabContent {
+        padding: 1rem;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
     }
 }

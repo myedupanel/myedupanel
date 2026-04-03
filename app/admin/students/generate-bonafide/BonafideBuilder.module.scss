@@ -1,162 +1,386 @@
 /* app/admin/students/generate-bonafide/BonafideBuilder.module.scss */
 
-/* --- Page Layout --- */
-.pageContainer { padding: 2rem; background-color: #f4f7fa; }
-.header { margin-bottom: 2rem; h1 { font-size: 2rem; font-weight: 700; color: #2c3e50; } p { font-size: 1rem; color: #555; } }
-.builderLayout { display: grid; grid-template-columns: 350px 1fr; gap: 2rem; align-items: flex-start; }
-.controlsColumn { background: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); overflow: hidden; position: sticky; top: 20px; }
-.controlSection { padding: 1.5rem; border-bottom: 1px solid #e0e0e0; &:last-child { border-bottom: none; } h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #34495e; } }
-.previewColumn { h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; } }
-.previewWrapper { background: #e0e0e0; padding: 2rem; border-radius: 8px; overflow-x: auto; text-align: center;
-  & > div { display: inline-block; text-align: left; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
+/* --- Page Layout & Header (Desktop) --- */
+.pageContainer {
+    padding: 2rem;
+    background-color: #f4f7fa;
 }
-.actionsWrapper { padding: 1.5rem; background: #f9f9f9; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.actionButton { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; &.download { background-color: #27ae60; color: white; &:hover { background-color: #229954; } } &.print { background-color: #2980b9; color: white; &:hover { background-color: #2471a3; } } }
-.dashboardLinkButton { display: inline-flex; align-items: center; gap: 8px; margin-top: 2rem; padding: 12px 20px; background-color: #34495e; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: background-color 0.2s ease; &:hover { background-color: #2c3e50; } }
-.note { font-size: 0.85rem; color: #7f8c8d; background-color: #fdfaf3; border: 1px solid #f3e5ab; padding: 10px; border-radius: 4px; margin-top: 1rem; }
-.form { display: flex; flex-direction: column; gap: 1rem; }
-.formGroup { display: flex; flex-direction: column; label { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: #555; } input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; font-family: inherit; box-sizing: border-box; &:focus { border-color: #2980b9; outline: none; box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.2); } } }
-.formGroupCheckbox { display: flex; align-items: center; gap: 8px; margin-top: 0.5rem; label { margin-bottom: 0; font-weight: normal; } input[type="checkbox"] { width: auto; } }
 
-/* --- ✅ FINAL V8: Certificate Preview Styles --- */
+.header {
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column; /* Stacks title bar and subtitle vertically */
+    align-items: flex-start;
+
+    h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    p {
+        font-size: 1rem;
+        color: #555;
+        margin: 0;
+    }
+}
+
+.headerTitleBar {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    flex-basis: 100%;
+    margin-top: 0.5rem;
+    padding-left: 0;
+}
+
+.controlsToggleButton, .controlsCloseButton {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #2980b9;
+    font-size: 24px;
+    padding: 5px;
+}
+
+.controlsToggleButton {
+    order: 2;
+    margin-left: auto;
+}
+
+.controlsCloseButton {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 1001;
+    font-size: 36px;
+    color: #c0392b;
+}
+
+/* --- Builder Layout (Desktop) --- */
+.builderLayout {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 2rem;
+    align-items: flex-start;
+    position: relative;
+}
+
+.controlsColumn {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    position: sticky;
+    top: 20px;
+    z-index: 50;
+}
+
+.controlSection {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #34495e;
+    }
+}
+
+.previewColumn {
+    h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+}
+
+.previewWrapper {
+    background: #e0e0e0;
+    padding: 2rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    text-align: center;
+
+    & > div {
+        display: inline-block;
+        text-align: left;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* --- Actions, Forms, and Notes --- */
+.actionsWrapper {
+    padding: 1.5rem;
+    background: #f9f9f9;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Desktop layout */
+    gap: 1rem;
+}
+
+.actionButton {
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+
+    &.download {
+        background-color: #27ae60;
+        color: white;
+
+        &:hover {
+            background-color: #229954;
+        }
+    }
+
+    &.print {
+        background-color: #2980b9;
+        color: white;
+
+        &:hover {
+            background-color: #2471a3;
+        }
+    }
+}
+
+.dashboardLinkButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2rem;
+    padding: 12px 20px;
+    background-color: #34495e;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: #2c3e50;
+    }
+}
+
+.note {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    background-color: #fdfaf3;
+    border: 1px solid #f3e5ab;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+
+    label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #555;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 1rem;
+        font-family: inherit;
+        box-sizing: border-box;
+
+        &:focus {
+            border-color: #2980b9;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.2);
+        }
+    }
+}
+
+.formGroupCheckbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 0.5rem;
+
+    label {
+        margin-bottom: 0;
+        font-weight: normal;
+    }
+
+    input[type="checkbox"] {
+        width: auto;
+    }
+}
+
+/* --- Certificate Preview Styles --- */
 .certificatePaper {
-  width: 210mm;
-  min-height: 297mm;
-  padding: 10mm 15mm 10mm 15mm; // Margins T R B L
-  box-sizing: border-box;
-  background: #fff; // White paper
-  color: #000;
-  font-family: Arial, sans-serif;
-  font-size: 11pt;
-  line-height: 1.6;
-  border: 1px solid #999;
-  position: relative;
-  display: flex;
-  flex-direction: column;
+    width: 210mm;
+    min-height: 297mm;
+    padding: 10mm 15mm 10mm 15mm;
+    box-sizing: border-box;
+    background: #fff;
+    color: #000;
+    font-family: Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    border: 1px solid #999;
+    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .certHeader {
-  display: flex;
-  
-  /* === YAHAN FIX KIYA (1/4) === */
-  /* 'position: relative' hata diya */
-  /* 'min-height' hata diya */
-  align-items: center; /* YEH SABSE ZAROORI HAI: Logo aur Text ko vertically center karega */
-  /* === FIX ENDS HERE === */
+    display: flex;
+    align-items: center;
+    padding-bottom: 3px;
+    margin-bottom: 3px;
+    border-bottom: 1px solid #000;
 
-  padding-bottom: 3px; 
-  margin-bottom: 3px;
-  border-bottom: 1px solid #000;
+    .logo {
+        width: 65px;
+        height: auto;
+        max-height: 65px;
+        margin-right: 10px;
+        object-fit: contain;
+        flex-shrink: 0;
+    }
 
-  .logo {
-    /* === YAHAN FIX KIYA (2/4) === */
-    /* 'position: absolute' aur uske related sab hata diya */
-    /* === FIX ENDS HERE === */
-    
-    width: 65px;
-    height: auto;
-    max-height: 65px;
-    margin-right: 10px; /* Logo aur text ke beech thoda gap (halka left shift) */
-    object-fit: contain;
-    flex-shrink: 0; /* Logo ko shrink nahi hone dega */
-  }
+    .schoolInfoBlock {
+        flex-grow: 1;
+        text-align: center;
+    }
 
-  .schoolInfoBlock {
-    /* === YAHAN FIX KIYA (3/4) === */
-    /* 'width: 100%' hata diya */
-    flex-grow: 1; /* Yeh bachi hui poori jagah lega */
-    text-align: center;
-    /* === FIX ENDS HERE === */
-  }
+    .schoolName1 {
+        font-size: 9pt;
+        font-weight: bold;
+        margin: 0;
+        color: #000;
+    }
 
-  .schoolName1 { font-size: 9pt; font-weight: bold; margin: 0; color: #000; }
-  .schoolName2 { font-size: 14pt; font-weight: bold; margin: 1px 0; color: #005A9C; } // Blue
-  .schoolAddress { font-size: 9pt; margin: 0; line-height: 1.3; }
-  .schoolContact { font-size: 9pt; margin: 2px 0 0 0; }
+    .schoolName2 {
+        font-size: 14pt;
+        font-weight: bold;
+        margin: 1px 0;
+        color: #005A9C;
+    }
 
-  .regInfo {
-    font-size: 9pt;
-    margin: 4px auto 0 auto;
+    .schoolAddress {
+        font-size: 9pt;
+        margin: 0;
+        line-height: 1.3;
+    }
+
+    .schoolContact {
+        font-size: 9pt;
+        margin: 2px 0 0 0;
+    }
+
+    .regInfo {
+        font-size: 9pt;
+        margin: 4px auto 0 auto;
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        max-width: 90%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+.metaArea {
+    position: relative;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    min-height: 50mm;
+    margin-bottom: 10px;
+}
+
+.certNo {
+    font-size: 10pt;
     font-weight: bold;
-    max-width: 90%;
-    
-    /* === YAHAN FIX KIYA (4/4) === */
-    /* Padding waale hacks hata diye kyunki ab logo flex flow mein hai */
-    padding-left: 0;
-    padding-right: 0;
-    /* === FIX ENDS HERE === */
-  }
+    white-space: nowrap;
 }
 
-// ✅ UPDATED: Meta Info Area Layout
-.metaArea {
-  position: relative;
-  display: flex;
-  justify-content: space-between; // Cert No left, reserve space right
-  // ✅ Changed alignment to center vertically
-  align-items: center;
-  min-height: 50mm; // Ensure height for photo box
-  margin-bottom: 10px; // Space before title
-}
-
-.certNo { // Cert No. now on the left
-  font-size: 10pt;
-  font-weight: bold;
-  white-space: nowrap;
-  // margin-top removed, rely on align-items: center
-}
-
-.photoBoxArea { // Photo Box on the right (Absolute)
-  position: absolute;
-  top: 5px; // Keep near top
-  right: 0; // Align right
+.photoBoxArea {
+    position: absolute;
+    top: 5px;
+    right: 0;
 }
 
 .photoBox {
-  width: 35mm;
-  height: 45mm;
-  border: 1px solid #000;
-  background-color: #fff;
+    width: 35mm;
+    height: 45mm;
+    border: 1px solid #000;
+    background-color: #fff;
 }
 
-// ✅ UPDATED: Title Area Wrapper
 .certTitleWrapper {
-    flex-grow: 1; // Allow title wrapper to take space
-    text-align: center; // Center the title within its available space
-    // ✅ Removed align-self: flex-end; Will now center vertically due to parent's align-items: center
-    margin-right: 40mm; // Keep space for photo box
-    width: calc(100% - 40mm); // Take remaining width
+    flex-grow: 1;
+    text-align: center;
+    margin-right: 40mm;
+    width: calc(100% - 40mm);
 }
 
 .certTitle {
-  display: inline-block;
-  text-align: center;
-  // margin-bottom removed, rely on align-items: center
-
-  h2 {
     display: inline-block;
-    font-size: 11pt;
-    font-weight: bold;
-    color: #fff;
-    background-color: #005A9C; // Blue
-    padding: 3px 12px;
-    margin: 0;
-    border-radius: 3px;
-    text-transform: uppercase;
-  }
+    text-align: center;
+
+    h2 {
+        display: inline-block;
+        font-size: 11pt;
+        font-weight: bold;
+        color: #fff;
+        background-color: #005A9C;
+        padding: 3px 12px;
+        margin: 0;
+        border-radius: 3px;
+        text-transform: uppercase;
+    }
 }
 
-// Fill-in styles (No change)
-.fillIn, .fillInFooter, .fillInBlank {
-  font-weight: bold;
-  padding: 0 0.1em;
-  margin: 0 0.2em;
-  border-bottom: 1px solid #000;
-  display: inline;
-  white-space: nowrap;
+.fillIn,
+.fillInFooter,
+.fillInBlank {
+    font-weight: bold;
+    padding: 0 0.1em;
+    margin: 0 0.2em;
+    border-bottom: 1px solid #000;
+    display: inline;
+    white-space: nowrap;
 }
+
 .fillInBlank {
     min-width: 30px;
     display: inline-block;
@@ -166,6 +390,7 @@
     color: transparent;
     user-select: none;
 }
+
 .fillInAddress {
     white-space: normal;
     border-bottom: none;
@@ -173,66 +398,179 @@
     font-weight: bold;
 }
 
-// Body styles (No change)
 .certBody {
-  flex-grow: 1;
-  font-size: 11.5pt;
-  line-height: 2.4;
+    flex-grow: 1;
+    font-size: 11.5pt;
+    line-height: 2.4;
 
-  .listItem {
-    margin-bottom: 0.5rem;
-    text-align: left;
-    padding-left: 20px;
-    position: relative;
-  }
+    .listItem {
+        margin-bottom: 0.5rem;
+        text-align: left;
+        padding-left: 20px;
+        position: relative;
+    }
 
-  .addressLine {
-    border-bottom: 1px solid #000;
-    margin-bottom: 1.5rem;
-    padding-bottom: 2px;
-    min-height: 1.2em;
-    .fillInAddress { border-bottom: none; }
-  }
+    .addressLine {
+        border-bottom: 1px solid #000;
+        margin-bottom: 1.5rem;
+        padding-bottom: 2px;
+        min-height: 1.2em;
 
-  .listNumber {
-    position: absolute;
-    left: 0;
-    font-weight: bold;
-    width: 15px;
-    text-align: left;
-  }
+        .fillInAddress {
+            border-bottom: none;
+        }
+    }
+
+    .listNumber {
+        position: absolute;
+        left: 0;
+        font-weight: bold;
+        width: 15px;
+        text-align: left;
+    }
 }
 
-// Footer styles (No change)
 .certFooter {
-  margin-top: auto;
-  padding-top: 1rem;
-  font-size: 11pt;
-  font-weight: bold;
-  background-color: transparent;
-
-  .placeDate {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-    p { margin: 0; color: #000; }
-    .fillInFooter {
-        color: #000;
-        border-bottom: 1px solid #000;
-    }
-  }
-
-  .signatures {
-    display: flex;
-    justify-content: space-between;
-    padding: 0 5%;
-  }
-
-  .sigBox {
-    width: auto;
-    text-align: center;
-    padding-top: 20px;
-    color: #000;
+    margin-top: auto;
+    padding-top: 1rem;
+    font-size: 11pt;
     font-weight: bold;
-  }
+    background-color: transparent;
+
+    .placeDate {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+
+        p {
+            margin: 0;
+            color: #000;
+        }
+
+        .fillInFooter {
+            color: #000;
+            border-bottom: 1px solid #000;
+        }
+    }
+
+    .signatures {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 5%;
+    }
+
+    .sigBox {
+        width: auto;
+        text-align: center;
+        padding-top: 20px;
+        color: #000;
+        font-weight: bold;
+    }
+}
+
+/* --- Media Query for Mobile/Tablet --- */
+@media (max-width: 1024px) {
+    .pageContainer {
+        padding: 1rem;
+    }
+
+    /* Header Top Bar (Title and Toggle Button) */
+    .headerTitleBar {
+        justify-content: space-between;
+    }
+
+    .header {
+        justify-content: flex-start;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+        padding: 0.5rem 0;
+
+        h1 {
+            font-size: 1.25rem;
+            flex-grow: 1;
+            margin: 0;
+            padding-left: 0.5rem;
+        }
+    }
+
+    .subtitle {
+        padding-left: 0;
+        order: 2;
+
+        .desktopSubtitle {
+            display: none;
+        }
+
+        .mobileSubtitle {
+            display: block;
+            text-align: center;
+            font-size: 0.85rem;
+            padding: 0 0.5rem;
+        }
+    }
+
+    /* Mobile Controls Toggle Button Styles */
+    .controlsToggleButton {
+        display: block;
+        font-size: 24px;
+        flex-shrink: 0;
+        margin-left: auto;
+        color: #2c3e50;
+        padding-right: 0.5rem;
+    }
+
+    .controlsCloseButton {
+        display: block;
+        font-size: 36px;
+        color: #c0392b;
+        flex-shrink: 0;
+        z-index: 1001;
+    }
+
+    /* Grid Collapse */
+    .builderLayout {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        position: relative;
+    }
+
+    /* Hide Preview Column on Mobile */
+    .previewColumn {
+        display: none !important;
+    }
+
+    /* Mobile Controls Visibility */
+    .controlsColumn {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        transform: translateY(100vh);
+        transition: transform 0.3s ease-out;
+        z-index: 1000;
+        background-color: #fff;
+        border-radius: 0;
+        padding-top: 60px;
+        overflow-y: auto;
+    }
+
+    /* Show Controls when class is active */
+    .builderLayout.controlsVisible .controlsColumn {
+        transform: translateY(0);
+    }
+
+    /* Actions Wrapper: Buttons stacked */
+    .actionsWrapper {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .printButtonDesktopOnly {
+        display: none !important;
+    }
+
+    .downloadMobileFullWidth {
+        grid-column: 1 / -1;
+    }
 }

@@ -8,10 +8,10 @@
 
 .content {
   flex-grow: 1;
-  overflow-y: auto; /* Agar content lamba ho toh woh scroll ho paayega */
-  height: 100vh; /* Content area bhi poori height lega */
+  overflow-y: auto; 
+  height: 100vh; 
   background-color: #f4f7fa;
-  /* Sidebar 'position: fixed' है, इसलिए content को 260px left margin चाहिए */
+  /* Desktop par sidebar fixed hai, isliye margin chahiye */
   margin-left: 260px !important; 
 }
 .loadingState {
@@ -23,7 +23,7 @@
   font-weight: 500;
 }
 
-/* === YEH NAYE MODAL STYLES HAIN (Bina Badlaav) === */
+/* === MODAL STYLES (Same) === */
 .upcomingModalOverlay {
   position: fixed;
   top: 0;
@@ -34,7 +34,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000; /* Sidebar se bhi upar */
+  z-index: 2000; 
   backdrop-filter: blur(5px);
 }
 
@@ -87,7 +87,7 @@
   line-height: 1.5;
 } 
 
-/* === MOBILE/TABLET CONTENT FIXES === */
+/* === MOBILE/TABLET CONTENT FIXES (Same) === */
 @media (max-width: 1024px) {
   .content {
     /* Mobile par sidebar chhipa hoga, isliye margin hata denge */

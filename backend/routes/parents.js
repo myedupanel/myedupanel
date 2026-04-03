@@ -7,6 +7,8 @@ const bcrypt = require('bcryptjs'); // Password hashing
 const generatePassword = require('generate-password'); // Temp password
 const sendEmail = require('../utils/sendEmail');
 const { authMiddleware, authorize } = require('../middleware/authMiddleware'); // Updated middleware
+// Academic year middleware import
+const { validateAcademicYear } = require('../middleware/academicYearMiddleware');
 
 // Helper: Get Full Name (Student ke liye)
 const getFullName = (student) => {
@@ -16,14 +18,23 @@ const getFullName = (student) => {
 // @route   GET /api/parents
 // @desc    Get all parents for the admin's school
 // @access  Private (Admin)
-router.get('/', [authMiddleware, authorize('Admin')], async (req, res) => { // Role Check Admin
+router.get('/', [authMiddleware, authorize('Admin'), validateAcademicYear], async (req, res) => { // Role Check Admin
   try {
     const schoolId = req.user.schoolId;
     if (!schoolId) {
         return res.status(400).json({ msg: 'School information missing.' });
     }
+    
+    // NAYA: Academic year ID ke basis par filter karein
+    const academicYearId = req.academicYearId;
+    
     const parents = await prisma.parent.findMany({
-        where: { schoolId: schoolId },
+        where: { 
+            schoolId: schoolId,
+            student: {
+                academicYearId: academicYearId // Filter parents based on their student's academic year
+            }
+        },
         include: { // Populate student name and class
             student: {
                 select: {
@@ -59,7 +70,7 @@ router.get('/', [authMiddleware, authorize('Admin')], async (req, res) => { // R
 // @route   POST /api/parents
 // @desc    Add new parent & create User account
 // @access  Private (Admin)
-router.post('/', [authMiddleware, authorize('Admin')], async (req, res) => { // Role Check Admin
+router.post('/', [authMiddleware, authorize('Admin'), validateAcademicYear], async (req, res) => { // Role Check Admin
   const { name, contactNumber, email, occupation, studentId } = req.body; // studentId abhi bhi Mongoose ID string ho sakta hai frontend se
   const schoolId = req.user.schoolId;
 
@@ -79,12 +90,16 @@ router.post('/', [authMiddleware, authorize('Admin')], async (req, res) => { // 
   try {
     // --- Prisma Transaction ---
     const result = await prisma.$transaction(async (tx) => {
-        // 1. Check student exists in this school
+        // 1. Check student exists in this school and academic year
         const studentExists = await tx.students.findUnique({
-            where: { studentid: studentIdInt, schoolId: schoolId }
+            where: { 
+                studentid: studentIdInt, 
+                schoolId: schoolId,
+                academicYearId: req.academicYearId // NAYA: Academic year check
+            }
         });
         if (!studentExists) {
-          throw new Error('Selected student not found in your school.');
+          throw new Error('Selected student not found in your school for the current academic year.');
         }
 
         // 2. Check if Parent with this email already exists *in this school*
@@ -220,10 +235,14 @@ router.put('/:id', [authMiddleware, authorize('Admin')], async (req, res) => { /
         const studentIdInt = parseInt(studentId);
          if (studentIdInt) {
             const studentExists = await prisma.students.findUnique({
-                 where: { studentid: studentIdInt, schoolId: schoolId }
+                 where: { 
+                     studentid: studentIdInt, 
+                     schoolId: schoolId,
+                     academicYearId: req.academicYearId // NAYA: Academic year check
+                 }
             });
             if (!studentExists) {
-                return res.status(404).json({ msg: 'New student selected not found in your school.' });
+                return res.status(404).json({ msg: 'New student selected not found in your school for the current academic year.' });
             }
             updateData.studentId = studentIdInt;
          }

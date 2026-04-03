@@ -57,8 +57,8 @@ const LatePaymentsTable = () => {
             setLoading(true);
             // Backend route: /fees/late-payments
             const res = await api.get(`/fees/late-payments?page=${currentPage}&limit=10&search=${debouncedSearchTerm}`);
-            setRecords(res.data.data);
-            setTotalPages(res.data.totalPages);
+            setRecords(res.data?.data || []);
+            setTotalPages(res.data?.totalPages || 0);
         } catch (err) {
             setError('Could not fetch late payment records.');
             console.error(err);

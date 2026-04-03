@@ -24,6 +24,7 @@ $failed-text: $error-text;
 $box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 $border-radius: 6px;
 $input-padding: 10px 12px;
+$white: #fff; // Added missing white variable for mobileHeaderBar
 
 // --- Overall Page Layout (Structure defined in page.tsx) ---
 .pageContainer {
@@ -35,6 +36,7 @@ $input-padding: 10px 12px;
     @media (max-width: 1100px) {
         grid-template-columns: 240px 1fr; // Narrower panel
     }
+    /* CRITICAL FIX 1: Single column on mobile */
     @media (max-width: 768px) {
         grid-template-columns: 1fr; // Single column on mobile
     }
@@ -50,13 +52,10 @@ $input-padding: 10px 12px;
     position: sticky; // Make it sticky
     top: 70px; // Adjust based on header height
 
+    /* CRITICAL FIX 2: Hide Left Panel on Mobile */
     @media (max-width: 768px) {
-       height: auto; // Reset height for single column layout
-       position: static; // Reset position
-       border-right: none;
-       border-bottom: 1px solid $border-color;
+       display: none !important; 
     }
-
 
     .panelHeader {
         display: flex;
@@ -111,10 +110,51 @@ $input-padding: 10px 12px;
     }
 }
 
+// --- Mobile Header Bar (New) ---
+.mobileHeaderBar {
+    display: none; /* Default: Hidden on Desktop */
+    justify-content: flex-start;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: $white;
+    border-bottom: 1px solid $border-color;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    
+    .menuButton, .searchToggleButton {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 24px;
+        padding: 5px;
+        color: $text-color;
+        flex-shrink: 0;
+    }
+    
+    .title {
+        font-size: 1.1em;
+        font-weight: 600;
+        color: $text-color;
+        margin: 0 10px;
+        flex-grow: 1;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        display: flex;
+    }
+}
+
+
 // --- Main Content Area ---
 .mainContent {
     padding: 15px; // Outer padding for spacing
     overflow-y: auto; // Allow main content to scroll independently
+
+    @media (max-width: 768px) {
+        padding: 0; /* Full width content on mobile */
+    }
 
     .panelHeader {
         display: flex;
@@ -136,6 +176,11 @@ $input-padding: 10px 12px;
             &:disabled { color: lighten($text-light, 20%); cursor: default; }
             svg.spin { animation: spin 1s linear infinite; }
         }
+        
+        @media (max-width: 768px) {
+            padding: 15px; /* Reduced padding */
+            border-radius: 0;
+        }
     }
 
     .panelContent {
@@ -144,6 +189,12 @@ $input-padding: 10px 12px;
         border-radius: $border-radius;
         box-shadow: $box-shadow;
         min-height: 400px; // Ensure minimum height
+        
+        @media (max-width: 768px) {
+            padding: 15px;
+            border-radius: 0;
+            box-shadow: none;
+        }
     }
 }
 
@@ -294,8 +345,6 @@ $input-padding: 10px 12px;
 }
 
 // --- History Tab Specific Styles ---
-// .historyContainer {} // <-- REMOVED EMPTY RULESET
-
 .filterBar {
     display: flex;
     flex-wrap: wrap; // Allow wrapping
@@ -488,6 +537,50 @@ $input-padding: 10px 12px;
     font-size: 0.85em;
     color: $text-light;
     margin-top: 8px;
+}
+
+// --- Fix Modal Styles (New) ---
+.modalSearchContent {
+    /* Student Search Box ko Modal ke andar theek se dikhane ke liye */
+    padding: 1rem;
+    .studentSearch {
+        padding: 0.5rem;
+    }
+}
+
+.mobileMenuNav {
+    /* CRITICAL FIX 3: Modal items ko vertically stack karna */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 10px;
+
+    .modalActionLink {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 15px;
+        text-align: left;
+        background-color: $background-light;
+        color: $text-color;
+        font-weight: 500;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: all 0.2s;
+        
+        &:hover {
+            background-color: lighten($primary-color, 45%);
+            color: $primary-color;
+        }
+        &.active {
+            background-color: $primary-color;
+            color: $white;
+        }
+        .exportButton {
+            background-color: #34495e;
+            color: $white;
+        }
+    }
 }
 
 

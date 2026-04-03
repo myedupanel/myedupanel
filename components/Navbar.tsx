@@ -16,6 +16,13 @@ function Navbar({ showLogin, showSignup, showFeatures, activeSection }: NavbarPr
   const menuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
 
+  // Removed dark mode functionality - always use light mode
+  useEffect(() => {
+    // Ensure light mode is set
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.body.classList.remove('dark-mode');
+  }, []);
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -57,6 +64,7 @@ function Navbar({ showLogin, showSignup, showFeatures, activeSection }: NavbarPr
             <li><Link href="#impact-section" className={activeSection === 'impact' ? 'active-link' : ''}>Impact</Link></li>
           </ul>
           <div className="buttons">
+            {/* Removed theme toggle button */}
             <Link href="/login" className="login-btn">Login</Link>
             {/* CHANGE HERE: 'Book Demo' button ab seedhe /signup page par le jayega */}
             <Link href="/signup" className="demo-btn">Book Demo</Link>
@@ -75,6 +83,7 @@ function Navbar({ showLogin, showSignup, showFeatures, activeSection }: NavbarPr
           <Link href="#pricing-section" className={activeSection === 'pricing' ? 'active-link' : ''} onClick={toggleMobileMenu}>Pricing</Link>
           <Link href="#impact-section" className={activeSection === 'impact' ? 'active-link' : ''} onClick={toggleMobileMenu}>Impact</Link>
           <hr />
+          {/* Removed theme toggle in mobile menu */}
           <Link href="/login" className="login-btn" onClick={toggleMobileMenu}>Login</Link>
           {/* CHANGE HERE: Mobile menu mein bhi 'Book Demo' button ab seedhe /signup page par le jayega */}
           <Link href="/signup" className="demo-btn" onClick={toggleMobileMenu}>Book Demo</Link>

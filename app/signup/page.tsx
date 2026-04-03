@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 // --- BADLAAV 1: 'useSearchParams' ko import karein ---
 import { useRouter, useSearchParams } from 'next/navigation'; 
-import axios from 'axios';
+// FIX: Use our configured API instance instead of default axios
+import api from '../../backend/utils/api';
 import { FiHome, FiUser, FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff } from 'react-icons/fi';
 import styles from './signup.module.scss';
 import { Inter, Montserrat } from 'next/font/google';
@@ -31,6 +32,7 @@ export default function SignupPage() {
     adminName: '',
     email: '',
     password: '',
+    mobileNumber: '', // Add mobile number field
   });
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -71,7 +73,8 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('/api/auth/signup', formData);
+      // FIX: Use our configured api instance instead of default axios
+      const response = await api.post('/auth/signup', formData);
       setMessage(response.data.message || "OTP sent successfully!");
 
       if (response.data.success) {
@@ -106,6 +109,7 @@ export default function SignupPage() {
             <form onSubmit={handleSignup}>
               <div className={styles.inputGroup}><label htmlFor="schoolName">School Name</label><div className={styles.inputWrapper}><FiHome /><input type="text" id="schoolName" name="schoolName" value={formData.schoolName} onChange={handleChange} required placeholder="Your School's Name" /></div></div>
               <div className={styles.inputGroup}><label htmlFor="adminName">Admin Name</label><div className={styles.inputWrapper}><FiUser /><input type="text" id="adminName" name="adminName" value={formData.adminName} onChange={handleChange} required placeholder="Enter Your Name" /></div></div>
+              <div className={styles.inputGroup}><label htmlFor="mobileNumber">Mobile Number</label><div className={styles.inputWrapper}><FiUser /><input type="tel" id="mobileNumber" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange} required placeholder="Enter Your Mobile Number" /></div></div>
               <div className={styles.inputGroup}><label htmlFor="email">Email</label><div className={styles.inputWrapper}><FiMail /><input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Eg. shauryaghadage@gmail.com" /></div></div>
               <div className={styles.inputGroup}><label htmlFor="password">Password</label><div className={styles.inputWrapper}><FiLock /><input type={showPassword ? 'text' : 'password'} id="password" name="password" value={formData.password} onChange={handleChange} required placeholder="Create a strong password" /><span onClick={() => setShowPassword(!showPassword)} className={styles.eyeIcon}>{showPassword ? <FiEyeOff /> : <FiEye />}</span></div></div>
               

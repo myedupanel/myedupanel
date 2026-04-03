@@ -1,125 +1,298 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import { FiArrowRight, FiEye, FiEyeOff, FiHome } from 'react-icons/fi';
+// FIX: Use our configured API instance instead of default axios
+import api from '../../backend/utils/api';
+import { FiEye, FiEyeOff, FiArrowRight, FiHome, FiUser, FiShield } from 'react-icons/fi';
 import styles from './login.module.scss';
-import { Inter } from 'next/font/google';
-// Import 'useAuth' hook (Aapka code pehle se sahi hai)
+import { Inter, Montserrat } from 'next/font/google';
+
+// =========================================================
+// FIX 1: Global Auth Context Import करें
+// =========================================================
 import { useAuth } from '@/app/context/AuthContext'; 
 
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700']
-});
+const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] });
+const montserrat = Montserrat({ subsets: ['latin'], weight: ['700'] });
 
-const slideshowImages = [
-  "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=2070",
-  "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=2070",
-  "https://images.unsplash.com/photo-1560440021-33f9b867899d?auto=format&fit=crop&q=80&w=1974",
-  "https://images.unsplash.com/photo-1590324153173-1959b867d268?auto=format&fit=crop&q=80&w=2070"
+const slideshowData = [
+  {
+    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1170",
+    title: "Student Success",
+    subtitle: "Comprehensive tracking for academic excellence",
+    cta: "See Results"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&q=80&w=1170",
+    title: "Smart Administration",
+    subtitle: "Efficient management tools for educational institutions",
+    cta: "Explore Solutions"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&q=80&w=1170",
+    title: "Future Ready",
+    subtitle: "Preparing students for tomorrow's challenges",
+    cta: "Get Started"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1170",
+    title: "Trusted by Educators",
+    subtitle: "Join thousands of schools transforming education",
+    cta: "View Testimonials"
+  }
 ];
 
 export default function LoginPage() {
   const router = useRouter();
-  // 'login' function (Aapka code pehle se sahi hai)
+  // FIX 2: useAuth hook से 'login' function को निकालें
   const { login } = useAuth(); 
-
+  
   const [showPassword, setShowPassword] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [loginStep, setLoginStep] = useState<'idle' | 'authenticating' | 'fetching' | 'redirecting'>('idle');
+  const [successMessage, setSuccessMessage] = useState('');
+  const slideIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const carouselTrackRef = useRef<HTMLDivElement>(null);
+
+  // Slideshow effect (No Change)
+  useEffect(() => {
+    startSlideShow();
+    
+    return () => {
+      if (slideIntervalRef.current) {
+        clearInterval(slideIntervalRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % slideshowImages.length);
-    }, 5000);
-    return () => clearTimeout(timer);
+    if (carouselTrackRef.current) {
+      carouselTrackRef.current.style.transform = `translateX(-${currentImageIndex * 100}%)`;
+    }
   }, [currentImageIndex]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const startSlideShow = () => {
+    if (slideIntervalRef.current) {
+      clearInterval(slideIntervalRef.current);
+    }
+    
+    slideIntervalRef.current = setInterval(() => {
+      setCurrentImageIndex(prevIndex => (prevIndex + 1) % slideshowData.length);
+    }, 5000);
   };
 
-  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError('');
+  const goToSlide = (index: number) => {
+    setCurrentImageIndex(index);
+    if (slideIntervalRef.current) {
+      clearInterval(slideIntervalRef.current);
+    }
+    startSlideShow();
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    
+    if (error) setError('');
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (!formData.email || !formData.password) {
+      setError('Please enter both email and password');
+      return;
+    }
+    
+    // Prevent multiple simultaneous login attempts
+    if (isLoading) {
+      return;
+    }
+    
     setIsLoading(true);
-
+    setError('');
+    setLoginStep('authenticating');
+    
     try {
-      // Axios call ab aapke global 'api.ts' instance ko use nahi karega, 
-      // isliye '/api' prefix zaroori hai
-      const response = await axios.post('/api/auth/login', formData);
-      const token = response.data.token;
+      // 1. First, login to get the token
+      // FIX: Use our configured api instance instead of default axios
+      const response = await api.post('/auth/login', formData);
       
-      const user = await login(token);
-
-      if (user) {
+      if (response.data.token) {
+        const token = response.data.token;
         
-        // 'signupIntent' logic (Yeh bilkul sahi hai)
-        const signupIntent = localStorage.getItem('signupIntent');
-        if (signupIntent === 'starter') {
-          localStorage.removeItem('signupIntent');
-          router.push('/upgrade');
-          return; 
+        setLoginStep('fetching');
+        setSuccessMessage('Authentication successful!');
+        
+        // Small delay to show the animation
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // 2. FIX 3: Context के 'login' function को कॉल करें।
+        // यह function अब token save करेगा, header सेट करेगा, और user data fetch करके 
+        // global state (setUser) को अपडेट करेगा।
+        const user = await login(token);
+        
+        if (!user) {
+             // Handle case where login succeeded but user fetch failed inside context
+             throw new Error('Could not retrieve user data after successful login.');
         }
+
+        const { role } = user; // Use user data returned by context's login function
         
-        // ===== YAHI HAI SUPERADMIN LOGIN FIX =====
-        // Role ke hisaab se redirect karein
-        switch (user.role) {
-          case 'Admin':
-          case 'SuperAdmin': // <-- YEH NAYI LINE ADD KI HAI
-            router.push('/admin/dashboard');
-            break;
-          case 'Teacher':
-            router.push('/teacher/dashboard');
-            break;
-          case 'Student':
-            router.push('/student/dashboard');
-            break;
-          case 'Parent':
-            router.push('/parent/dashboard');
-            break;
-          default:
-            router.push('/');
+        setLoginStep('redirecting');
+        setSuccessMessage('Redirecting to your dashboard...');
+        
+        // Small delay before redirect
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // 3. Redirect based on user role (using data returned from context)
+        // Add a small delay to ensure state is properly set
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        if (role === 'admin' || role === 'Admin') {
+          router.push('/admin/dashboard');
+        } else if (role === 'teacher' || role === 'Teacher') {
+          router.push('/teacher');
+        } else if (role === 'student' || role === 'Student') {
+          router.push('/student');
+        } else if (role === 'parent' || role === 'Parent') {
+          router.push('/parent');
+        } else {
+          // Default to admin dashboard for any other role
+          router.push('/admin/dashboard');
         }
       } else {
-        setError("Could not verify user role after login.");
+        setError(response.data.message || 'Login failed');
+        setLoginStep('idle');
       }
     } catch (err: any) {
-      if (err.response && err.response.data.msg) {
-        setError(err.response.data.msg);
+      setLoginStep('idle');
+      console.error('Login error:', err);
+      // Handle the error which might be a network error or a specific API error
+      if (err.response && err.response.data) {
+        setError(err.response.data.message || 'Invalid email or password');
+      } else if (err.code === 'ECONNABORTED') {
+        setError('Request timeout. Please check your internet connection and try again.');
+      } else if (err.message) {
+        setError(err.message);
       } else {
-        setError("Login failed. Please check your connection and try again.");
+        setError('An error occurred. Please try again.');
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Baaki saara JSX code bilkul waisa hi rahega
+  // Show login process animation (No Change)
+  if (loginStep !== 'idle') {
+    return (
+      <div className={`${styles.pageWrapper} ${inter.className}`}>
+        {/* --- Left Side: Login Process Animation --- */}
+        <div className={styles.formContainer}>
+          <div className={styles.formCard}>
+            <div className={styles.processContainer}>
+              <div className={styles.processAnimation}>
+                <div className={`${styles.processIcon} ${loginStep === 'authenticating' ? styles.active : ''}`}>
+                  <FiShield />
+                </div>
+                <div className={`${styles.processIcon} ${loginStep === 'fetching' ? styles.active : ''}`}>
+                  <FiUser />
+                </div>
+                <div className={`${styles.processIcon} ${loginStep === 'redirecting' ? styles.active : ''}`}>
+                  <FiArrowRight />
+                </div>
+                
+                <div className={styles.progressBar}>
+                  <div className={`${styles.progressFill} ${styles[loginStep]}`}></div>
+                </div>
+                
+                <p className={styles.processMessage}>{successMessage || 'Processing...'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* --- Right Side: Slideshow (kept for consistency) --- */}
+        <div className={`${styles.slideshowContainer} ${montserrat.className}`}>
+          <div className={styles.overlay}></div>
+          
+          <div className={styles.carouselTrack} ref={carouselTrackRef}>
+            {slideshowData.map((slide, index) => (
+              <div
+                key={index}
+                className={`${styles.carouselSlide} ${index === currentImageIndex ? styles.active : ''}`}
+                style={{ backgroundImage: `url(${slide.image})` }}
+              >
+                <div className={styles.carouselSlideContent}>
+                  <div className={styles.premiumBadge}>Premium Experience</div>
+                  <h2 className={styles.carouselTitle}>{slide.title}</h2>
+                  <p className={styles.carouselSubtitle}>{slide.subtitle}</p>
+                  <a href="#" className={styles.carouselCtaButton}>{slide.cta}</a>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className={styles.slideshowContent}>
+            <div className={styles.tagline}>
+              Your Complete School Management System
+            </div>
+            
+            <div className={styles.navDots}>
+              {slideshowData.map((_, index) => (
+                <div
+                  key={index}
+                  className={`${styles.dot} ${index === currentImageIndex ? styles.active : ''}`}
+                  onClick={() => goToSlide(index)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`${styles.pageWrapper} ${inter.className}`}>
+      {/* --- Left Side: Login Form --- */}
       <div className={styles.formContainer}>
         <div className={styles.formCard}>
           <header className={styles.header}>
-            <p className={styles.welcomeText}>Welcome Back To</p>
+            <h3 className={styles.welcomeText}>Welcome To</h3>
             <h1>
-              <span className={styles.schoolText}>My</span>
-              <span className={styles.proText}>EduPanel</span>
+              <span className={styles.schoolText}>School</span>
+              <span className={styles.proText}>Pro</span>
             </h1>
           </header>
 
           <main className={styles.formContent}>
-            <h2>Login to your Account</h2>
-            <form onSubmit={handleLogin}>
+            <h2>Sign in to your account</h2>
+            
+            <form onSubmit={handleSubmit}>
               <div className={styles.inputGroup}>
-                <label htmlFor="email">Email Address</label>
-                <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Ex. shauryaghadage@gmail.com" />
+                <label htmlFor="email">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  placeholder="Eg. shauryaghadage@gmail.com"
+                />
               </div>
+
               <div className={styles.inputGroup}>
                 <label htmlFor="password">Password</label>
                 <div className={styles.passwordWrapper}>
@@ -150,11 +323,11 @@ export default function LoginPage() {
               </button>
             </form>
           </main>
-          
+
           <div className={styles.actionLinkContainer}>
-            <Link href="/signup" className={styles.actionLink} replace>
-              <span>Don't have an account?</span>
-              <strong>Create now</strong>
+            <Link href="/signup" className={styles.actionLink}>
+              <span>Create a new account</span>
+              <strong>Sign Up</strong>
             </Link>
           </div>
 
@@ -167,17 +340,41 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className={styles.slideshowContainer}>
+      {/* --- Right Side: Infinite Carousel Slideshow --- */}
+      <div className={`${styles.slideshowContainer} ${montserrat.className}`}>
         <div className={styles.overlay}></div>
-        {slideshowImages.map((src, index) => (
-          <div 
-            key={src}
-            className={`${styles.slide} ${index === currentImageIndex ? styles.active : ''}`}
-            style={{ backgroundImage: `url(${src})` }}
-          />
-        ))}
+        
+        <div className={styles.carouselTrack} ref={carouselTrackRef}>
+          {slideshowData.map((slide, index) => (
+            <div
+              key={index}
+              className={`${styles.carouselSlide}`}
+              style={{ backgroundImage: `url(${slide.image})` }}
+            >
+              <div className={styles.carouselSlideContent}>
+                <div className={styles.premiumBadge}>Premium Experience</div>
+                <h2 className={styles.carouselTitle}>{slide.title}</h2>
+                <p className={styles.carouselSubtitle}>{slide.subtitle}</p>
+                <a href="#" className={styles.carouselCtaButton}>{slide.cta}</a>
+              </div>
+            </div>
+          ))}
+        </div>
+        
         <div className={styles.slideshowContent}>
-          <p className={styles.tagline}>Transform Education, One Click at a Time</p>
+          <div className={styles.tagline}>
+            Your Complete School Management System
+          </div>
+          
+          <div className={styles.navDots}>
+            {slideshowData.map((_, index) => (
+              <div
+                key={index}
+                className={`${styles.dot} ${index === currentImageIndex ? styles.active : ''}`}
+                onClick={() => goToSlide(index)}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

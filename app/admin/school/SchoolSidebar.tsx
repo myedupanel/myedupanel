@@ -1,20 +1,19 @@
-// File: app/admin/school/SchoolSidebar.tsx (FINAL WITH PROFESSIONAL LOCKING & STYLES)
-
 "use client";
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+// CRITICAL FIX: Hook को लेआउट से हटाकर context फ़ाइल से import करें
+import { useSchoolLayout } from '@/app/context/SchoolLayoutContext'; 
 import styles from '@/components/layout/Sidebar/Sidebar.module.scss'; 
-import { useAuth } from '@/app/context/AuthContext'; 
-// === NEW IMPORT: Context ===
-import { useUpcomingFeature } from '@/app/context/UpcomingFeatureContext'; 
+import { useAuth } from '@/app/context/AuthContext';
+import { useUpcomingFeature } from '@/app/context/UpcomingFeatureContext';
 
 import { 
   MdPeople, MdSchool, MdFamilyRestroom, MdBadge, MdClass, MdSettings, MdAttachMoney, 
   MdEventAvailable, MdSchedule, MdAssessment, MdArrowBack, MdBolt, MdPublic
 } from 'react-icons/md'; 
 
-// --- NavItem Interface (Unchanged) ---
+// --- NavItem Interface (Same) ---
 export interface NavItem {
   name: string;
   path: string;
@@ -22,10 +21,10 @@ export interface NavItem {
   type: 'free' | 'starter' | 'locked'; 
 }
 
-// --- Professional Premium Color Palette (Unchanged) ---
+// --- RESTORED: Professional Premium Color Palette (Same) ---
 const Colors = {
-    // Core (Blue/Purple)
     ControlCenter: '#6366F1', 
+<<<<<<< HEAD
     Students: '#0EA5E9',      
     Teachers: '#10B981',      
     Parents: '#F59E0B',        
@@ -34,6 +33,14 @@ const Colors = {
     Classes: '#8B5CF6',       
     Settings: '#64748B',      
     // Revenue/Premium (Gold/Vibrant)
+=======
+    Students: '#0EA5E9',     
+    Teachers: '#10B981',     
+    Parents: '#F59E0B',      
+    Staff: '#EC4899',       
+    Classes: '#8B5CF6',     
+    Settings: '#64748B',    
+>>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
     FeeCounter: '#F59E0B',    
     Attendance: '#EF4444',    
     Timetable: '#F97316',     
@@ -41,7 +48,7 @@ const Colors = {
 };
 // ---
 
-// --- School Control Center Menu Items (Unchanged) ---
+// --- FIX 2: School Control Center Menu Items (Array Restored) ---
 const schoolMenuItems: NavItem[] = [
     // Control Center - Main
     { name: 'Control Center', path: '/admin/school', icon: <MdSchool style={{ color: Colors.ControlCenter }} />, type: 'free' },
@@ -66,28 +73,20 @@ const schoolMenuItems: NavItem[] = [
 
 const SchoolSidebar = () => {
     const pathname = usePathname();
-    const { user } = useAuth(); 
-    // === CONTEXT CONSUMPTION ===
-    const { triggerModal } = useUpcomingFeature(); 
+    const { user } = useAuth();
+    const { triggerModal } = useUpcomingFeature();
+    // Hook call is now safe because the correct file is imported
+    const { isSidebarOpen, toggleSidebar } = useSchoolLayout(); 
 
-    // --- LOGIC 1: SuperAdmin Bypass ---
     const isSuperAdmin = user?.role === 'SuperAdmin';
-    
-    // --- LOGIC 2: Upcoming Feature Modal Handler (FIXED) ---
-    // alert() को Context के triggerModal() से replace किया गया
     const showUpcomingFeatureAlert = (e: React.MouseEvent) => {
-        e.preventDefault(); 
-        triggerModal(); // Now opens the professional modal defined in page.tsx
+        e.preventDefault();
+        triggerModal();
     };
 
     const getTag = (itemType: NavItem['type']) => {
-        // SuperAdmin के लिए कोई tag नहीं
-        if (isSuperAdmin) return null; 
-
-        // Fee Counter (Starter) पर कोई tag नहीं
-        if (itemType === 'starter') return null; 
-        
-        // Locked features पर SOON tag
+        if (isSuperAdmin) return null;
+        if (itemType === 'starter') return null;
         if (itemType === 'locked') {
             return (
                 <span className={styles.upcomingTag}>
@@ -101,10 +100,19 @@ const SchoolSidebar = () => {
     const getItemProps = (item: NavItem) => {
         const props: { href: string, onClick?: (e: React.MouseEvent) => void } = { href: item.path };
         
-        // Feature locked है और user SuperAdmin नहीं है
+        const clickHandler = (e: React.MouseEvent) => {
+             // Mobile par hi toggle karein (1024px)
+            if (window.innerWidth <= 1024) toggleSidebar(); 
+            if (item.type === 'locked' && !isSuperAdmin) {
+                showUpcomingFeatureAlert(e);
+            }
+        };
+
         if (item.type === 'locked' && !isSuperAdmin) {
-            props.href = pathname; // Current path पर ही रखो
-            props.onClick = showUpcomingFeatureAlert; // Context handler call करो
+            props.href = pathname;
+            props.onClick = clickHandler;
+        } else {
+            props.onClick = clickHandler;
         }
 
         return props;
@@ -112,10 +120,10 @@ const SchoolSidebar = () => {
 
 
     return (
-        <aside className={styles.sidebarContainer}>
+        <aside className={`${styles.sidebarContainer} ${isSidebarOpen ? styles.mobileOpen : ''}`}>
             
             <div className={styles.logoSection}>
-                <Link href="/admin/school">
+                <Link href="/admin/school" onClick={e => { if (window.innerWidth <= 1024) toggleSidebar(); }}>
                     <h2>School Center</h2>
                 </Link>
             </div>
@@ -146,7 +154,6 @@ const SchoolSidebar = () => {
                 </ul>
             </nav>
             
-            {/* FOOTER: Back Button */}
             <footer className={`${styles.sidebarFooter} ${styles.noBorder}`} style={{ borderTop: 'none' }}>
                 <Link href="/admin/dashboard" className={`${styles.footerButton} ${styles.backButton}`}>
                     <MdArrowBack />

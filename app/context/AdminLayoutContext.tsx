@@ -1,19 +1,24 @@
 "use client";
 
 import { createContext, useContext, ReactNode, useState } from 'react';
-import { FiZap } from 'react-icons/fi'; // Icon ko yahaan import karein
-import styles from '@/app/admin/dashboard/layout.module.scss'; // Style file ko reuse karein
+import { FiZap } from 'react-icons/fi';
+import styles from '@/app/admin/dashboard/layout.module.scss';
 
 // 1. Context banayein
 interface AdminLayoutContextType {
   showUpcomingFeatureModal: () => void;
+<<<<<<< HEAD
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
+=======
+  isSidebarOpen: boolean; // Sidebar ka current state
+  toggleSidebar: () => void; // Toggle function
+>>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
 }
 
 const AdminLayoutContext = createContext<AdminLayoutContextType | undefined>(undefined);
 
-// 2. Custom hook banayein (jise Sidebar use karega)
+// 2. Custom hook banayein
 export const useAdminLayout = () => {
   const context = useContext(AdminLayoutContext);
   if (!context) {
@@ -22,11 +27,32 @@ export const useAdminLayout = () => {
   return context;
 };
 
-// 3. Provider component banayein (jise layout.tsx use karega)
+// 3. Provider component banayein
 export const AdminLayoutProvider = ({ children }: { children: ReactNode }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
+<<<<<<< HEAD
+=======
+  // Mobile par sidebar ko hamesha close rakhe jab resize ho
+  const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
+  
+  // Naya: Desktop par sidebar hamesha open rahe
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     if (window.innerWidth > 1024) {
+  //       setIsSidebarOpen(true);
+  //     } else {
+  //       setIsSidebarOpen(false);
+  //     }
+  //   };
+  //   handleResize(); // Initial call
+  //   window.addEventListener('resize', handleResize);
+  //   return () => window.removeEventListener('resize', handleResize);
+  // }, []);
+
+
+>>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
   const showUpcomingFeatureModal = () => setIsModalOpen(true);
   const hideModal = () => setIsModalOpen(false);
   const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
@@ -35,7 +61,7 @@ export const AdminLayoutProvider = ({ children }: { children: ReactNode }) => {
     <AdminLayoutContext.Provider value={{ showUpcomingFeatureModal, isSidebarOpen, toggleSidebar }}>
       {children}
 
-      {/* === YEH HAI AAPKA "UPCOMING FEATURE" MODAL === */}
+      {/* === UPCOMING FEATURE MODAL === */}
       {isModalOpen && (
         <div className={styles.upcomingModalOverlay} onClick={hideModal}>
           <div className={styles.upcomingModalBox} onClick={(e) => e.stopPropagation()}>
@@ -48,7 +74,6 @@ export const AdminLayoutProvider = ({ children }: { children: ReactNode }) => {
           </div>
         </div>
       )}
-      {/* === MODAL ENDS HERE === */}
     </AdminLayoutContext.Provider>
   );
 };

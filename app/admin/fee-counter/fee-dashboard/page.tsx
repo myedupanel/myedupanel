@@ -1,13 +1,16 @@
+// File: app/admin/fee-counter/fee-dashboard/page.tsx
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
-import { io } from 'socket.io-client'; 
+import { io } from "socket.io-client";
+import { useAcademicYear } from '@/app/context/AcademicYearContext';
 import api from '@/backend/utils/api';
 import styles from './FeeDashboard.module.scss';
 import StatCard from '@/components/admin/StatCard/StatCard';
 import FeeTabs from '@/components/admin/FeeTabs/FeeTabs';
 import { MdSchedule, MdCreditCard, MdAccountBalanceWallet, MdSchool, MdChevronRight, MdRssFeed } from 'react-icons/md'; 
-
-// FIX: useSession Import हटा दिया गया
+import Modal from '@/components/common/Modal/Modal';
+import { FiMenu } from 'react-icons/fi'; 
+import Link from 'next/link';
 
 // --- TYPE DEFINITIONS (No Change) ---
 interface DashboardData {
@@ -30,12 +33,10 @@ interface TemplateDetails {
     collectedAmount: number;
 }
 
-// --- NAYI TYPE ---
 interface FeedItem {
   name: string;
   amount: number;
 }
-// ---
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -45,8 +46,21 @@ const formatCurrency = (amount: number) => {
     }).format(amount);
 };
 
+// --- NAYE MENU ITEMS (FeesSidebar.tsx से कॉपी किया गया ताकि मोडल में उपयोग हो सके) ---
+const feeMenuItems = [
+  { title: 'Fee Dashboard', path: '/admin/fee-counter/fee-dashboard' },
+  { title: 'Assign Fee', path: '/admin/fee-counter/assign' },
+  { title: 'Fee Templates', path: '/admin/fee-counter/templates' },
+  { title: 'Fee Records', path: '/admin/fee-counter/fee-records' },
+  { title: 'Import/Export', path: '/admin/fee-counter/fee-import-export' },
+  { title: 'Fee Collection', path: '/admin/fee-counter/collection' },
+];
+// --- END MENU ITEMS ---
+
+
 const FeeDashboardPage = () => {
-    
+    const { currentYearId } = useAcademicYear();
+
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [templates, setTemplates] = useState<Template[]>([]);
     const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -57,17 +71,19 @@ const FeeDashboardPage = () => {
     
     const [feed, setFeed] = useState<FeedItem[]>([]);
     
+    // NAYA STATE
+    const [isMenuModalOpen, setIsMenuModalOpen] = useState(false); 
+
     // 1. Dashboard Stat Cards ke liye data fetch karna
     const fetchDashboardOverview = useCallback(async () => {
         try {
             const dashboardRes = await api.get<DashboardData>('/fees/dashboard-overview');
             setDashboardData(dashboardRes.data);
-            // Original logic: setError यहाँ नहीं सेट करना
         } catch (err) {
             console.error("Failed to fetch dashboard overview:", err);
-            setError('Failed to load dashboard data. Please try again.'); // Error को catch करें
+            setError('Failed to load dashboard data. Please try again.'); 
         }
-    }, []); 
+    }, [currentYearId]); 
 
     // 2. Fee Templates ki list fetch karna
     const fetchTemplates = useCallback(async () => {
@@ -83,9 +99,8 @@ const FeeDashboardPage = () => {
             }
         } catch (err) {
             console.error("Failed to fetch templates:", err);
-            // Original logic: setError यहाँ नहीं सेट करना
         }
-    }, [selectedTemplate]); 
+    }, [selectedTemplate, currentYearId]); 
 
     // 3. Selected Template ki details fetch karna
     const fetchTemplateDetails = useCallback(async (templateId: string) => {
@@ -99,14 +114,13 @@ const FeeDashboardPage = () => {
         } finally {
             setDetailsLoading(false);
         }
-    }, []); 
+    }, [currentYearId]); 
 
 
-    // --- PEHLA useEffect (Original Loading Logic) ---
+    // --- useEffects (No Change in logic) ---
     useEffect(() => {
         const fetchInitialData = async () => {
             setLoading(true);
-            // Promise.all से दोनों fetch का इंतज़ार करें
             await Promise.all([
                 fetchDashboardOverview(),
                 fetchTemplates()
@@ -114,16 +128,14 @@ const FeeDashboardPage = () => {
             setLoading(false);
         };
         fetchInitialData();
-    }, [fetchDashboardOverview, fetchTemplates]); // Dependencies Original ही रहेंगी
+    }, [fetchDashboardOverview, fetchTemplates, currentYearId]); 
 
-    // --- DOOSRA useEffect (Jab bhi selectedTemplate badlega, run hoga) ---
     useEffect(() => {
         if (selectedTemplate && selectedTemplate.id) { 
             fetchTemplateDetails(selectedTemplate.id);
         }
     }, [selectedTemplate, fetchTemplateDetails]); 
 
-    // --- YEH HAI REAL-TIME useEffect (No Change) ---
     useEffect(() => {
         const BACKEND_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "https://myedupanel.onrender.com";
         const socket = io(BACKEND_URL);
@@ -156,11 +168,8 @@ const FeeDashboardPage = () => {
     }, [fetchDashboardOverview, fetchTemplates, fetchTemplateDetails, selectedTemplate]);
 
 
-    // --- AAPKA BAAKI KA CODE ---
-
     if (loading) return <div className={styles.loadingState}>Loading Fee Dashboard...</div>;
     
-    // Original error check: अगर error string सेट है, या dashboardData null है
     if (error || !dashboardData) return <div className={styles.errorState}>{error || "Failed to load dashboard data. Please check logs."}</div>;
 
     const getStudentProgress = () => {
@@ -175,8 +184,19 @@ const FeeDashboardPage = () => {
 
     return (
         <div className={styles.dashboardContainer}>
-            <h1 className={styles.pageTitle}>Dashboard Overview</h1>
             
+            {/* --- NAYA: Mobile Header Bar --- */}
+            <header className={styles.mobileHeaderBar}>
+                <button 
+                    className={styles.menuButton} 
+                    onClick={() => setIsMenuModalOpen(true)}
+                    aria-label="Open Fees Menu"
+                >
+                    <FiMenu />
+                </button>
+                <h1 className={styles.pageTitle}>Dashboard Overview</h1>
+            </header>
+
             {dashboardData && (
                 <div className={styles.statsGrid}>
                     <StatCard
@@ -207,14 +227,15 @@ const FeeDashboardPage = () => {
             )}
 
             <div className={styles.mainContentGrid}>
+                {/* ... (Existing Content Grid) ... */}
                 <div className={styles.feeStructureCard}>
                     <div className={styles.cardHeader}>
                         <h3>Fee Structure</h3>
-                        <span className={styles.templateCount}>{templates.length} Templates</span>
+                        <span className={styles.templateCount}>{(templates || []).length} Templates</span>
                     </div>
                     <ul className={styles.templateList}>
-                        {templates.length > 0 ? (
-                            templates.map(template => (
+                        {(templates || []).length > 0 ? (
+                            (templates || []).map(template => (
                                 <li 
                                     key={template.id} 
                                     className={`${styles.templateItem} ${selectedTemplate?.id === template.id ? styles.active : ''}`}
@@ -265,7 +286,6 @@ const FeeDashboardPage = () => {
                     )}
                 </div>
 
-                {/* --- YEH NAYA CARD HAI --- */}
                 <div className={styles.recentActivityCard}>
                      <div className={styles.cardHeader}>
                         <h3><MdRssFeed style={{ marginRight: '8px', verticalAlign: 'bottom' }} /> Live Feed</h3>
@@ -276,7 +296,7 @@ const FeeDashboardPage = () => {
                         </div>
                     ) : (
                         <ul className={styles.feedList}>
-                            {feed.map((item, index) => (
+                            {(feed || []).map((item, index) => (
                                 <li key={index} className={styles.feedItem}>
                                     <span className={styles.feedName}>{item.name}</span>
                                     <span className={styles.feedAmount}>
@@ -287,11 +307,40 @@ const FeeDashboardPage = () => {
                         </ul>
                     )}
                 </div>
-                {/* --- NAYA CARD END --- */}
-
             </div>
             
-            <FeeTabs />
+            {/* --- TABS OVERFLOW FIX --- */}
+            <div className={styles.tableScrollWrapper}>
+                <FeeTabs /> 
+            </div>
+            {/* --- END TABS OVERFLOW FIX --- */}
+
+            {/* --- NAYA: Mobile Menu Modal --- */}
+            <Modal isOpen={isMenuModalOpen} onClose={() => setIsMenuModalOpen(false)} title="Fees Counter Menu">
+                <nav className={styles.mobileMenuNav}>
+                    <ul>
+                        {feeMenuItems.map((item) => (
+                            <li key={item.path} className={styles.mobileMenuItem}>
+                                <Link 
+                                    href={item.path} 
+                                    onClick={() => setIsMenuModalOpen(false)}
+                                >
+                                    {item.title}
+                                </Link>
+                            </li>
+                        ))}
+                         <li className={styles.mobileMenuItem}>
+                             <Link 
+                                href="/admin/school" 
+                                className={styles.goDashboardLink}
+                                onClick={() => setIsMenuModalOpen(false)}
+                             >
+                                Go to School Dashboard
+                            </Link>
+                        </li>
+                    </ul>
+                </nav>
+            </Modal>
 
         </div>
     );

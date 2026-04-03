@@ -1,19 +1,28 @@
+/* app/admin/fee-counter/FeesLayout.module.scss */
+
+/* --- Main Layout Styles (Desktop) --- */
 .feesLayoutContainer {
   display: flex;
   width: 100%;
-  height: 100%;
-  position: relative; // Yeh zaroori hai
+  height: 100vh;
+  position: relative; 
 }
 
 .feesContent {
   flex-grow: 1;
   overflow-y: auto;
-  
-  // --- YEH SABSE ZAROORI BADLAV HAI ---
-  // Sidebar ki width ke barabar left se margin de dein
-  // Agar aapka sidebar chhota ya bada hai to is value ko adjust karein
+  /* Sidebar ki width ke barabar left se margin de dein */
   margin-left: 250px; 
-  
-  // Thodi padding add kar dein taaki content chipka hua na lage
+  /* Thodi padding add kar dein */
   padding: 2rem; 
+}
+
+/* --- Mobile Overrides --- */
+@media (max-width: 1024px) {
+    /* Sidebar component itself will need logic to hide or become a drawer. 
+       Yahan hum sirf content margin ko reset kar rahe hain. */
+    .feesContent {
+        margin-left: 0; /* Full width */
+        padding: 1rem; /* Reduced padding */
+    }
 }

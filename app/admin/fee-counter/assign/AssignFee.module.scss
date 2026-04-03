@@ -11,41 +11,50 @@
   padding: 1.5rem 2rem;
   border-bottom: 1px solid #e5e7eb;
   background-color: #ffffff;
-  margin-bottom: 1rem; // Added margin below header
+  margin-bottom: 1rem;
 }
 
 .title {
   font-size: 1.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+  font-weight: 400;
 }
 
 .formContainer {
-  padding: 0 2rem 2rem 2rem; // Removed top padding, added bottom
-  max-width: 900px; // Slightly wider
-  margin: 0 auto; // Center horizontally
-  background-color: transparent; // No background on container itself
-  border-radius: 0; // No radius
-  box-shadow: none; // No shadow
+  padding: 0 2rem 2rem 2rem;
+  max-width: 900px; 
+  margin: 0 auto; 
+  background-color: transparent; 
+  border-radius: 0; 
+  box-shadow: none; 
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; // Reduced gap between sections
+  gap: 1.5rem; 
 }
 
 .section {
-  background-color: #ffffff; // White background for sections
+  background-color: #ffffff; 
   border: 1px solid #e5e7eb;
-  border-radius: 8px; // Rounded corners for sections
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); // Subtle shadow
-  overflow: hidden;
+  border-radius: 8px; 
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); 
+  /* FIX: overflow: hidden; हटाया गया ताकि ड्रॉपडाउन बाहर आ सके */
+  position: relative; /* जोड़ा गया ताकि stacking context सही रहे */
 }
 
 .sectionHeader {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background-color: #f9fafb; // Very light grey header
-  padding: 0.75rem 1.25rem;
+  align-items: flex-start;
+  gap: 1rem;
+  background-color: #f9fafb; 
+  padding: 1.25rem 1.5rem;
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -53,59 +62,66 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background-color: #3b82f6; // Blue color
+  background-color: #3b82f6; 
   color: white;
-  font-size: 0.8rem;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
 }
 
 .sectionTitle {
-  font-size: 1.1rem;
-  font-weight: 600; // Bolder title
-  color: #111827; // Darker header text
+  font-size: 1.25rem;
+  font-weight: 600; 
+  color: #111827; 
+  margin: 0 0 0.25rem 0;
+}
+
+.sectionDescription {
+  font-size: 0.95rem;
+  color: #6b7280;
   margin: 0;
+  font-weight: 400;
 }
 
 .sectionContent {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem; // Increased gap inside content area
+  gap: 1.25rem; 
 }
 
 .selectedStudent {
-  margin-top: 0.5rem; // Reduced margin
-  padding: 0.75rem 1rem;
-  background-color: #eff6ff; // Lighter blue
-  border: 1px solid #bfdbfe; // Softer border blue
+  margin-top: 0.5rem; 
+  padding: 0.875rem 1.25rem;
+  background-color: #eff6ff; 
+  border: 1px solid #bfdbfe; 
   border-radius: 6px;
-  color: #1e40af; // Darker blue text
-  font-size: 0.95rem;
+  color: #1e40af; 
+  font-size: 1rem;
 
   strong {
     font-weight: 600;
   }
 }
 
-/* --- CORRECTED BLOCK --- */
-/* Common styles applied directly to the class for all relevant input types */
 .selectInput {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1.125rem;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 1rem;
   background-color: #ffffff;
   transition: border-color 0.2s, box-shadow 0.2s;
-  color: #1f2937; // Ensure text color is set
+  color: #1f2937; 
 
   &:focus {
     outline: none;
-    border-color: #3b82f6; // Match section number blue
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); // Blue ring on focus
+    border-color: #3b82f6; 
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); 
   }
 
   &:disabled {
@@ -113,19 +129,17 @@
     cursor: not-allowed;
   }
 }
-/* --- END CORRECTED BLOCK --- */
-
 
 .textAreaInput {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1.125rem;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 1rem;
   background-color: #ffffff;
   font-family: inherit;
   resize: vertical;
-  min-height: 70px; // Slightly taller
+  min-height: 90px; 
   transition: border-color 0.2s, box-shadow 0.2s;
   color: #1f2937;
 
@@ -136,44 +150,49 @@
   }
 }
 
+.fieldHint {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0 0;
+}
+
 .errorMessage {
-  color: #ef4444; // Brighter red
+  color: #ef4444; 
   font-size: 0.9rem;
   margin-top: 0.5rem;
 }
 
-/* Quick Collect Section styling */
 .quickCollectSection {
-  border-top: 3px solid #3b82f6; // Blue top border to highlight
-  margin-top: 0.5rem; // Add a bit of space
+  border-top: 3px solid #3b82f6; 
+  margin-top: 0.5rem; 
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.625rem;
 
   label {
     font-weight: 500;
-    color: #374151; // Dark grey label text
-    font-size: 0.9rem;
+    color: #374151; 
+    font-size: 0.95rem;
   }
 }
 
 /* Grid layout for payment modes */
 .paymentModesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); // Responsive grid
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+  gap: 1rem;
   margin-top: 0.5rem;
 }
 
 /* Styling for individual radio button + label */
 .radioGroupStyled {
-  position: relative; // Needed for absolute positioning of input
+  position: relative; 
 
   input[type="radio"] {
-    position: absolute; // Hide the default radio button
+    position: absolute; 
     opacity: 0;
     width: 0;
     height: 0;
@@ -181,39 +200,38 @@
 
   .radioLabel {
     display: flex;
-    flex-direction: column; // Stack icon and text
+    flex-direction: column; 
     align-items: center;
     justify-content: center;
-    padding: 0.75rem 0.5rem; // Vertical padding more than horizontal
-    border: 2px solid #e5e7eb; // Default border
-    border-radius: 6px;
+    padding: 1rem 0.75rem; 
+    border: 2px solid #e5e7eb; 
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     text-align: center;
-    min-height: 70px; // Ensure consistent height
+    min-height: 85px; 
     background-color: #fff;
 
     .radioIcon {
-      font-size: 1.5rem; // Larger icon
-      margin-bottom: 0.3rem;
-      color: #6b7280; // Default icon color
+      font-size: 1.75rem; 
+      margin-bottom: 0.5rem;
+      color: #6b7280; 
       transition: color 0.2s ease-in-out;
     }
 
-    // Styles when the radio button is checked
     input[type="radio"]:checked + & {
-      border-color: #3b82f6; // Blue border when checked
-      background-color: #eff6ff; // Light blue background when checked
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); // Subtle ring
-      color: #1e40af; // Darker text color when checked
+      border-color: #3b82f6; 
+      background-color: #eff6ff; 
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); 
+      color: #1e40af; 
 
       .radioIcon {
-        color: #3b82f6; // Blue icon when checked
+        color: #3b82f6; 
       }
     }
 
     &:hover {
-       border-color: #9ca3af; // Slightly darker border on hover (if not checked)
+       border-color: #9ca3af; 
     }
   }
 }
@@ -222,34 +240,32 @@
 .actions {
   display: flex;
   justify-content: flex-end;
-  padding: 1.5rem;
-  margin: 0; // Remove negative margin
-  margin-top: 1rem; // Add space above actions
-  background-color: #ffffff; // Match section background
-  border-top: 1px solid #e5e7eb; // Separator
-  border-radius: 0 0 8px 8px; // Match section radius
+  padding: 1.75rem;
+  margin-top: 1rem; 
+  background-color: #ffffff; 
+  border-top: 1px solid #e5e7eb; 
+  border-radius: 0 0 8px 8px; 
 }
 
 .assignButton {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem; // Slightly more gap
-  padding: 0.8rem 1.75rem; // Slightly larger button
-  // Gradient background
+  gap: 0.75rem; 
+  padding: 0.9rem 2rem; 
   background-image: linear-gradient(to right, #10b981, #059669);
   color: white;
   border: none;
   border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600; // Bolder text
+  font-size: 1.05rem;
+  font-weight: 600; 
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   &:hover {
-    background-image: linear-gradient(to right, #059669, #047857); // Darker gradient
+    background-image: linear-gradient(to right, #059669, #047857); 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    transform: translateY(-1px); // Slight lift effect
+    transform: translateY(-1px); 
   }
 
   &:disabled {
@@ -260,29 +276,139 @@
     transform: none;
   }
 }
-/* --- Onboarding Messages (Safety Net) --- */
+
+/* --- Onboarding Messages --- */
 .loadingMessage,
 .onboardingMessage {
-  padding: 2rem 1.5rem;
+  padding: 3rem 2rem;
   text-align: center;
-  background-color: #f8f9fa; /* Light grey background */
+  background-color: #f8f9fa; 
   border-radius: 8px;
-  margin: 1.5rem; /* Match the .formContainer margin if any */
-  border: 1px solid #e2e8f0; /* Light border */
+  margin: 1.5rem; 
+  border: 1px solid #e2e8f0; 
 
   h2 {
-    font-size: 1.5rem;
-    color: #1e293b; /* Darker heading */
-    margin-bottom: 0.75rem;
+    font-size: 1.75rem;
+    color: #1e293b; 
+    margin: 1.5rem 0 1rem 0;
+    font-weight: 700;
   }
 
   p {
-    font-size: 1rem;
-    color: #475569; /* Muted text color */
-    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    color: #475569; 
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
   }
+}
 
-  // Yeh .assignButton style ko reuse karega
-  // Agar aapke paas .assignButton nahi hai, toh button basic dikhega
-  // Hum maan rahe hain ki styles.assignButton maujood hai
+.onboardingIcon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+/* --- Mobile Responsive Styles (Max 768px) --- */
+@media (max-width: 768px) {
+    .pageContainer {
+        padding: 0; /* Full width page */
+    }
+    
+    .header {
+        padding: 1.25rem; /* Reduced header padding */
+        margin-bottom: 0.75rem; 
+    }
+    
+    .title {
+        font-size: 1.5rem; /* Smaller title */
+    }
+    
+    .subtitle {
+        font-size: 0.95rem;
+    }
+
+    .formContainer {
+        padding: 0 1.25rem 1.25rem 1.25rem; /* Reduced side padding, now relative to page */
+        gap: 1.25rem;
+    }
+    
+    .section {
+        border-radius: 0; /* Square edges on small screen for a cleaner flow */
+        box-shadow: none; /* Remove shadow */
+        border-left: none;
+        border-right: none;
+        /* NOTE: The relative position added above helps mobile search also */
+    }
+
+    .sectionHeader {
+        padding: 1rem 1.25rem;
+    }
+    
+    .sectionTitle {
+        font-size: 1.1rem;
+    }
+    
+    .sectionDescription {
+        font-size: 0.9rem;
+    }
+
+    .sectionContent {
+        padding: 1.25rem; /* Reduced inner padding */
+        gap: 1.125rem;
+    }
+
+    .paymentModesGrid {
+        /* Ensures min size is small enough */
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
+        gap: 0.75rem;
+    }
+    
+    .radioGroupStyled .radioLabel {
+        min-height: 75px; /* Slightly smaller height for radios */
+        padding: 0.75rem 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .radioGroupStyled .radioLabel .radioIcon {
+        font-size: 1.5rem; /* Slightly smaller icon */
+    }
+
+    .actions {
+        padding: 1.25rem;
+        justify-content: center; /* Center button on mobile */
+    }
+
+    .assignButton {
+        width: 100%;
+        max-width: 300px; /* Max width to prevent stretching too wide */
+        padding: 0.85rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .onboardingMessage {
+        margin: 1rem; /* Adjusted margin */
+        padding: 2rem 1.5rem;
+        
+        h2 {
+            font-size: 1.5rem;
+            margin: 1.25rem 0 0.875rem 0;
+        }
+        
+        p {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        // Ensure onboarding button is full width
+        .assignButton {
+            width: 100%;
+        }
+    }
+    
+    .loadingMessage {
+        margin: 1rem;
+        padding: 2rem 1rem;
+    }
 }

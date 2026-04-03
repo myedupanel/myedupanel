@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import styles from './StaffAttendancePage.module.scss';
-import api from '@/backend/utils/api'; 
+import api from '@/backend/utils/api';
+import { useAcademicYear } from '@/app/context/AcademicYearContext';
 
 // --- Interfaces (No Change) ---
 interface ApiStaff {
@@ -20,6 +21,7 @@ type AttendanceStatus = 'Present' | 'Absent' | 'Leave' | 'Unmarked';
 const statusOptions: AttendanceStatus[] = ['Present', 'Absent', 'Leave', 'Unmarked'];
 
 const StaffAttendancePage = () => {
+  const { currentYearId } = useAcademicYear();
   const [selectedRole, setSelectedRole] = useState(staffRoles[0]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   
@@ -39,8 +41,8 @@ const StaffAttendancePage = () => {
     const fetchAllStaff = async () => {
       setIsStaffLoading(true);
       try {
-        const res = await api.get('/api/staff');
-        const transformedData: StaffMember[] = res.data.data.map((staff: ApiStaff) => ({
+        const res = await api.get('/staff');
+        const transformedData: StaffMember[] = (res.data?.data || []).map((staff: ApiStaff) => ({
           id: staff.id.toString(), 
           name: staff.name,
           role: staff.role,
@@ -55,7 +57,7 @@ const StaffAttendancePage = () => {
       }
     };
     fetchAllStaff();
-  }, []); // Run only once
+  }, [currentYearId]); // Run only once
 
   // --- FIX 2: Main Logic useEffect - Dependencies aur Logic ko theek kiya ---
   useEffect(() => {
@@ -76,7 +78,7 @@ const StaffAttendancePage = () => {
       
       const fetchAttendanceForDate = async (currentStaffList: StaffMember[]) => {
         try {
-          const res = await api.get(`/api/attendance/staff?date=${selectedDate}`);
+          const res = await api.get(`/attendance/staff?date=${selectedDate}`);
           const savedAttendance: Record<string, AttendanceStatus> = res.data;
 
           const initialAttendance: Record<string, AttendanceStatus> = {};
@@ -105,7 +107,7 @@ const StaffAttendancePage = () => {
       }
     }
     setStaffList(staffToDisplay);
-  }, [selectedRole, selectedDate, showAllStaff, allStaff, isStaffLoading]); // isStaffLoading dependency rakha hai taaki jab initial fetch complete ho toh yeh ek baar chale
+  }, [selectedRole, selectedDate, showAllStaff, allStaff, isStaffLoading, currentYearId]); // isStaffLoading dependency rakha hai taaki jab initial fetch complete ho toh yeh ek baar chale
 
   // handleMarkAttendance (No Change)
   const handleMarkAttendance = (staffId: string, status: AttendanceStatus) => {
@@ -133,7 +135,7 @@ const StaffAttendancePage = () => {
     });
 
     try {
-      await api.post('/api/attendance/staff', {
+      await api.post('/attendance/staff', {
         date: selectedDate,
         attendanceData: dataToSubmit
       });

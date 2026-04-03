@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import axios from 'axios';
+// FIX: Use our configured API instance instead of default axios
+import api from '../../backend/utils/api';
 import styles from './forgot-password.module.scss';
 
 export default function ForgotPasswordPage() {
@@ -18,7 +19,8 @@ export default function ForgotPasswordPage() {
     setError('');
 
     try {
-      const response = await axios.post('/api/auth/forgot-password', { email });
+      // FIX: Use our configured api instance instead of default axios
+      const response = await api.post('/auth/forgot-password', { email });
       setMessage("If an account with that email exists, a password reset link has been sent.");
       setEmail('');
     } catch (err: any) {

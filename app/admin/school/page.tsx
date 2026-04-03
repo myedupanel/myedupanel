@@ -1,17 +1,19 @@
-// File: app/admin/school/page.tsx (FINAL CLEANED CODE - Provider Removed)
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styles from './SchoolPage.module.scss';
 import Link from 'next/link';
+import { useSchoolLayout } from '@/app/context/SchoolLayoutContext'; 
+import { MdMenu } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useAuth, User } from '@/app/context/AuthContext';
+import { useAcademicYear } from '@/app/context/AcademicYearContext'; // Add this import
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
     MdPeople, MdSchool, MdFamilyRestroom, MdBadge,
     MdEventAvailable, MdAttachMoney, MdSchedule,
     MdAssessment, MdSettings, MdPersonAdd,
-    MdClass, MdFlashOn, MdStar // Added icons for the banner
+    MdClass, MdFlashOn, MdStar 
 } from 'react-icons/md';
 import Modal from '@/components/common/Modal/Modal';
 import AddStudentForm from '@/components/admin/AddStudentForm/AddStudentForm';
@@ -19,10 +21,9 @@ import AddTeacherForm from '@/components/admin/AddTeacherForm/AddTeacherForm';
 import AddParentForm from '@/components/admin/AddParentForm/AddParentForm';
 import AddStaffForm from '@/components/admin/AddStaffForm/AddStaffForm';
 import api from '@/backend/utils/api';
-// === Context Imports Removed: अब ये layout.tsx में रहेंगे ===
 
 
-// === 1. TypeScript Interfaces (Unchanged) ===
+// === 1. TypeScript Interfaces (Same) ===
 interface RecentStudent {
     id: string; name: string; class?: string; details?: { class?: string };
 }
@@ -43,13 +44,12 @@ interface AdmissionDataPoint {
 }
 
 
-// === Subscription Interface (Unchanged) ===
+// === Subscription Interface (Same) ===
 type PlanType = 'NONE' | 'TRIAL' | 'STARTER' | 'PRO'; 
 interface SubscriptionData {
     plan: PlanType;
     planExpiryDate: string | null; 
 }
-// =========================================================
 
 interface DashboardData {
     admissionsData: AdmissionDataPoint[];
@@ -67,53 +67,96 @@ interface DashboardData {
 }
 // ===========================================
 
-// --- NEW COMPONENT: TrialWarningModal (Unchanged) ---
+// --- NEW COMPONENT: TrialWarningModal (Same) ---
 interface TrialWarningModalProps {
+
     isOpen: boolean;
+
     onClose: () => void;
+
     daysLeft: number;
+
 }
+
 const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, daysLeft }) => {
+
     return (
+
         <Modal 
+
             isOpen={isOpen} 
+
             onClose={onClose} 
-            title="Trial Period Ending Soon! ⏳"
+
+            // Title ko sirf icon ke saath rakha, styling CSS mein
+
+            title="Trial Period Ending Soon!" 
+
             modalClassName={styles.warningModal}
+
         >
+
             <div className={styles.modalContent}>
-                <p>Your **{daysLeft} day** free trial will expire soon.</p>
-                <p>To avoid any disruption to your school's operations, please consider **upgrading** to a paid plan today.</p>
+
+                {/* Days left ko strong tag mein wrap kiya for Red Highlight */}
+
+                <p>Your <strong>{daysLeft} day</strong> free trial will expire soon.</p> 
+
+                
+
+                <p>To avoid any disruption to your school's operations, please consider upgrading to a paid plan today.</p>
+
+                
+
+                {/* Warning Message Styling (Uses .warningMessage class) */}
+
                 <p className={styles.warningMessage}>
+
                     <MdFlashOn size={20} style={{ marginRight: '8px' }}/> 
+<<<<<<< HEAD
                     Once your trial ends, access to premium features will be restricted until you upgrade.
+=======
+
+                    Once your trial ends, access to some features will be restricted.
+
+>>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
                 </p>
+
+                
+
                 <div className={styles.modalActions}>
+
                     <Link href="/upgrade" className={styles.upgradeLinkButton}>
-                        Upgrade Now
+
+                        Upgrade
+
                     </Link>
+
                     <button onClick={onClose} className={styles.dismissButton}>
+
                         Continue Using Trial
+
                     </button>
+
                 </div>
             </div>
+
         </Modal>
+
     );
+
 };
-// ----------------------------------------
 
 
-// --- UPDATED COMPONENT: SubscriptionBanner (Unchanged) ---
+// --- UPDATED COMPONENT: SubscriptionBanner ---
 interface SubscriptionBannerProps {
     plan: PlanType;
     planExpiryDate: string | null;
 }
 
 const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpiryDate }) => {
-    // ... (Subscription Banner logic remains unchanged) ...
     const [daysLeft, setDaysLeft] = useState<number | null>(null);
 
-    // Calculate days left and update every minute
     useEffect(() => {
         if (plan === 'TRIAL' || plan === 'STARTER' || plan === 'PRO') {
             if (!planExpiryDate) {
@@ -143,27 +186,27 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
             case 'TRIAL':
                 return {
                     icon: MdFlashOn,
-                    text: 'Trial Mode Active',
+                    text: 'Free Trial Active', // More professional text
                     link: '/upgrade', 
-                    buttonText: 'Upgrade Now',
+                    buttonText: 'Upgrade',
                     className: styles.trialBanner,
                     isPaid: false,
                 };
             case 'STARTER':
                 return {
                     icon: MdStar,
-                    text: 'Starter Plan Active',
-                    link: '/admin/settings/billing', 
-                    buttonText: null, 
+                    text: 'Starter Plan',
+                    link: '/upgrade', 
+                    buttonText: 'Manage', 
                     className: styles.paidPlanBanner, 
                     isPaid: true,
                 };
             case 'PRO':
                 return {
                     icon: MdStar,
-                    text: 'Pro Plan Active',
-                    link: '/admin/settings/billing', 
-                    buttonText: null, 
+                    text: 'Pro Plan',
+                    link: '/upgrade', 
+                    buttonText: 'Manage', 
                     className: styles.paidPlanBanner, 
                     isPaid: true,
                 };
@@ -173,7 +216,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
                     icon: MdFlashOn,
                     text: 'No Active Plan',
                     link: '/upgrade',
-                    buttonText: 'Start Trial / Upgrade',
+                    buttonText: 'Upgrade',
                     className: styles.freeBanner,
                     isPaid: false,
                 };
@@ -186,16 +229,21 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
             
             return (
                 <div className={styles.trialContent}>
-                    <div className={styles.trialSlogan}>Your 14-day trial has begun!</div>
+                    {/* Desktop Trial View */}
+                    <div className={styles.trialSlogan}>
+                         <PlanIcon size={18} />
+                         <span>{text}</span>
+                         {/* Desktop days left */}
+                         <span style={{ fontWeight: 700, color: '#dc2626', marginLeft: '8px', fontSize: '0.9rem' }}>{daysLeft} DAYS LEFT</span>
+                    </div>
                     <div className={styles.trialCountdown}>
-                        <div className={styles.countdownValue}>{daysLeft}</div>
-                        <div className={styles.countdownLabel}>DAYS LEFT</div>
                         <div className={styles.progressBar}>
                             <div 
                                 className={styles.progressFill} 
                                 style={{ width: `${progress > 100 ? 100 : progress}%` }} 
                             />
                         </div>
+                        <span className={styles.countdownLabel}>Trial Ends</span>
                     </div>
                 </div>
             );
@@ -204,8 +252,16 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
         return (
             <div className={styles.planContent}>
                 <PlanIcon size={20} />
-                <span>{text}</span>
-                {/* 1 Year Remaining Alert for Paid Users */}
+                
+                {/* Mobile Text (Hidden on desktop by SCSS) */}
+                <span className={styles.bannerAbbreviation}>
+                    {plan === 'STARTER' ? 'Starter' : (plan === 'PRO' ? 'Pro' : (plan === 'TRIAL' ? 'Trial' : 'Upgrade'))}
+                </span>
+                
+                {/* Full text (Visible on desktop) */}
+                <span>{text}</span> 
+
+                {/* 1 Year Remaining Alert for Paid Users (Same) */}
                 {isPaid && daysLeft !== null && daysLeft <= 30 && daysLeft > 0 && (
                      <span className={styles.paidExpiryWarning}>
                         (Expires in {daysLeft} Days)
@@ -219,7 +275,16 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
 
     return (
         <div className={`${styles.subscriptionBanner} ${className}`}>
-            {renderContent()}
+             {/* CRITICAL FIX 1: Render Trial Icon on mobile, full content on desktop */}
+            {isTrial && daysLeft !== null && window.innerWidth <= 1024 ? (
+                 <div className={styles.planContent}>
+                    <MdFlashOn size={20} style={{ color: '#f59e0b' }}/>
+                 </div>
+            ) : (
+                renderContent()
+            )}
+            
+            {/* CRITICAL FIX 2: Upgrade Button is ALWAYS rendered next to the banner content/icon */}
             {buttonText && (
                 <Link href={link} className={styles.upgradeButton}>
                     {buttonText}
@@ -231,17 +296,17 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ plan, planExpir
 // -------------------------------------------
 
 
-// === UpcomingFeatureModal REMOVED FROM HERE, it goes to layout.tsx ===
-
 // --- DashboardControlCenter Component (Main) ---
 const DashboardControlCenter = () => {
     const { token, user } = useAuth(); 
+    const { currentYearId } = useAcademicYear(); // Add this line to use academic year context
     const router = useRouter();
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeModal, setActiveModal] = useState<string | null>(null);
-
+    const { toggleSidebar } = useSchoolLayout(); 
+    
     // REAL-TIME SUBSCRIPTION DATA from useAuth().user (Unchanged)
     const subscriptionData: SubscriptionData = useMemo(() => {
         if (user && user.role === 'SuperAdmin') {
@@ -260,13 +325,11 @@ const DashboardControlCenter = () => {
     const openModal = (modalName: string) => setActiveModal(modalName);
     const closeModal = () => setActiveModal(null);
     
-    // FIX: closeWarningModal handler definition
     const closeWarningModal = () => {
         setShowWarningModal(false);
         localStorage.setItem('trialWarningDismissed', 'true');
         setWarningDismissed(true);
     };
-    // ... (rest of the handlers remain unchanged) ...
 
     const handleFormSubmit = async () => {
         return new Promise<void>((resolve) => {
@@ -277,9 +340,51 @@ const DashboardControlCenter = () => {
     };
 
     const handleStudentSuccess = () => { console.log("Student added!"); closeModal(); }
-    const handleTeacherSuccess = () => { console.log("Teacher added!"); closeModal(); }
-    const handleParentSuccess = () => { console.log("Parent added!"); closeModal(); }
-    const handleStaffSuccess = async (staffData: any) => { console.log("Staff potentially added/updated via API call inside AddStaffForm", staffData); closeModal(); return Promise.resolve(); }
+    const handleTeacherSuccess = async (teacherData: any) => { 
+      try {
+        const response = await api.post('/teachers', teacherData);
+        console.log("Teacher added successfully", response.data);
+        closeModal();
+        // Refresh dashboard data
+        const response2 = await api.get<DashboardData>('/admin/dashboard-data');
+        setData(response2.data);
+        return Promise.resolve();
+      } catch (error: any) {
+        console.error("Error adding teacher:", error);
+        alert("Failed to add teacher. Please try again.");
+        return Promise.reject(error);
+      }
+    }
+    const handleParentSuccess = async (parentData: any) => { 
+      try {
+        const response = await api.post('/parents', parentData);
+        console.log("Parent added successfully", response.data);
+        closeModal();
+        // Refresh dashboard data
+        const response2 = await api.get<DashboardData>('/admin/dashboard-data');
+        setData(response2.data);
+        return Promise.resolve();
+      } catch (error: any) {
+        console.error("Error adding parent:", error);
+        alert("Failed to add parent. Please try again.");
+        return Promise.reject(error);
+      }
+    }
+    const handleStaffSuccess = async (staffData: any) => { 
+      try {
+        const response = await api.post('/staff', staffData);
+        console.log("Staff added successfully", response.data);
+        closeModal();
+        // Refresh dashboard data
+        const response2 = await api.get<DashboardData>('/admin/dashboard-data');
+        setData(response2.data);
+        return Promise.resolve();
+      } catch (error: any) {
+        console.error("Error adding staff:", error);
+        alert("Failed to add staff. Please try again.");
+        return Promise.reject(error);
+      }
+    }
 
     const getModalTitle = () => {
         switch (activeModal) {
@@ -291,7 +396,6 @@ const DashboardControlCenter = () => {
         }
     };
 
-    // Main Data Fetch (Dashboard Data) - Unchanged
     useEffect(() => {
         const fetchData = async () => {
             if (!token) {
@@ -313,9 +417,8 @@ const DashboardControlCenter = () => {
         };
         fetchData();
         setWarningDismissed(localStorage.getItem('trialWarningDismissed') === 'true');
-    }, [token]);
+    }, [token, currentYearId]); // Add currentYearId as dependency
 
-    // POP-UP LOGIC: Show warning if trial and <= 14 days left and not dismissed - Unchanged
     useEffect(() => {
         if (subscriptionData.plan === 'TRIAL' && subscriptionData.planExpiryDate && !warningDismissed) {
             const end = new Date(subscriptionData.planExpiryDate).getTime();
@@ -343,6 +446,11 @@ const DashboardControlCenter = () => {
         <div className={styles.overviewContainer}>
             
             <div className={styles.headerRow}>
+                {/* NAYA: Hamburger Button (Mobile Only) */}
+                <button className={styles.menuButton} onClick={toggleSidebar}>
+                    <MdMenu />
+                </button>
+                
                 <h1 className={styles.mainTitle}>School Control Center</h1>
                 {user && (
                     <SubscriptionBanner 
@@ -353,7 +461,6 @@ const DashboardControlCenter = () => {
             </div>
 
             <div className={styles.mainGrid}>
-                {/* ... (Chart Box and all other Boxes remain unchanged) ... */}
                  {/* Chart Box */}
                 <div className={`${styles.summaryBox} ${styles.chartBox}`}>
                      <div className={styles.boxHeader}><h2><MdAssessment/> Student Admissions</h2></div>
@@ -421,7 +528,7 @@ const DashboardControlCenter = () => {
                  </div>
             </div>
             
-            {/* General Modals */}
+            {/* General Modals (Same) */}
             <Modal isOpen={!!activeModal} onClose={closeModal} title={getModalTitle()}>
                 <>
                     {activeModal === 'add-student' && <AddStudentForm onClose={closeModal} onSuccess={handleStudentSuccess} />}

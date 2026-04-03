@@ -71,8 +71,16 @@ export default function ReceiptPage() {
       if (!transactionId) return;
       setLoading(true);
       try {
+<<<<<<< HEAD
         // Fetch transaction details which includes school info from backend
         const transactionRes = await api.get(`/fees/transaction/${transactionId}`);
+=======
+        // Ek hi baar mein dono cheezein fetch karein
+        const [transactionRes, schoolRes] = await Promise.all([
+          api.get(`/fees/transaction/${transactionId}`),
+          api.get('/school/profile') 
+        ]);
+>>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
         
         setTransaction(transactionRes.data);
 

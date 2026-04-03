@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
+// FIX: Use our configured API instance instead of default axios
+import api from '../../../backend/utils/api';
 import { FiLock, FiEye, FiEyeOff, FiArrowLeft } from 'react-icons/fi';
 import styles from './reset-password.module.scss';
 
@@ -41,7 +42,8 @@ export default function ResetPasswordPage() {
 
     try {
       // NOTE: Make sure this API route is correct for your backend setup
-      const response = await axios.put(`/api/auth/reset-password/${token}`, { password });
+      // FIX: Use our configured api instance instead of default axios
+      const response = await api.put(`/auth/reset-password/${token}`, { password });
       setMessage("Your password has been reset successfully! Redirecting to login...");
       
       setTimeout(() => {

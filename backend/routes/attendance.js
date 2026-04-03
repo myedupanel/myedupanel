@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../config/prisma');
 const { authMiddleware, authorize } = require('../middleware/authMiddleware');
+// Academic year middleware import
+const { validateAcademicYear } = require('../middleware/academicYearMiddleware');
 
 // Helper function (students ke liye)
 const getStudentFullName = (student) => {
@@ -12,7 +14,7 @@ const getStudentFullName = (student) => {
 // @route   POST /api/attendance
 // @desc    Take or update STUDENT attendance
 // (Yeh code pehle se sahi tha, koi badlaav nahi)
-router.post('/', [authMiddleware, authorize('Admin', 'Teacher')], async (req, res) => {
+router.post('/', [authMiddleware, authorize('Admin', 'Teacher'), validateAcademicYear], async (req, res) => {
   const { date, classId, attendanceData } = req.body;
   const schoolId = req.user.schoolId;
 
@@ -37,7 +39,7 @@ router.post('/', [authMiddleware, authorize('Admin', 'Teacher')], async (req, re
       }
       return prisma.attendance.upsert({
         where: { studentId_date: { studentId: studentId, date: attendanceDate } },
-        create: { date: attendanceDate, status: status, studentId: studentId, classId: classIdInt, schoolId: schoolId },
+        create: { date: attendanceDate, status: status, studentId: studentId, classId: classIdInt, schoolId: schoolId, academicYearId: req.academicYearId },
         update: { status: status, classId: classIdInt }
       });
     });
@@ -63,7 +65,7 @@ router.post('/', [authMiddleware, authorize('Admin', 'Teacher')], async (req, re
 
 // @route   POST /api/attendance/staff
 // @desc    Take or update STAFF attendance
-router.post('/staff', [authMiddleware, authorize('Admin')], async (req, res) => {
+router.post('/staff', [authMiddleware, authorize('Admin'), validateAcademicYear], async (req, res) => {
   const { date, attendanceData } = req.body; 
   const schoolId = req.user.schoolId;
 
@@ -83,7 +85,7 @@ router.post('/staff', [authMiddleware, authorize('Admin')], async (req, res) => 
       }
       return prisma.staffAttendance.upsert({
         where: { userId_date: { userId: userId, date: attendanceDate } },
-        create: { date: attendanceDate, status: status, userId: userId, schoolId: schoolId },
+        create: { date: attendanceDate, status: status, userId: userId, schoolId: schoolId, academicYearId: req.academicYearId },
         update: { status: status }
       });
     });
@@ -106,7 +108,7 @@ router.post('/staff', [authMiddleware, authorize('Admin')], async (req, res) => 
 // @route   GET /api/attendance/staff
 // @desc    Get STAFF attendance for a specific date
 // (Yeh code pehle se sahi tha, koi badlaav nahi)
-router.get('/staff', [authMiddleware, authorize('Admin')], async (req, res) => {
+router.get('/staff', [authMiddleware, authorize('Admin'), validateAcademicYear], async (req, res) => {
   const { date } = req.query;
   const schoolId = req.user.schoolId;
 
@@ -119,7 +121,7 @@ router.get('/staff', [authMiddleware, authorize('Admin')], async (req, res) => {
     attendanceDate.setHours(0, 0, 0, 0);
 
     const attendanceRecords = await prisma.staffAttendance.findMany({
-      where: { schoolId: schoolId, date: attendanceDate },
+      where: { schoolId: schoolId, date: attendanceDate, academicYearId: req.academicYearId },
       select: { userId: true, status: true }
     });
 
@@ -142,7 +144,7 @@ router.get('/staff', [authMiddleware, authorize('Admin')], async (req, res) => {
 // @route   GET /api/attendance/report
 // @desc    Generate STUDENT or STAFF attendance report
 // @access  Private (Admin)
-router.get('/report', [authMiddleware, authorize('Admin')], async (req, res) => {
+router.get('/report', [authMiddleware, authorize('Admin'), validateAcademicYear], async (req, res) => {
   const { reportFor, groupId, role, startDate, endDate } = req.query;
   const schoolId = req.user.schoolId;
 
@@ -167,12 +169,13 @@ router.get('/report', [authMiddleware, authorize('Admin')], async (req, res) => 
 
       // 1. Uss class ke saare students nikalo
       const students = await prisma.students.findMany({
-        where: { schoolId: schoolId, classid: classIdInt },
+        where: { schoolId: schoolId, classid: classIdInt, academicYearId: req.academicYearId },
         // 2. Har student ke saath, unki attendance bhi nikalo (sirf date range ke andar ki)
         include: {
           attendances: {
             where: {
-              date: { gte: start, lte: end }
+              date: { gte: start, lte: end },
+              academicYearId: req.academicYearId
             }
           }
         }
@@ -208,7 +211,8 @@ router.get('/report', [authMiddleware, authorize('Admin')], async (req, res) => 
         include: {
           staffAttendances: {
             where: {
-              date: { gte: start, lte: end }
+              date: { gte: start, lte: end },
+              academicYearId: req.academicYearId
             }
           }
         }
