@@ -24,7 +24,6 @@ export interface NavItem {
 // --- RESTORED: Professional Premium Color Palette (Same) ---
 const Colors = {
     ControlCenter: '#6366F1', 
-<<<<<<< HEAD
     Students: '#0EA5E9',      
     Teachers: '#10B981',      
     Parents: '#F59E0B',        
@@ -33,14 +32,6 @@ const Colors = {
     Classes: '#8B5CF6',       
     Settings: '#64748B',      
     // Revenue/Premium (Gold/Vibrant)
-=======
-    Students: '#0EA5E9',     
-    Teachers: '#10B981',     
-    Parents: '#F59E0B',      
-    Staff: '#EC4899',       
-    Classes: '#8B5CF6',     
-    Settings: '#64748B',    
->>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
     FeeCounter: '#F59E0B',    
     Attendance: '#EF4444',    
     Timetable: '#F97316',     

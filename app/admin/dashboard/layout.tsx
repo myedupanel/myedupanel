@@ -12,7 +12,6 @@ const AdminContent = ({ children }: { children: React.ReactNode }) => {
   const { isSidebarOpen, toggleSidebar } = useAdminLayout();
   const pathname = usePathname(); 
   
-<<<<<<< HEAD
   // FIX: Specific sub-routes के लिए Main Sidebar hide करें, but show on main dashboard pages
   const isSpecificPageRoute = 
         pathname.startsWith('/admin/school/') ||
@@ -30,20 +29,6 @@ const AdminContent = ({ children }: { children: React.ReactNode }) => {
         pathname.startsWith('/admin/fee-counter/history') ||
         pathname.startsWith('/admin/communication/') ||
         pathname.startsWith('/admin/profile/');
-=======
-  // FIX: Conditional Rendering
-  const isSchoolOrFeeRoute = 
-        pathname.startsWith('/admin/school') ||
-        pathname.startsWith('/admin/students') || 
-        pathname.startsWith('/admin/teachers') ||
-        pathname.startsWith('/admin/parents') ||
-        pathname.startsWith('/admin/staff') ||
-        pathname.startsWith('/admin/settings') ||
-        pathname.startsWith('/admin/attendance') ||
-        pathname.startsWith('/admin/academics') ||
-        pathname.startsWith('/admin/timetable') ||
-        pathname.startsWith('/admin/fee-counter');
->>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
                         
   const shouldRenderMainSidebar = !isSpecificPageRoute;
 

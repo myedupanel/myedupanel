@@ -10,19 +10,12 @@ import { FiUser, FiCreditCard, FiRefreshCw, FiDollarSign, FiPrinter, FiXCircle, 
 import StudentSearch from '@/components/admin/StudentSearch/StudentSearch'; 
 import FeeReceipt from '@/components/admin/fees/FeeReceipt'; 
 
-<<<<<<< HEAD
 import { FiUser, FiCreditCard, FiRefreshCw, FiDollarSign, FiPrinter, FiXCircle, FiCalendar, FiSearch, FiCheckCircle, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import StudentSearch from '@/components/admin/StudentSearch/StudentSearch'; 
 
 // --- Import correct interface from types ---
 import { Transaction, ReceiptData } from '@/components/types/fees';
-// --- END FIX ---
-=======
-// --- Interface Definitions (No changes) ---
-export interface TemplateInfo {
-  id: string; 
-  name: string;
-  items?: { name: string; amount: number; }[]; 
+// --- END FIX --- 
   totalAmount?: number; 
 }
 
@@ -48,7 +41,6 @@ export interface ReceiptData extends Transaction {
   collectorInfo?: CollectorInfo;
   feeRecordInfo?: FeeRecordInfo;
 }
->>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
 
 interface FeeRecordListItem {
   id: number; 
@@ -261,7 +253,6 @@ const FeeCollectionPage: React.FC = () => {
         notes: manualNotes,
         ...(manualPaymentMode === 'Cheque' && { chequeNumber: manualNotes, bankName: 'N/A' })
       };
-<<<<<<< HEAD
       
       console.log("[Frontend] Sending fee collection payload:", payload);
       console.log("[Frontend] recordToCollectOffline:", recordToCollectOffline);
@@ -271,11 +262,6 @@ const FeeCollectionPage: React.FC = () => {
       
       console.log("[Frontend] Success response:", response.data);
       
-=======
-      // Log the request for debugging
-      console.log("Sending collect-manual request with payload:", payload);
-      const response = await api.post('/fees/collect-manual', payload);
->>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
       setSubmitStatus({ message: 'Payment collected successfully!', type: 'success' });
       setLastTransactionForReceipt(response.data.transaction);
       setRecordToCollectOffline(null);
@@ -661,20 +647,7 @@ const FeeCollectionPage: React.FC = () => {
             
             receiptDataForModal ? (
               <FeeReceipt 
-<<<<<<< HEAD
                 transaction={receiptDataForModal}
-=======
-                transaction={{
-                  ...receiptDataForModal, 
-                  id: receiptDataForModal.id, 
-                  templateId: {
-                    id: Number(receiptDataForModal.templateId?.id || '0'), 
-                    name: receiptDataForModal.templateId?.name || 'N/A',
-                    items: receiptDataForModal.templateId?.items || [], 
-                    totalAmount: receiptDataForModal.templateId?.totalAmount || 0
-                  }
-                }} 
->>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
               />
             ) : (
               <p>Could not load receipt data.</p>

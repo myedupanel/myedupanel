@@ -2,22 +2,17 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-<<<<<<< HEAD
       "@/backend/*": [
         "backend/*"
       ],
       "@/*": [
         "./*"
       ]
-=======
-      "@/backend/*": ["backend/*"],
-      "@/*": ["./*"] 
->>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
     },
-    "target": "ES2017", 
+    "target": "ES2017",
     "lib": [
       "dom",
-      "dom.iterable", 
+      "dom.iterable",
       "esnext"
     ],
     "allowJs": true,
@@ -27,7 +22,7 @@
     "incremental": true,
     "module": "esnext",
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",

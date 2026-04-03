@@ -131,7 +131,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // FIX: Use our configured api instance instead of default axios
       const response = await api.get('/auth/me');
       // Naye fields yahaan bhi automatically aa jayenge
-<<<<<<< HEAD
       const userData = response.data;
       setUser(userData);
       
@@ -140,11 +139,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       setIsLoading(false); // Set loading false after fetching
       return userData;
-=======
-      setUser(response.data);
-      // We don't set isLoading to false here either
-      return response.data;
->>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
     } catch (error) {
       console.error("Login failed: could not fetch user", error);
       // Clean up on failure but don't redirect immediately

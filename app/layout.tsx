@@ -5,11 +5,8 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.scss";
 import { AuthProvider } from './context/AuthContext';
-<<<<<<< HEAD
-import AppWrapper from '@/components/AppWrapper';
-=======
 import { AcademicYearProvider } from './context/AcademicYearContext';
->>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
+import AppWrapper from '@/components/AppWrapper';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,17 +34,12 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-<<<<<<< HEAD
         <AuthProvider>
-          <AppWrapper>
-            {children}
-          </AppWrapper>
-=======
-        <AuthProvider> 
           <AcademicYearProvider>
-            {children}
+            <AppWrapper>
+              {children}
+            </AppWrapper>
           </AcademicYearProvider>
->>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
         </AuthProvider>
       </body>
     </html>

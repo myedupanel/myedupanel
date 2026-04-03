@@ -12,32 +12,5 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-<<<<<<< HEAD
-    "@prisma/client": "^6.19.0",
-=======
-    "@google/generative-ai": "^0.24.1",
-    "@prisma/client": "^6.18.0",
->>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
-    "bcryptjs": "^3.0.2",
-    "cloudinary": "^1.41.3",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "express-rate-limit": "^8.2.1",
-    "generate-password": "^1.7.1",
-    "googleapis": "^164.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "multer": "^2.0.2",
-    "multer-storage-cloudinary": "^4.0.0",
-    "nodemailer": "^7.0.10",
-    "razorpay": "^2.9.6",
-    "socket.io": "^4.8.1",
-    "streamifier": "^0.1.1",
-    "xlsx": "^0.18.5"
-  },
-  "devDependencies": {
-    "prisma": "^6.19.0"
-  }
+  "dependencies": {}
 }

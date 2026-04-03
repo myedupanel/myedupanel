@@ -113,13 +113,7 @@ const TrialWarningModal: React.FC<TrialWarningModalProps> = ({ isOpen, onClose, 
                 <p className={styles.warningMessage}>
 
                     <MdFlashOn size={20} style={{ marginRight: '8px' }}/> 
-<<<<<<< HEAD
                     Once your trial ends, access to premium features will be restricted until you upgrade.
-=======
-
-                    Once your trial ends, access to some features will be restricted.
-
->>>>>>> 1111f0618edff54adadf0e97c6ded36c47715662
                 </p>
 
                 
