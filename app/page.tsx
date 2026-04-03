@@ -131,8 +131,8 @@ export default function Home() {
             unoptimized={true}
           />
         </div>
-        <p className="hero-subtitle">✨ Welcome to My EduPanel</p>
-        <h1>Your Complete School<br />Management Solution</h1>
+        <p className="hero-subtitle">✨ Welcome to My EduPanel.com </p>
+        <h1>Your Complete School<br />Management Solution 2026-27</h1>
         <p className="hero-description">From admissions to academics, simplify every aspect of school administration with our comprehensive and user-friendly platform.</p>
         <div className="hero-buttons">
           <Link href="/signup" className="get-started-btn">Get Started</Link>
